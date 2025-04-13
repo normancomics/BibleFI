@@ -106,7 +106,8 @@ export default {
 			},
 			fontFamily: {
 				pixel: ['VT323', 'monospace'],
-				scroll: ['Cinzel', 'serif']
+				scroll: ['Cinzel', 'serif'],
+				game: ['"Press Start 2P"', 'cursive']
 			}
 		}
 	},
