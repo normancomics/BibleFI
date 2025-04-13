@@ -9,6 +9,15 @@ interface ScriptureCardProps {
 }
 
 const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) => {
+  // Add null check to prevent rendering if verse is undefined
+  if (!verse || !verse.reference) {
+    return (
+      <div className={`scripture-container ${className}`}>
+        <p className="text-foreground text-lg italic">Loading scripture wisdom...</p>
+      </div>
+    );
+  }
+  
   return (
     <div className={`scripture-container ${className}`}>
       <div className="flex items-center mb-2">

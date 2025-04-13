@@ -81,6 +81,7 @@
     background-repeat: repeat;
     background-size: 300px;
     image-rendering: pixelated;
+    -webkit-font-smoothing: none;
   }
 
   h1, h2, h3, h4 {
@@ -91,6 +92,9 @@
 @layer components {
   .pixel-art {
     image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;
   }
   
   .scripture-container {
@@ -103,5 +107,43 @@
   
   .pixel-card {
     @apply bg-white border-4 border-b-8 border-r-8 border-gray-400 p-4;
+  }
+
+  /* Fix for iOS devices */
+  @supports (-webkit-touch-callout: none) {
+    .pixel-art {
+      image-rendering: auto;
+    }
+  }
+
+  /* Animation for coin spinning */
+  @keyframes coin-spin {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+  }
+
+  .animate-coin-spin {
+    animation: coin-spin 3s infinite linear;
+  }
+
+  /* Animation for scroll unfurling */
+  @keyframes scroll-unfurl {
+    0% { opacity: 0; transform: scaleY(0.7); }
+    100% { opacity: 1; transform: scaleY(1); }
+  }
+
+  .animate-scroll-unfurl {
+    animation: scroll-unfurl 0.4s ease-out forwards;
+  }
+
+  /* Speech bubble for Bible characters */
+  .speech-bubble:after {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 15px;
+    border-width: 10px 10px 10px 0;
+    border-style: solid;
+    border-color: transparent var(--tw-border-opacity);
   }
 }

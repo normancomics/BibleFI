@@ -4,13 +4,13 @@ import { Card } from "@/components/ui/card";
 import { BookOpen, ArrowUpRight } from "lucide-react";
 import PixelButton from "./PixelButton";
 import ScriptureCard from "./ScriptureCard";
-import { BibleVerse } from "@/data/bibleVerses";
+import { BibleVerse, getRandomVerse } from "@/data/bibleVerses";
 
 interface StakingPoolProps {
   title: string;
   apy: number;
   description: string;
-  verse: BibleVerse;
+  verse?: BibleVerse;
   lockPeriod: string;
 }
 
@@ -21,6 +21,9 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   verse,
   lockPeriod
 }) => {
+  // If verse is undefined, get a random verse
+  const safeVerse = verse || getRandomVerse();
+  
   return (
     <Card className="pixel-card overflow-hidden">
       <div className="flex justify-between items-center mb-4">
@@ -37,7 +40,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
         <span>Lock Period: {lockPeriod}</span>
       </div>
       
-      <ScriptureCard verse={verse} className="mb-4" />
+      <ScriptureCard verse={safeVerse} className="mb-4" />
       
       <div className="flex space-x-2">
         <PixelButton className="flex-1">
