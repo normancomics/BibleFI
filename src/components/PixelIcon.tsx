@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface PixelIconProps {
   src: string;
@@ -10,6 +10,7 @@ interface PixelIconProps {
   spin?: boolean;
   glow?: boolean;
   glitch?: boolean;
+  soundEffect?: "coin" | "scroll" | "powerup" | "select";
 }
 
 const PixelIcon: React.FC<PixelIconProps> = ({ 
@@ -20,9 +21,29 @@ const PixelIcon: React.FC<PixelIconProps> = ({
   bounce = false,
   spin = false,
   glow = false,
-  glitch = false
+  glitch = false,
+  soundEffect
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [playedSound, setPlayedSound] = useState(false);
+  
+  // Sound effect mapping
+  const soundMap = {
+    coin: "/sounds/coin.mp3",
+    scroll: "/sounds/scroll.mp3",
+    powerup: "/sounds/powerup.mp3",
+    select: "/sounds/select.mp3"
+  };
+  
+  // Play sound effect when the component mounts
+  useEffect(() => {
+    if (soundEffect && !playedSound) {
+      const sound = new Audio(soundMap[soundEffect]);
+      sound.volume = 0.3; // Lower volume to be less intrusive
+      sound.play().catch(e => console.error("Error playing sound:", e));
+      setPlayedSound(true);
+    }
+  }, [soundEffect, playedSound]);
   
   // Determine animation classes
   let animationClass = "";

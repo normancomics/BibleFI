@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BibleVerse } from "@/data/bibleVerses";
 import PixelIcon from "./PixelIcon";
 
@@ -9,6 +9,13 @@ interface ScriptureCardProps {
 }
 
 const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) => {
+  const [playSound, setPlaySound] = useState(false);
+  
+  // Add effect to play sound when component mounts
+  useEffect(() => {
+    setPlaySound(true);
+  }, []);
+  
   // Add null check to prevent rendering if verse is undefined
   if (!verse || !verse.reference) {
     return (
@@ -27,6 +34,7 @@ const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) 
           className="mr-2" 
           bounce={true} 
           glow={true}
+          soundEffect={playSound ? "scroll" : undefined}
         />
         <h3 className="font-game text-base text-ancient-gold uppercase tracking-tight">
           {verse.reference}
