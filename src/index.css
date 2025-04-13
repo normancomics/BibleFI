@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
@@ -8,35 +9,35 @@
 
 @layer base {
   :root {
-    --background: 270 60% 99%;
-    --foreground: 270 10% 10%;
+    --background: 240 20% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 270 10% 10%;
+    --card: 240 20% 15%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 270 10% 10%;
+    --popover: 240 20% 15%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 270 70% 75%;
-    --primary-foreground: 270 10% 99%;
+    --primary: 300 100% 60%;
+    --primary-foreground: 0 0% 95%;
 
-    --secondary: 270 30% 90%;
-    --secondary-foreground: 270 10% 10%;
+    --secondary: 240 30% 25%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 270 10% 90%;
-    --muted-foreground: 270 10% 40%;
+    --muted: 240 20% 25%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 270 30% 90%;
-    --accent-foreground: 270 10% 10%;
+    --accent: 120 100% 40%;
+    --accent-foreground: 0 0% 95%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 270 10% 99%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 270 30% 85%;
-    --input: 270 30% 85%;
-    --ring: 270 70% 75%;
+    --border: 240 20% 30%;
+    --input: 240 20% 30%;
+    --ring: 300 100% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
   }
 
   .dark {
@@ -83,15 +84,61 @@
     image-rendering: pixelated;
     -webkit-font-smoothing: none;
     cursor: url('/cursor.png'), auto;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Scanline effect for CRT display look */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      transparent 0px,
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* CRT flicker effect */
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(18, 16, 16, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 101;
+    animation: flicker 0.2s infinite alternate-reverse;
+  }
+
+  @keyframes flicker {
+    0% { opacity: 0; }
+    100% { opacity: 0.03; }
   }
 
   h1, h2, h3, h4 {
     @apply font-game text-shadow-retro;
+    letter-spacing: -1px;
   }
   
   /* Game-like buttons */
   button {
     cursor: url('/cursor-pointer.png'), pointer;
+  }
+
+  /* Base integration styling */
+  .base-highlight {
+    @apply bg-base-blue text-white border-2 border-base-dark;
   }
 }
 
@@ -105,17 +152,21 @@
   
   /* Text shadow styles */
   .text-shadow-retro {
-    text-shadow: 2px 2px 0 #6E59A5, 
+    text-shadow: 2px 2px 0 #000000, 
                  4px 4px 0 rgba(0,0,0,0.2);
   }
   
   .text-shadow-sm {
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 5px #FF44FF, 0 0 10px #FF44FF, 0 0 15px #FF44FF;
   }
   
   /* Retro-styled card with pixelated borders */
   .retro-border {
-    @apply bg-ancient-scroll relative;
+    @apply bg-ancient-scroll relative border-0;
     border: 4px solid transparent;
     border-image: url('/border-pixel.png') 4 repeat;
     image-rendering: pixelated;
@@ -127,23 +178,53 @@
     background-image: url('/scroll-bg.png');
     background-size: cover;
     image-rendering: pixelated;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scripture-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,0,0.1) 0%, rgba(255,136,0,0.1) 100%);
+    pointer-events: none;
   }
   
   /* Pixelated shadow effect */
   .pixelated-shadow {
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
   }
   
   /* Retro pixel button */
   .pixel-button {
-    @apply bg-scripture border-b-4 border-r-4 border-scripture-dark hover:bg-scripture-light hover:translate-y-[-2px] hover:translate-x-[-2px] active:translate-y-1 active:translate-x-1 active:border-b-2 active:border-r-2 transition-all duration-100 font-game text-shadow-sm pixelated-shadow;
+    @apply bg-scripture border-b-4 border-r-4 border-scripture-dark hover:bg-scripture-light hover:translate-y-[-2px] hover:translate-x-[-2px] active:translate-y-1 active:translate-x-1 active:border-b-2 active:border-r-2 transition-all duration-100 font-game text-shadow-sm pixelated-shadow uppercase tracking-tight;
   }
   
   /* Pixel card with retro styling */
   .pixel-card {
-    @apply bg-white border-4 border-b-8 border-r-8 border-gray-400 p-4 pixelated-shadow;
+    @apply bg-card border-0 overflow-hidden relative p-4 pixelated-shadow;
+    border: 4px solid transparent;
     border-image: url('/card-border.png') 4 repeat;
     image-rendering: pixelated;
+  }
+
+  .pixel-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    animation: scanline 2s linear infinite;
+  }
+
+  /* Base chain integration styles */
+  .base-button {
+    @apply bg-base-blue border-b-4 border-r-4 border-base-dark hover:bg-base-blue/80 font-game text-shadow-sm pixelated-shadow uppercase;
   }
 
   /* Fix for iOS devices */
@@ -206,5 +287,61 @@
     background-image: url('/grid-bg.png');
     background-size: 16px 16px;
     image-rendering: pixelated;
+  }
+
+  /* Warpcast/Farcaster integration styling */
+  .warpcast-frame {
+    @apply bg-black/90 border-2 border-pixel-purple p-4 rounded-lg;
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(255, 0, 255, 0.2) 0%, transparent 20%), 
+      radial-gradient(circle at 90% 80%, rgba(0, 200, 255, 0.2) 0%, transparent 20%);
+  }
+
+  /* Glitch text effect */
+  .glitch-text {
+    position: relative;
+    animation: pixel-shift 5s ease-in-out infinite;
+  }
+
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 #ff00ff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+  }
+
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 #00ffff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim {
+    0% { clip: rect(4px, 9999px, 26px, 0); }
+    20% { clip: rect(54px, 9999px, 96px, 0); }
+    40% { clip: rect(24px, 9999px, 16px, 0); }
+    60% { clip: rect(64px, 9999px, 86px, 0); }
+    80% { clip: rect(14px, 9999px, 56px, 0); }
+    100% { clip: rect(74px, 9999px, 46px, 0); }
+  }
+
+  @keyframes glitch-anim2 {
+    0% { clip: rect(74px, 9999px, 46px, 0); }
+    20% { clip: rect(14px, 9999px, 56px, 0); }
+    40% { clip: rect(64px, 9999px, 86px, 0); }
+    60% { clip: rect(24px, 9999px, 16px, 0); }
+    80% { clip: rect(54px, 9999px, 96px, 0); }
+    100% { clip: rect(4px, 9999px, 26px, 0); }
   }
 }

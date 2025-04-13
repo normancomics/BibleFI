@@ -21,10 +21,26 @@ const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) 
   return (
     <div className={`scripture-container retro-border pixelated-shadow ${className}`}>
       <div className="flex items-center mb-2">
-        <PixelIcon src="/scroll-pixel.png" alt="Scripture scroll" className="mr-2 bounce-slow" bounce={true} />
-        <h3 className="font-scroll text-lg text-scripture-dark">{verse.reference}</h3>
+        <PixelIcon 
+          src="/scroll-pixel.png" 
+          alt="Scripture scroll" 
+          className="mr-2" 
+          bounce={true} 
+          glow={true}
+        />
+        <h3 className="font-game text-base text-ancient-gold uppercase tracking-tight">
+          {verse.reference}
+        </h3>
       </div>
-      <p className="text-foreground text-lg leading-relaxed font-pixel">"{verse.text}"</p>
+      <p className="text-foreground text-lg leading-relaxed font-pixel bg-black/30 p-2 border-l-4 border-ancient-gold">
+        "{verse.text}"
+      </p>
+      
+      <div className="mt-2 flex justify-end">
+        <div className="bg-black/50 px-2 py-1 text-xs text-ancient-scroll">
+          LEVEL 7 WISDOM
+        </div>
+      </div>
     </div>
   );
 };

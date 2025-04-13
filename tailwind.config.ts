@@ -63,16 +63,33 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Bible.Fi custom colors
+				// Bible.Fi custom colors - more vibrant retro game colors
 				scripture: {
-					DEFAULT: '#9b87f5', // Primary purple
-					dark: '#6E59A5',    // Darker purple
-					light: '#D6BCFA',   // Light purple
+					DEFAULT: '#FF44FF', // Bright neon pink
+					dark: '#BB00BB',    // Darker pink
+					light: '#FFB3FF',   // Light pink
 				},
 				ancient: {
-					scroll: '#FEF7CD',  // Soft yellow for scrolls
-					gold: '#FFD700',    // Gold for important elements
-					temple: '#F2FCE2',  // Soft green for temple elements
+					scroll: '#FFFF00',  // Bright retro yellow
+					gold: '#FFAA00',    // Gold orange for important elements
+					temple: '#00FF66',  // Bright green for temple elements
+				},
+				// Retro game colors
+				pixel: {
+					red: '#FF0000',
+					blue: '#0088FF',
+					green: '#00FF00',
+					yellow: '#FFFF00',
+					orange: '#FF8800',
+					pink: '#FF44FF',
+					cyan: '#00FFFF',
+					purple: '#8800FF',
+					black: '#000000',
+					white: '#FFFFFF',
+				},
+				base: {
+					blue: '#0052FF', // Base chain blue
+					dark: '#003399',
 				}
 			},
 			borderRadius: {
@@ -96,13 +113,37 @@ export default {
 				'scroll-unfurl': {
 					'0%': { transform: 'scaleY(0)' },
 					'100%': { transform: 'scaleY(1)' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'pulse-glow': {
+					'0%, 100%': { filter: 'drop-shadow(0 0 5px rgba(255, 68, 255, 0.5))' },
+					'50%': { filter: 'drop-shadow(0 0 20px rgba(255, 68, 255, 0.8))' }
+				},
+				'pixel-shift': {
+					'0%, 100%': { transform: 'translate(0, 0)' },
+					'10%': { transform: 'translate(-2px, 0)' },
+					'20%': { transform: 'translate(2px, 0)' },
+					'30%': { transform: 'translate(-2px, 0)' },
+					'40%': { transform: 'translate(2px, 0)' },
+					'50%': { transform: 'translate(0, 0)' }
+				},
+				'scanline': {
+					'0%': { transform: 'translateY(0)' },
+					'100%': { transform: 'translateY(100%)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'coin-spin': 'coin-spin 2s ease-in-out infinite',
-				'scroll-unfurl': 'scroll-unfurl 0.5s ease-out'
+				'scroll-unfurl': 'scroll-unfurl 0.5s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'pixel-shift': 'pixel-shift 5s ease-in-out infinite',
+				'scanline': 'scanline 8s linear infinite'
 			},
 			fontFamily: {
 				pixel: ['VT323', 'monospace'],
