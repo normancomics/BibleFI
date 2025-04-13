@@ -38,7 +38,7 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   return (
     <div className={`flex items-start ${className}`}>
       <div className="flex-shrink-0 mr-3">
-        <PixelIcon src={src} alt={alt} size={64} />
+        <PixelIcon src={src} alt={alt} size={64} soundEffect="select" />
       </div>
       <div className="bg-white border-2 border-scripture p-3 rounded-lg relative speech-bubble">
         <p className="font-bold text-scripture mb-1">{name} says:</p>

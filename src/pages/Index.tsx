@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
 import BibleCharacter from "@/components/BibleCharacter";
@@ -14,8 +14,29 @@ import {
   BarChart 
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSound } from "@/contexts/SoundContext";
 
 const Index: React.FC = () => {
+  const { playSound, setUserInteracted } = useSound();
+  
+  // Enable sound on page load
+  useEffect(() => {
+    // Force enable user interaction for development
+    setUserInteracted(true);
+    
+    // Play an initial sound to unlock audio on iOS/Safari
+    const unlockAudio = () => {
+      playSound("select");
+    };
+    
+    // Add a slight delay to ensure the context is ready
+    const timer = setTimeout(() => {
+      unlockAudio();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [playSound, setUserInteracted]);
+  
   return (
     <div className="min-h-screen">
       <NavBar />
@@ -42,7 +63,7 @@ const Index: React.FC = () => {
             <h2 className="text-2xl font-scroll mb-2">Biblical Staking</h2>
             <p className="mb-4">Grow your wealth little by little through our scripture-based staking pools.</p>
             <Link to="/staking" className="mt-auto">
-              <PixelButton className="flex items-center">
+              <PixelButton className="flex items-center" onClick={() => playSound("coin")}>
                 Stake Now <ArrowRight size={16} className="ml-2" />
               </PixelButton>
             </Link>
@@ -53,7 +74,7 @@ const Index: React.FC = () => {
             <h2 className="text-2xl font-scroll mb-2">Digital Tithing</h2>
             <p className="mb-4">Give your tithe to churches worldwide, even if they don't accept crypto.</p>
             <Link to="/tithe" className="mt-auto">
-              <PixelButton className="flex items-center">
+              <PixelButton className="flex items-center" onClick={() => playSound("scroll")}>
                 Tithe Now <ArrowRight size={16} className="ml-2" />
               </PixelButton>
             </Link>
@@ -64,7 +85,7 @@ const Index: React.FC = () => {
             <h2 className="text-2xl font-scroll mb-2">Scripture Wisdom</h2>
             <p className="mb-4">Learn what the Bible teaches about money, wealth, and stewardship.</p>
             <Link to="/wisdom" className="mt-auto">
-              <PixelButton className="flex items-center">
+              <PixelButton className="flex items-center" onClick={() => playSound("select")}>
                 Learn More <ArrowRight size={16} className="ml-2" />
               </PixelButton>
             </Link>
@@ -82,7 +103,7 @@ const Index: React.FC = () => {
             <p className="mb-4">Bible.Fi helps you track and report your crypto transactions for proper tax compliance.</p>
             <div className="text-center">
               <Link to="/taxes">
-                <PixelButton className="flex items-center mx-auto">
+                <PixelButton className="flex items-center mx-auto" onClick={() => playSound("powerup")}>
                   <BarChart size={16} className="mr-2" />
                   Track Taxes
                 </PixelButton>
@@ -93,6 +114,15 @@ const Index: React.FC = () => {
         
         <FarcasterFrame />
       </main>
+      
+      {/* Add a hidden button to force sound activation on mobile */}
+      <button 
+        onClick={() => playSound("select")} 
+        className="fixed bottom-4 right-4 bg-scripture text-white p-2 rounded"
+        aria-label="Enable Sounds"
+      >
+        Enable Sounds
+      </button>
     </div>
   );
 };

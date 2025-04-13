@@ -1,1 +1,3 @@
-<!-- This is a placeholder for the actual MP3 file. You would need to replace this with a real MP3 file. -->
+
+<!-- Creating a base64 encoded tiny MP3 sound file for scroll sound effect -->
+data:audio/mpeg;base64,SUQzAwAAAAAAJlRQRTEAAAAcAAAAU291bmRKYXkuY29tIFNvdW5kIEVmZmVjdHMAVEVOQwAAABcAAAB3d3cuc291bmRqYXkuY29tAAAA

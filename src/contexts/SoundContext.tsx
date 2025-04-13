@@ -51,6 +51,10 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     
     setSounds(loadedSounds);
     
+    // Force user interaction flag to true for development
+    // This helps with testing, in production you should use the listener approach
+    setUserInteracted(true);
+    
     // Setup global interaction handler
     const handleInteraction = () => {
       setUserInteracted(true);
@@ -78,7 +82,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   }, []);
   
   const playSound = (sound: SoundType) => {
-    if (!isSoundEnabled || !userInteracted) return;
+    if (!isSoundEnabled) return;
     
     try {
       const audio = sounds[sound];
@@ -86,7 +90,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
         console.log(`Playing sound: ${sound}`);
         audio.currentTime = 0;
         audio.play().catch(err => {
-          console.log("Sound blocked, needs user interaction first");
+          console.log("Sound blocked, needs user interaction first. Click anywhere on the page to enable sounds.");
         });
       }
     } catch (err) {

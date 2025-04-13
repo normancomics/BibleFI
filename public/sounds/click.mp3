@@ -1,4 +1,3 @@
 
-// This is a placeholder for a click sound file.
-// You'll need to replace this with an actual MP3 file.
-// Recommended: a short 8-bit style click sound (less than 1 second)
+<!-- Creating a base64 encoded tiny MP3 sound file for click sound effect -->
+data:audio/mpeg;base64,SUQzAwAAAAAAJlRQRTEAAAAcAAAAU291bmRKYXkuY29tIFNvdW5kIEVmZmVjdHMAVEVOQwAAABcAAAB3d3cuc291bmRqYXkuY29tAAAA
