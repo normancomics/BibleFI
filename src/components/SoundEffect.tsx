@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 export type SoundType = "coin" | "scroll" | "powerup" | "select" | "click" | "error" | "success";
 
@@ -20,30 +20,54 @@ const soundMap: Record<SoundType, string> = {
   success: "/sounds/success.mp3"
 };
 
+// Cache audio instances to prevent multiple loads
+const audioCache: Record<string, HTMLAudioElement> = {};
+
 const SoundEffect: React.FC<SoundEffectProps> = ({ 
   sound, 
   play, 
   volume = 0.3,
   loop = false
 }) => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
   useEffect(() => {
     if (play) {
-      const audio = new Audio(soundMap[sound]);
+      // Create or get from cache
+      if (!audioCache[sound]) {
+        audioCache[sound] = new Audio(soundMap[sound]);
+      }
+      
+      const audio = audioCache[sound];
+      audioRef.current = audio;
+      
+      // Set properties
       audio.volume = volume;
       audio.loop = loop;
       
-      audio.play().catch(err => {
-        console.error(`Failed to play sound ${sound}:`, err);
-      });
+      // Reset if it was playing
+      audio.currentTime = 0;
       
-      return () => {
-        audio.pause();
-        audio.currentTime = 0;
-      };
+      // Play with user interaction handling
+      const playPromise = audio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.log(`Sound ${sound} blocked by browser. This is normal before user interaction.`);
+          // We don't show errors since this is expected before user interaction
+        });
+      }
     }
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
   }, [play, sound, volume, loop]);
 
-  return null; // This is a non-visual component
+  return null; // Non-visual component
 };
 
 export default SoundEffect;

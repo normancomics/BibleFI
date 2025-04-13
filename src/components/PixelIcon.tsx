@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from "react";
+import { useSound } from "@/contexts/SoundContext";
+import SoundEffect from "./SoundEffect";
 
 interface PixelIconProps {
   src: string;
@@ -25,25 +27,16 @@ const PixelIcon: React.FC<PixelIconProps> = ({
   soundEffect
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [playedSound, setPlayedSound] = useState(false);
-  
-  // Sound effect mapping
-  const soundMap = {
-    coin: "/sounds/coin.mp3",
-    scroll: "/sounds/scroll.mp3",
-    powerup: "/sounds/powerup.mp3",
-    select: "/sounds/select.mp3"
-  };
+  const [playSound, setPlaySound] = useState(false);
+  const { playSound: playSoundEffect, userInteracted } = useSound();
   
   // Play sound effect when the component mounts
   useEffect(() => {
-    if (soundEffect && !playedSound) {
-      const sound = new Audio(soundMap[soundEffect]);
-      sound.volume = 0.3; // Lower volume to be less intrusive
-      sound.play().catch(e => console.error("Error playing sound:", e));
-      setPlayedSound(true);
+    if (soundEffect && userInteracted) {
+      playSoundEffect(soundEffect);
+      setPlaySound(true);
     }
-  }, [soundEffect, playedSound]);
+  }, [soundEffect, userInteracted]);
   
   // Determine animation classes
   let animationClass = "";
@@ -56,6 +49,12 @@ const PixelIcon: React.FC<PixelIconProps> = ({
   
   return (
     <div className="relative inline-block">
+      {soundEffect && (
+        <SoundEffect 
+          sound={soundEffect} 
+          play={playSound} 
+        />
+      )}
       <img 
         src={src} 
         alt={alt} 

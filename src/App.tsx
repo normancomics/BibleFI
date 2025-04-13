@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SoundProvider } from "@/contexts/SoundContext";
 import Index from "./pages/Index";
 import StakingPage from "./pages/StakingPage";
 import TithePage from "./pages/TithePage";
@@ -16,18 +17,20 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/staking" element={<StakingPage />} />
-          <Route path="/tithe" element={<TithePage />} />
-          <Route path="/wisdom" element={<WisdomPage />} />
-          <Route path="/taxes" element={<TaxesPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <SoundProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/staking" element={<StakingPage />} />
+            <Route path="/tithe" element={<TithePage />} />
+            <Route path="/wisdom" element={<WisdomPage />} />
+            <Route path="/taxes" element={<TaxesPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </SoundProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

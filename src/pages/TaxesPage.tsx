@@ -1,15 +1,25 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
-import BibleCharacter from "@/components/BibleCharacter";
 import ScriptureCard from "@/components/ScriptureCard";
 import PixelButton from "@/components/PixelButton";
 import { getVersesByCategory } from "@/data/bibleVerses";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDownToLine, FileSpreadsheet, BarChart3 } from "lucide-react";
+import PixelCharacter from "@/components/PixelCharacter";
+import SoundEffect from "@/components/SoundEffect";
+import { useSound } from "@/contexts/SoundContext";
 
 const TaxesPage: React.FC = () => {
   const taxesVerses = getVersesByCategory("taxes");
+  const { playSound, userInteracted } = useSound();
+  
+  // Play page load sound
+  useEffect(() => {
+    if (userInteracted) {
+      playSound("powerup");
+    }
+  }, [userInteracted]);
   
   return (
     <div className="min-h-screen">
@@ -23,10 +33,11 @@ const TaxesPage: React.FC = () => {
           </p>
         </section>
         
-        <BibleCharacter 
+        <PixelCharacter 
           character="jesus" 
           message="Render unto Caesar the things that are Caesar's, and unto God the things that are God's. - Matthew 22:21"
           className="mb-8 max-w-2xl mx-auto"
+          soundEffect={true}
         />
         
         {taxesVerses.length > 0 && (
@@ -40,7 +51,8 @@ const TaxesPage: React.FC = () => {
               <p className="mb-6">Bible.Fi helps you track and report your cryptocurrency transactions for proper tax compliance.</p>
               
               <div className="space-y-4">
-                <div className="flex items-center p-3 border border-border rounded">
+                <div className="flex items-center p-3 border border-border rounded" 
+                     onClick={() => playSound("click")}>
                   <ArrowDownToLine size={24} className="text-scripture mr-3" />
                   <div>
                     <h3 className="font-bold">Import Transactions</h3>
@@ -48,7 +60,8 @@ const TaxesPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center p-3 border border-border rounded">
+                <div className="flex items-center p-3 border border-border rounded"
+                     onClick={() => playSound("scroll")}>
                   <BarChart3 size={24} className="text-scripture mr-3" />
                   <div>
                     <h3 className="font-bold">Calculate Gains/Losses</h3>
@@ -56,7 +69,8 @@ const TaxesPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center p-3 border border-border rounded">
+                <div className="flex items-center p-3 border border-border rounded"
+                     onClick={() => playSound("select")}>
                   <FileSpreadsheet size={24} className="text-scripture mr-3" />
                   <div>
                     <h3 className="font-bold">Export Tax Forms</h3>
@@ -66,7 +80,9 @@ const TaxesPage: React.FC = () => {
               </div>
               
               <div className="mt-6">
-                <PixelButton className="w-full">Get Started</PixelButton>
+                <PixelButton className="w-full" onClick={() => playSound("coin")}>
+                  Get Started
+                </PixelButton>
               </div>
             </CardContent>
           </Card>
@@ -98,16 +114,71 @@ const TaxesPage: React.FC = () => {
                 </div>
                 
                 <div className="bg-ancient-scroll border border-ancient-gold p-4 rounded-md">
-                  <h3 className="font-bold">Remember:</h3>
-                  <p className="italic">
-                    While we should pay our taxes honestly, the Bible also encourages wise stewardship. Bible.Fi helps you accurately report taxes while minimizing your tax burden legally.
-                  </p>
+                  <PixelCharacter 
+                    character="solomon" 
+                    message="The wise store up knowledge, but the mouth of a fool invites ruin. - Proverbs 10:14" 
+                    size={40}
+                    soundEffect={true}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="pixel-card">
+            <CardContent className="pt-6">
+              <h2 className="text-2xl font-scroll mb-4">Crypto Tax Calculator</h2>
+              <div className="flex mb-4">
+                <PixelCharacter 
+                  character="david" 
+                  message="Let me help you calculate your crypto gains and losses." 
+                  size={32}
+                  soundEffect={true}
+                />
+              </div>
+              
+              <div className="space-y-4 mt-6">
+                <p className="text-base">Interactive calculator coming soon!</p>
+                <PixelButton className="w-full" onClick={() => playSound("select")}>
+                  Subscribe for Updates
+                </PixelButton>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="pixel-card">
+            <CardContent className="pt-6">
+              <h2 className="text-2xl font-scroll mb-4">Tax Filing Deadlines</h2>
+              <div className="flex mb-4">
+                <PixelCharacter 
+                  character="moses" 
+                  message="Remember the deadlines, as I remembered the commandments." 
+                  size={36}
+                  soundEffect={true}
+                />
+              </div>
+              
+              <div className="space-y-3 mt-6 bg-black/20 p-4 border border-pixel-cyan">
+                <div className="flex justify-between items-center">
+                  <span className="font-pixel">Individual Returns</span>
+                  <span className="font-game text-pixel-green">APR 15</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-pixel">Extension Deadline</span>
+                  <span className="font-game text-pixel-yellow">OCT 15</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-pixel">Quarterly Estimated</span>
+                  <span className="font-game text-pixel-red">Q1-Q4</span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </main>
+      
+      {/* Hidden audio player to enable sound on iOS */}
+      <audio id="sound-enabler" preload="auto" src="/sounds/click.mp3" style={{ display: 'none' }} />
     </div>
   );
 };
