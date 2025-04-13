@@ -33,6 +33,7 @@ const PixelIcon: React.FC<PixelIconProps> = ({
   // Play sound effect when the component mounts
   useEffect(() => {
     if (soundEffect && userInteracted) {
+      console.log(`PixelIcon triggering sound effect: ${soundEffect}`);
       playSoundEffect(soundEffect);
       setPlaySound(true);
     }

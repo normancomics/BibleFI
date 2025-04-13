@@ -54,6 +54,12 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     // Setup global interaction handler
     const handleInteraction = () => {
       setUserInteracted(true);
+      console.log("User has interacted with the page - sounds can now play");
+      // Try to play a silent sound to unlock audio on iOS
+      const unlockAudio = new Audio("/sounds/click.mp3");
+      unlockAudio.volume = 0.1;
+      unlockAudio.play().catch(e => console.log("Initial sound play failed, this is normal"));
+      
       // Remove event listeners after first interaction
       window.removeEventListener("click", handleInteraction);
       window.removeEventListener("keydown", handleInteraction);
@@ -77,6 +83,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     try {
       const audio = sounds[sound];
       if (audio) {
+        console.log(`Playing sound: ${sound}`);
         audio.currentTime = 0;
         audio.play().catch(err => {
           console.log("Sound blocked, needs user interaction first");
