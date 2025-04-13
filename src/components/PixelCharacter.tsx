@@ -15,37 +15,37 @@ interface PixelCharacterProps {
 
 const characterMap = {
   jesus: {
-    src: "/lovable-uploads/76f7f2f3-54bc-44d8-bd6d-ea0302f88e5e.png",
+    src: "/pixel-jesus.png",
     alt: "Pixel Jesus",
     name: "JESUS",
     sound: "powerup"
   },
   moses: {
-    src: "/lovable-uploads/76f7f2f3-54bc-44d8-bd6d-ea0302f88e5e.png",
+    src: "/pixel-moses.png",
     alt: "Pixel Moses",
     name: "MOSES",
     sound: "scroll"
   },
   solomon: {
-    src: "/lovable-uploads/76f7f2f3-54bc-44d8-bd6d-ea0302f88e5e.png",
+    src: "/pixel-solomon.png",
     alt: "Pixel Solomon",
     name: "SOLOMON",
     sound: "coin"
   },
   david: {
-    src: "/lovable-uploads/76f7f2f3-54bc-44d8-bd6d-ea0302f88e5e.png",
+    src: "/pixel-david.png",
     alt: "Pixel David",
     name: "DAVID",
     sound: "select"
   },
   noah: {
-    src: "/lovable-uploads/76f7f2f3-54bc-44d8-bd6d-ea0302f88e5e.png",
+    src: "/pixel-noah.png",
     alt: "Pixel Noah",
     name: "NOAH",
     sound: "powerup"
   },
   paul: {
-    src: "/lovable-uploads/76f7f2f3-54bc-44d8-bd6d-ea0302f88e5e.png",
+    src: "/pixel-paul.png",
     alt: "Pixel Paul",
     name: "PAUL",
     sound: "scroll"

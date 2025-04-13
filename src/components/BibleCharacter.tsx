@@ -12,17 +12,17 @@ interface BibleCharacterProps {
 
 const characterMap = {
   jesus: {
-    src: "/jesus-pixel.png",
+    src: "/pixel-jesus.png",
     alt: "Pixel Jesus",
     name: "Jesus"
   },
   moses: {
-    src: "/moses-pixel.png",
+    src: "/pixel-moses.png",
     alt: "Pixel Moses",
     name: "Moses"
   },
   solomon: {
-    src: "/solomon-pixel.png",
+    src: "/pixel-solomon.png",
     alt: "Pixel Solomon",
     name: "Solomon"
   }

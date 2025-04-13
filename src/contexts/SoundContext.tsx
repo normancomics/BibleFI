@@ -27,20 +27,24 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [userInteracted, setUserInteracted] = useState<boolean>(false);
   const [sounds, setSounds] = useState<Record<SoundType, HTMLAudioElement>>({} as Record<SoundType, HTMLAudioElement>);
   
-  // Create simple base64 audio data for sound effects (these will just be empty placeholders)
-  const createEmptyAudio = () => {
-    return new Audio("data:audio/mp3;base64,SUQzAwAAAAAAJlRQRTEAAAAcAAAAU291bmRKYXkuY29tIFNvdW5kIEVmZmVjdHMAVEVOQwAAABcAAAB3d3cuc291bmRqYXkuY29tAAAA");
-  };
-  
   // Initialize sound files
   useEffect(() => {
-    // We'll create empty audio objects since we don't have real sound files
+    // Create audio objects with real sound file paths
     const loadedSounds: Record<SoundType, HTMLAudioElement> = {} as Record<SoundType, HTMLAudioElement>;
     
     const soundTypes: SoundType[] = ["coin", "scroll", "powerup", "select", "click", "error", "success"];
+    const soundPaths: Record<SoundType, string> = {
+      coin: "/sounds/coin.mp3",
+      scroll: "/sounds/scroll.mp3",
+      powerup: "/sounds/powerup.mp3",
+      select: "/sounds/select.mp3",
+      click: "/sounds/click.mp3",
+      error: "/sounds/error.mp3",
+      success: "/sounds/success.mp3"
+    };
     
     soundTypes.forEach(type => {
-      const audio = createEmptyAudio();
+      const audio = new Audio(soundPaths[type]);
       audio.volume = 0.3;
       audio.preload = "auto";
       loadedSounds[type] = audio;
@@ -48,16 +52,13 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     
     setSounds(loadedSounds);
     
-    // Force user interaction flag to true for development
-    setUserInteracted(true);
-    
     // Setup global interaction handler
     const handleInteraction = () => {
       setUserInteracted(true);
       console.log("User has interacted with the page - sounds can now play");
       
       // Try to play a silent sound to unlock audio on iOS
-      const unlockAudio = createEmptyAudio();
+      const unlockAudio = new Audio(soundPaths.click);
       unlockAudio.volume = 0.1;
       unlockAudio.play().catch(e => console.log("Initial sound play failed, this is normal"));
       
@@ -79,7 +80,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   }, []);
   
   const playSound = (sound: SoundType) => {
-    if (!isSoundEnabled) return;
+    if (!isSoundEnabled || !userInteracted) return;
     
     try {
       const audio = sounds[sound];
