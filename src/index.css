@@ -1,5 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
 
 @tailwind base;
@@ -82,10 +83,16 @@
     background-size: 300px;
     image-rendering: pixelated;
     -webkit-font-smoothing: none;
+    cursor: url('/cursor.png'), auto;
   }
 
   h1, h2, h3, h4 {
-    @apply font-scroll;
+    @apply font-game text-shadow-retro;
+  }
+  
+  /* Game-like buttons */
+  button {
+    cursor: url('/cursor-pointer.png'), pointer;
   }
 }
 
@@ -97,16 +104,43 @@
     -ms-interpolation-mode: nearest-neighbor;
   }
   
+  /* Retro-styled card with pixelated borders */
+  .retro-border {
+    @apply bg-ancient-scroll relative;
+    border: 4px solid transparent;
+    border-image: url('/border-pixel.png') 4 repeat;
+    image-rendering: pixelated;
+  }
+  
+  /* Scripture container with retro styling */
   .scripture-container {
-    @apply bg-ancient-scroll border-2 border-ancient-gold p-4 rounded-md animate-scroll-unfurl;
+    @apply p-4 rounded-none animate-scroll-unfurl;
+    background-image: url('/scroll-bg.png');
+    background-size: cover;
+    image-rendering: pixelated;
   }
   
+  /* Text shadow for retro game look */
+  .text-shadow-retro {
+    text-shadow: 2px 2px 0 #6E59A5, 
+                 4px 4px 0 rgba(0,0,0,0.2);
+  }
+  
+  /* Pixelated shadow effect */
+  .pixelated-shadow {
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  }
+  
+  /* Retro pixel button */
   .pixel-button {
-    @apply bg-scripture border-b-4 border-r-4 border-scripture-dark hover:bg-scripture-light active:translate-y-1 active:translate-x-1 active:border-b-2 active:border-r-2 transition-all duration-100 font-pixel text-lg;
+    @apply bg-scripture border-b-4 border-r-4 border-scripture-dark hover:bg-scripture-light hover:translate-y-[-2px] hover:translate-x-[-2px] active:translate-y-1 active:translate-x-1 active:border-b-2 active:border-r-2 transition-all duration-100 font-game text-lg text-shadow-sm pixelated-shadow;
   }
   
+  /* Pixel card with retro styling */
   .pixel-card {
-    @apply bg-white border-4 border-b-8 border-r-8 border-gray-400 p-4;
+    @apply bg-white border-4 border-b-8 border-r-8 border-gray-400 p-4 pixelated-shadow;
+    border-image: url('/card-border.png') 4 repeat;
+    image-rendering: pixelated;
   }
 
   /* Fix for iOS devices */
@@ -124,6 +158,16 @@
 
   .animate-coin-spin {
     animation: coin-spin 3s infinite linear;
+  }
+  
+  /* Slow bounce animation */
+  @keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .bounce-slow {
+    animation: bounce-slow 2s infinite ease-in-out;
   }
 
   /* Animation for scroll unfurling */
@@ -145,5 +189,19 @@
     border-width: 10px 10px 10px 0;
     border-style: solid;
     border-color: transparent var(--tw-border-opacity);
+  }
+  
+  /* Game interface frame */
+  .game-frame {
+    @apply border-8 rounded-none;
+    border-image: url('/frame-pixel.png') 8 repeat;
+    image-rendering: pixelated;
+  }
+  
+  /* 8-bit style grid */
+  .pixel-grid {
+    background-image: url('/grid-bg.png');
+    background-size: 16px 16px;
+    image-rendering: pixelated;
   }
 }
