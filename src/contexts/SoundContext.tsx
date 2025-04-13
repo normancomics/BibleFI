@@ -27,40 +27,37 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [userInteracted, setUserInteracted] = useState<boolean>(false);
   const [sounds, setSounds] = useState<Record<SoundType, HTMLAudioElement>>({} as Record<SoundType, HTMLAudioElement>);
   
+  // Create simple base64 audio data for sound effects (these will just be empty placeholders)
+  const createEmptyAudio = () => {
+    return new Audio("data:audio/mp3;base64,SUQzAwAAAAAAJlRQRTEAAAAcAAAAU291bmRKYXkuY29tIFNvdW5kIEVmZmVjdHMAVEVOQwAAABcAAAB3d3cuc291bmRqYXkuY29tAAAA");
+  };
+  
   // Initialize sound files
   useEffect(() => {
-    const soundMap: Record<SoundType, string> = {
-      coin: "/sounds/coin.mp3",
-      scroll: "/sounds/scroll.mp3",
-      powerup: "/sounds/powerup.mp3",
-      select: "/sounds/select.mp3",
-      click: "/sounds/click.mp3",
-      error: "/sounds/error.mp3",
-      success: "/sounds/success.mp3"
-    };
-    
-    // Preload sounds
+    // We'll create empty audio objects since we don't have real sound files
     const loadedSounds: Record<SoundType, HTMLAudioElement> = {} as Record<SoundType, HTMLAudioElement>;
     
-    Object.entries(soundMap).forEach(([key, path]) => {
-      const audio = new Audio(path);
+    const soundTypes: SoundType[] = ["coin", "scroll", "powerup", "select", "click", "error", "success"];
+    
+    soundTypes.forEach(type => {
+      const audio = createEmptyAudio();
       audio.volume = 0.3;
       audio.preload = "auto";
-      loadedSounds[key as SoundType] = audio;
+      loadedSounds[type] = audio;
     });
     
     setSounds(loadedSounds);
     
     // Force user interaction flag to true for development
-    // This helps with testing, in production you should use the listener approach
     setUserInteracted(true);
     
     // Setup global interaction handler
     const handleInteraction = () => {
       setUserInteracted(true);
       console.log("User has interacted with the page - sounds can now play");
+      
       // Try to play a silent sound to unlock audio on iOS
-      const unlockAudio = new Audio("/sounds/click.mp3");
+      const unlockAudio = createEmptyAudio();
       unlockAudio.volume = 0.1;
       unlockAudio.play().catch(e => console.log("Initial sound play failed, this is normal"));
       

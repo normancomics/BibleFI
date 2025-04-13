@@ -37,8 +37,14 @@ const Index: React.FC = () => {
     return () => clearTimeout(timer);
   }, [playSound, setUserInteracted]);
   
+  // Function to handle user interaction
+  const handleInteraction = () => {
+    setUserInteracted(true);
+    playSound("select");
+  };
+  
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" onClick={handleInteraction}>
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
@@ -115,13 +121,13 @@ const Index: React.FC = () => {
         <FarcasterFrame />
       </main>
       
-      {/* Add a hidden button to force sound activation on mobile */}
+      {/* Add a visible button to force sound activation on mobile */}
       <button 
-        onClick={() => playSound("select")} 
-        className="fixed bottom-4 right-4 bg-scripture text-white p-2 rounded"
+        onClick={handleInteraction} 
+        className="fixed bottom-4 right-4 bg-scripture text-white p-3 rounded-lg shadow-lg z-50 flex items-center"
         aria-label="Enable Sounds"
       >
-        Enable Sounds
+        <span className="mr-2">🔊</span> Tap for Sounds
       </button>
     </div>
   );

@@ -10,14 +10,19 @@ interface SoundEffectProps {
   loop?: boolean;
 }
 
+// Create simple base64 audio data for sound effects (these will just be empty placeholders)
+const createEmptyAudioSrc = () => {
+  return "data:audio/mp3;base64,SUQzAwAAAAAAJlRQRTEAAAAcAAAAU291bmRKYXkuY29tIFNvdW5kIEVmZmVjdHMAVEVOQwAAABcAAAB3d3cuc291bmRqYXkuY29tAAAA";
+};
+
 const soundMap: Record<SoundType, string> = {
-  coin: "/sounds/coin.mp3",
-  scroll: "/sounds/scroll.mp3",
-  powerup: "/sounds/powerup.mp3",
-  select: "/sounds/select.mp3",
-  click: "/sounds/click.mp3",
-  error: "/sounds/error.mp3",
-  success: "/sounds/success.mp3"
+  coin: createEmptyAudioSrc(),
+  scroll: createEmptyAudioSrc(),
+  powerup: createEmptyAudioSrc(),
+  select: createEmptyAudioSrc(),
+  click: createEmptyAudioSrc(),
+  error: createEmptyAudioSrc(),
+  success: createEmptyAudioSrc()
 };
 
 // Cache audio instances to prevent multiple loads
