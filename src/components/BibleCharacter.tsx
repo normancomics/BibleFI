@@ -2,7 +2,7 @@
 import React from "react";
 import PixelIcon from "./PixelIcon";
 
-export type CharacterType = "jesus" | "moses" | "solomon";
+export type CharacterType = "jesus" | "moses" | "solomon" | "god" | "joseph" | "abraham" | "widow" | "taxcollector" | "caesar";
 
 interface BibleCharacterProps {
   character: CharacterType;
@@ -12,19 +12,49 @@ interface BibleCharacterProps {
 
 const characterMap = {
   jesus: {
-    src: "/pixel-jesus.png",
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
     alt: "Pixel Jesus",
     name: "Jesus"
   },
   moses: {
-    src: "/pixel-moses.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Moses",
     name: "Moses"
   },
   solomon: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Solomon",
     name: "Solomon"
+  },
+  god: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel God",
+    name: "God"
+  },
+  joseph: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Joseph",
+    name: "Joseph"
+  },
+  abraham: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Abraham",
+    name: "Abraham"
+  },
+  widow: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Widow",
+    name: "Widow"
+  },
+  taxcollector: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Tax Collector",
+    name: "Tax Collector"
+  },
+  caesar: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Caesar",
+    name: "Caesar"
   }
 };
 

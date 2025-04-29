@@ -13,8 +13,8 @@ const FarcasterFrame: React.FC = () => {
     <Card className="warpcast-frame p-4 my-4">
       <div className="flex items-center mb-4">
         <PixelIcon 
-          src="/coin-pixel.png" 
-          alt="Warpcast" 
+          src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
+          alt="Warpcast Coin" 
           size={32} 
           className="mr-2 animate-pulse-glow" 
         />

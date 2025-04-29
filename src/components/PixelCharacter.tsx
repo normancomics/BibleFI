@@ -2,7 +2,7 @@
 import React from "react";
 import PixelIcon from "./PixelIcon";
 
-export type CharacterType = "jesus" | "moses" | "solomon" | "david" | "noah" | "paul";
+export type CharacterType = "jesus" | "moses" | "solomon" | "david" | "noah" | "paul" | "god" | "joseph" | "abraham" | "widow" | "taxcollector" | "caesar" | "coin";
 
 interface PixelCharacterProps {
   character: CharacterType;
@@ -15,40 +15,82 @@ interface PixelCharacterProps {
 
 const characterMap = {
   jesus: {
-    src: "/pixel-jesus.png",
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
     alt: "Pixel Jesus",
     name: "JESUS",
     sound: "powerup"
   },
   moses: {
-    src: "/pixel-moses.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Moses",
     name: "MOSES",
     sound: "scroll"
   },
   solomon: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Solomon",
     name: "SOLOMON",
     sound: "coin"
   },
   david: {
-    src: "/pixel-david.png",
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
     alt: "Pixel David",
     name: "DAVID",
     sound: "select"
   },
   noah: {
-    src: "/pixel-noah.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Noah",
     name: "NOAH",
     sound: "powerup"
   },
   paul: {
-    src: "/pixel-paul.png",
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
     alt: "Pixel Paul",
     name: "PAUL",
     sound: "scroll"
+  },
+  god: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel God",
+    name: "GOD",
+    sound: "powerup"
+  },
+  joseph: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Joseph",
+    name: "JOSEPH",
+    sound: "select"
+  },
+  abraham: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Abraham",
+    name: "ABRAHAM",
+    sound: "scroll"
+  },
+  widow: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Widow",
+    name: "WIDOW",
+    sound: "coin"
+  },
+  taxcollector: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Tax Collector",
+    name: "TAX COLLECTOR",
+    sound: "select"
+  },
+  caesar: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Caesar",
+    name: "CAESAR",
+    sound: "coin"
+  },
+  coin: {
+    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    alt: "Pixel Coin",
+    name: "COIN",
+    sound: "coin"
   }
 };
 

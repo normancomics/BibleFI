@@ -29,7 +29,7 @@ const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) 
     <div className={`scripture-container retro-border pixelated-shadow ${className}`}>
       <div className="flex items-center mb-2">
         <PixelIcon 
-          src="/scroll-pixel.png" 
+          src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
           alt="Scripture scroll" 
           className="mr-2" 
           bounce={true} 
