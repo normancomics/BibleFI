@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from "react";
 import { BibleVerse } from "@/data/bibleVerses";
-import PixelIcon from "./PixelIcon";
 import { useSound } from "@/contexts/SoundContext";
 
 interface ScriptureCardProps {
@@ -11,14 +10,15 @@ interface ScriptureCardProps {
 
 const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) => {
   const [playSound, setPlaySound] = useState(false);
-  const { userInteracted } = useSound();
+  const { userInteracted, playSound: playSoundEffect } = useSound();
   
   // Add effect to play sound when component mounts
   useEffect(() => {
     if (userInteracted) {
       setPlaySound(true);
+      playSoundEffect("scroll");
     }
-  }, [userInteracted]);
+  }, [userInteracted, playSoundEffect]);
   
   // Add null check to prevent rendering if verse is undefined
   if (!verse || !verse.reference) {
@@ -32,14 +32,7 @@ const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) 
   return (
     <div className={`scripture-container retro-border pixelated-shadow ${className}`}>
       <div className="flex items-center mb-2">
-        <PixelIcon 
-          src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
-          alt="Scripture scroll" 
-          className="mr-2" 
-          bounce={true} 
-          glow={true}
-          soundEffect={playSound ? "scroll" : undefined}
-        />
+        <div className="w-8 h-8 bg-ancient-scroll rounded-md mr-2 animate-pulse"></div>
         <h3 className="font-game text-base text-ancient-gold uppercase tracking-tight">
           {verse.reference}
         </h3>

@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import PixelButton from "./PixelButton";
 import { getRandomVerse } from "@/data/bibleVerses";
 import { Share2, ZapIcon } from "lucide-react";
-import PixelIcon from "./PixelIcon";
 import { useSound } from "@/contexts/SoundContext";
 
 const FarcasterFrame: React.FC = () => {
@@ -14,15 +13,7 @@ const FarcasterFrame: React.FC = () => {
   return (
     <Card className="warpcast-frame p-4 my-4">
       <div className="flex items-center mb-4">
-        <PixelIcon 
-          src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
-          alt="Warpcast Coin" 
-          size={32} 
-          className="mr-2"
-          spin={true}
-          glow={true}
-          soundEffect="coin"
-        />
+        <div className="w-8 h-8 bg-base-blue rounded-full mr-2 animate-pulse"></div>
         <h3 className="text-xl font-game text-glow">Warpcast Your Wisdom</h3>
       </div>
       

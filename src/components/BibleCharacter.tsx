@@ -1,6 +1,5 @@
 
 import React from "react";
-import PixelIcon from "./PixelIcon";
 
 export type CharacterType = "jesus" | "moses" | "solomon" | "god" | "joseph" | "abraham" | "widow" | "taxcollector" | "caesar";
 
@@ -12,49 +11,40 @@ interface BibleCharacterProps {
 
 const characterMap = {
   jesus: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-    alt: "Pixel Jesus",
-    name: "Jesus"
+    name: "Jesus",
+    color: "bg-pixel-blue"
   },
   moses: {
-    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
-    alt: "Pixel Moses",
-    name: "Moses"
+    name: "Moses",
+    color: "bg-pixel-cyan"
   },
   solomon: {
-    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
-    alt: "Pixel Solomon",
-    name: "Solomon"
+    name: "Solomon",
+    color: "bg-pixel-yellow"
   },
   god: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-    alt: "Pixel God",
-    name: "God"
+    name: "God",
+    color: "bg-pixel-purple"
   },
   joseph: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-    alt: "Pixel Joseph",
-    name: "Joseph"
+    name: "Joseph",
+    color: "bg-pixel-green"
   },
   abraham: {
-    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
-    alt: "Pixel Abraham",
-    name: "Abraham"
+    name: "Abraham",
+    color: "bg-pixel-orange"
   },
   widow: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-    alt: "Pixel Widow",
-    name: "Widow"
+    name: "Widow",
+    color: "bg-pixel-pink"
   },
   taxcollector: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-    alt: "Pixel Tax Collector",
-    name: "Tax Collector"
+    name: "Tax Collector",
+    color: "bg-pixel-red"
   },
   caesar: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-    alt: "Pixel Caesar",
-    name: "Caesar"
+    name: "Caesar",
+    color: "bg-pixel-blue"
   }
 };
 
@@ -63,12 +53,14 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   message,
   className = "" 
 }) => {
-  const { src, alt, name } = characterMap[character];
+  const { name, color } = characterMap[character];
 
   return (
     <div className={`flex items-start ${className}`}>
       <div className="flex-shrink-0 mr-3">
-        <PixelIcon src={src} alt={alt} size={64} soundEffect="select" bounce={true} glow={true} />
+        <div className={`${color} w-16 h-16 rounded-md animate-pulse flex items-center justify-center text-white font-bold`}>
+          {name.charAt(0)}
+        </div>
       </div>
       <div className="bg-white border-2 border-scripture p-3 rounded-lg relative speech-bubble">
         <p className="font-bold text-scripture mb-1">{name} says:</p>

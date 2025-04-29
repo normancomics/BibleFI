@@ -22,10 +22,10 @@ interface SoundProviderProps {
   children: React.ReactNode;
 }
 
-// Create and preload audio elements to work around browser restrictions
+// Create audio elements with iPad compatibility in mind
 const createAudio = (src: string): HTMLAudioElement => {
   const audio = new Audio(src);
-  audio.volume = 0.3;
+  audio.volume = 0.5; // Slightly louder for iPad
   audio.preload = "auto";
   return audio;
 };
@@ -33,7 +33,7 @@ const createAudio = (src: string): HTMLAudioElement => {
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [userInteracted, setUserInteracted] = useState<boolean>(false);
-  const [sounds, setSounds] = useState<Record<SoundType, HTMLAudioElement>>({} as Record<SoundType, HTMLAudioElement>);
+  const [soundsLoaded, setSoundsLoaded] = useState<boolean>(false);
   
   // Initialize sound files
   useEffect(() => {
@@ -48,60 +48,88 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       success: createAudio("/sounds/success.mp3")
     };
     
-    setSounds(loadedSounds);
+    // Pre-load all sounds
+    Promise.all(
+      Object.values(loadedSounds).map(audio => {
+        return new Promise((resolve) => {
+          audio.addEventListener('canplaythrough', resolve, { once: true });
+          audio.load();
+        });
+      })
+    ).then(() => {
+      console.log("All sounds preloaded successfully");
+      setSoundsLoaded(true);
+    });
     
-    // Setup global interaction handler
+    // Setup global interaction handler - special focus on iPad compatibility
     const handleInteraction = () => {
       setUserInteracted(true);
       console.log("User has interacted with the page - sounds can now play");
       
-      // Try to play a silent sound to unlock audio on iOS
-      const unlockAudio = createAudio("/sounds/click.mp3");
-      unlockAudio.volume = 0.1;
-      unlockAudio.play().catch(e => console.log("Initial sound play failed, this is normal"));
+      // Try to play all sounds with minimal volume to unlock audio on iOS/iPad
+      Object.values(loadedSounds).forEach(audio => {
+        const originalVolume = audio.volume;
+        audio.volume = 0.01;
+        const playPromise = audio.play();
+        if (playPromise) {
+          playPromise
+            .then(() => {
+              audio.pause();
+              audio.currentTime = 0;
+              audio.volume = originalVolume;
+            })
+            .catch(e => console.log("Initial sound unlock attempt - this is expected"));
+        }
+      });
       
       // Remove event listeners after first interaction
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("keydown", handleInteraction);
     };
     
-    // Add touch interaction handlers
-    window.addEventListener("click", handleInteraction, { once: true });
-    window.addEventListener("keydown", handleInteraction, { once: true });
-    window.addEventListener("touchstart", handleInteraction, { once: true });
+    // Add touch interaction handlers - important for iPad
+    document.addEventListener("click", handleInteraction, { once: true });
+    document.addEventListener("touchstart", handleInteraction, { once: true });
+    document.addEventListener("keydown", handleInteraction, { once: true });
     
     return () => {
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("keydown", handleInteraction);
     };
   }, []);
   
   const playSound = useCallback((sound: SoundType) => {
-    if (!isSoundEnabled) return;
+    if (!isSoundEnabled || !userInteracted) return;
     
     try {
-      // Create a fresh audio element each time to avoid playback issues
+      // Create a fresh audio element each time for better iPad compatibility
       const audio = new Audio(`/sounds/${sound}.mp3`);
-      audio.volume = 0.3;
+      audio.volume = 0.5; // Louder for iPad
+      audio.muted = false;
       
-      console.log(`Playing sound: ${sound}`);
+      console.log(`Playing sound: ${sound} for iPad`);
       
-      // Try to play the sound
-      const playPromise = audio.play();
+      // For iPad, we need to first load then play
+      audio.addEventListener('canplaythrough', () => {
+        const playPromise = audio.play();
+        if (playPromise) {
+          playPromise.catch(err => {
+            console.error("Sound still blocked on iPad:", err);
+            // Try once more with user gesture
+            const forceSoundButton = document.getElementById('force-sound-button');
+            if (forceSoundButton) {
+              forceSoundButton.style.display = 'block';
+              forceSoundButton.onclick = () => {
+                audio.play().catch(e => console.error("Final attempt failed:", e));
+              };
+            }
+          });
+        }
+      }, { once: true });
       
-      if (playPromise) {
-        playPromise.catch(err => {
-          console.log("Sound blocked, needs user interaction first. Click anywhere on the page to enable sounds.");
-          
-          // If sound fails, and we don't have userInteracted flag set, we'll set it to try again
-          if (!userInteracted) {
-            // We'll mark this as false to avoid recursive loop
-            setUserInteracted(true);
-          }
-        });
-      }
+      audio.load();
     } catch (err) {
       console.error("Error playing sound:", err);
     }
@@ -122,16 +150,21 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       }}
     >
       {children}
-      {/* Always-visible sound activation button */}
-      {!userInteracted && (
-        <button 
-          onClick={() => setUserInteracted(true)} 
-          className="fixed bottom-4 right-4 bg-scripture text-white p-3 rounded-lg shadow-lg z-50 flex items-center animate-pulse"
-          aria-label="Enable Sounds"
-        >
-          <span className="mr-2">🔊</span> Tap for Sounds
-        </button>
-      )}
+      
+      {/* Special sound unlock button for iPad */}
+      <button 
+        id="force-sound-button"
+        onClick={() => {
+          setUserInteracted(true);
+          playSound("click");
+          document.getElementById('force-sound-button')?.setAttribute('style', 'display: none;');
+        }} 
+        className="fixed bottom-4 right-4 bg-scripture text-white p-3 rounded-lg shadow-lg z-50 flex items-center animate-pulse"
+        style={{display: userInteracted ? 'none' : 'flex'}}
+        aria-label="Enable Sounds"
+      >
+        <span className="mr-2">🔊</span> Tap For Sounds (iPad)
+      </button>
     </SoundContext.Provider>
   );
 };

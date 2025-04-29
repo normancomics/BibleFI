@@ -27,6 +27,15 @@ const preloadSounds = () => {
     const audio = new Audio();
     audio.src = path;
     audio.preload = "auto";
+    
+    // For iOS/iPad, we need to pre-unlock audio
+    document.addEventListener('touchstart', function unlockAudio() {
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(() => {});
+      document.removeEventListener('touchstart', unlockAudio);
+    }, { once: true });
   });
 };
 
@@ -36,7 +45,7 @@ preloadSounds();
 const SoundEffect: React.FC<SoundEffectProps> = ({ 
   sound, 
   play, 
-  volume = 0.3,
+  volume = 0.5, // Higher volume for iPad
   loop = false
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -51,22 +60,33 @@ const SoundEffect: React.FC<SoundEffectProps> = ({
         // Set properties
         audio.volume = volume;
         audio.loop = loop;
+        audio.muted = false;
         
         // Play with user interaction handling
-        console.log(`Attempting to play sound: ${sound}`);
+        console.log(`Attempting to play sound: ${sound} for iPad`);
         
-        const playPromise = audio.play();
+        // For iPad, first load then play
+        audio.addEventListener('canplaythrough', () => {
+          const playPromise = audio.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.catch(err => {
+              console.log(`Sound ${sound} failed to play:`, err);
+              
+              // Try to play again on user interaction
+              const handleUserInteraction = () => {
+                audio.play().catch(e => console.log("Still failed after interaction"));
+                document.removeEventListener('click', handleUserInteraction);
+                document.removeEventListener('touchstart', handleUserInteraction);
+              };
+              
+              document.addEventListener('click', handleUserInteraction, { once: true });
+              document.addEventListener('touchstart', handleUserInteraction, { once: true });
+            });
+          }
+        }, { once: true });
         
-        if (playPromise !== undefined) {
-          playPromise.catch(err => {
-            console.log(`Sound ${sound} failed to play:`, err);
-            // We'll try a fallback approach for iOS/Safari
-            document.addEventListener('click', function playOnce() {
-              audio.play().catch(e => console.log("Fallback play failed"));
-              document.removeEventListener('click', playOnce);
-            }, { once: true });
-          });
-        }
+        audio.load();
       } catch (err) {
         console.error("Error playing sound:", err);
       }
