@@ -37,7 +37,7 @@ const PixelIcon: React.FC<PixelIconProps> = ({
       playSoundEffect(soundEffect);
       setPlaySound(true);
     }
-  }, [soundEffect, userInteracted]);
+  }, [soundEffect, userInteracted, playSoundEffect]);
   
   // Determine animation classes
   let animationClass = "";

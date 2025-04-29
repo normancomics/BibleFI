@@ -3,34 +3,48 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Home, BookOpen, Coins, Church, BarChart } from "lucide-react";
 import PixelIcon from "./PixelIcon";
+import { useSound } from "@/contexts/SoundContext";
 
 const NavBar: React.FC = () => {
+  const { playSound } = useSound();
+
+  const handleNavClick = (soundType: "coin" | "select" | "scroll") => {
+    playSound(soundType);
+  };
+
   return (
     <header className="bg-scripture text-white p-2 sticky top-0 z-10">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="flex items-center">
-          <PixelIcon src="/coin-pixel.png" alt="Bible.Fi Logo" size={40} className="animate-coin-spin mr-2" />
+        <Link to="/" className="flex items-center" onClick={() => handleNavClick("coin")}>
+          <PixelIcon 
+            src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
+            alt="Bible.Fi Logo" 
+            size={40} 
+            spin={true} 
+            glow={true}
+            className="mr-2"
+          />
           <h1 className="text-2xl font-scroll">Bible.Fi</h1>
         </Link>
         
         <nav className="flex items-center space-x-4">
-          <Link to="/" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded">
+          <Link to="/" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded" onClick={() => handleNavClick("select")}>
             <Home size={20} />
             <span className="text-xs">Home</span>
           </Link>
-          <Link to="/wisdom" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded">
+          <Link to="/wisdom" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded" onClick={() => handleNavClick("scroll")}>
             <BookOpen size={20} />
             <span className="text-xs">Wisdom</span>
           </Link>
-          <Link to="/staking" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded">
+          <Link to="/staking" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded" onClick={() => handleNavClick("coin")}>
             <Coins size={20} />
             <span className="text-xs">Staking</span>
           </Link>
-          <Link to="/tithe" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded">
+          <Link to="/tithe" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded" onClick={() => handleNavClick("scroll")}>
             <Church size={20} />
             <span className="text-xs">Tithe</span>
           </Link>
-          <Link to="/taxes" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded">
+          <Link to="/taxes" className="flex flex-col items-center px-2 py-1 hover:bg-scripture-dark rounded" onClick={() => handleNavClick("select")}>
             <BarChart size={20} />
             <span className="text-xs">Taxes</span>
           </Link>

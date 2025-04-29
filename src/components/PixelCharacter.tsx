@@ -63,7 +63,7 @@ const characterMap = {
     sound: "select"
   },
   abraham: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Abraham",
     name: "ABRAHAM",
     sound: "scroll"
@@ -87,7 +87,7 @@ const characterMap = {
     sound: "coin"
   },
   coin: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    src: "/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png",
     alt: "Pixel Coin",
     name: "COIN",
     sound: "coin"
@@ -112,6 +112,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
           alt={alt} 
           size={size} 
           glow={true}
+          bounce={true}
           soundEffect={soundEffect ? sound as any : undefined}
         />
         <div className="absolute -top-2 -right-2 bg-black/70 text-pixel-green px-2 py-0.5 text-xs border border-pixel-green font-game">

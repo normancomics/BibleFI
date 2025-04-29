@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { BibleVerse } from "@/data/bibleVerses";
 import PixelIcon from "./PixelIcon";
+import { useSound } from "@/contexts/SoundContext";
 
 interface ScriptureCardProps {
   verse: BibleVerse;
@@ -10,11 +11,14 @@ interface ScriptureCardProps {
 
 const ScriptureCard: React.FC<ScriptureCardProps> = ({ verse, className = "" }) => {
   const [playSound, setPlaySound] = useState(false);
+  const { userInteracted } = useSound();
   
   // Add effect to play sound when component mounts
   useEffect(() => {
-    setPlaySound(true);
-  }, []);
+    if (userInteracted) {
+      setPlaySound(true);
+    }
+  }, [userInteracted]);
   
   // Add null check to prevent rendering if verse is undefined
   if (!verse || !verse.reference) {

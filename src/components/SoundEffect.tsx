@@ -21,8 +21,17 @@ const soundMap: Record<SoundType, string> = {
   success: "/sounds/success.mp3"
 };
 
-// Cache audio instances to prevent multiple loads
-const audioCache: Record<string, HTMLAudioElement> = {};
+// Create simple audio elements for each sound to ensure they're loaded
+const preloadSounds = () => {
+  Object.entries(soundMap).forEach(([type, path]) => {
+    const audio = new Audio();
+    audio.src = path;
+    audio.preload = "auto";
+  });
+};
+
+// Preload sounds when module loads
+preloadSounds();
 
 const SoundEffect: React.FC<SoundEffectProps> = ({ 
   sound, 
@@ -34,29 +43,32 @@ const SoundEffect: React.FC<SoundEffectProps> = ({
   
   useEffect(() => {
     if (play) {
-      // Create or get from cache
-      if (!audioCache[sound]) {
-        audioCache[sound] = new Audio(soundMap[sound]);
-      }
-      
-      const audio = audioCache[sound];
-      audioRef.current = audio;
-      
-      // Set properties
-      audio.volume = volume;
-      audio.loop = loop;
-      
-      // Reset if it was playing
-      audio.currentTime = 0;
-      
-      // Play with user interaction handling
-      const playPromise = audio.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch(err => {
-          console.log(`Sound ${sound} blocked by browser. This is normal before user interaction.`);
-          // We don't show errors since this is expected before user interaction
-        });
+      try {
+        // Create a new audio instance each time for reliable playback
+        const audio = new Audio(soundMap[sound]);
+        audioRef.current = audio;
+        
+        // Set properties
+        audio.volume = volume;
+        audio.loop = loop;
+        
+        // Play with user interaction handling
+        console.log(`Attempting to play sound: ${sound}`);
+        
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.log(`Sound ${sound} failed to play:`, err);
+            // We'll try a fallback approach for iOS/Safari
+            document.addEventListener('click', function playOnce() {
+              audio.play().catch(e => console.log("Fallback play failed"));
+              document.removeEventListener('click', playOnce);
+            }, { once: true });
+          });
+        }
+      } catch (err) {
+        console.error("Error playing sound:", err);
       }
     }
     

@@ -37,7 +37,7 @@ const characterMap = {
     name: "Joseph"
   },
   abraham: {
-    src: "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
+    src: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
     alt: "Pixel Abraham",
     name: "Abraham"
   },
@@ -68,7 +68,7 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   return (
     <div className={`flex items-start ${className}`}>
       <div className="flex-shrink-0 mr-3">
-        <PixelIcon src={src} alt={alt} size={64} soundEffect="select" />
+        <PixelIcon src={src} alt={alt} size={64} soundEffect="select" bounce={true} glow={true} />
       </div>
       <div className="bg-white border-2 border-scripture p-3 rounded-lg relative speech-bubble">
         <p className="font-bold text-scripture mb-1">{name} says:</p>
