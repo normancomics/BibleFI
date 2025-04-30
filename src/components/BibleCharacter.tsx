@@ -18,7 +18,7 @@ interface CharacterInfo {
   name: string;
   color: string;
   wisdomLevel: number;
-  soundEffect: string; // Changed from SoundType to string
+  soundEffect: string;
 }
 
 const characterMap: Record<CharacterType, CharacterInfo> = {
@@ -106,7 +106,7 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
 
   useEffect(() => {
     if (soundEffect && userInteracted && !hasPlayed) {
-      playSound(characterSound);
+      playSound(characterSound as any);
       setHasPlayed(true);
     }
   }, [soundEffect, userInteracted, characterSound, playSound, hasPlayed]);
@@ -114,7 +114,7 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   const handleCharacterClick = () => {
     setIsAnimating(true);
     if (userInteracted) {
-      playSound(characterSound);
+      playSound(characterSound as any);
     }
     setTimeout(() => setIsAnimating(false), 1000);
   };
