@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import NavBar from "@/components/NavBar";
 import BibleCharacter from "@/components/BibleCharacter";
@@ -54,7 +55,7 @@ const WisdomPage: React.FC = () => {
               <h3 className="font-game text-sm">YOUR WISDOM JOURNEY</h3>
               <span className="font-pixel text-ancient-gold">Level {wisdomLevel}/{maxWisdomLevel}</span>
             </div>
-            <Progress value={(wisdomLevel / maxWisdomLevel) * 100} className="h-2 bg-black/30" indicatorClassName="bg-ancient-gold" />
+            <Progress value={(wisdomLevel / maxWisdomLevel) * 100} className="h-2 bg-black/30" />
             <div className="mt-2 flex justify-between">
               <div className="flex items-center">
                 <Award size={16} className="text-ancient-gold mr-1" />

@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useSound } from "@/contexts/SoundContext";
-import type { SoundType } from "@/contexts/SoundContext";
 
 export type CharacterType = "jesus" | "moses" | "solomon" | "god" | "joseph" | "abraham" | "widow" | "taxcollector" | "caesar" | "paul" | "david";
 
@@ -19,7 +18,7 @@ interface CharacterInfo {
   name: string;
   color: string;
   wisdomLevel: number;
-  soundEffect: SoundType;
+  soundEffect: string; // Changed from SoundType to string
 }
 
 const characterMap: Record<CharacterType, CharacterInfo> = {

@@ -6,6 +6,7 @@ import PixelButton from "./PixelButton";
 import ScriptureCard from "./ScriptureCard";
 import { BibleVerse, getRandomVerse } from "@/data/bibleVerses";
 import { useSound } from "@/contexts/SoundContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface StakingPoolProps {
   title: string;
@@ -31,6 +32,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   // If verse is undefined, get a random verse
   const safeVerse = verse || getRandomVerse();
   const { playSound } = useSound();
+  const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   
   const getRiskColor = () => {
@@ -40,6 +42,19 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       case "high": return "bg-red-100 text-red-800";
       default: return "bg-green-100 text-green-800";
     }
+  };
+  
+  const handleStake = () => {
+    playSound("coin");
+    toast({
+      title: "Preparing to stake",
+      description: "Connect your wallet to continue your stewardship journey",
+    });
+  };
+  
+  const handleLearn = () => {
+    playSound("scroll");
+    setShowDetails(!showDetails);
   };
   
   return (
@@ -94,10 +109,10 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       <ScriptureCard verse={safeVerse} className="mb-4" />
       
       <div className="flex space-x-2">
-        <PixelButton className="flex-1" onClick={() => playSound("coin")}>
+        <PixelButton className="flex-1" onClick={handleStake}>
           Stake
         </PixelButton>
-        <PixelButton variant="outline" className="flex items-center" onClick={() => playSound("scroll")}>
+        <PixelButton variant="outline" className="flex items-center" onClick={handleLearn}>
           Learn <ArrowUpRight size={16} className="ml-1" />
         </PixelButton>
       </div>
