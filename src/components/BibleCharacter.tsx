@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSound } from "@/contexts/SoundContext";
+import type { SoundType } from "@/contexts/SoundContext";
 
 export type CharacterType = "jesus" | "moses" | "solomon" | "god" | "joseph" | "abraham" | "widow" | "taxcollector" | "caesar" | "paul" | "david";
 
@@ -14,7 +15,14 @@ interface BibleCharacterProps {
   showWisdomLevel?: boolean;
 }
 
-const characterMap = {
+interface CharacterInfo {
+  name: string;
+  color: string;
+  wisdomLevel: number;
+  soundEffect: SoundType;
+}
+
+const characterMap: Record<CharacterType, CharacterInfo> = {
   jesus: {
     name: "Jesus",
     color: "bg-pixel-blue",
