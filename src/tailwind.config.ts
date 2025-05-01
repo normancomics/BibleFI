@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -72,16 +71,24 @@ export default {
 				ancient: {
 					scroll: '#FFF7C2',  // Brighter yellow for scrolls
 					gold: '#FFD700',    // Gold for important elements
-					temple: '#D1FFBD',  // Brighter green for temple elements
+					temple: '#00FF66',  // Brighter green for temple elements
 				},
 				// Retro game colors
 				pixel: {
 					red: '#FF5555',
-					blue: '#55AAFF',
+					blue: '#1E90FF',    // Royal blue for the new headings
 					green: '#55FF55',
 					yellow: '#FFFF55',
 					orange: '#FF9955',
 					pink: '#FF55FF',
+					cyan: '#00FFFF',
+					purple: '#8800FF',
+					black: '#000000',
+					white: '#FFFFFF',
+				},
+				base: {
+					blue: '#0052FF', // Base chain blue
+					dark: '#003399',
 				}
 			},
 			borderRadius: {

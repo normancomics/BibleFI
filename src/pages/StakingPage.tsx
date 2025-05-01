@@ -16,8 +16,19 @@ const StakingPage: React.FC = () => {
       
       <main className="container mx-auto px-4 py-8">
         <section className="text-center mb-12">
-          <h1 className="text-4xl font-scroll text-scripture-dark mb-4">Biblical Staking</h1>
-          <p className="text-xl max-w-2xl mx-auto">
+          <div className="inline-block relative px-8 py-4 bg-gradient-to-r from-pixel-blue/60 via-pixel-blue to-pixel-blue/60 border-2 border-ancient-gold shadow-lg transform hover:scale-105 transition-transform">
+            <div className="absolute inset-0 bg-black/10 opacity-30"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-ancient-gold"></div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-ancient-gold"></div>
+            <div className="absolute -left-2 -top-2 w-4 h-4 border-t-2 border-l-2 border-ancient-gold"></div>
+            <div className="absolute -right-2 -top-2 w-4 h-4 border-t-2 border-r-2 border-ancient-gold"></div>
+            <div className="absolute -left-2 -bottom-2 w-4 h-4 border-b-2 border-l-2 border-ancient-gold"></div>
+            <div className="absolute -right-2 -bottom-2 w-4 h-4 border-b-2 border-r-2 border-ancient-gold"></div>
+            <h1 className="text-4xl font-scroll text-white drop-shadow-[0_0_8px_rgba(255,215,0,0.5)] tracking-wider uppercase relative z-10" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,215,0,0.7)' }}>
+              Biblical Staking
+            </h1>
+          </div>
+          <p className="text-xl max-w-2xl mx-auto mt-4">
             "Wealth gained hastily will dwindle, but whoever gathers little by little will increase it." - Proverbs 13:11
           </p>
         </section>
@@ -32,7 +43,21 @@ const StakingPage: React.FC = () => {
         
         {/* Achievement System */}
         <div className="mb-8 bg-black/10 p-4 rounded-lg">
-          <h2 className="text-2xl font-scroll mb-4 text-center">Faith Achievements</h2>
+          <div className="text-center mb-6">
+            <div className="inline-block relative px-6 py-3 bg-gradient-to-r from-pixel-blue/60 via-pixel-blue to-pixel-blue/60 border-2 border-ancient-gold shadow-lg">
+              <div className="absolute inset-0 bg-black/10 opacity-30"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-ancient-gold"></div>
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-ancient-gold"></div>
+              <div className="absolute -left-1 -top-1 w-3 h-3 border-t-2 border-l-2 border-ancient-gold"></div>
+              <div className="absolute -right-1 -top-1 w-3 h-3 border-t-2 border-r-2 border-ancient-gold"></div>
+              <div className="absolute -left-1 -bottom-1 w-3 h-3 border-b-2 border-l-2 border-ancient-gold"></div>
+              <div className="absolute -right-1 -bottom-1 w-3 h-3 border-b-2 border-r-2 border-ancient-gold"></div>
+              <h2 className="text-2xl font-scroll text-white drop-shadow-[0_0_8px_rgba(255,215,0,0.5)] tracking-wider uppercase relative z-10" style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.5), 0 0 8px rgba(255,215,0,0.7)' }}>
+                Faith Achievements
+              </h2>
+            </div>
+          </div>
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-black/20 p-3 rounded-md text-center">
               <div className="mb-2">
