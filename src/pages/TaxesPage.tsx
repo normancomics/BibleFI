@@ -27,8 +27,19 @@ const TaxesPage: React.FC = () => {
       
       <main className="container mx-auto px-4 py-8">
         <section className="text-center mb-12">
-          <h1 className="text-4xl font-scroll text-scripture-dark mb-4">Render Unto Caesar</h1>
-          <p className="text-xl max-w-2xl mx-auto">
+          <div className="inline-block relative px-8 py-4 bg-gradient-to-r from-ancient-gold via-yellow-600 to-ancient-gold border-2 border-red-800 shadow-lg transform hover:scale-105 transition-transform">
+            <div className="absolute inset-0 bg-black/10 opacity-30"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-red-700"></div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-red-700"></div>
+            <div className="absolute -left-2 -top-2 w-4 h-4 border-t-2 border-l-2 border-red-800"></div>
+            <div className="absolute -right-2 -top-2 w-4 h-4 border-t-2 border-r-2 border-red-800"></div>
+            <div className="absolute -left-2 -bottom-2 w-4 h-4 border-b-2 border-l-2 border-red-800"></div>
+            <div className="absolute -right-2 -bottom-2 w-4 h-4 border-b-2 border-r-2 border-red-800"></div>
+            <h1 className="text-4xl font-scroll text-ancient-temple drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] tracking-wider uppercase relative z-10" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,215,0,0.7)' }}>
+              Render Unto Caesar
+            </h1>
+          </div>
+          <p className="text-xl max-w-2xl mx-auto mt-4">
             Manage your cryptocurrency taxes with biblical wisdom.
           </p>
         </section>

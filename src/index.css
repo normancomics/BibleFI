@@ -140,6 +140,31 @@
   .base-highlight {
     @apply bg-base-blue text-white border-2 border-base-dark;
   }
+  
+  /* Caesar title styling */
+  .caesar-title {
+    background: linear-gradient(to right, #D4AF37, #FFD700, #D4AF37);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .caesar-title::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #8B0000, transparent);
+  }
 }
 
 @layer components {
