@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { BookOpen, ArrowUpRight, Info, Shield, ChartBar } from "lucide-react";
 import PixelButton from "./PixelButton";
 import ScriptureCard from "./ScriptureCard";
+import StakingTransparency from "./StakingTransparency";
 import { BibleVerse, getRandomVerse } from "@/data/bibleVerses";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ interface StakingPoolProps {
   riskLevel?: "low" | "medium" | "high";
   biblicalPrinciple?: string;
   returnsMechanism?: string;
+  showTransparency?: boolean;
 }
 
 const StakingPool: React.FC<StakingPoolProps> = ({
@@ -27,13 +29,15 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   lockPeriod,
   riskLevel = "low",
   biblicalPrinciple = "Careful stewardship of resources",
-  returnsMechanism = "Interest from lending to verified projects"
+  returnsMechanism = "Interest from lending to verified projects",
+  showTransparency = false,
 }) => {
   // If verse is undefined, get a random verse
   const safeVerse = verse || getRandomVerse();
   const { playSound } = useSound();
   const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
+  const [showFullTransparency, setShowFullTransparency] = useState(showTransparency);
   
   const getRiskColor = () => {
     switch(riskLevel) {
@@ -56,6 +60,11 @@ const StakingPool: React.FC<StakingPoolProps> = ({
     playSound("scroll");
     setShowDetails(!showDetails);
   };
+
+  const handleShowTransparency = () => {
+    playSound("select");
+    setShowFullTransparency(true);
+  };
   
   return (
     <Card className="pixel-card overflow-hidden">
@@ -77,14 +86,14 @@ const StakingPool: React.FC<StakingPoolProps> = ({
         </div>
       </div>
       
-      <p className="mb-4">{description}</p>
+      <p className="mb-4 px-4">{description}</p>
       
-      <div className="flex items-center mb-4 text-sm text-muted-foreground">
+      <div className="flex items-center mb-4 text-sm text-muted-foreground px-4">
         <BookOpen size={16} className="mr-1" />
         <span>Lock Period: {lockPeriod}</span>
       </div>
       
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-4 px-4">
         <div className={`text-xs px-2 py-1 rounded-md ${getRiskColor()} flex items-center mr-2`}>
           <Shield size={12} className="mr-1" /> {riskLevel.toUpperCase()} RISK
         </div>
@@ -101,7 +110,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       </div>
       
       {showDetails && (
-        <div className="bg-black/10 p-3 rounded-md mb-4 text-sm">
+        <div className="bg-black/10 p-3 rounded-md mb-4 text-sm mx-4">
           <div className="flex items-start mb-2">
             <ChartBar size={16} className="mr-2 flex-shrink-0 mt-1 text-scripture" />
             <div>
@@ -114,12 +123,24 @@ const StakingPool: React.FC<StakingPoolProps> = ({
               <strong>Biblical Principle:</strong> {biblicalPrinciple}
             </div>
           </div>
+          <div className="mt-2 text-center">
+            <button 
+              className="text-xs text-scripture underline hover:text-scripture-dark"
+              onClick={handleShowTransparency}
+            >
+              View full biblical transparency report
+            </button>
+          </div>
         </div>
       )}
+
+      {showFullTransparency && <StakingTransparency />}
       
-      <ScriptureCard verse={safeVerse} className="mb-4" />
+      <div className="px-4 mb-4">
+        <ScriptureCard verse={safeVerse} />
+      </div>
       
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 px-4 pb-4">
         <PixelButton className="flex-1" onClick={handleStake}>
           Stake
         </PixelButton>
