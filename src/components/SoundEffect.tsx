@@ -24,18 +24,29 @@ const soundMap: Record<SoundType, string> = {
 // Create simple audio elements for each sound to ensure they're loaded
 const preloadSounds = () => {
   Object.entries(soundMap).forEach(([type, path]) => {
-    const audio = new Audio();
-    audio.src = path;
-    audio.preload = "auto";
-    
-    // For iOS/iPad, we need to pre-unlock audio
-    document.addEventListener('touchstart', function unlockAudio() {
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-      }).catch(() => {});
-      document.removeEventListener('touchstart', unlockAudio);
-    }, { once: true });
+    try {
+      const audio = new Audio();
+      audio.src = path;
+      audio.preload = "auto";
+      
+      // For iOS/Safari, we need to pre-unlock audio
+      const unlockAudio = () => {
+        audio.play().then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          console.log(`Preloaded sound: ${type}`);
+        }).catch(e => {
+          console.log(`Failed to preload sound: ${type}`, e);
+        });
+      };
+      
+      // Try to unlock on user interaction
+      document.addEventListener('click', unlockAudio, { once: true });
+      document.addEventListener('touchstart', unlockAudio, { once: true });
+      document.addEventListener('keydown', unlockAudio, { once: true });
+    } catch (err) {
+      console.error(`Error preloading sound: ${type}`, err);
+    }
   });
 };
 
@@ -45,16 +56,25 @@ preloadSounds();
 const SoundEffect: React.FC<SoundEffectProps> = ({ 
   sound, 
   play, 
-  volume = 0.5, // Higher volume for iPad
+  volume = 0.7, // Higher volume for better audibility
   loop = false
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
+    // Clean up previous audio element
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    
     if (play) {
       try {
+        console.log(`Attempting to play sound: ${sound}`);
+        
         // Create a new audio instance each time for reliable playback
-        const audio = new Audio(soundMap[sound]);
+        const audio = new Audio();
+        audio.src = soundMap[sound];
         audioRef.current = audio;
         
         // Set properties
@@ -62,26 +82,30 @@ const SoundEffect: React.FC<SoundEffectProps> = ({
         audio.loop = loop;
         audio.muted = false;
         
-        // Play with user interaction handling
-        console.log(`Attempting to play sound: ${sound} for iPad`);
-        
-        // For iPad, first load then play
+        // First load then play to improve reliability
         audio.addEventListener('canplaythrough', () => {
+          console.log(`Sound ${sound} loaded, attempting to play...`);
+          
           const playPromise = audio.play();
           
           if (playPromise !== undefined) {
             playPromise.catch(err => {
-              console.log(`Sound ${sound} failed to play:`, err);
+              console.error(`Sound ${sound} failed to play:`, err);
               
               // Try to play again on user interaction
               const handleUserInteraction = () => {
-                audio.play().catch(e => console.log("Still failed after interaction"));
+                console.log(`Attempting to play ${sound} after user interaction`);
+                audio.play().catch(e => console.error("Still failed after interaction:", e));
+                
+                // Remove event listeners once we attempt to play
                 document.removeEventListener('click', handleUserInteraction);
                 document.removeEventListener('touchstart', handleUserInteraction);
+                document.removeEventListener('keydown', handleUserInteraction);
               };
               
               document.addEventListener('click', handleUserInteraction, { once: true });
               document.addEventListener('touchstart', handleUserInteraction, { once: true });
+              document.addEventListener('keydown', handleUserInteraction, { once: true });
             });
           }
         }, { once: true });
@@ -100,7 +124,8 @@ const SoundEffect: React.FC<SoundEffectProps> = ({
     };
   }, [play, sound, volume, loop]);
 
-  return null; // Non-visual component
+  // This is a non-visual component
+  return null;
 };
 
 export default SoundEffect;

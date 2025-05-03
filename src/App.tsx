@@ -10,6 +10,7 @@ import StakingPage from "./pages/StakingPage";
 import TithePage from "./pages/TithePage";
 import WisdomPage from "./pages/WisdomPage";
 import TaxesPage from "./pages/TaxesPage";
+import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/tithe" element={<TithePage />} />
             <Route path="/wisdom" element={<WisdomPage />} />
             <Route path="/taxes" element={<TaxesPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

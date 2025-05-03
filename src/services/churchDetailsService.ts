@@ -1,45 +1,29 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { Church } from '@/types/church';
-import { mockChurches } from '@/data/mockChurches';
-import { isSupabaseConnected } from '@/utils/supabaseConnector';
+import { Church } from "@/types/church";
+import { mockChurches } from "@/data/mockChurches";
+import { isSupabaseConnected } from "@/utils/supabaseConnector";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Get a church by its ID
+ * Get church details by ID
  */
-export const getChurchById = async (id: string): Promise<Church | undefined> => {
-  // If Supabase is connected, use it
-  if (isSupabaseConnected()) {
-    try {
-      const { data, error } = await supabase
-        .from('churches')
-        .select('id, name, city, state, country, denomination, website, accepts_crypto, payment_methods')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error('Error getting church by ID:', error);
-        return mockChurches.find(church => church.id === id);
-      }
-
-      // Transform Supabase response to match our Church type
-      return {
-        id: data.id,
-        name: data.name,
-        location: `${data.city || ''}, ${data.state || ''}`,
-        city: data.city || undefined,
-        state: data.state || undefined,
-        country: data.country || undefined,
-        denomination: data.denomination || undefined,
-        acceptsCrypto: data.accepts_crypto || false,
-        website: data.website || undefined,
-        payment_methods: data.payment_methods || []
-      };
-    } catch (error) {
-      console.error('Error connecting to Supabase:', error);
-      return mockChurches.find(church => church.id === id);
-    }
+export async function getChurchById(id: string): Promise<Church | null> {
+  console.log("Getting church with id:", id);
+  
+  // Use mock data when Supabase is not connected
+  if (!isSupabaseConnected()) {
+    console.log("Using mock churches data");
+    
+    const church = mockChurches.find(church => church.id === id);
+    return church || null;
   }
-
-  return mockChurches.find(church => church.id === id);
-};
+  
+  // For future Supabase implementation
+  try {
+    console.log("This would use Supabase in production");
+    return mockChurches.find(church => church.id === id) || null; // Use mock data for now
+  } catch (error) {
+    console.error("Error fetching church details:", error);
+    return null;
+  }
+}

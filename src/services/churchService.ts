@@ -1,54 +1,42 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { Church } from '@/types/church';
-import { mockChurches } from '@/data/mockChurches';
-import { isSupabaseConnected } from '@/utils/supabaseConnector';
-import { extractLocationParts } from '@/utils/locationUtils';
+import { Church } from "@/types/church";
+import { mockChurches } from "@/data/mockChurches";
+import { isSupabaseConnected } from "@/utils/supabaseConnector";
+import { supabase } from "@/integrations/supabase/client";
+import { extractLocationParts } from "@/utils/locationUtils";
 
 /**
- * Search for churches by name, location, or denomination
+ * Search for churches by name or location
  */
-export const searchChurches = async (query: string): Promise<Church[]> => {
-  // If Supabase is connected, use it
-  if (isSupabaseConnected()) {
-    try {
-      const normalizedQuery = query.toLowerCase();
-      const { data, error } = await supabase
-        .from('churches')
-        .select('id, name, city, state, country, denomination, website, accepts_crypto, payment_methods')
-        .or(`name.ilike.%${normalizedQuery}%,city.ilike.%${normalizedQuery}%,state.ilike.%${normalizedQuery}%,denomination.ilike.%${normalizedQuery}%`)
-        .limit(10);
-
-      if (error) {
-        console.error('Error searching churches:', error);
-        return mockChurches;
-      }
-
-      // Transform Supabase response to match our Church type
-      return data.map(church => ({
-        id: church.id,
-        name: church.name,
-        location: `${church.city || ''}, ${church.state || ''}`,
-        city: church.city || undefined,
-        state: church.state || undefined,
-        country: church.country || undefined,
-        denomination: church.denomination || undefined,
-        acceptsCrypto: church.accepts_crypto || false,
-        website: church.website || undefined,
-        payment_methods: church.payment_methods || []
-      }));
-    } catch (error) {
-      console.error('Error connecting to Supabase:', error);
-      return mockChurches;
-    }
+export async function searchChurches(query: string): Promise<Church[]> {
+  console.log("Searching churches with query:", query);
+  
+  // If no query provided or too short, return empty array
+  if (!query || query.trim().length < 2) {
+    return [];
   }
   
-  // Fall back to mock data if Supabase is not connected
-  const normalizedQuery = query.toLowerCase();
+  // Use mock data when Supabase is not connected
+  if (!isSupabaseConnected()) {
+    console.log("Using mock churches data");
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    return mockChurches.filter(church => 
+      church.name.toLowerCase().includes(normalizedQuery) ||
+      church.location?.toLowerCase().includes(normalizedQuery) ||
+      church.city?.toLowerCase().includes(normalizedQuery) ||
+      church.state?.toLowerCase().includes(normalizedQuery) ||
+      church.country?.toLowerCase().includes(normalizedQuery) ||
+      church.denomination?.toLowerCase().includes(normalizedQuery)
+    );
+  }
   
-  return mockChurches.filter(church => 
-    church.name.toLowerCase().includes(normalizedQuery) || 
-    (church.location && church.location.toLowerCase().includes(normalizedQuery)) ||
-    (church.denomination && church.denomination.toLowerCase().includes(normalizedQuery))
-  );
-};
+  // For future Supabase implementation
+  try {
+    console.log("This would use Supabase in production");
+    return mockChurches; // Use mock data for now
+  } catch (error) {
+    console.error("Error searching churches:", error);
+    return mockChurches; // Fallback to mock data
+  }
+}

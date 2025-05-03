@@ -1,68 +1,73 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { Church } from '@/types/church';
-import { isSupabaseConnected } from '@/utils/supabaseConnector';
-import { extractLocationParts } from '@/utils/locationUtils';
+import { Church } from "@/types/church";
+import { mockChurches } from "@/data/mockChurches";
+import { isSupabaseConnected } from "@/utils/supabaseConnector";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Add a new church to the database
  */
-export const addChurch = async (church: Omit<Church, "id">): Promise<Church> => {
-  // If Supabase is connected, use it
-  if (isSupabaseConnected()) {
-    try {
-      const { city, state } = extractLocationParts(church.location || '');
-      
-      // Prepare data for insertion
-      const churchData = {
-        name: church.name,
-        city: church.city || city,
-        state: church.state || state,
-        country: church.country || 'USA',
-        denomination: church.denomination,
-        website: church.website,
-        accepts_crypto: church.acceptsCrypto,
-        payment_methods: church.payment_methods || ['Cash', 'Check']
-      };
-
-      const { data, error } = await supabase
-        .from('churches')
-        .insert(churchData)
-        .select('id, name, city, state, country, denomination, website, accepts_crypto, payment_methods')
-        .single();
-
-      if (error) {
-        console.error('Error adding church:', error);
-        throw new Error('Error adding church to database');
-      }
-
-      // Transform Supabase response to match our Church type
-      return {
-        id: data.id,
-        name: data.name,
-        location: `${data.city || ''}, ${data.state || ''}`,
-        city: data.city || undefined,
-        state: data.state || undefined,
-        country: data.country || undefined,
-        denomination: data.denomination || undefined,
-        acceptsCrypto: data.accepts_crypto || false,
-        website: data.website || undefined,
-        payment_methods: data.payment_methods || []
-      };
-    } catch (error) {
-      console.error('Error connecting to Supabase:', error);
-      throw error;
-    }
+export async function addChurch(churchData: {
+  name: string;
+  city: string;
+  state: string;
+  country: string;
+  denomination: string;
+  website: string;
+  accepts_crypto: boolean;
+  payment_methods: string[];
+}): Promise<Church> {
+  console.log("Adding new church:", churchData);
+  
+  // Use mock data when Supabase is not connected
+  if (!isSupabaseConnected()) {
+    console.log("Using mock data (no Supabase connection)");
+    
+    // Generate a new mock church with a unique ID
+    const newId = `mock-${Date.now()}`;
+    const location = `${churchData.city}, ${churchData.state}`;
+    
+    const newChurch: Church = {
+      id: newId,
+      name: churchData.name,
+      location: location,
+      city: churchData.city,
+      state: churchData.state,
+      country: churchData.country,
+      denomination: churchData.denomination,
+      acceptsCrypto: churchData.accepts_crypto,
+      website: churchData.website,
+      payment_methods: churchData.payment_methods
+    };
+    
+    // In a real app, we would push to Supabase here
+    return newChurch;
   }
   
-  // Log that we would add this church
-  console.log("Would add church to database:", church);
-  
-  // Return mock data with a generated ID
-  const newChurch = {
-    ...church,
-    id: `new-${Date.now()}`
-  };
-  
-  return newChurch;
-};
+  // For future Supabase implementation
+  try {
+    console.log("This would use Supabase in production");
+    
+    // Mock implementation for now
+    const newId = `mock-${Date.now()}`;
+    const location = `${churchData.city}, ${churchData.state}`;
+    
+    const newChurch: Church = {
+      id: newId,
+      name: churchData.name,
+      location: location,
+      city: churchData.city,
+      state: churchData.state,
+      country: churchData.country,
+      denomination: churchData.denomination,
+      acceptsCrypto: churchData.accepts_crypto,
+      website: churchData.website,
+      payment_methods: churchData.payment_methods
+    };
+    
+    return newChurch;
+  } catch (error) {
+    console.error("Error adding church:", error);
+    throw new Error("Failed to add church");
+  }
+}
