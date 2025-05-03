@@ -7,7 +7,6 @@ import { getVersesByCategory } from "@/data/bibleVerses";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDownToLine, FileSpreadsheet, BarChart3 } from "lucide-react";
 import PixelCharacter from "@/components/PixelCharacter";
-import SoundEffect from "@/components/SoundEffect";
 import { useSound } from "@/contexts/SoundContext";
 
 const TaxesPage: React.FC = () => {
@@ -40,13 +39,13 @@ const TaxesPage: React.FC = () => {
             </h1>
           </div>
           <p className="text-xl max-w-2xl mx-auto mt-4">
-            Manage your cryptocurrency taxes with biblical wisdom.
+            Manage your cryptocurrency taxes with BIBLICAL wisdom.
           </p>
         </section>
         
         <PixelCharacter 
           character="jesus" 
-          message="Render unto Caesar the things that are Caesar's, and unto God the things that are God's. - Matthew 22:21"
+          message="Render unto Caesar the things that are Caesar's, and unto GOD the things that are GOD's. - Matthew 22:21"
           className="mb-8 max-w-2xl mx-auto"
           soundEffect={true}
         />
@@ -100,7 +99,7 @@ const TaxesPage: React.FC = () => {
           
           <Card className="pixel-card">
             <CardContent className="pt-6">
-              <h2 className="text-2xl font-scroll mb-4">Biblical Tax Wisdom</h2>
+              <h2 className="text-2xl font-scroll mb-4">BIBLICAL Tax Wisdom</h2>
               
               <div className="space-y-6">
                 <div>
@@ -128,7 +127,7 @@ const TaxesPage: React.FC = () => {
                   <PixelCharacter 
                     character="solomon" 
                     message="The wise store up knowledge, but the mouth of a fool invites ruin. - Proverbs 10:14" 
-                    size={40}
+                    size="md"
                     soundEffect={true}
                   />
                 </div>
@@ -143,7 +142,7 @@ const TaxesPage: React.FC = () => {
                 <PixelCharacter 
                   character="david" 
                   message="Let me help you calculate your crypto gains and losses." 
-                  size={32}
+                  size="sm"
                   soundEffect={true}
                 />
               </div>
@@ -164,7 +163,7 @@ const TaxesPage: React.FC = () => {
                 <PixelCharacter 
                   character="moses" 
                   message="Remember the deadlines, as I remembered the commandments." 
-                  size={36}
+                  size="sm"
                   soundEffect={true}
                 />
               </div>

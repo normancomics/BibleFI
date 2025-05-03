@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSound } from "@/contexts/SoundContext";
-
-export type CharacterType = "jesus" | "moses" | "solomon" | "god" | "joseph" | "abraham" | "widow" | "taxcollector" | "caesar" | "paul" | "david";
+import PixelCharacter, { CharacterType } from "@/components/PixelCharacter";
 
 interface BibleCharacterProps {
   character: CharacterType;
@@ -10,13 +9,11 @@ interface BibleCharacterProps {
   className?: string;
   animated?: boolean;
   soundEffect?: boolean;
-  size?: number;
   showWisdomLevel?: boolean;
 }
 
 interface CharacterInfo {
   name: string;
-  color: string;
   wisdomLevel: number;
   soundEffect: string;
 }
@@ -24,69 +21,43 @@ interface CharacterInfo {
 const characterMap: Record<CharacterType, CharacterInfo> = {
   jesus: {
     name: "Jesus",
-    color: "bg-pixel-blue",
     wisdomLevel: 100,
     soundEffect: "powerup"
   },
   moses: {
     name: "Moses",
-    color: "bg-pixel-cyan",
     wisdomLevel: 90,
     soundEffect: "scroll"
   },
   solomon: {
     name: "Solomon",
-    color: "bg-pixel-yellow",
     wisdomLevel: 95,
     soundEffect: "success"
   },
-  god: {
-    name: "God",
-    color: "bg-pixel-purple",
-    wisdomLevel: 100,
-    soundEffect: "powerup"
-  },
-  joseph: {
-    name: "Joseph",
-    color: "bg-pixel-green",
+  david: {
+    name: "David",
     wisdomLevel: 85,
+    soundEffect: "success"
+  },
+  noah: {
+    name: "Noah",
+    wisdomLevel: 88,
+    soundEffect: "click"
+  },
+  paul: {
+    name: "Paul",
+    wisdomLevel: 88,
+    soundEffect: "scroll"
+  },
+  coin: {
+    name: "Coin",
+    wisdomLevel: 70,
     soundEffect: "coin"
   },
   abraham: {
     name: "Abraham",
-    color: "bg-pixel-orange",
     wisdomLevel: 92,
     soundEffect: "scroll"
-  },
-  widow: {
-    name: "Widow",
-    color: "bg-pixel-pink",
-    wisdomLevel: 80,
-    soundEffect: "coin"
-  },
-  taxcollector: {
-    name: "Tax Collector",
-    color: "bg-pixel-red",
-    wisdomLevel: 75,
-    soundEffect: "coin"
-  },
-  caesar: {
-    name: "Caesar",
-    color: "bg-pixel-blue",
-    wisdomLevel: 70,
-    soundEffect: "coin"
-  },
-  paul: {
-    name: "Paul",
-    color: "bg-pixel-cyan",
-    wisdomLevel: 88,
-    soundEffect: "scroll"
-  },
-  david: {
-    name: "David",
-    color: "bg-pixel-green",
-    wisdomLevel: 85,
-    soundEffect: "success"
   }
 };
 
@@ -96,25 +67,24 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   className = "",
   animated = true,
   soundEffect = false,
-  size = 16,
   showWisdomLevel = false
 }) => {
-  const { name, color, wisdomLevel, soundEffect: characterSound } = characterMap[character];
+  const { name, wisdomLevel } = characterMap[character];
   const { playSound, userInteracted } = useSound();
   const [isAnimating, setIsAnimating] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
 
   useEffect(() => {
     if (soundEffect && userInteracted && !hasPlayed) {
-      playSound(characterSound as any);
+      playSound("select");
       setHasPlayed(true);
     }
-  }, [soundEffect, userInteracted, characterSound, playSound, hasPlayed]);
+  }, [soundEffect, userInteracted, playSound, hasPlayed]);
 
   const handleCharacterClick = () => {
     setIsAnimating(true);
     if (userInteracted) {
-      playSound(characterSound as any);
+      playSound("select");
     }
     setTimeout(() => setIsAnimating(false), 1000);
   };
@@ -122,12 +92,13 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   return (
     <div className={`flex items-start ${className}`}>
       <div className="flex-shrink-0 mr-3">
-        <div 
-          className={`${color} w-${size} h-${size} rounded-md ${animated ? 'animate-pulse' : ''} ${isAnimating ? 'animate-bounce' : ''} flex items-center justify-center text-white font-bold cursor-pointer transition-transform hover:scale-110`}
+        <PixelCharacter 
+          character={character}
+          size="sm"
+          animate={animated || isAnimating}
           onClick={handleCharacterClick}
-        >
-          {name.charAt(0)}
-        </div>
+          soundEffect={soundEffect}
+        />
         {showWisdomLevel && (
           <div className="mt-1 text-xs text-center">
             <div className="bg-black/30 rounded-full h-1.5 w-full mt-1 overflow-hidden">

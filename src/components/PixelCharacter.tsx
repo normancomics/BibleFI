@@ -1,14 +1,18 @@
+
 import React, { useState } from "react";
 import { useSound } from "@/contexts/SoundContext";
 import { SoundType } from "@/components/SoundEffect"; // Import the SoundType
 
+export type CharacterType = 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | 'paul' | 'coin' | 'abraham';
+
 interface PixelCharacterProps {
-  character: 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | 'paul' | 'coin';
+  character: CharacterType;
   message?: string;
   className?: string;
   onClick?: () => void;
   animate?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  soundEffect?: boolean;
 }
 
 const characterConfig = {
@@ -47,6 +51,11 @@ const characterConfig = {
     sound: "coin",
     alt: "Coin Pixel Art",
   },
+  abraham: {
+    src: "/lovable-uploads/4e94966c-9c89-499d-b195-5821a9693992.png",
+    sound: "scroll",
+    alt: "Abraham Pixel Art",
+  }
 };
 
 const PixelCharacter: React.FC<PixelCharacterProps> = ({
@@ -56,6 +65,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
   onClick,
   animate = false,
   size = 'md',
+  soundEffect = false,
 }) => {
   const { playSound } = useSound();
   const [isHovered, setIsHovered] = useState(false);
@@ -66,7 +76,9 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
   const characterSound = charConfig?.sound as SoundType;
 
   const handleClick = () => {
-    playSound(characterSound);
+    if (soundEffect) {
+      playSound(characterSound);
+    }
     if (onClick) {
       onClick();
     }

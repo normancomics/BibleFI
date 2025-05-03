@@ -20,7 +20,7 @@ const TitheForm: React.FC = () => {
             <PixelCharacter 
               character="solomon" 
               message="Honor the LORD with your wealth, with the firstfruits of all your crops. - Proverbs 3:9"
-              size={40}
+              size="md"
               soundEffect={true}
             />
           </div>

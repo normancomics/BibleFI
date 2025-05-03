@@ -3,8 +3,7 @@ import React from 'react';
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SoundManager from "@/components/admin/SoundManager";
-import PixelCharacter from "@/components/PixelCharacter";
-import { CharacterType } from "@/components/PixelCharacter";
+import PixelCharacter, { CharacterType } from "@/components/PixelCharacter";
 import { useSound } from "@/contexts/SoundContext";
 
 const AdminPage: React.FC = () => {
@@ -13,7 +12,7 @@ const AdminPage: React.FC = () => {
   // List of all available character types
   const characterTypes: CharacterType[] = [
     "jesus", "moses", "solomon", "david", "noah", "paul", 
-    "god", "joseph", "abraham", "widow", "taxcollector", "caesar", "coin"
+    "abraham", "coin"
   ];
   
   return (
@@ -41,8 +40,8 @@ const AdminPage: React.FC = () => {
                 <div key={type} className="text-center" onClick={() => playSound("select")}>
                   <PixelCharacter 
                     character={type}
-                    withSpeech={false}
-                    size={40}
+                    size="md"
+                    soundEffect={true}
                   />
                   <p className="mt-2 text-sm text-gray-400">/{type}-pixel.png</p>
                 </div>

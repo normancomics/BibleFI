@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { searchChurches } from "@/services/churchService";
 import { Input } from "@/components/ui/input";
@@ -92,11 +93,11 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onSelectChurch }) => {
             )}
             <p>
               <strong>Accepts Cryptocurrency:</strong>{" "}
-              {church.accepts_crypto ? "Yes" : "No"}
+              {church.acceptsCrypto ? "Yes" : "No"}
             </p>
             <p>
               <strong>Payment Methods:</strong>{" "}
-              {church.payment_methods.join(", ")}
+              {church.paymentMethods.join(", ")}
             </p>
           </div>
         </DialogContent>
@@ -132,7 +133,7 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onSelectChurch }) => {
                 {church.city}, {church.state}, {church.country}
               </p>
               <p className="text-xs text-gray-500">
-                {church.accepts_crypto ? "Accepts crypto" : "Traditional giving only"}
+                {church.acceptsCrypto ? "Accepts crypto" : "Traditional giving only"}
               </p>
             </Card>
           ))}
@@ -141,7 +142,6 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onSelectChurch }) => {
         <p className="text-gray-500">No churches found. Would you like to add one?</p>
       ) : null}
       
-      {/* Use the ChurchDetailsDialog component with proper props */}
       <ChurchDetailsDialog 
         church={selectedChurch} 
         open={detailsOpen} 

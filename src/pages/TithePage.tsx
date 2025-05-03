@@ -53,8 +53,8 @@ const TithePage: React.FC = () => {
             <div className="mb-6">
               <PixelCharacter 
                 character="david" 
-                message="I will not sacrifice to the LORD my God burnt offerings that cost me nothing. - 2 Samuel 24:24"
-                size={44}
+                message="I will not sacrifice to the LORD my GOD burnt offerings that cost me nothing. - 2 Samuel 24:24"
+                size="md"
                 soundEffect={true}
               />
             </div>
