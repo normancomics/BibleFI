@@ -21,7 +21,7 @@ const SoundActivationButton: React.FC<SoundActivationButtonProps> = ({ onActivat
       className="fixed bottom-4 right-4 bg-scripture text-white p-3 rounded-lg shadow-lg z-50 flex items-center"
       aria-label="Enable Sounds"
     >
-      <span className="mr-2">🔊</span> Tap for Sounds (iPad Pro)
+      <span className="mr-2">🔊</span> Enable Bible.Fi Sounds
     </button>
   );
 };

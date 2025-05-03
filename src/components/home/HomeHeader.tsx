@@ -7,8 +7,9 @@ const HomeHeader: React.FC = () => {
     <section className="text-center mb-12 animate-fade-in">
       <h1 className="text-4xl md:text-5xl font-scroll text-scripture-dark mb-4 gold-gradient-text">BIBLE.Fi</h1>
       <p className="text-xl max-w-2xl mx-auto">
-        BIBLICAL wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
+        Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
       </p>
+      <p className="text-sm mt-2 opacity-70">Made on Base Chain</p>
       
       <BibleCharacter 
         character="solomon" 
