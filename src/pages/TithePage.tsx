@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import PixelCharacter from "@/components/PixelCharacter";
 import ScriptureCard from "@/components/ScriptureCard";
@@ -10,10 +10,12 @@ import ImpactStories from "@/components/tithe/ImpactStories";
 import TitheForm from "@/components/tithe/TitheForm";
 import TithingAchievements from "@/components/tithe/TithingAchievements";
 import SaintsWisdom from "@/components/tithe/SaintsWisdom";
+import AddChurchForm from "@/components/tithe/AddChurchForm";
 
 const TithePage: React.FC = () => {
   const givingVerses = getVersesByCategory("giving");
   const { playSound, userInteracted } = useSound();
+  const [showAddChurch, setShowAddChurch] = useState(false);
   
   // Play page load sound when user has interacted
   useEffect(() => {
@@ -43,8 +45,12 @@ const TithePage: React.FC = () => {
         
         <div className="grid md:grid-cols-2 gap-8">
           <div>
-            <ChurchSearch />
-            <ImpactStories />
+            <ChurchSearch onAddChurch={() => setShowAddChurch(true)} />
+            {showAddChurch ? (
+              <AddChurchForm onComplete={() => setShowAddChurch(false)} />
+            ) : (
+              <ImpactStories />
+            )}
           </div>
           
           <div>
@@ -69,9 +75,6 @@ const TithePage: React.FC = () => {
         
         <SaintsWisdom />
       </main>
-      
-      {/* Hidden audio player to enable sound on iOS */}
-      <audio id="sound-enabler" preload="auto" src="/sounds/click.mp3" style={{ display: 'none' }} />
     </div>
   );
 };

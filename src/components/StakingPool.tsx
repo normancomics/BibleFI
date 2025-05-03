@@ -1,12 +1,14 @@
+
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { BookOpen, ArrowUpRight, Info, Shield, ChartBar } from "lucide-react";
+import { BookOpen, ArrowUpRight, Info, Shield, ChartBar, Wallet } from "lucide-react";
 import PixelButton from "./PixelButton";
 import ScriptureCard from "./ScriptureCard";
 import StakingTransparency from "./StakingTransparency";
 import { BibleVerse, getRandomVerse } from "@/data/bibleVerses";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
+import WalletConnect from "./wallet/WalletConnect";
 
 interface StakingPoolProps {
   title: string;
@@ -39,6 +41,10 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   const [showFullTransparency, setShowFullTransparency] = useState(showTransparency);
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [stakeAmount, setStakeAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState(supportedTokens[0] || "USDC");
+  const [showStakingForm, setShowStakingForm] = useState(false);
   
   const getRiskColor = () => {
     switch(riskLevel) {
@@ -50,11 +56,51 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   };
   
   const handleStake = () => {
+    if (!showStakingForm) {
+      setShowStakingForm(true);
+      playSound("select");
+      return;
+    }
+    
+    if (!stakeAmount || isNaN(Number(stakeAmount)) || Number(stakeAmount) <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid staking amount",
+        variant: "destructive"
+      });
+      playSound("error");
+      return;
+    }
+    
     playSound("coin");
     toast({
       title: "Preparing to stake",
-      description: "Connect your wallet to continue your stewardship journey",
+      description: `Staking ${stakeAmount} ${selectedToken} in the ${title}`,
     });
+    
+    setIsWalletOpen(true);
+  };
+  
+  const handleWalletConnected = (address: string) => {
+    toast({
+      title: "Wallet Connected",
+      description: `Connected with ${address.substring(0, 6)}...${address.substring(address.length - 4)}`,
+    });
+    
+    // Simulate successful staking after wallet connection
+    setTimeout(() => {
+      toast({
+        title: "Staking Successful",
+        description: `Your ${stakeAmount} ${selectedToken} is now growing with biblical wisdom`,
+        variant: "default",
+      });
+      
+      // Reset form
+      setStakeAmount("");
+      setShowStakingForm(false);
+      setIsWalletOpen(false);
+      playSound("success");
+    }, 1500);
   };
   
   const handleLearn = () => {
@@ -145,18 +191,65 @@ const StakingPool: React.FC<StakingPoolProps> = ({
 
       {showFullTransparency && <StakingTransparency />}
       
+      {showStakingForm && (
+        <div className="px-4 mb-4 border-t border-border pt-4">
+          <div className="flex gap-4 mb-4">
+            <div className="flex-1">
+              <label htmlFor={`amount-${title}`} className="block text-xs mb-1">Amount</label>
+              <input
+                id={`amount-${title}`}
+                type="text"
+                value={stakeAmount}
+                onChange={(e) => setStakeAmount(e.target.value)}
+                className="w-full border border-input px-3 py-2 rounded text-sm"
+                placeholder="0.00"
+              />
+            </div>
+            <div className="w-1/3">
+              <label htmlFor={`token-${title}`} className="block text-xs mb-1">Token</label>
+              <select
+                id={`token-${title}`}
+                value={selectedToken}
+                onChange={(e) => {
+                  setSelectedToken(e.target.value);
+                  playSound("select");
+                }}
+                className="w-full border border-input px-3 py-2 rounded text-sm"
+              >
+                {supportedTokens.map((token) => (
+                  <option key={token} value={token}>{token}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="px-4 mb-4">
         <ScriptureCard verse={safeVerse} />
       </div>
       
       <div className="flex space-x-2 px-4 pb-4">
-        <PixelButton className="flex-1" onClick={handleStake}>
-          Stake
+        <PixelButton className="flex-1 flex items-center justify-center" onClick={handleStake}>
+          {!showStakingForm ? (
+            <>Stake</>
+          ) : (
+            <>Confirm Stake<Wallet size={16} className="ml-2" /></>
+          )}
         </PixelButton>
         <PixelButton variant="outline" className="flex items-center" onClick={handleLearn}>
           Learn <ArrowUpRight size={16} className="ml-1" />
         </PixelButton>
       </div>
+      
+      {isWalletOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">Connect Wallet</h3>
+            <WalletConnect onConnect={handleWalletConnected} onCancel={() => setIsWalletOpen(false)} />
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
