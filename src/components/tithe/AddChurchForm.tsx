@@ -1,170 +1,286 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import PixelButton from "@/components/PixelButton";
-import { useSound } from "@/contexts/SoundContext";
+
+import React, { useState } from 'react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from "@/hooks/use-toast";
-import { addChurch } from "@/services/churchCreationService";
-import { Church } from "@/types/church";
+import { addChurch } from '@/services/churchCreationService';
+import { useSound } from '@/contexts/SoundContext';
 
-type ChurchFormData = {
-  name: string;
-  location: string;
-  denomination: string;
-  website: string;
-  email: string;
-  phone: string;
-  acceptsCrypto: boolean;
-  city: string;
-  state: string;
-  country: string;
-};
+const formSchema = z.object({
+  name: z.string().min(3, { message: "Church name must be at least 3 characters." }),
+  city: z.string().min(2, { message: "City is required." }),
+  state: z.string().min(2, { message: "State is required." }),
+  country: z.string().min(2, { message: "Country is required." }),
+  denomination: z.string().optional(),
+  website: z.string().optional(),
+  accepts_crypto: z.boolean().default(false),
+  payment_methods: z.array(z.string()).default([]),
+});
 
-const AddChurchForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm<ChurchFormData>();
-  const { playSound } = useSound();
+type FormValues = z.infer<typeof formSchema>;
+
+const AddChurchForm: React.FC = () => {
   const { toast } = useToast();
+  const { playSound } = useSound();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const onSubmit = async (data: ChurchFormData) => {
-    playSound("coin");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      city: "",
+      state: "",
+      country: "",
+      denomination: "",
+      website: "",
+      accepts_crypto: false,
+      payment_methods: [],
+    },
+  });
+  
+  const onSubmit = async (data: FormValues) => {
+    setIsSubmitting(true);
+    playSound("powerup");
     
     try {
-      // Format location from city and state if not provided
-      const location = data.location || `${data.city}, ${data.state}`;
-      
-      // This will save to your Supabase database when connected
-      await addChurch({
-        ...data,
-        location,
-        acceptsCrypto: !!data.acceptsCrypto,
-      });
+      const church = await addChurch(data);
       
       toast({
-        title: "Church Added",
-        description: "Thank you for adding your church to our database!",
+        title: "Church added successfully!",
+        description: `${church.name} has been added to our directory.`,
       });
       
-      onClose();
+      form.reset();
+      playSound("success");
     } catch (error) {
       console.error("Error adding church:", error);
+      playSound("error");
       toast({
-        title: "Error",
-        description: "There was a problem adding your church. Please try again.",
+        title: "Failed to add church",
+        description: "Please try again later.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
+  // Payment method options
+  const paymentMethods = [
+    { id: "credit-card", label: "Credit Card" },
+    { id: "paypal", label: "PayPal" },
+    { id: "bank-transfer", label: "Bank Transfer" },
+    { id: "usdc", label: "USDC" },
+    { id: "eth", label: "ETH" },
+  ];
+  
   return (
-    <Card className="pixel-card">
-      <CardContent className="pt-6">
-        <h2 className="text-2xl font-scroll mb-4">Add Your Church</h2>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Church Name</FormLabel>
+              <FormControl>
+                <Input placeholder="First Baptist Church" {...field} />
+              </FormControl>
+              <FormDescription>
+                Enter the official name of the church.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Church Name</Label>
-            <Input 
-              id="name" 
-              {...register("name", { required: "Church name is required" })}
-              className="mt-1"
-            />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City</FormLabel>
+                <FormControl>
+                  <Input placeholder="San Francisco" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="city">City</Label>
-              <Input 
-                id="city" 
-                {...register("city", { required: "City is required" })}
-                className="mt-1"
-              />
-              {errors.city && <p className="text-red-500 text-sm">{errors.city.message}</p>}
-            </div>
-            
-            <div>
-              <Label htmlFor="state">State</Label>
-              <Input 
-                id="state" 
-                {...register("state", { required: "State is required" })}
-                className="mt-1"
-              />
-              {errors.state && <p className="text-red-500 text-sm">{errors.state.message}</p>}
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="country">Country</Label>
-            <Input 
-              id="country" 
-              {...register("country")}
-              className="mt-1"
-              defaultValue="USA"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="denomination">Denomination</Label>
-            <Input 
-              id="denomination" 
-              {...register("denomination")}
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="website">Website</Label>
-            <Input 
-              id="website" 
-              {...register("website")}
-              className="mt-1"
-              placeholder="https://"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="email">Contact Email</Label>
-            <Input 
-              id="email" 
-              {...register("email")}
-              className="mt-1"
-              type="email"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input 
-              id="phone" 
-              {...register("phone")}
-              className="mt-1"
-              type="tel"
-            />
-          </div>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="acceptsCrypto"
-              {...register("acceptsCrypto")}
-              className="mr-2"
-            />
-            <Label htmlFor="acceptsCrypto">Church currently accepts cryptocurrency</Label>
-          </div>
-          
-          <div className="flex space-x-2 pt-2">
-            <PixelButton type="submit">
-              Save Church
-            </PixelButton>
-            <PixelButton type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </PixelButton>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>State/Province</FormLabel>
+                <FormControl>
+                  <Input placeholder="California" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country</FormLabel>
+              <FormControl>
+                <Input placeholder="United States" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="denomination"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Denomination</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a denomination" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="baptist">Baptist</SelectItem>
+                  <SelectItem value="catholic">Catholic</SelectItem>
+                  <SelectItem value="lutheran">Lutheran</SelectItem>
+                  <SelectItem value="methodist">Methodist</SelectItem>
+                  <SelectItem value="presbyterian">Presbyterian</SelectItem>
+                  <SelectItem value="evangelical">Evangelical</SelectItem>
+                  <SelectItem value="non-denominational">Non-denominational</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Select the church's denomination.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="website"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Website</FormLabel>
+              <FormControl>
+                <Input placeholder="https://www.churchwebsite.com" {...field} />
+              </FormControl>
+              <FormDescription>
+                Enter the church's official website URL.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="accepts_crypto"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">
+                  Accepts Cryptocurrency
+                </FormLabel>
+                <FormDescription>
+                  Can this church receive cryptocurrency donations directly?
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="payment_methods"
+          render={() => (
+            <FormItem>
+              <div className="mb-4">
+                <FormLabel className="text-base">
+                  Accepted Payment Methods
+                </FormLabel>
+                <FormDescription>
+                  Select all payment methods that this church accepts.
+                </FormDescription>
+              </div>
+              {paymentMethods.map((method) => (
+                <FormField
+                  key={method.id}
+                  control={form.control}
+                  name="payment_methods"
+                  render={({ field }) => {
+                    return (
+                      <FormItem
+                        key={method.id}
+                        className="flex flex-row items-start space-x-3 space-y-0"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value?.includes(method.id)}
+                            onCheckedChange={(checked) => {
+                              playSound("click");
+                              return checked
+                                ? field.onChange([...field.value, method.id])
+                                : field.onChange(
+                                    field.value?.filter(
+                                      (value) => value !== method.id
+                                    )
+                                  );
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          {method.label}
+                        </FormLabel>
+                      </FormItem>
+                    );
+                  }}
+                />
+              ))}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <Button 
+          type="submit" 
+          disabled={isSubmitting}
+          onClick={() => playSound("select")}
+          className="pixel-button w-full"
+        >
+          {isSubmitting ? "Adding..." : "Add Church"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 

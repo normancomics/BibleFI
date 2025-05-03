@@ -80,12 +80,12 @@ const FarcasterFrame: React.FC = () => {
   return (
     <Card className="pixel-card my-6">
       <CardContent className="pt-6">
-        <h2 className="text-2xl font-scroll mb-4">Bible.fi on Farcaster</h2>
+        <h2 className="text-2xl font-scroll mb-4">BIBLE.FI on Farcaster</h2>
         
         <div className="mb-6">
           <FramePreview 
             imageUrl={frameImage}
-            title="Biblical wisdom for your financial journey"
+            title="BIBLICAL wisdom for your financial journey"
             buttons={[
               { label: "Share Wisdom" },
               { label: "Learn More" },
@@ -111,7 +111,8 @@ const FarcasterFrame: React.FC = () => {
         </div>
 
         <div className="mt-6 text-sm text-center text-white/60">
-          <p>Create and share biblical financial wisdom directly to Farcaster</p>
+          <p>Learn, implement & share BIBLICAL-financial wisdom directly to your degen frens on Farcaster.</p>
+          <p className="mt-2 text-xs">Built & deployed by Base chain for based degens.</p>
         </div>
       </CardContent>
     </Card>

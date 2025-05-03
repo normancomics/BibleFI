@@ -15,16 +15,18 @@ const NavBar: React.FC = () => {
   return (
     <header className="bg-scripture text-white p-2 sticky top-0 z-10">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="flex items-center" onClick={() => handleNavClick("coin")}>
+        <Link to="/" className="flex items-center group" onClick={() => handleNavClick("coin")}>
           <PixelIcon 
             src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
-            alt="Bible.Fi Logo" 
+            alt="BIBLE.Fi Logo" 
             size={40} 
             spin={true} 
             glow={true}
-            className="mr-2"
+            className="mr-2 transition-all duration-300 group-hover:animate-pulse-glow"
           />
-          <h1 className="text-2xl font-scroll">Bible.Fi</h1>
+          <h1 className="text-2xl font-scroll transition-all duration-300 gold-gradient-text group-hover:text-glow">
+            BIBLE.Fi
+          </h1>
         </Link>
         
         <nav className="flex items-center space-x-4">

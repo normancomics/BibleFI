@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
@@ -164,6 +163,15 @@
     width: 100%;
     height: 1px;
     background: linear-gradient(to right, transparent, #8B0000, transparent);
+  }
+  
+  /* Gold gradient text for Bible.Fi logo */
+  .gold-gradient-text {
+    background: linear-gradient(to right, #FEF7CD, #FFD700, #D4AF37);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
   }
 }
 
@@ -368,5 +376,16 @@
     60% { clip: rect(24px, 9999px, 16px, 0); }
     80% { clip: rect(54px, 9999px, 96px, 0); }
     100% { clip: rect(4px, 9999px, 26px, 0); }
+  }
+  
+  /* New addition for gold glow effect */
+  .gold-glow {
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 10px rgba(255, 215, 0, 0.4));
+    animation: gold-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes gold-pulse {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
+    50% { filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); }
   }
 }
