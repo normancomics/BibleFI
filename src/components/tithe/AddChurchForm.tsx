@@ -15,7 +15,11 @@ type ChurchFormData = {
   denomination: string;
   website: string;
   email: string;
+  phone: string;
   acceptsCrypto: boolean;
+  city: string;
+  state: string;
+  country: string;
 };
 
 const AddChurchForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
@@ -27,10 +31,14 @@ const AddChurchForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     playSound("coin");
     
     try {
-      // This would actually save to your Supabase database in a real implementation
+      // Format location from city and state if not provided
+      const location = data.location || `${data.city}, ${data.state}`;
+      
+      // This will save to your Supabase database when connected
       await addChurch({
         ...data,
-        location: data.location
+        location,
+        acceptsCrypto: !!data.acceptsCrypto,
       });
       
       toast({
@@ -65,14 +73,36 @@ const AddChurchForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
           </div>
           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input 
+                id="city" 
+                {...register("city", { required: "City is required" })}
+                className="mt-1"
+              />
+              {errors.city && <p className="text-red-500 text-sm">{errors.city.message}</p>}
+            </div>
+            
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input 
+                id="state" 
+                {...register("state", { required: "State is required" })}
+                className="mt-1"
+              />
+              {errors.state && <p className="text-red-500 text-sm">{errors.state.message}</p>}
+            </div>
+          </div>
+          
           <div>
-            <Label htmlFor="location">Location (City, State)</Label>
+            <Label htmlFor="country">Country</Label>
             <Input 
-              id="location" 
-              {...register("location", { required: "Location is required" })}
+              id="country" 
+              {...register("country")}
               className="mt-1"
+              defaultValue="USA"
             />
-            {errors.location && <p className="text-red-500 text-sm">{errors.location.message}</p>}
           </div>
           
           <div>
@@ -101,6 +131,16 @@ const AddChurchForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               {...register("email")}
               className="mt-1"
               type="email"
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input 
+              id="phone" 
+              {...register("phone")}
+              className="mt-1"
+              type="tel"
             />
           </div>
           
