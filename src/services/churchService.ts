@@ -2,14 +2,8 @@
 // This service connects to your Supabase database
 // It will access the churches table you've defined in your SQL
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/types/supabase';
-
-// These environment variables will need to be set when connected to Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export type Church = {
   id: string;
@@ -67,7 +61,8 @@ const mockChurches: Church[] = [
 ];
 
 export const isSupabaseConnected = (): boolean => {
-  return supabaseUrl !== '' && supabaseKey !== '';
+  // Check if the supabase client is available and configured
+  return !!supabase;
 };
 
 export const searchChurches = async (query: string): Promise<Church[]> => {
