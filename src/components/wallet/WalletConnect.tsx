@@ -17,7 +17,12 @@ interface WalletOption {
   available: boolean;
 }
 
-const WalletConnect: React.FC = () => {
+interface WalletConnectProps {
+  onConnect?: (address: string) => void;
+  onCancel?: () => void;
+}
+
+const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect, onCancel }) => {
   const { toast } = useToast();
   const { playSound } = useSound();
   const [connecting, setConnecting] = useState<WalletType | null>(null);
@@ -59,6 +64,11 @@ const WalletConnect: React.FC = () => {
     playSound("powerup");
     setConnecting(wallet);
     
+    // Generate a mock address for demonstration
+    const mockAddress = "0x" + Array(40).fill(0).map(() => 
+      Math.floor(Math.random() * 16).toString(16)
+    ).join('');
+    
     // Simulate connection
     setTimeout(() => {
       setConnecting(null);
@@ -68,6 +78,11 @@ const WalletConnect: React.FC = () => {
         title: "Wallet Connected",
         description: `Successfully connected to ${wallets.find(w => w.id === wallet)?.name}`,
       });
+      
+      // Call the onConnect callback if provided
+      if (onConnect) {
+        onConnect(mockAddress);
+      }
     }, 1500);
     
     // In a real implementation, this would integrate with the wallet's API
@@ -145,9 +160,17 @@ const WalletConnect: React.FC = () => {
               </p>
             </div>
             
-            <PixelButton onClick={handleDisconnect} variant="outline" className="w-full">
-              Disconnect Wallet
-            </PixelButton>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <PixelButton onClick={handleDisconnect} variant="outline" className="flex-1">
+                Disconnect Wallet
+              </PixelButton>
+              
+              {onCancel && (
+                <PixelButton onClick={onCancel} variant="outline" className="flex-1">
+                  Cancel
+                </PixelButton>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
