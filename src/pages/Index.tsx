@@ -4,7 +4,8 @@ import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
 import BibleCharacter from "@/components/BibleCharacter";
 import PixelButton from "@/components/PixelButton";
-import FarcasterFrame from "@/components/FarcasterFrame";
+import FarcasterFrame from "@/components/farcaster/FarcasterFrame";
+import WalletConnect from "@/components/wallet/WalletConnect";
 import { Card } from "@/components/ui/card";
 import { 
   Coins, 
@@ -110,6 +111,11 @@ const Index: React.FC = () => {
               />
             </section>
             
+            {/* New Wallet Connect Section */}
+            <section className="my-10">
+              <WalletConnect />
+            </section>
+            
             <DailyScripture />
             
             <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 my-10">
@@ -167,6 +173,7 @@ const Index: React.FC = () => {
               </div>
             </section>
             
+            {/* Updated Farcaster Frame Component */}
             <FarcasterFrame />
           </>
         )}

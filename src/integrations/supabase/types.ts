@@ -9,7 +9,18 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      churches: {
+        Row: {
+          "## churches.csv": string
+        }
+        Insert: {
+          "## churches.csv": string
+        }
+        Update: {
+          "## churches.csv"?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
