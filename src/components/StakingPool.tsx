@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { BookOpen, ArrowUpRight, Info, Shield, ChartBar } from "lucide-react";
@@ -19,6 +18,7 @@ interface StakingPoolProps {
   biblicalPrinciple?: string;
   returnsMechanism?: string;
   showTransparency?: boolean;
+  supportedTokens?: string[];
 }
 
 const StakingPool: React.FC<StakingPoolProps> = ({
@@ -31,6 +31,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   biblicalPrinciple = "Careful stewardship of resources",
   returnsMechanism = "Interest from lending to verified projects",
   showTransparency = false,
+  supportedTokens = [],
 }) => {
   // If verse is undefined, get a random verse
   const safeVerse = verse || getRandomVerse();
@@ -108,6 +109,14 @@ const StakingPool: React.FC<StakingPoolProps> = ({
           <Info size={12} className="mr-1" /> How returns are generated
         </button>
       </div>
+
+      {supportedTokens && supportedTokens.length > 0 && (
+        <div className="px-4 mb-4">
+          <div className="text-xs text-muted-foreground">
+            Supported tokens: {supportedTokens.join(", ")}
+          </div>
+        </div>
+      )}
       
       {showDetails && (
         <div className="bg-black/10 p-3 rounded-md mb-4 text-sm mx-4">

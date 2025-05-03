@@ -45,27 +45,28 @@ const StakingPage: React.FC = () => {
             <h2 className="text-2xl font-scroll mb-4">Staking Pools</h2>
             <div className="space-y-6">
               <StakingPool 
-                name="Proverbs Pool" 
+                title="Proverbs Pool" 
                 apy={5.2} 
-                lockPeriod={30} 
-                tvl={125000} 
+                description="A conservative staking pool based on the wisdom of Proverbs for steady, reliable growth."
+                lockPeriod="30 days" 
                 supportedTokens={["USDC", "DAI", "ETH"]}
               />
               
               <StakingPool 
-                name="Ecclesiastes Pool" 
+                title="Ecclesiastes Pool" 
                 apy={8.4} 
-                lockPeriod={90} 
-                tvl={320000} 
+                description="A balanced approach to wealth that understands there is a time for everything under heaven."
+                lockPeriod="90 days" 
+                riskLevel="medium"
                 supportedTokens={["USDC", "DAI", "ETH", "USDT"]}
-                featured={true}
               />
               
               <StakingPool 
-                name="Genesis Pool" 
+                title="Genesis Pool" 
                 apy={12.7} 
-                lockPeriod={180} 
-                tvl={780000} 
+                description="Be fruitful and multiply your wealth with this higher-yield, longer-term commitment."
+                lockPeriod="180 days" 
+                riskLevel="high"
                 supportedTokens={["USDC", "DAI"]}
               />
             </div>
