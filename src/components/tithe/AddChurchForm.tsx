@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -7,7 +6,8 @@ import { useForm } from "react-hook-form";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
-import { addChurch } from "@/services/churchService";
+import { addChurch } from "@/services/churchCreationService";
+import { Church } from "@/types/church";
 
 type ChurchFormData = {
   name: string;

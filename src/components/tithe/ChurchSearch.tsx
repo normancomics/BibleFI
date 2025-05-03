@@ -7,7 +7,8 @@ import { Search, Church as ChurchIcon, Plus } from "lucide-react";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
-import { searchChurches, Church } from "@/services/churchService";
+import { searchChurches } from "@/services/churchService";
+import { Church } from "@/types/church";
 import AddChurchForm from "./AddChurchForm";
 
 const ChurchSearch: React.FC = () => {
