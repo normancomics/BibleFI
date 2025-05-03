@@ -102,7 +102,9 @@ const WalletConnect: React.FC = () => {
             {wallets.map((wallet) => (
               <div 
                 key={wallet.id}
-                className="flex items-center justify-between p-3 bg-black/20 border border-ancient-gold/30 rounded-md hover:bg-scripture/10 cursor-pointer"
+                className={`flex items-center justify-between p-3 border rounded-md hover:bg-scripture/10 cursor-pointer ${
+                  wallet.id === connecting ? "bg-scripture/20 border-scripture" : "bg-black/20 border-ancient-gold/30"
+                }`}
                 onClick={() => wallet.available && handleConnect(wallet.id)}
               >
                 <div className="flex items-center">
@@ -118,8 +120,13 @@ const WalletConnect: React.FC = () => {
                   {connecting === wallet.id ? (
                     <div className="w-5 h-5 border-2 border-scripture border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <PixelButton size="sm" disabled={!wallet.available}>
-                      Connect
+                    <PixelButton 
+                      size="sm" 
+                      disabled={!wallet.available}
+                      baseStyle={true} // Use base chain style instead of default
+                      className="bg-base-blue hover:bg-base-blue/80"
+                    >
+                      CONNECT
                     </PixelButton>
                   )}
                 </div>
@@ -128,8 +135,8 @@ const WalletConnect: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-md">
-              <h3 className="flex items-center text-green-400 font-pixel mb-2">
+            <div className="bg-base-blue/20 border border-base-blue/50 p-4 rounded-md">
+              <h3 className="flex items-center text-base-blue font-pixel mb-2">
                 <CheckCircle2 size={16} className="mr-2" />
                 {wallets.find(w => w.id === connected)?.name} Connected
               </h3>

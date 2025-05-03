@@ -46,26 +46,26 @@ const StakingPage: React.FC = () => {
             <div className="space-y-6">
               <StakingPool 
                 name="Proverbs Pool" 
-                apy="5.2" 
-                lockPeriod="30" 
-                tvl="125000" 
+                apy={5.2} 
+                lockPeriod={30} 
+                tvl={125000} 
                 supportedTokens={["USDC", "DAI", "ETH"]}
               />
               
               <StakingPool 
                 name="Ecclesiastes Pool" 
-                apy="8.4" 
-                lockPeriod="90" 
-                tvl="320000" 
+                apy={8.4} 
+                lockPeriod={90} 
+                tvl={320000} 
                 supportedTokens={["USDC", "DAI", "ETH", "USDT"]}
                 featured={true}
               />
               
               <StakingPool 
                 name="Genesis Pool" 
-                apy="12.7" 
-                lockPeriod="180" 
-                tvl="780000" 
+                apy={12.7} 
+                lockPeriod={180} 
+                tvl={780000} 
                 supportedTokens={["USDC", "DAI"]}
               />
             </div>
