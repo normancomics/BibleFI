@@ -6,9 +6,11 @@ import PixelIcon from "@/components/PixelIcon";
 const HomeHeader: React.FC = () => {
   return (
     <section className="text-center mb-12 animate-fade-in">
-      <h1 className="text-5xl md:text-6xl font-scroll mb-6 gold-gradient-text">BIBLE.FI</h1>
+      <h1 className="text-5xl md:text-6xl font-sans tracking-tight mb-6">
+        <span className="text-base-blue">Bible</span>.fi
+      </h1>
       <p className="text-xl max-w-2xl mx-auto mb-3">
-        BIBLICAL wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
+        Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
       </p>
       <div className="flex justify-center items-center mt-2 mb-4">
         <span className="text-sm mr-2">Made on</span>
