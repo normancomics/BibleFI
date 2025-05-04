@@ -1,14 +1,18 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { BookOpen, ArrowUpRight, Info, Shield, ChartBar, Wallet } from "lucide-react";
+import { BookOpen, ArrowUpRight, Info } from "lucide-react";
 import PixelButton from "./PixelButton";
 import ScriptureCard from "./ScriptureCard";
 import StakingTransparency from "./StakingTransparency";
 import { BibleVerse, getRandomVerse } from "@/data/bibleVerses";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
-import WalletConnect from "./wallet/WalletConnect";
+import StakingHeader from "./staking/StakingHeader";
+import StakingDetails from "./staking/StakingDetails";
+import StakingForm from "./staking/StakingForm";
+import RiskBadge from "./staking/RiskBadge";
+import WalletModal from "./staking/WalletModal";
 
 interface StakingPoolProps {
   title: string;
@@ -35,25 +39,13 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   showTransparency = false,
   supportedTokens = [],
 }) => {
-  // If verse is undefined, get a random verse
   const safeVerse = verse || getRandomVerse();
   const { playSound } = useSound();
   const { toast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   const [showFullTransparency, setShowFullTransparency] = useState(showTransparency);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
-  const [stakeAmount, setStakeAmount] = useState("");
-  const [selectedToken, setSelectedToken] = useState(supportedTokens[0] || "USDC");
   const [showStakingForm, setShowStakingForm] = useState(false);
-  
-  const getRiskColor = () => {
-    switch(riskLevel) {
-      case "low": return "bg-green-100 text-green-800";
-      case "medium": return "bg-yellow-100 text-yellow-800";
-      case "high": return "bg-red-100 text-red-800";
-      default: return "bg-green-100 text-green-800";
-    }
-  };
   
   const handleStake = () => {
     if (!showStakingForm) {
@@ -61,21 +53,12 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       playSound("select");
       return;
     }
-    
-    if (!stakeAmount || isNaN(Number(stakeAmount)) || Number(stakeAmount) <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid staking amount",
-        variant: "destructive"
-      });
-      playSound("error");
-      return;
-    }
-    
-    playSound("coin");
+  };
+
+  const handleStakeSubmit = (amount: string, token: string) => {
     toast({
       title: "Preparing to stake",
-      description: `Staking ${stakeAmount} ${selectedToken} in the ${title}`,
+      description: `Staking ${amount} ${token} in the ${title}`,
     });
     
     setIsWalletOpen(true);
@@ -91,12 +74,11 @@ const StakingPool: React.FC<StakingPoolProps> = ({
     setTimeout(() => {
       toast({
         title: "Staking Successful",
-        description: `Your ${stakeAmount} ${selectedToken} is now growing with biblical wisdom`,
+        description: `Your staking transaction is now growing with biblical wisdom`,
         variant: "default",
       });
       
       // Reset form
-      setStakeAmount("");
       setShowStakingForm(false);
       setIsWalletOpen(false);
       playSound("success");
@@ -109,29 +91,12 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   };
 
   const handleShowTransparency = () => {
-    playSound("select");
     setShowFullTransparency(true);
   };
   
   return (
     <Card className="pixel-card overflow-hidden">
-      <div className="relative px-4 py-2 mb-4 bg-gradient-to-r from-pixel-blue/60 via-pixel-blue to-pixel-blue/60 border-2 border-ancient-gold">
-        <div className="absolute inset-0 bg-black/10 opacity-30"></div>
-        <div className="absolute top-0 left-0 w-full h-0.5 bg-ancient-gold"></div>
-        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-ancient-gold"></div>
-        <div className="absolute -left-1 -top-1 w-2 h-2 border-t border-l border-ancient-gold"></div>
-        <div className="absolute -right-1 -top-1 w-2 h-2 border-t border-r border-ancient-gold"></div>
-        <div className="absolute -left-1 -bottom-1 w-2 h-2 border-b border-l border-ancient-gold"></div>
-        <div className="absolute -right-1 -bottom-1 w-2 h-2 border-b border-r border-ancient-gold"></div>
-        <div className="flex justify-between items-center relative z-10">
-          <h3 className="text-xl font-scroll text-white drop-shadow-[0_0_5px_rgba(255,215,0,0.5)]" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5), 0 0 6px rgba(255,215,0,0.7)' }}>
-            {title}
-          </h3>
-          <div className="bg-ancient-gold text-black px-3 py-1 rounded-md font-bold drop-shadow-lg">
-            {apy}% APY
-          </div>
-        </div>
-      </div>
+      <StakingHeader title={title} apy={apy} />
       
       <p className="mb-4 px-4">{description}</p>
       
@@ -141,9 +106,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       </div>
       
       <div className="flex items-center mb-4 px-4">
-        <div className={`text-xs px-2 py-1 rounded-md ${getRiskColor()} flex items-center mr-2`}>
-          <Shield size={12} className="mr-1" /> {riskLevel.toUpperCase()} RISK
-        </div>
+        <RiskBadge riskLevel={riskLevel} />
         
         <button 
           className="text-xs flex items-center text-muted-foreground hover:text-foreground"
@@ -164,66 +127,20 @@ const StakingPool: React.FC<StakingPoolProps> = ({
         </div>
       )}
       
-      {showDetails && (
-        <div className="bg-black/10 p-3 rounded-md mb-4 text-sm mx-4">
-          <div className="flex items-start mb-2">
-            <ChartBar size={16} className="mr-2 flex-shrink-0 mt-1 text-scripture" />
-            <div>
-              <strong>Returns Mechanism:</strong> {returnsMechanism}
-            </div>
-          </div>
-          <div className="flex items-start">
-            <BookOpen size={16} className="mr-2 flex-shrink-0 mt-1 text-scripture" />
-            <div>
-              <strong>Biblical Principle:</strong> {biblicalPrinciple}
-            </div>
-          </div>
-          <div className="mt-2 text-center">
-            <button 
-              className="text-xs text-scripture underline hover:text-scripture-dark"
-              onClick={handleShowTransparency}
-            >
-              View full biblical transparency report
-            </button>
-          </div>
-        </div>
-      )}
+      <StakingDetails 
+        returnsMechanism={returnsMechanism}
+        biblicalPrinciple={biblicalPrinciple}
+        onShowTransparency={handleShowTransparency}
+        visible={showDetails}
+      />
 
       {showFullTransparency && <StakingTransparency />}
       
-      {showStakingForm && (
-        <div className="px-4 mb-4 border-t border-border pt-4">
-          <div className="flex gap-4 mb-4">
-            <div className="flex-1">
-              <label htmlFor={`amount-${title}`} className="block text-xs mb-1">Amount</label>
-              <input
-                id={`amount-${title}`}
-                type="text"
-                value={stakeAmount}
-                onChange={(e) => setStakeAmount(e.target.value)}
-                className="w-full border border-input px-3 py-2 rounded text-sm"
-                placeholder="0.00"
-              />
-            </div>
-            <div className="w-1/3">
-              <label htmlFor={`token-${title}`} className="block text-xs mb-1">Token</label>
-              <select
-                id={`token-${title}`}
-                value={selectedToken}
-                onChange={(e) => {
-                  setSelectedToken(e.target.value);
-                  playSound("select");
-                }}
-                className="w-full border border-input px-3 py-2 rounded text-sm"
-              >
-                {supportedTokens.map((token) => (
-                  <option key={token} value={token}>{token}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
+      <StakingForm
+        supportedTokens={supportedTokens} 
+        onStakeSubmit={handleStakeSubmit}
+        isFormVisible={showStakingForm}
+      />
       
       <div className="px-4 mb-4">
         <ScriptureCard verse={safeVerse} />
@@ -231,25 +148,18 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       
       <div className="flex space-x-2 px-4 pb-4">
         <PixelButton className="flex-1 flex items-center justify-center" onClick={handleStake}>
-          {!showStakingForm ? (
-            <>Stake</>
-          ) : (
-            <>Confirm Stake<Wallet size={16} className="ml-2" /></>
-          )}
+          {!showStakingForm ? "Stake" : "Show Details"}
         </PixelButton>
         <PixelButton variant="outline" className="flex items-center" onClick={handleLearn}>
           Learn <ArrowUpRight size={16} className="ml-1" />
         </PixelButton>
       </div>
       
-      {isWalletOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Connect Wallet</h3>
-            <WalletConnect onConnect={handleWalletConnected} onCancel={() => setIsWalletOpen(false)} />
-          </div>
-        </div>
-      )}
+      <WalletModal 
+        isOpen={isWalletOpen}
+        onClose={() => setIsWalletOpen(false)}
+        onWalletConnected={handleWalletConnected}
+      />
     </Card>
   );
 };
