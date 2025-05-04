@@ -25,7 +25,7 @@ const NavBar: React.FC = () => {
             src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" 
             alt="BIBLE.Fi Logo" 
             size={40} 
-            spin={true} 
+            spin={false}
             glow={true}
             className="mr-2 transition-all duration-300 group-hover:animate-pulse-glow"
           />
