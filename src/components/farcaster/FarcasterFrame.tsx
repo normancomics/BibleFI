@@ -67,8 +67,8 @@ const FarcasterFrame: React.FC = () => {
     const frameConfig = {
       image: `${window.location.origin}${frameImage}`,
       buttons: [
-        { label: "Learn Biblical Finance", action: "link", target: window.location.origin },
-        { label: "Share Wisdom", action: "post", target: `${window.location.origin}/wisdom` }
+        { label: "Learn Biblical Finance", action: "link" as "link", target: window.location.origin },
+        { label: "Share Wisdom", action: "post" as "post" }
       ],
       postUrl: `${window.location.origin}/api/frame`,
       state: btoa(JSON.stringify({ referrer: "farcaster-frame" }))
