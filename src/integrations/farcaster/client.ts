@@ -78,8 +78,61 @@ export function generateFrameHTML(config: FrameConfig): string {
 
 // Validate Farcaster message using the Farcaster Hub API
 export async function validateFrameMessage(payload: FrameActionPayload): Promise<boolean> {
-  // This is a placeholder - in production you would validate with the Farcaster Hub
-  // You'll need to implement proper validation logic here
-  console.log("Validating frame message:", payload);
-  return true; // Placeholder return
+  try {
+    // In production, this should verify the message with Farcaster's Hub API
+    // Example verification logic:
+    // 1. Check timestamp is recent
+    const isTimestampRecent = Date.now() - payload.timestamp < 5 * 60 * 1000; // 5 minutes
+    
+    // 2. Verify the message came from a valid Farcaster user
+    // This would typically involve calling Farcaster's API
+    
+    console.log("Validating frame message:", payload);
+    return isTimestampRecent;
+  } catch (error) {
+    console.error("Error validating Farcaster message:", error);
+    return false;
+  }
+}
+
+// Process frame actions
+export async function processFrameAction(payload: FrameActionPayload): Promise<any> {
+  // Validate the message first
+  const isValid = await validateFrameMessage(payload);
+  
+  if (!isValid) {
+    throw new Error("Invalid Farcaster message");
+  }
+  
+  // Process based on button index
+  switch (payload.buttonIndex) {
+    case 1: // First button - Learn
+      return { 
+        success: true, 
+        action: "learn",
+        redirectUrl: "/wisdom" 
+      };
+      
+    case 2: // Second button - Share
+      // Handle sharing logic
+      return { 
+        success: true, 
+        action: "share",
+        message: "Wisdom shared!"
+      };
+      
+    default:
+      return { 
+        success: false, 
+        error: "Unknown button action" 
+      };
+  }
+}
+
+// Create a new API endpoint file for handling Frame requests
+export function createFrameApiEndpoint() {
+  // This is a placeholder for future server-side code
+  // In a production environment, this would be a serverless function
+  // or an API endpoint that processes Frame requests
+  console.log("Frame API endpoint would be created here");
 }

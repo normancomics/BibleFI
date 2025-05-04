@@ -2,8 +2,29 @@
 import React from "react";
 import BibleCharacter from "@/components/BibleCharacter";
 import PixelIcon from "@/components/PixelIcon";
+import PixelButton from "@/components/PixelButton";
+import { ExternalLink } from "lucide-react";
+import { useSound } from "@/contexts/SoundContext";
+import { useToast } from "@/hooks/use-toast";
 
 const HomeHeader: React.FC = () => {
+  const { playSound } = useSound();
+  const { toast } = useToast();
+  
+  const handleOpenFarcaster = () => {
+    playSound("select");
+    // This would open the Farcaster mini-app in production
+    // For now, we'll just show a toast
+    toast({
+      title: "Farcaster Integration",
+      description: "Opening Bible.fi mini-app in Farcaster...",
+    });
+    
+    // Here you would use Farcaster's client SDK to open the mini-app
+    // For now, we'll just open the Frame HTML page
+    window.open("/frame.html", "_blank");
+  };
+  
   return (
     <section className="text-center mb-12 animate-fade-in">
       <h1 className="text-5xl md:text-6xl font-sans tracking-tight mb-6">
@@ -21,6 +42,16 @@ const HomeHeader: React.FC = () => {
           className="inline-block"
         />
         <span className="text-sm ml-1 text-base-blue font-medium">Base Chain</span>
+      </div>
+      
+      <div className="mt-4 mb-6">
+        <PixelButton 
+          onClick={handleOpenFarcaster}
+          className="inline-flex items-center px-4 py-2"
+        >
+          <ExternalLink size={16} className="mr-2" />
+          Open in Farcaster
+        </PixelButton>
       </div>
       
       <BibleCharacter 
