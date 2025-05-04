@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSound } from "@/contexts/SoundContext";
-import { SoundType } from "@/components/SoundEffect"; // Import the SoundType
+import { SoundType } from "@/components/SoundEffect";
 
-export type CharacterType = 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | 'paul' | 'coin' | 'abraham';
+export type CharacterType = 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | 'paul' | 'coin' | 'abraham' | 'god' | 'joseph' | 'woman-well' | 'caesar' | 'tax-collector';
 
 interface PixelCharacterProps {
   character: CharacterType;
@@ -13,49 +13,109 @@ interface PixelCharacterProps {
   animate?: boolean;
   size?: 'sm' | 'md' | 'lg';
   soundEffect?: boolean;
+  glow?: boolean;
 }
 
 const characterConfig = {
+  god: {
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    sound: "powerup",
+    alt: "God Pixel Art",
+    label: "GOD"
+  },
   jesus: {
-    src: "/lovable-uploads/4999a976-37a9-44f1-9959-37e31a99939f.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "powerup",
     alt: "Jesus Pixel Art",
+    label: "JESUS"
   },
   solomon: {
-    src: "/lovable-uploads/4e94966c-9c89-499d-b195-5821a9693992.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "coin",
     alt: "Solomon Pixel Art",
+    label: "SOLOMON"
   },
   moses: {
-    src: "/lovable-uploads/589b204c-0ffb-4c59-949f-fca9896ca59a.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "scroll",
     alt: "Moses Pixel Art",
+    label: "MOSES"
   },
   david: {
-    src: "/lovable-uploads/1c4f4967-9a95-485c-b937-3a989791995f.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "select",
-    alt: "David Pixel Art",
+    alt: "King David Pixel Art",
+    label: "KING DAVID"
   },
   noah: {
-    src: "/lovable-uploads/93098951-4491-4441-a84e-f3f6195c92c9.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "click",
     alt: "Noah Pixel Art",
+    label: "NOAH"
   },
   paul: {
-    src: "/lovable-uploads/d194954b-1971-4432-a59f-367a84b0e591.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "success",
     alt: "Paul Pixel Art",
+    label: "PAUL"
   },
   coin: {
     src: "/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png",
     sound: "coin",
     alt: "Coin Pixel Art",
+    label: "COIN"
   },
   abraham: {
-    src: "/lovable-uploads/4e94966c-9c89-499d-b195-5821a9693992.png",
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     sound: "scroll",
     alt: "Abraham Pixel Art",
+    label: "ABRAHAM"
+  },
+  joseph: {
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    sound: "powerup",
+    alt: "Joseph Pixel Art",
+    label: "JOSEPH"
+  },
+  "woman-well": {
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    sound: "select",
+    alt: "Woman at the Well Pixel Art",
+    label: "WOMAN AT WELL"
+  },
+  caesar: {
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    sound: "coin",
+    alt: "Caesar Pixel Art",
+    label: "CAESAR"
+  },
+  "tax-collector": {
+    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    sound: "coin",
+    alt: "Tax Collector Pixel Art",
+    label: "TAX COLLECTOR"
   }
+};
+
+// Helper function to get character position from the sprite sheet
+const getCharacterPosition = (character: CharacterType): { x: number, y: number } => {
+  const positions: Record<CharacterType, { x: number, y: number }> = {
+    god: { x: 0, y: 0 },
+    jesus: { x: 1, y: 0 },
+    moses: { x: 2, y: 0 },
+    abraham: { x: 3, y: 0 },
+    joseph: { x: 0, y: 1 },
+    solomon: { x: 1, y: 1 },
+    david: { x: 2, y: 1 },
+    "woman-well": { x: 3, y: 1 },
+    caesar: { x: 0, y: 2 },
+    "tax-collector": { x: 1, y: 2 },
+    coin: { x: 2, y: 2 },
+    noah: { x: 2, y: 1 }, // Reusing another character
+    paul: { x: 1, y: 2 }  // Reusing another character
+  };
+  
+  return positions[character] || { x: 0, y: 0 };
 };
 
 const PixelCharacter: React.FC<PixelCharacterProps> = ({
@@ -66,14 +126,33 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
   animate = false,
   size = 'md',
   soundEffect = false,
+  glow = false
 }) => {
   const { playSound } = useSound();
   const [isHovered, setIsHovered] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
+  // Get character configuration
   const charConfig = characterConfig[character];
-  const characterSrc = charConfig?.src;
-  const characterAlt = charConfig?.alt;
-  const characterSound = charConfig?.sound as SoundType;
+  const characterAlt = charConfig?.alt || "Bible Character";
+  const characterSound = charConfig?.sound as SoundType || "select";
+  const characterLabel = charConfig?.label || character.toUpperCase();
+  
+  // Set up position for sprite extraction
+  const position = getCharacterPosition(character);
+
+  // Animation effect
+  useEffect(() => {
+    if (animate) {
+      const interval = setInterval(() => {
+        setIsAnimating(prev => !prev);
+      }, 500);
+      
+      return () => clearInterval(interval);
+    }
+    
+    return undefined;
+  }, [animate]);
 
   const handleClick = () => {
     if (soundEffect) {
@@ -82,6 +161,10 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
     if (onClick) {
       onClick();
     }
+    
+    // Trigger animation on click
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 300);
   };
 
   const sizeClasses = {
@@ -89,21 +172,40 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
     md: 'w-24 h-24',
     lg: 'w-32 h-32',
   };
+  
+  // Animation classes
+  const animationClasses = [
+    animate ? 'animate-float' : '',
+    isAnimating ? 'scale-110' : '',
+    glow ? 'drop-shadow-glow' : '',
+    isHovered ? 'scale-105' : ''
+  ].filter(Boolean).join(' ');
 
   return (
     <div
-      className={`flex flex-col items-center justify-center p-4 rounded-lg transition-transform duration-300 ${className} ${isHovered ? 'scale-105' : ''}`}
+      className={`flex flex-col items-center justify-center p-4 rounded-lg transition-transform duration-300 ${className}`}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <img
-        src={characterSrc}
-        alt={characterAlt}
-        className={`pixelated mb-2 ${sizeClasses[size]} ${animate ? 'animate-pulse' : ''}`}
-      />
+      <div className={`${sizeClasses[size]} relative ${animationClasses}`}>
+        <img
+          src="/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png"
+          alt={characterAlt}
+          className="pixelated w-full h-full"
+        />
+        
+        {isHovered && (
+          <div className="absolute bottom-[-20px] left-0 right-0 text-center">
+            <span className="bg-black/80 px-2 py-1 text-xs rounded font-pixel text-white">
+              {characterLabel}
+            </span>
+          </div>
+        )}
+      </div>
+      
       {message && (
-        <p className="text-sm text-center text-white">
+        <p className="text-sm text-center text-white mt-2">
           {message}
         </p>
       )}

@@ -12,6 +12,7 @@ import HomeHeader from "@/components/home/HomeHeader";
 import FeatureCards from "@/components/home/FeatureCards";
 import TaxSection from "@/components/home/TaxSection";
 import SoundActivationButton from "@/components/home/SoundActivationButton";
+import { AnimatedSpriteBackground } from "@/components/ui/tailwind-extensions";
 
 const Index: React.FC = () => {
   const { playSound, setUserInteracted } = useSound();
@@ -40,12 +41,15 @@ const Index: React.FC = () => {
   const handleIntroComplete = () => {
     setShowIntro(false);
     setShowMainContent(true);
+    playSound("powerup");
   };
   
   // Function to handle user interaction
   const handleInteraction = () => {
     setUserInteracted(true);
-    playSound("select");
+    if (!showMainContent) {
+      playSound("select");
+    }
   };
 
   // Function to handle sound activation button
@@ -53,10 +57,12 @@ const Index: React.FC = () => {
     // Skip intro if button is clicked
     setShowIntro(false);
     setShowMainContent(true);
+    playSound("powerup");
   };
   
   return (
     <div className="min-h-screen" onClick={handleInteraction}>
+      <AnimatedSpriteBackground opacity={0.05} />
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
@@ -65,7 +71,7 @@ const Index: React.FC = () => {
         )}
         
         {showMainContent && (
-          <>
+          <div className="animate-entrance">
             <HomeHeader />
             
             {/* Wallet Connect Section */}
@@ -81,12 +87,12 @@ const Index: React.FC = () => {
             
             {/* Farcaster Frame Component */}
             <FarcasterFrame />
-          </>
+          </div>
         )}
       </main>
       
       {/* Sound activation button */}
-      <SoundActivationButton onActivate={handleSoundActivation} />
+      {!showMainContent && !showIntro && <SoundActivationButton onActivate={handleSoundActivation} />}
     </div>
   );
 };

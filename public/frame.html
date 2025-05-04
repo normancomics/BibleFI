@@ -9,13 +9,16 @@
   <!-- Basic Open Graph meta tags -->
   <meta property="og:title" content="Bible.fi - Biblical Financial Wisdom" />
   <meta property="og:description" content="Learn biblical principles for your financial journey." />
-  <meta property="og:image" content="https://bible.fi/pixel-solomon.png" />
+  <meta property="og:image" content="https://bible.fi/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" />
   
   <!-- Farcaster Frame meta tags -->
   <meta property="fc:frame" content="vNext" />
-  <meta property="fc:frame:image" content="https://bible.fi/pixel-solomon.png" />
-  <meta property="fc:frame:button:1" content="Learn Biblical Finance" action="link" target="https://bible.fi" />
-  <meta property="fc:frame:button:2" content="Share Wisdom" action="post" />
+  <meta property="fc:frame:image" content="https://bible.fi/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" />
+  <meta property="fc:frame:button:1" content="Learn Biblical Finance" />
+  <meta property="fc:frame:button:1:action" content="link" />
+  <meta property="fc:frame:button:1:target" content="https://bible.fi" />
+  <meta property="fc:frame:button:2" content="Share Wisdom" />
+  <meta property="fc:frame:button:2:action" content="post" />
   <meta property="fc:frame:post_url" content="https://bible.fi/api/frame" />
   
   <style>
@@ -25,27 +28,67 @@
       margin: 0 auto;
       padding: 20px;
       text-align: center;
+      background: #111;
+      color: #fff;
     }
-    h1 span {
-      color: #0052FF;
+    .logo {
+      max-width: 300px;
+      margin: 0 auto;
+      animation: pulse 2s infinite ease-in-out;
     }
     .info {
-      background-color: #f0f0f0;
+      background-color: rgba(0, 82, 255, 0.1);
+      border: 1px solid rgba(0, 82, 255, 0.3);
       border-radius: 8px;
       padding: 20px;
       margin: 20px 0;
     }
+    .pixel-art {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .pixel-character {
+      width: 80px;
+      text-align: center;
+    }
+    .pixel-character img {
+      width: 60px;
+      height: 60px;
+      image-rendering: pixelated;
+    }
+    .pixel-character p {
+      margin: 5px 0;
+      font-size: 12px;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.8; transform: scale(0.98); }
+      50% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.8; transform: scale(0.98); }
+    }
   </style>
 </head>
 <body>
-  <h1><span>Bible</span>.fi Frame</h1>
-  <p>This is a Farcaster Frame for Bible.fi</p>
+  <div class="logo">
+    <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" width="300" />
+  </div>
+  
+  <h1>Bible.fi Frame</h1>
+  <p>Biblical wisdom for your financial journey</p>
   
   <div class="info">
     <p>This page is optimized for viewing in Farcaster clients.</p>
-    <p>To view the full Bible.fi application, visit: <a href="https://bible.fi">bible.fi</a></p>
+    <p>To view the full Bible.fi application, visit: <a href="https://bible.fi" style="color: #0052FF">bible.fi</a></p>
   </div>
   
-  <p>Biblical wisdom for your financial journey.</p>
+  <div class="pixel-art">
+    <div class="pixel-character">
+      <img src="/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png" alt="Bible Characters" />
+    </div>
+  </div>
+  
+  <p>Learn biblical financial principles and apply them in your DeFi journey.</p>
 </body>
 </html>
