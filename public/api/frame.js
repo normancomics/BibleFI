@@ -3,8 +3,9 @@
 // This file will be served at /api/frame when deployed
 
 // Configuration constants
-const APP_NAME = "Bible.fi";
-const APP_BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi';
+const APP_NAME = "biblefi.base.eth";
+const APP_BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://biblefi.base.eth';
+const FARCASTER_API_KEY = '425081D4-0BD4-4365-910D-8876E1E1BD00';
 
 // Biblical wisdom quotes for responses
 const WISDOM_QUOTES = [
@@ -40,6 +41,9 @@ function validateFrameSignature(request) {
   // For demo purposes, we're accepting all requests
   // In production, you would verify using Farcaster's signature validation
   // https://docs.farcaster.xyz/reference/frames/message-signing
+  
+  // With a real implementation, you would use the FARCASTER_API_KEY here
+  // to verify the request signature against the Farcaster API
   return true;
 }
 
@@ -74,7 +78,7 @@ function handleFrameRequest(request) {
         text: WISDOM_QUOTES[randomQuoteIndex],
         buttons: [
           { label: "More Wisdom", action: "post" },
-          { label: "Visit Bible.fi", action: "link", target: APP_BASE_URL }
+          { label: "Visit biblefi.base.eth", action: "link", target: APP_BASE_URL }
         ]
       };
     } else if (buttonIndex === 2) { // DeFi button
@@ -93,7 +97,7 @@ function handleFrameRequest(request) {
       return {
         version: 'vNext',
         image: `${APP_BASE_URL}/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png`,
-        text: "Discover biblical wisdom for your financial journey on Bible.fi",
+        text: "Discover biblical wisdom for your financial journey on biblefi.base.eth",
         buttons: [
           { label: "Explore Wisdom", action: "link", target: `${APP_BASE_URL}/wisdom` },
           { label: "Share Wisdom", action: "post" }
