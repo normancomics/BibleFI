@@ -14,11 +14,14 @@
   <!-- Farcaster Frame meta tags -->
   <meta property="fc:frame" content="vNext" />
   <meta property="fc:frame:image" content="https://bible.fi/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" />
-  <meta property="fc:frame:button:1" content="Learn Biblical Finance" />
+  <meta property="fc:frame:button:1" content="Biblical Wisdom" />
   <meta property="fc:frame:button:1:action" content="link" />
-  <meta property="fc:frame:button:1:target" content="https://bible.fi" />
-  <meta property="fc:frame:button:2" content="Share Wisdom" />
-  <meta property="fc:frame:button:2:action" content="post" />
+  <meta property="fc:frame:button:1:target" content="https://bible.fi/wisdom" />
+  <meta property="fc:frame:button:2" content="DeFi Swaps" />
+  <meta property="fc:frame:button:2:action" content="link" />
+  <meta property="fc:frame:button:2:target" content="https://bible.fi/defi" />
+  <meta property="fc:frame:button:3" content="Share Wisdom" />
+  <meta property="fc:frame:button:3:action" content="post" />
   <meta property="fc:frame:post_url" content="https://bible.fi/api/frame" />
   
   <style>
@@ -63,6 +66,32 @@
       margin: 5px 0;
       font-size: 12px;
     }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .feature {
+      width: 120px;
+      text-align: center;
+      padding: 15px;
+      background-color: rgba(142, 93, 246, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(142, 93, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(142, 93, 246, 0.2);
+    }
+    .feature img {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 10px;
+      image-rendering: pixelated;
+    }
     @keyframes pulse {
       0% { opacity: 0.8; transform: scale(0.98); }
       50% { opacity: 1; transform: scale(1); }
@@ -75,7 +104,7 @@
     <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" width="300" />
   </div>
   
-  <h1>Bible.fi Frame</h1>
+  <h1>Bible.fi Mini-App</h1>
   <p>Biblical wisdom for your financial journey</p>
   
   <div class="info">
@@ -83,9 +112,21 @@
     <p>To view the full Bible.fi application, visit: <a href="https://bible.fi" style="color: #0052FF">bible.fi</a></p>
   </div>
   
-  <div class="pixel-art">
-    <div class="pixel-character">
-      <img src="/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png" alt="Bible Characters" />
+  <div class="features">
+    <div class="feature">
+      <img src="/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png" alt="Wisdom" />
+      <h3>Biblical Wisdom</h3>
+      <p>Ancient wisdom for modern finance</p>
+    </div>
+    <div class="feature">
+      <img src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" alt="DeFi" />
+      <h3>DeFi Swaps</h3>
+      <p>Swap tokens with 0x Protocol</p>
+    </div>
+    <div class="feature">
+      <img src="/pixel-solomon.png" alt="Solomon" />
+      <h3>Learn</h3>
+      <p>Financial principles from Scripture</p>
     </div>
   </div>
   

@@ -14,14 +14,24 @@ function handleFrameRequest(request) {
     "Dishonest money dwindles away, but whoever gathers money little by little makes it grow. - Proverbs 13:11",
     "The rich rule over the poor, and the borrower is slave to the lender. - Proverbs 22:7",
     "Honor the Lord with your wealth, with the firstfruits of all your crops. - Proverbs 3:9",
-    "Give, and it will be given to you. - Luke 6:38"
+    "Give, and it will be given to you. - Luke 6:38",
+    "Whoever can be trusted with very little can also be trusted with much. - Luke 16:10"
   ];
   
   // Character images for responses
   const characterImages = [
     "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
     "/pixel-solomon.png",
-    "/pixel-jesus.png"
+    "/pixel-jesus.png",
+    "/pixel-moses.png",
+    "/pixel-david.png"
+  ];
+  
+  // DeFi related quotes
+  const defiQuotes = [
+    "The borrower is servant to the lender, choose your DeFi protocols wisely. - Proverbs 22:7",
+    "Invest your talents wisely, for to everyone who has, more will be given. - Matthew 25:29",
+    "Diversify your investments: divide your portion to seven, or even to eight. - Ecclesiastes 11:2"
   ];
   
   // Process based on button index
@@ -29,17 +39,27 @@ function handleFrameRequest(request) {
     version: 'vNext',
     image: `${window.location.origin}/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png`,
     buttons: [
-      { label: "Continue Learning", action: "link", target: `${window.location.origin}/wisdom` },
-      { label: "Share More Wisdom", action: "post" }
+      { label: "Biblical Wisdom", action: "link", target: `${window.location.origin}/wisdom` },
+      { label: "DeFi Swaps", action: "link", target: `${window.location.origin}/defi` },
+      { label: "Share Wisdom", action: "post" }
     ]
   };
   
-  if (buttonIndex === 2) { // Share button was clicked
+  if (buttonIndex === 3) { // Share button was clicked
     const randomQuoteIndex = Math.floor(Math.random() * wisdomQuotes.length);
     const randomImageIndex = Math.floor(Math.random() * characterImages.length);
     
     response.image = `${window.location.origin}${characterImages[randomImageIndex]}`;
     response.text = wisdomQuotes[randomQuoteIndex];
+  } else if (buttonIndex === 2) { // DeFi button was clicked
+    const randomQuoteIndex = Math.floor(Math.random() * defiQuotes.length);
+    
+    response.image = `${window.location.origin}/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png`;
+    response.text = defiQuotes[randomQuoteIndex];
+    response.buttons = [
+      { label: "Swap Tokens", action: "link", target: `${window.location.origin}/defi` },
+      { label: "Learn More", action: "link", target: `${window.location.origin}/wisdom` }
+    ];
   }
   
   return response;

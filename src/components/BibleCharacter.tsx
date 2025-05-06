@@ -1,24 +1,31 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSound } from "@/contexts/SoundContext";
-import PixelCharacter, { CharacterType } from "@/components/PixelCharacter";
 
-interface BibleCharacterProps {
-  character: CharacterType;
-  message: string;
-  className?: string;
-  animated?: boolean;
-  soundEffect?: boolean;
-  showWisdomLevel?: boolean;
-}
+// Define the available character types
+export type CharacterType = 
+  | "jesus" 
+  | "moses" 
+  | "solomon" 
+  | "david" 
+  | "paul" 
+  | "noah" 
+  | "abraham"
+  | "god"
+  | "joseph"
+  | "woman-well"
+  | "caesar"
+  | "tax-collector";
 
+// Character info structure
 interface CharacterInfo {
   name: string;
   wisdomLevel: number;
   soundEffect: string;
 }
 
-const characterMap: Record<CharacterType, CharacterInfo> = {
+// Character data for all character types
+const characterData: Record<CharacterType, CharacterInfo> = {
   jesus: {
     name: "Jesus",
     wisdomLevel: 100,
@@ -26,95 +33,133 @@ const characterMap: Record<CharacterType, CharacterInfo> = {
   },
   moses: {
     name: "Moses",
-    wisdomLevel: 90,
-    soundEffect: "scroll"
+    wisdomLevel: 95,
+    soundEffect: "select"
   },
   solomon: {
     name: "Solomon",
-    wisdomLevel: 95,
-    soundEffect: "success"
+    wisdomLevel: 99,
+    soundEffect: "coin"
   },
   david: {
-    name: "David",
-    wisdomLevel: 85,
+    name: "King David",
+    wisdomLevel: 90,
+    soundEffect: "scroll"
+  },
+  paul: {
+    name: "Paul",
+    wisdomLevel: 92,
     soundEffect: "success"
   },
   noah: {
     name: "Noah",
-    wisdomLevel: 88,
-    soundEffect: "click"
-  },
-  paul: {
-    name: "Paul",
-    wisdomLevel: 88,
-    soundEffect: "scroll"
-  },
-  coin: {
-    name: "Coin",
-    wisdomLevel: 70,
-    soundEffect: "coin"
+    wisdomLevel: 85,
+    soundEffect: "select"
   },
   abraham: {
     name: "Abraham",
-    wisdomLevel: 92,
+    wisdomLevel: 88,
+    soundEffect: "coin"
+  },
+  god: {
+    name: "God",
+    wisdomLevel: 100,
+    soundEffect: "powerup"
+  },
+  joseph: {
+    name: "Joseph",
+    wisdomLevel: 87,
+    soundEffect: "select"
+  },
+  "woman-well": {
+    name: "Woman at the Well",
+    wisdomLevel: 75,
     soundEffect: "scroll"
+  },
+  caesar: {
+    name: "Caesar",
+    wisdomLevel: 70,
+    soundEffect: "coin"
+  },
+  "tax-collector": {
+    name: "Tax Collector",
+    wisdomLevel: 65,
+    soundEffect: "click"
   }
 };
 
-const BibleCharacter: React.FC<BibleCharacterProps> = ({ 
-  character, 
-  message,
+interface BibleCharacterProps {
+  character: CharacterType;
+  showName?: boolean;
+  showWisdom?: boolean;
+  className?: string;
+  onClick?: () => void;
+}
+
+const BibleCharacter: React.FC<BibleCharacterProps> = ({
+  character,
+  showName = true,
+  showWisdom = false,
   className = "",
-  animated = true,
-  soundEffect = false,
-  showWisdomLevel = false
+  onClick
 }) => {
-  const { name, wisdomLevel } = characterMap[character];
-  const { playSound, userInteracted } = useSound();
+  const { playSound } = useSound();
   const [isAnimating, setIsAnimating] = useState(false);
-  const [hasPlayed, setHasPlayed] = useState(false);
-
+  
+  const characterInfo = characterData[character];
+  const imagePath = `/pixel-${character}.png`;
+  
   useEffect(() => {
-    if (soundEffect && userInteracted && !hasPlayed) {
-      playSound("select");
-      setHasPlayed(true);
+    let animationTimeout: NodeJS.Timeout;
+    
+    if (isAnimating) {
+      animationTimeout = setTimeout(() => {
+        setIsAnimating(false);
+      }, 500);
     }
-  }, [soundEffect, userInteracted, playSound, hasPlayed]);
-
-  const handleCharacterClick = () => {
+    
+    return () => {
+      if (animationTimeout) {
+        clearTimeout(animationTimeout);
+      }
+    };
+  }, [isAnimating]);
+  
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+    
     setIsAnimating(true);
-    if (userInteracted) {
-      playSound("select");
-    }
-    setTimeout(() => setIsAnimating(false), 1000);
+    playSound(characterInfo.soundEffect as any);
   };
-
+  
   return (
-    <div className={`flex items-start ${className}`}>
-      <div className="flex-shrink-0 mr-3">
-        <PixelCharacter 
-          character={character}
-          size="sm"
-          animate={animated || isAnimating}
-          onClick={handleCharacterClick}
-          soundEffect={soundEffect}
+    <div 
+      className={`flex flex-col items-center ${className}`}
+      onClick={handleClick}
+    >
+      <div 
+        className={`relative transition-transform duration-300 ${
+          isAnimating ? 'scale-110 rotate-3' : ''
+        } ${onClick ? 'cursor-pointer hover:scale-105' : ''}`}
+      >
+        <img 
+          src={imagePath} 
+          alt={characterInfo.name} 
+          className="pixelated w-16 h-16 object-contain"
         />
-        {showWisdomLevel && (
-          <div className="mt-1 text-xs text-center">
-            <div className="bg-black/30 rounded-full h-1.5 w-full mt-1 overflow-hidden">
-              <div 
-                className="bg-ancient-gold h-full rounded-full" 
-                style={{ width: `${wisdomLevel}%` }}
-              ></div>
-            </div>
-            <span className="text-xs text-ancient-gold">Wisdom {wisdomLevel}</span>
+        
+        {showWisdom && (
+          <div className="absolute -top-2 -right-2 bg-ancient-gold/90 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            {characterInfo.wisdomLevel}
           </div>
         )}
       </div>
-      <div className="bg-white border-2 border-scripture p-3 rounded-lg relative speech-bubble">
-        <p className="font-bold text-scripture mb-1">{name} says:</p>
-        <p>{message}</p>
-      </div>
+      
+      {showName && (
+        <p className="mt-1 text-xs font-medium text-white/80">{characterInfo.name}</p>
+      )}
     </div>
   );
 };

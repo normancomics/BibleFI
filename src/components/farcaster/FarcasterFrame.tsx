@@ -62,7 +62,7 @@ const biblicalCharacters: CharacterType[] = ["jesus", "moses", "solomon", "david
 const FarcasterFrame: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [frameImage, setFrameImage] = useState("/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png"); // New Bible.fi logo
+  const [frameImage, setFrameImage] = useState("/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png"); // Bible.fi logo
   const verse = getRandomVerse();
   const [previewHTML, setPreviewHTML] = useState<string>("");
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterType>("solomon");
@@ -82,7 +82,8 @@ const FarcasterFrame: React.FC = () => {
     const frameConfig = {
       image: `${window.location.origin}${frameImage}`,
       buttons: [
-        { label: "Learn Biblical Finance", action: "link" as "link", target: window.location.origin },
+        { label: "Biblical Wisdom", action: "link" as "link", target: `${window.location.origin}/wisdom` },
+        { label: "DeFi Swaps", action: "link" as "link", target: `${window.location.origin}/defi` },
         { label: "Share Wisdom", action: "post" as "post" }
       ],
       postUrl: `${window.location.origin}/api/frame`,
