@@ -11,9 +11,10 @@
   <meta property="og:description" content="Learn biblical principles for your financial journey." />
   <meta property="og:image" content="https://bible.fi/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" />
   
-  <!-- Farcaster Frame meta tags -->
+  <!-- Farcaster Frame meta tags (based on the latest Frame spec) -->
   <meta property="fc:frame" content="vNext" />
   <meta property="fc:frame:image" content="https://bible.fi/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" />
+  <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
   <meta property="fc:frame:button:1" content="Biblical Wisdom" />
   <meta property="fc:frame:button:1:action" content="link" />
   <meta property="fc:frame:button:1:target" content="https://bible.fi/wisdom" />
@@ -23,113 +24,28 @@
   <meta property="fc:frame:button:3" content="Share Wisdom" />
   <meta property="fc:frame:button:3:action" content="post" />
   <meta property="fc:frame:post_url" content="https://bible.fi/api/frame" />
-  
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
-      background: #111;
-      color: #fff;
-    }
-    .logo {
-      max-width: 300px;
-      margin: 0 auto;
-      animation: pulse 2s infinite ease-in-out;
-    }
-    .info {
-      background-color: rgba(0, 82, 255, 0.1);
-      border: 1px solid rgba(0, 82, 255, 0.3);
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-    .pixel-art {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin: 20px 0;
-    }
-    .pixel-character {
-      width: 80px;
-      text-align: center;
-    }
-    .pixel-character img {
-      width: 60px;
-      height: 60px;
-      image-rendering: pixelated;
-    }
-    .pixel-character p {
-      margin: 5px 0;
-      font-size: 12px;
-    }
-    .features {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin: 20px 0;
-    }
-    .feature {
-      width: 120px;
-      text-align: center;
-      padding: 15px;
-      background-color: rgba(142, 93, 246, 0.1);
-      border-radius: 8px;
-      border: 1px solid rgba(142, 93, 246, 0.3);
-      transition: all 0.3s ease;
-    }
-    .feature:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(142, 93, 246, 0.2);
-    }
-    .feature img {
-      width: 40px;
-      height: 40px;
-      margin: 0 auto 10px;
-      image-rendering: pixelated;
-    }
-    @keyframes pulse {
-      0% { opacity: 0.8; transform: scale(0.98); }
-      50% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0.8; transform: scale(0.98); }
-    }
-  </style>
 </head>
-<body>
-  <div class="logo">
-    <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" width="300" />
-  </div>
-  
-  <h1>Bible.fi Mini-App</h1>
-  <p>Biblical wisdom for your financial journey</p>
-  
-  <div class="info">
-    <p>This page is optimized for viewing in Farcaster clients.</p>
-    <p>To view the full Bible.fi application, visit: <a href="https://bible.fi" style="color: #0052FF">bible.fi</a></p>
-  </div>
-  
-  <div class="features">
-    <div class="feature">
-      <img src="/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png" alt="Wisdom" />
-      <h3>Biblical Wisdom</h3>
-      <p>Ancient wisdom for modern finance</p>
-    </div>
-    <div class="feature">
-      <img src="/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png" alt="DeFi" />
-      <h3>DeFi Swaps</h3>
-      <p>Swap tokens with 0x Protocol</p>
-    </div>
-    <div class="feature">
-      <img src="/pixel-solomon.png" alt="Solomon" />
-      <h3>Learn</h3>
-      <p>Financial principles from Scripture</p>
+<body style="margin:0;padding:0;background:#000;color:#fff;font-family:system-ui,-apple-system,sans-serif;">
+  <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;text-align:center;">
+    <div>
+      <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" style="max-width:100%;height:auto;margin-bottom:20px;" />
+      <h1 style="margin:0 0 10px;font-size:24px;">Bible.fi Mini-App</h1>
+      <p style="margin:0 0 20px;opacity:0.8;">Biblical wisdom for your financial journey</p>
+      <div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:15px;margin:20px 0;max-width:500px;">
+        <p style="margin:0;font-size:14px;">This is a Farcaster Frame. View it in a Farcaster client like Warpcast for the full experience.</p>
+      </div>
+      <p style="font-size:12px;opacity:0.6;">Made with ❤️ on Base Chain</p>
     </div>
   </div>
   
-  <p>Learn biblical financial principles and apply them in your DeFi journey.</p>
+  <script>
+    // Simple script to detect if we're in a Farcaster client
+    document.addEventListener('DOMContentLoaded', function() {
+      const isFarcasterClient = navigator.userAgent.includes('Farcaster') || window.location.href.includes('warpcast.com');
+      if (isFarcasterClient) {
+        console.log('Detected Farcaster client!');
+      }
+    });
+  </script>
 </body>
 </html>

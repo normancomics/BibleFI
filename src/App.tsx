@@ -1,3 +1,4 @@
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "@/pages/Index";
@@ -11,25 +12,28 @@ import NotFound from "@/pages/NotFound";
 
 import { SoundProvider } from "@/contexts/SoundContext";
 import { Toaster } from "@/components/ui/toaster";
+import { FarcasterAuthProvider } from "@/farcaster/auth";
 
 function App() {
   return (
     <SoundProvider>
-      <Router>
-        <div className="app min-h-screen bg-background text-foreground overflow-x-hidden">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/wisdom" element={<WisdomPage />} />
-            <Route path="/tithe" element={<TithePage />} />
-            <Route path="/staking" element={<StakingPage />} />
-            <Route path="/taxes" element={<TaxesPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/defi" element={<DefiPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </div>
-      </Router>
+      <FarcasterAuthProvider>
+        <Router>
+          <div className="app min-h-screen bg-background text-foreground overflow-x-hidden">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/wisdom" element={<WisdomPage />} />
+              <Route path="/tithe" element={<TithePage />} />
+              <Route path="/staking" element={<StakingPage />} />
+              <Route path="/taxes" element={<TaxesPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/defi" element={<DefiPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </div>
+        </Router>
+      </FarcasterAuthProvider>
     </SoundProvider>
   );
 }
