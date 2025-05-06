@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSound } from "@/contexts/SoundContext";
 
 // Define the available character types
@@ -88,18 +88,22 @@ const characterData: Record<CharacterType, CharacterInfo> = {
   }
 };
 
-interface BibleCharacterProps {
+export interface BibleCharacterProps {
   character: CharacterType;
+  message?: string;
   showName?: boolean;
   showWisdom?: boolean;
+  showWisdomLevel?: boolean;
   className?: string;
   onClick?: () => void;
 }
 
 const BibleCharacter: React.FC<BibleCharacterProps> = ({
   character,
+  message,
   showName = true,
   showWisdom = false,
+  showWisdomLevel = false,
   className = "",
   onClick
 }) => {
@@ -109,22 +113,6 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
   const characterInfo = characterData[character];
   const imagePath = `/pixel-${character}.png`;
   
-  useEffect(() => {
-    let animationTimeout: NodeJS.Timeout;
-    
-    if (isAnimating) {
-      animationTimeout = setTimeout(() => {
-        setIsAnimating(false);
-      }, 500);
-    }
-    
-    return () => {
-      if (animationTimeout) {
-        clearTimeout(animationTimeout);
-      }
-    };
-  }, [isAnimating]);
-  
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -132,6 +120,10 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
     
     setIsAnimating(true);
     playSound(characterInfo.soundEffect as any);
+    
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
   
   return (
@@ -139,18 +131,14 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
       className={`flex flex-col items-center ${className}`}
       onClick={handleClick}
     >
-      <div 
-        className={`relative transition-transform duration-300 ${
-          isAnimating ? 'scale-110 rotate-3' : ''
-        } ${onClick ? 'cursor-pointer hover:scale-105' : ''}`}
-      >
+      <div className={`relative ${onClick ? 'cursor-pointer' : ''}`}>
         <img 
           src={imagePath} 
           alt={characterInfo.name} 
           className="pixelated w-16 h-16 object-contain"
         />
         
-        {showWisdom && (
+        {showWisdomLevel && (
           <div className="absolute -top-2 -right-2 bg-ancient-gold/90 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
             {characterInfo.wisdomLevel}
           </div>
@@ -159,6 +147,12 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
       
       {showName && (
         <p className="mt-1 text-xs font-medium text-white/80">{characterInfo.name}</p>
+      )}
+      
+      {message && (
+        <div className="mt-3 max-w-sm bg-black/80 border border-scripture/50 p-2 rounded-md">
+          <p className="text-sm text-white/90">{message}</p>
+        </div>
       )}
     </div>
   );

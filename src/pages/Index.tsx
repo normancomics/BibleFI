@@ -6,9 +6,9 @@ import HomeHeader from "@/components/home/HomeHeader";
 import FeatureCards from "@/components/home/FeatureCards";
 import TaxSection from "@/components/home/TaxSection";
 import { useSound } from "@/contexts/SoundContext";
-import { AnimatedSpriteBackground } from "@/components/ui/tailwind-extensions";
 import FarcasterFrame from "@/farcaster/FarcasterFrame";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Index: React.FC = () => {
   const { playSound, setUserInteracted } = useSound();
@@ -37,11 +37,10 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen" onClick={handleInteraction}>
-      <AnimatedSpriteBackground opacity={0.05} />
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900" onClick={handleInteraction}>
       <NavBar />
       
-      <main className="container mx-auto px-4 py-8 animate-entrance">
+      <main className="container mx-auto px-4 py-8">
         <div className="flex justify-end mb-4">
           <FarcasterConnect size="sm" />
         </div>
@@ -54,6 +53,30 @@ const Index: React.FC = () => {
         </div>
         
         <FeatureCards />
+        
+        <div className="my-12">
+          <Card className="bg-black/60 border border-base-blue shadow-md">
+            <CardContent className="p-6">
+              <h2 className="text-2xl text-white font-medium mb-4">Bible.fi Mini-App</h2>
+              <p className="text-white/80 mb-4">
+                Bible.fi is built specifically to run as a mini-app inside Farcaster, 
+                offering biblical financial wisdom directly to the Farcaster community.
+              </p>
+              
+              <div className="flex justify-center my-6">
+                <img 
+                  src="/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png" 
+                  alt="Farcaster Logo"
+                  className="h-16 opacity-70"
+                />
+              </div>
+              
+              <p className="text-white/70 text-sm">
+                Connect your Farcaster account to access all features and share wisdom with your network.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
         
         <TaxSection />
       </main>

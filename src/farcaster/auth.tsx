@@ -1,25 +1,26 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthStatus, FarcasterUser } from './types';
-import { useToast } from '@/hooks/use-toast';
-import { useSound } from '@/contexts/SoundContext';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from "react";
+import { FARCASTER_CONFIG } from "./config";
+import { FarcasterUser, AuthStatus } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
-// Create a context for Farcaster authentication
 interface FarcasterAuthContextType {
   user: FarcasterUser | null;
   status: AuthStatus;
-  signIn: () => Promise<void>;
+  signIn: () => Promise<void>; // Changed return type to void
   signOut: () => void;
+  updateUser: (user: FarcasterUser) => void;
 }
 
-const FarcasterAuthContext = createContext<FarcasterAuthContextType>({
+const defaultContext: FarcasterAuthContextType = {
   user: null,
-  status: 'disconnected',
-  signIn: async () => {},
+  status: "disconnected",
+  signIn: async () => {}, // Now returns void
   signOut: () => {},
-});
+  updateUser: () => {},
+};
 
-export const useFarcasterAuth = () => useContext(FarcasterAuthContext);
+const FarcasterAuthContext = createContext<FarcasterAuthContextType>(defaultContext);
 
 interface FarcasterAuthProviderProps {
   children: ReactNode;
@@ -27,81 +28,64 @@ interface FarcasterAuthProviderProps {
 
 export const FarcasterAuthProvider: React.FC<FarcasterAuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<FarcasterUser | null>(null);
-  const [status, setStatus] = useState<AuthStatus>('disconnected');
+  const [status, setStatus] = useState<AuthStatus>("disconnected");
   const { toast } = useToast();
-  const { playSound } = useSound();
-
-  // Check if the user is in a Farcaster client environment
-  const isFarcasterClient = () => {
-    return typeof window !== 'undefined' && !!window.addEventListener && 
-           (window.location.href.includes('warpcast.com') || 
-            window.navigator.userAgent.includes('Farcaster'));
-  };
-
+  
+  // Initialize auth state from localStorage on mount
   useEffect(() => {
-    // Check for existing session on load
-    const checkExistingSession = () => {
-      const storedUser = localStorage.getItem('biblefi_farcaster_user');
-      
-      if (storedUser) {
-        try {
-          const userData = JSON.parse(storedUser);
-          setUser(userData);
-          setStatus('connected');
-          console.log('Restored Farcaster session:', userData);
-        } catch (error) {
-          console.error('Failed to parse stored user data', error);
-          localStorage.removeItem('biblefi_farcaster_user');
-        }
-      }
-      
-      // Auto-detect if we're in a Farcaster client
-      if (isFarcasterClient()) {
-        console.log('Detected Farcaster client environment');
-        // In a real implementation, we would authenticate directly
-      }
-    };
+    const storedUser = localStorage.getItem("farcaster_user");
     
-    checkExistingSession();
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setStatus("connected");
+      } catch (error) {
+        console.error("Failed to parse stored user:", error);
+        localStorage.removeItem("farcaster_user");
+      }
+    }
   }, []);
 
-  const signIn = async () => {
+  // Mock implementation of Farcaster auth
+  // In a real app, you would use @farcaster/auth-kit
+  const signIn = async (): Promise<void> => {
     try {
-      setStatus('connecting');
-      playSound('select');
+      setStatus("connecting");
       
-      // For demo purposes, we're using mock data
-      // In a real implementation, we would use @farcaster/auth-kit
+      // Mock user data - in a real implementation, this would come from Farcaster auth
       const mockUser: FarcasterUser = {
         fid: 12345,
-        username: 'biblereader',
-        displayName: 'Bible Reader',
-        pfp: '/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png'
+        username: "demo_user",
+        displayName: "Demo User",
+        pfp: "https://i.imgur.com/pBDThdn.png"
       };
       
-      // Simulate delay for authentication
+      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Update state
       setUser(mockUser);
-      setStatus('connected');
-      localStorage.setItem('biblefi_farcaster_user', JSON.stringify(mockUser));
+      setStatus("connected");
       
-      playSound('success');
+      // Store in localStorage for persistence
+      localStorage.setItem("farcaster_user", JSON.stringify(mockUser));
+      
       toast({
-        title: 'Connected to Farcaster',
+        title: "Connected to Farcaster",
         description: `Welcome, ${mockUser.displayName || mockUser.username}!`,
       });
       
-      return mockUser;
+      // Return the user (though it's not used in this version)
+      return;
     } catch (error) {
-      console.error('Farcaster sign in error:', error);
-      setStatus('disconnected');
+      console.error("Farcaster auth error:", error);
+      setStatus("disconnected");
       
-      playSound('error');
       toast({
-        title: 'Connection Failed',
-        description: 'Could not connect to Farcaster. Please try again.',
-        variant: 'destructive',
+        title: "Connection Failed",
+        description: "Could not connect to Farcaster. Please try again.",
+        variant: "destructive",
       });
       
       throw error;
@@ -109,20 +93,26 @@ export const FarcasterAuthProvider: React.FC<FarcasterAuthProviderProps> = ({ ch
   };
 
   const signOut = () => {
-    playSound('select');
     setUser(null);
-    setStatus('disconnected');
-    localStorage.removeItem('biblefi_farcaster_user');
+    setStatus("disconnected");
+    localStorage.removeItem("farcaster_user");
     
     toast({
-      title: 'Disconnected',
-      description: 'You have been signed out of Farcaster.',
+      title: "Disconnected",
+      description: "You've been signed out of Farcaster.",
     });
   };
 
+  const updateUser = (updatedUser: FarcasterUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("farcaster_user", JSON.stringify(updatedUser));
+  };
+
   return (
-    <FarcasterAuthContext.Provider value={{ user, status, signIn, signOut }}>
+    <FarcasterAuthContext.Provider value={{ user, status, signIn, signOut, updateUser }}>
       {children}
     </FarcasterAuthContext.Provider>
   );
 };
+
+export const useFarcasterAuth = () => useContext(FarcasterAuthContext);

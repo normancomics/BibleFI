@@ -5,7 +5,6 @@ import PixelButton from '@/components/PixelButton';
 import { useToast } from '@/hooks/use-toast';
 import { Share2, ExternalLink, Copy } from 'lucide-react';
 import { useSound } from '@/contexts/SoundContext';
-import BibleCharacter from '@/components/BibleCharacter';
 import { APP_CONFIG } from './config';
 
 const FarcasterFrame: React.FC = () => {
@@ -52,19 +51,18 @@ const FarcasterFrame: React.FC = () => {
   };
 
   return (
-    <Card className="bg-black/80 border-2 border-ancient-gold/60 shadow-glow-sm">
+    <Card className="bg-black/80 border border-base-blue shadow-md">
       <CardContent className="p-4">
-        <div className="text-center mb-3">
-          <h3 className="text-xl font-pixel text-ancient-gold">Bible.fi Frame</h3>
+        <div className="text-center mb-4">
+          <h3 className="text-xl text-white font-medium">Bible.fi Frame</h3>
           <p className="text-sm text-white/70">Share biblical wisdom on Farcaster</p>
         </div>
         
         <div className="my-4 flex justify-center">
-          <BibleCharacter 
-            character="moses" 
-            showName={false}
-            message="Embed this mini-app in Farcaster"
-            className="animate-minimal-sprite"
+          <img 
+            src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
+            alt="Bible.fi Logo" 
+            className="h-24 object-contain"
           />
         </div>
         
