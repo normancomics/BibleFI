@@ -35,5 +35,10 @@ export const APP_CONFIG = {
   name: 'Bible.fi',
   description: 'Biblical wisdom for your financial journey',
   icon: '/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
-  canonical: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi'
+  canonical: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi',
+  // Add Farcaster API key configuration
+  farcasterApi: {
+    enabled: !!process.env.VITE_FARCASTER_API_KEY,
+    apiKey: process.env.VITE_FARCASTER_API_KEY || ''
+  }
 };
