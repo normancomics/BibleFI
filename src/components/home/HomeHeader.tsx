@@ -1,15 +1,17 @@
 
 import React from "react";
 import PixelButton from "@/components/PixelButton";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 const HomeHeader: React.FC = () => {
-  const { playSound } = useSound();
+  const { playSound, isSoundEnabled, toggleSound, setUserInteracted } = useSound();
   const { toast } = useToast();
   
   const handleOpenFarcaster = () => {
+    setUserInteracted(true);
     playSound("select");
     toast({
       title: "Farcaster Integration",
@@ -18,6 +20,16 @@ const HomeHeader: React.FC = () => {
     
     // For now, we'll just open the Frame HTML page
     window.open("/frame.html", "_blank");
+  };
+  
+  const handleSoundToggle = () => {
+    toggleSound();
+    setUserInteracted(true);
+    
+    if (!isSoundEnabled) {
+      // Try to play a sound when enabling
+      setTimeout(() => playSound("click"), 100);
+    }
   };
   
   return (
@@ -34,24 +46,46 @@ const HomeHeader: React.FC = () => {
         Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
       </p>
       
-      <div className="flex justify-center items-center mt-2 mb-4 bg-black/50 py-2 px-4 rounded-lg inline-block mx-auto border border-ancient-gold/30">
-        <span className="text-white mr-2 font-pixel tracking-wider">MADE ON</span>
+      <div className="flex justify-center items-center mt-2 mb-4 bg-black/70 py-2 px-6 rounded-lg inline-block mx-auto border-2 border-ancient-gold/50">
+        <span className="text-white mr-3 font-pixel tracking-wider text-lg">MADE ON</span>
         <img 
           src="https://base.org/images/favicon.png" 
           alt="Base Chain Logo" 
           className="w-6 h-6 inline-block"
         />
-        <span className="ml-1 text-base-blue font-pixel font-bold tracking-wider">BASE CHAIN</span>
+        <span className="ml-2 text-base-blue font-pixel font-bold tracking-wider text-lg">BASE CHAIN</span>
       </div>
       
-      <div className="mt-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 mb-6">
         <PixelButton 
           onClick={handleOpenFarcaster}
-          className="inline-flex items-center px-4 py-2"
+          className="inline-flex items-center px-6 py-3 text-lg"
         >
-          <ExternalLink size={16} className="mr-2" />
+          <ExternalLink size={20} className="mr-2" />
           Open in Farcaster
         </PixelButton>
+        
+        <Button
+          onClick={handleSoundToggle}
+          variant="outline"
+          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-black/50 hover:bg-black/70"
+        >
+          {isSoundEnabled ? (
+            <>
+              <Volume2 size={18} className="text-ancient-gold" />
+              <span>Sound ON</span>
+            </>
+          ) : (
+            <>
+              <VolumeX size={18} className="text-gray-400" />
+              <span>Sound OFF</span>
+            </>
+          )}
+        </Button>
+      </div>
+      
+      <div className="text-sm text-white/70 mt-2">
+        <p>Using iPad/iOS? Tap any sound button to enable audio</p>
       </div>
     </section>
   );

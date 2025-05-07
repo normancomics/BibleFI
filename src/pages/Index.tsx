@@ -11,21 +11,30 @@ import FarcasterConnect from "@/farcaster/FarcasterConnect";
 import SoundInitializer from "@/components/SoundInitializer";
 import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle } from "lucide-react";
 
 const Index: React.FC = () => {
   const { playSound, setUserInteracted } = useSound();
   
+  // Check if user is on iOS
+  const isIOS = typeof navigator !== 'undefined' && 
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  
   useEffect(() => {
-    // Force enable user interaction for development
-    setUserInteracted(true);
-    
-    // Try to play a sound to unlock audio context
-    const timer = setTimeout(() => {
-      playSound("select");
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [playSound, setUserInteracted]);
+    // On non-iOS we can try to auto-enable
+    if (!isIOS) {
+      // Force enable user interaction for development
+      setUserInteracted(true);
+      
+      // Try to play a sound to unlock audio context
+      const timer = setTimeout(() => {
+        playSound("select");
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [playSound, setUserInteracted, isIOS]);
   
   return (
     <div className="min-h-screen">
@@ -39,18 +48,22 @@ const Index: React.FC = () => {
         
         <HomeHeader />
         
-        <Card className="border-2 border-scripture mb-8">
-          <CardContent className="p-4">
-            <h2 className="text-2xl font-bold text-center text-ancient-gold mb-4">
-              SOUND TEST CENTER
-            </h2>
-            <p className="text-white mb-4">
-              Click the buttons below to test the sound effects. Make sure your volume is turned up!
+        {isIOS && (
+          <div className="mb-6 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg p-4 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <AlertTriangle className="text-yellow-500" />
+              <h3 className="text-xl font-bold text-yellow-500">iPad/iOS Sound Notice</h3>
+            </div>
+            <p className="text-white">
+              Apple devices require direct user interaction before allowing sound to play.
+              Please tap the buttons in the Sound Test Center below to enable audio.
             </p>
-            
-            <SoundTestPanel />
-          </CardContent>
-        </Card>
+          </div>
+        )}
+        
+        <div className="mb-10">
+          <SoundTestPanel />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
           <DailyScripture />

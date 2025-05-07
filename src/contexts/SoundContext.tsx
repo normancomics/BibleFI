@@ -25,7 +25,33 @@ interface SoundProviderProps {
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [userInteracted, setUserInteracted] = useState<boolean>(false);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [soundsLoaded, setSoundsLoaded] = useState<boolean>(false);
+  
+  // Initialize Web Audio API for better iOS compatibility
+  useEffect(() => {
+    // Only create AudioContext after user interaction to avoid warnings
+    if (userInteracted && !audioContext) {
+      try {
+        // Use AudioContext for better cross-browser support
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          const newContext = new AudioContextClass();
+          setAudioContext(newContext);
+          console.log("🎵 Audio Context created successfully");
+          
+          // Resume the audio context (needed for iOS)
+          if (newContext.state === 'suspended') {
+            newContext.resume().then(() => {
+              console.log("🎵 Audio Context resumed");
+            });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to create AudioContext:", e);
+      }
+    }
+  }, [userInteracted]);
   
   // Pre-load audio files
   useEffect(() => {
@@ -53,51 +79,49 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       // Start loading
       audio.load();
     });
-    
-    // Force user interaction after a short delay (for testing)
-    const timer = setTimeout(() => {
-      setUserInteracted(true);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
   }, []);
   
-  // Play sound function
+  // Play sound function with improved iOS support
   const playSound = useCallback((sound: SoundType) => {
-    if (!isSoundEnabled) {
+    if (!isSoundEnabled || !userInteracted) {
+      console.log(`Sound ${sound} not played: enabled=${isSoundEnabled}, userInteracted=${userInteracted}`);
       return;
     }
     
     try {
-      console.log(`Attempting to play sound: ${sound}`);
+      console.log(`🎵 Attempting to play sound: ${sound}`);
       
       // Create a fresh audio element each time for better compatibility
       const audio = new Audio(`/sounds/${sound}.mp3`);
       audio.volume = 0.5;
+      audio.muted = false; // Ensure not muted
       
-      // Play the sound without waiting for it to load
+      // For iOS Safari, we need to play in direct response to a user action
+      // We'll use both the audio element and AudioContext if available
+      if (audioContext && audioContext.state === "running") {
+        console.log("Using AudioContext for playback");
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(audioContext.destination);
+      }
+      
+      // Play the sound
       const playPromise = audio.play();
       
       if (playPromise !== undefined) {
         playPromise.then(() => {
-          console.log(`Sound ${sound} played successfully`);
+          console.log(`✅ Sound ${sound} played successfully`);
         }).catch(error => {
-          console.warn(`Error playing sound ${sound}:`, error);
-          
-          // Auto-enable user interaction if needed
-          if (!userInteracted) {
-            setUserInteracted(true);
-          }
+          console.warn(`❌ Error playing sound ${sound}:`, error);
         });
       }
     } catch (err) {
       console.error(`Failed to create audio for ${sound}:`, err);
     }
-  }, [isSoundEnabled, userInteracted]);
+  }, [isSoundEnabled, userInteracted, audioContext]);
   
-  const toggleSound = () => {
+  const toggleSound = useCallback(() => {
     setIsSoundEnabled(prev => !prev);
-  };
+  }, []);
   
   return (
     <SoundContext.Provider 
