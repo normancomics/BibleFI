@@ -4,7 +4,6 @@ import NavBar from "@/components/NavBar";
 import DefiSwap from "@/components/defi/DefiSwap";
 import { useSound } from "@/contexts/SoundContext";
 import { AnimatedSpriteBackground, GlowingText } from "@/components/ui/tailwind-extensions";
-import PixelCharacter from "@/components/PixelCharacter";
 
 const DefiPage: React.FC = () => {
   const { playSound } = useSound();
@@ -27,20 +26,6 @@ const DefiPage: React.FC = () => {
           <p className="text-lg text-white/80 max-w-xl mx-auto font-scroll">
             Apply Biblical wisdom to your financial decisions with 0x Protocol DeFi swaps on Base Chain
           </p>
-        </div>
-        
-        <div className="flex flex-wrap justify-center items-center gap-4 mb-8">
-          <PixelCharacter 
-            character="solomon" 
-            size="md" 
-            soundEffect={true} 
-          />
-          <div className="character-bubble max-w-sm">
-            <p className="text-sm italic font-scroll">
-              "Divide your portion to seven, or even to eight, for you do not know what disaster may happen on earth."
-            </p>
-            <p className="text-right text-xs mt-1 text-ancient-gold font-scroll">— Ecclesiastes 11:2</p>
-          </div>
         </div>
         
         <div className="max-w-3xl mx-auto">

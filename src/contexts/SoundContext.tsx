@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { SoundType } from "@/components/SoundEffect";
 
 interface SoundContextType {
@@ -25,119 +25,97 @@ interface SoundProviderProps {
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [userInteracted, setUserInteracted] = useState<boolean>(false);
+  const audioElements = useRef<{[key: string]: HTMLAudioElement}>({});
   
-  // Auto-enable user interaction after a delay (for demo purposes)
+  // Pre-load audio files for better performance
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setUserInteracted(true);
-      console.log("Auto-enabling user interaction for sounds");
-    }, 3000);
+    const soundTypes: SoundType[] = ["coin", "click", "error", "scroll", "select", "powerup", "success"];
     
-    return () => clearTimeout(timer);
-  }, []);
-  
-  // Initialize sound files and set up global interaction detection
-  useEffect(() => {
-    // Global user interaction handler - this is key for iOS/Safari
-    const handleInteraction = () => {
-      console.log("User interaction detected - sounds can now play");
+    soundTypes.forEach(sound => {
+      const audio = new Audio();
+      audio.src = `/sounds/${sound}.mp3`;
+      audio.preload = "auto"; // Preload the audio file
+      audioElements.current[sound] = audio;
+    });
+    
+    // Force interaction and unlock audio
+    const unlockAudio = () => {
       setUserInteracted(true);
       
-      // Attempt to play a silent sound to unlock audio
-      try {
-        const audio = new Audio();
-        audio.volume = 0.01; // Nearly silent
-        audio.src = "/sounds/click.mp3";
-        
+      // Try to play and immediately pause all sounds to unlock them
+      Object.values(audioElements.current).forEach(audio => {
         const playPromise = audio.play();
-        if (playPromise) {
+        if (playPromise !== undefined) {
           playPromise
             .then(() => {
               audio.pause();
               audio.currentTime = 0;
-              console.log("Audio context unlocked successfully");
+              console.log("Audio unlocked successfully");
             })
-            .catch(e => console.log("Initial sound unlock attempt - expected error:", e));
+            .catch(e => console.log("Unlock attempt - expected error:", e));
         }
-      } catch (e) {
-        console.error("Error unlocking audio context:", e);
-      }
+      });
     };
+
+    // Listen for various user interactions to unlock audio
+    const handleUserInteraction = () => unlockAudio();
     
-    // Listen for various user interactions
-    document.addEventListener("click", handleInteraction, { once: true });
-    document.addEventListener("touchstart", handleInteraction, { once: true });
-    document.addEventListener("keydown", handleInteraction, { once: true });
+    document.addEventListener("click", handleUserInteraction);
+    document.addEventListener("touchstart", handleUserInteraction);
+    document.addEventListener("keydown", handleUserInteraction);
+    
+    // Auto-unlock for testing purposes
+    const forceUnlockTimer = setTimeout(() => {
+      console.log("Auto-enabling user interaction for sounds");
+      setUserInteracted(true);
+      unlockAudio();
+    }, 1000);
     
     return () => {
-      document.removeEventListener("click", handleInteraction);
-      document.removeEventListener("touchstart", handleInteraction);
-      document.removeEventListener("keydown", handleInteraction);
+      document.removeEventListener("click", handleUserInteraction);
+      document.removeEventListener("touchstart", handleUserInteraction);
+      document.removeEventListener("keydown", handleUserInteraction);
+      clearTimeout(forceUnlockTimer);
     };
   }, []);
   
   // Play sound function with improved reliability
   const playSound = useCallback((sound: SoundType) => {
     if (!isSoundEnabled) {
-      console.log(`Sound ${sound} not played - sounds are disabled`);
-      return;
-    }
-    
-    if (!userInteracted) {
-      console.log(`Sound ${sound} not played - waiting for user interaction`);
+      console.log(`Sound ${sound} disabled - sounds are turned off`);
       return;
     }
     
     try {
-      console.log(`Playing sound: ${sound}`);
+      console.log(`Attempting to play sound: ${sound}`);
       
-      // Create a fresh audio element each time for better compatibility
+      // Create a fresh audio element each time for better browser compatibility
       const audio = new Audio(`/sounds/${sound}.mp3`);
-      audio.volume = 0.7; // Louder for better audibility
+      audio.volume = 0.8; 
       
       // Try to play the sound
       const playPromise = audio.play();
       
-      // Handle play promise rejection (common in Safari/iOS)
+      // Handle play promise rejection
       if (playPromise !== undefined) {
-        playPromise.catch(error => {
+        playPromise.then(() => {
+          console.log(`Sound ${sound} played successfully`);
+        }).catch(error => {
           console.error(`Error playing sound ${sound}:`, error);
           
-          // Display a user hint if sounds aren't playing
-          const soundHintElement = document.getElementById('sound-activation-hint');
-          if (soundHintElement) {
-            soundHintElement.style.display = 'block';
-            setTimeout(() => {
-              soundHintElement.style.display = 'none';
-            }, 5000);
+          // If user hasn't interacted, force interaction mode
+          if (!userInteracted) {
+            setUserInteracted(true);
           }
         });
       }
     } catch (err) {
-      console.error(`Error playing sound ${sound}:`, err);
+      console.error(`Error creating audio for ${sound}:`, err);
     }
   }, [isSoundEnabled, userInteracted]);
   
   const toggleSound = () => {
-    setIsSoundEnabled(prev => {
-      const newState = !prev;
-      console.log(`Sound ${newState ? 'enabled' : 'disabled'}`);
-      return newState;
-    });
-    
-    // Play a sound when turning sounds back on
-    if (!isSoundEnabled) {
-      setTimeout(() => {
-        console.log("Playing sound after enabling");
-        try {
-          const audio = new Audio("/sounds/powerup.mp3");
-          audio.volume = 0.7;
-          audio.play().catch(e => console.error("Error playing sound after enable:", e));
-        } catch (e) {
-          console.error("Error creating audio:", e);
-        }
-      }, 100);
-    }
+    setIsSoundEnabled(prev => !prev);
   };
   
   return (
@@ -152,26 +130,15 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     >
       {children}
       
-      {/* Hidden element for sound activation hint */}
-      <div 
-        id="sound-activation-hint" 
-        style={{
-          display: 'none',
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: '#8E5DF6',
-          color: 'white',
-          padding: '10px 15px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          zIndex: 9999,
-          fontSize: '14px',
-          animation: 'bounce 2s infinite'
-        }}
-      >
-        Tap anywhere to enable sounds 🔊
-      </div>
+      {/* Sound activation notification */}
+      {!userInteracted && (
+        <div 
+          className="fixed bottom-4 right-4 bg-scripture text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce-subtle"
+          onClick={() => setUserInteracted(true)}
+        >
+          Click anywhere to enable sounds 🔊
+        </div>
+      )}
     </SoundContext.Provider>
   );
 };

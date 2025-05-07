@@ -8,36 +8,28 @@ import TaxSection from "@/components/home/TaxSection";
 import { useSound } from "@/contexts/SoundContext";
 import FarcasterFrame from "@/farcaster/FarcasterFrame";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
+import SoundInitializer from "@/components/SoundInitializer";
+import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 
 const Index: React.FC = () => {
   const { playSound, setUserInteracted } = useSound();
   
-  // Enable sound on page load
   useEffect(() => {
     // Force enable user interaction for development
     setUserInteracted(true);
     
-    // Play an initial sound to unlock audio on iOS/Safari
-    const unlockAudio = () => {
-      playSound("select");
-    };
-    
-    // Add a slight delay to ensure the context is ready
+    // Try to play a sound to unlock audio context
     const timer = setTimeout(() => {
-      unlockAudio();
+      playSound("select");
     }, 500);
     
     return () => clearTimeout(timer);
   }, [playSound, setUserInteracted]);
   
-  // Function to handle user interaction
-  const handleInteraction = () => {
-    setUserInteracted(true);
-  };
-
   return (
-    <div className="min-h-screen" onClick={handleInteraction}>
+    <div className="min-h-screen">
+      <SoundInitializer />
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
@@ -46,6 +38,9 @@ const Index: React.FC = () => {
         </div>
         
         <HomeHeader />
+        
+        {/* Sound Test Panel */}
+        <SoundTestPanel />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
           <DailyScripture />
