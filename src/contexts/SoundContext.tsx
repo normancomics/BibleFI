@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { SoundType } from "@/components/SoundEffect";
 
 interface SoundContextType {
@@ -25,92 +25,73 @@ interface SoundProviderProps {
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
   const [userInteracted, setUserInteracted] = useState<boolean>(false);
-  const audioElements = useRef<{[key: string]: HTMLAudioElement}>({});
+  const [soundsLoaded, setSoundsLoaded] = useState<boolean>(false);
   
-  // Pre-load audio files for better performance
+  // Pre-load audio files
   useEffect(() => {
     const soundTypes: SoundType[] = ["coin", "click", "error", "scroll", "select", "powerup", "success"];
+    let loadedSounds = 0;
     
     soundTypes.forEach(sound => {
       const audio = new Audio();
       audio.src = `/sounds/${sound}.mp3`;
-      audio.preload = "auto"; // Preload the audio file
-      audioElements.current[sound] = audio;
+      
+      // Handle load event
+      audio.oncanplaythrough = () => {
+        loadedSounds++;
+        if (loadedSounds === soundTypes.length) {
+          setSoundsLoaded(true);
+          console.log("✅ All sounds preloaded successfully");
+        }
+      };
+      
+      // Handle errors
+      audio.onerror = (e) => {
+        console.error(`Failed to load sound: ${sound}`, e);
+      };
+      
+      // Start loading
+      audio.load();
     });
     
-    // Force interaction and unlock audio
-    const unlockAudio = () => {
+    // Force user interaction after a short delay (for testing)
+    const timer = setTimeout(() => {
       setUserInteracted(true);
-      
-      // Try to play and immediately pause all sounds to unlock them
-      Object.values(audioElements.current).forEach(audio => {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              audio.pause();
-              audio.currentTime = 0;
-              console.log("Audio unlocked successfully");
-            })
-            .catch(e => console.log("Unlock attempt - expected error:", e));
-        }
-      });
-    };
-
-    // Listen for various user interactions to unlock audio
-    const handleUserInteraction = () => unlockAudio();
-    
-    document.addEventListener("click", handleUserInteraction);
-    document.addEventListener("touchstart", handleUserInteraction);
-    document.addEventListener("keydown", handleUserInteraction);
-    
-    // Auto-unlock for testing purposes
-    const forceUnlockTimer = setTimeout(() => {
-      console.log("Auto-enabling user interaction for sounds");
-      setUserInteracted(true);
-      unlockAudio();
     }, 1000);
     
-    return () => {
-      document.removeEventListener("click", handleUserInteraction);
-      document.removeEventListener("touchstart", handleUserInteraction);
-      document.removeEventListener("keydown", handleUserInteraction);
-      clearTimeout(forceUnlockTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
   
-  // Play sound function with improved reliability
+  // Play sound function
   const playSound = useCallback((sound: SoundType) => {
     if (!isSoundEnabled) {
-      console.log(`Sound ${sound} disabled - sounds are turned off`);
       return;
     }
     
     try {
       console.log(`Attempting to play sound: ${sound}`);
       
-      // Create a fresh audio element each time for better browser compatibility
+      // Create a fresh audio element each time for better compatibility
       const audio = new Audio(`/sounds/${sound}.mp3`);
-      audio.volume = 0.8; 
+      audio.volume = 0.5;
       
-      // Try to play the sound
+      // Play the sound without waiting for it to load
       const playPromise = audio.play();
       
-      // Handle play promise rejection
       if (playPromise !== undefined) {
         playPromise.then(() => {
           console.log(`Sound ${sound} played successfully`);
         }).catch(error => {
-          console.error(`Error playing sound ${sound}:`, error);
+          console.warn(`Error playing sound ${sound}:`, error);
           
-          // If user hasn't interacted, force interaction mode
+          // Auto-enable user interaction if needed
           if (!userInteracted) {
             setUserInteracted(true);
           }
         });
       }
     } catch (err) {
-      console.error(`Error creating audio for ${sound}:`, err);
+      console.error(`Failed to create audio for ${sound}:`, err);
     }
   }, [isSoundEnabled, userInteracted]);
   
@@ -129,16 +110,6 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       }}
     >
       {children}
-      
-      {/* Sound activation notification */}
-      {!userInteracted && (
-        <div 
-          className="fixed bottom-4 right-4 bg-scripture text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce-subtle"
-          onClick={() => setUserInteracted(true)}
-        >
-          Click anywhere to enable sounds 🔊
-        </div>
-      )}
     </SoundContext.Provider>
   );
 };

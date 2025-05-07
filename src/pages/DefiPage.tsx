@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import DefiSwap from "@/components/defi/DefiSwap";
 import { useSound } from "@/contexts/SoundContext";
-import { AnimatedSpriteBackground, GlowingText } from "@/components/ui/tailwind-extensions";
+import { GlowingText } from "@/components/ui/tailwind-extensions";
 
 const DefiPage: React.FC = () => {
   const { playSound } = useSound();
@@ -14,11 +14,10 @@ const DefiPage: React.FC = () => {
   }, [playSound]);
   
   return (
-    <div className="min-h-screen">
-      <AnimatedSpriteBackground opacity={0.05} />
+    <div className="min-h-screen bg-gradient-to-b from-black to-scripture/20">
       <NavBar />
       
-      <main className="container mx-auto px-4 py-8 animate-entrance">
+      <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-scroll mb-2">
             <GlowingText color="gold">Biblical DeFi</GlowingText>
@@ -32,7 +31,7 @@ const DefiPage: React.FC = () => {
           <DefiSwap />
         </div>
         
-        <div className="mt-12 text-center text-sm text-white/60 font-scroll">
+        <div className="mt-12 text-center text-sm text-white/60">
           <p>All transactions powered by 0x Protocol on Base Chain</p>
           <div className="flex items-center justify-center mt-2 gap-3">
             <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" className="h-6" />

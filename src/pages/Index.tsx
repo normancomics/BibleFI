@@ -39,8 +39,18 @@ const Index: React.FC = () => {
         
         <HomeHeader />
         
-        {/* Sound Test Panel */}
-        <SoundTestPanel />
+        <Card className="border-2 border-scripture mb-8">
+          <CardContent className="p-4">
+            <h2 className="text-2xl font-bold text-center text-ancient-gold mb-4">
+              SOUND TEST CENTER
+            </h2>
+            <p className="text-white mb-4">
+              Click the buttons below to test the sound effects. Make sure your volume is turned up!
+            </p>
+            
+            <SoundTestPanel />
+          </CardContent>
+        </Card>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
           <DailyScripture />
@@ -65,10 +75,6 @@ const Index: React.FC = () => {
                   className="h-16"
                 />
               </div>
-              
-              <p className="text-white/70 text-sm font-scroll">
-                Connect your Farcaster account to access all features and share wisdom with your network.
-              </p>
             </CardContent>
           </Card>
         </div>
