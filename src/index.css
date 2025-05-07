@@ -5,13 +5,13 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
+    --background: 258 67% 60%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 3%;
+    --card: 258 67% 3%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3%;
+    --popover: 258 67% 3%;
     --popover-foreground: 0 0% 98%;
-    --primary: 272 67% 60%;
+    --primary: 217 100% 50%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 3% 11%;
     --secondary-foreground: 0 0% 98%;
@@ -27,12 +27,12 @@
     --radius: 0.5rem;
 
     /* Custom colors */
-    --scripture: 272 67% 60%;
-    --scripture-light: 272 67% 70%;
+    --scripture: 258 67% 60%;
+    --scripture-light: 258 67% 70%;
     --ancient-gold: 41 89% 64%;
     --ancient-scroll: 39 70% 90%;
     --base-blue: 217 100% 50%;
-    --pixel-purple: 272 67% 60%;
+    --pixel-purple: 258 67% 60%;
     --pixel-green: 120 100% 50%;
     --pixel-yellow: 60 100% 50%;
   }
@@ -45,12 +45,12 @@
   
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at center, rgba(69, 69, 69, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%);
+    background-image: linear-gradient(135deg, rgba(155, 135, 245, 0.9) 0%, rgba(0, 82, 255, 0.8) 100%);
     background-attachment: fixed;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight;
+    @apply tracking-tight font-scroll;
   }
 }
 
@@ -87,7 +87,7 @@
   }
   
   .warpcast-frame {
-    @apply border border-ancient-gold/50 bg-gradient-to-br from-black/80 to-black/40;
+    @apply border border-ancient-gold/50 bg-gradient-to-br from-scripture/80 to-black/40;
   }
   
   /* Bible character styles */
@@ -198,5 +198,5 @@
 }
 
 .font-scroll {
-  font-family: 'Copperplate', 'Papyrus', serif;
+  font-family: 'Cinzel', 'Playfair Display', 'Copperplate', 'Papyrus', serif;
 }

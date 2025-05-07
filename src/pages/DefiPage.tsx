@@ -21,10 +21,10 @@ const DefiPage: React.FC = () => {
       
       <main className="container mx-auto px-4 py-8 animate-entrance">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-pixel mb-2">
+          <h1 className="text-3xl font-scroll mb-2">
             <GlowingText color="gold">Biblical DeFi</GlowingText>
           </h1>
-          <p className="text-lg text-white/80 max-w-xl mx-auto">
+          <p className="text-lg text-white/80 max-w-xl mx-auto font-scroll">
             Apply Biblical wisdom to your financial decisions with 0x Protocol DeFi swaps on Base Chain
           </p>
         </div>
@@ -36,10 +36,10 @@ const DefiPage: React.FC = () => {
             soundEffect={true} 
           />
           <div className="character-bubble max-w-sm">
-            <p className="text-sm italic">
+            <p className="text-sm italic font-scroll">
               "Divide your portion to seven, or even to eight, for you do not know what disaster may happen on earth."
             </p>
-            <p className="text-right text-xs mt-1 text-ancient-gold">— Ecclesiastes 11:2</p>
+            <p className="text-right text-xs mt-1 text-ancient-gold font-scroll">— Ecclesiastes 11:2</p>
           </div>
         </div>
         
@@ -47,7 +47,7 @@ const DefiPage: React.FC = () => {
           <DefiSwap />
         </div>
         
-        <div className="mt-12 text-center text-sm text-white/60">
+        <div className="mt-12 text-center text-sm text-white/60 font-scroll">
           <p>All transactions powered by 0x Protocol on Base Chain</p>
           <div className="flex items-center justify-center mt-2 gap-3">
             <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" className="h-6" />

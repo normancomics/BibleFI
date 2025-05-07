@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -62,27 +63,27 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Bible.Fi custom colors - more vibrant retro game colors
+				// Bible.Fi custom colors - Farcaster purple and Base blue
 				scripture: {
-					DEFAULT: '#8E5DF6', // Brighter purple
-					dark: '#6E42D3',    // Darker purple
-					light: '#BFA6FF',   // Light purple
+					DEFAULT: '#9B87F5', // Farcaster purple
+					dark: '#7E69AB',    // Darker purple
+					light: '#D6BCFA',   // Light purple
 				},
 				ancient: {
-					scroll: '#FFF7C2',  // Brighter yellow for scrolls
+					scroll: '#FFF7C2',  // Parchment yellow
 					gold: '#FFD700',    // Gold for important elements
-					temple: '#00FF66',  // Brighter green for temple elements
+					temple: '#00FF66',  // Green for temple elements
 				},
 				// Retro game colors
 				pixel: {
 					red: '#FF5555',
-					blue: '#1E90FF',    // Royal blue for the new headings
+					blue: '#0052FF',    // Base blue
 					green: '#55FF55',
 					yellow: '#FFFF55',
 					orange: '#FF9955',
 					pink: '#FF55FF',
 					cyan: '#00FFFF',
-					purple: '#8800FF',
+					purple: '#9B87F5',  // Farcaster purple
 					black: '#000000',
 					white: '#FFFFFF',
 				},
@@ -132,7 +133,7 @@ export default {
 			},
 			fontFamily: {
 				pixel: ['VT323', 'monospace'],
-				scroll: ['Cinzel', 'serif'],
+				scroll: ['Cinzel', 'Playfair Display', 'serif'],
 				game: ['"Press Start 2P"', 'cursive']
 			}
 		}

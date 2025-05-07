@@ -37,7 +37,7 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900" onClick={handleInteraction}>
+    <div className="min-h-screen" onClick={handleInteraction}>
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
@@ -55,10 +55,10 @@ const Index: React.FC = () => {
         <FeatureCards />
         
         <div className="my-12">
-          <Card className="bg-black/60 border border-base-blue shadow-md">
+          <Card className="bg-scripture/20 border border-ancient-gold shadow-md">
             <CardContent className="p-6">
-              <h2 className="text-2xl text-white font-medium mb-4">Bible.fi Mini-App</h2>
-              <p className="text-white/80 mb-4">
+              <h2 className="text-2xl text-white font-scroll mb-4">Bible.fi Mini-App</h2>
+              <p className="text-white/80 mb-4 font-scroll">
                 Bible.fi is built specifically to run as a mini-app inside Farcaster, 
                 offering biblical financial wisdom directly to the Farcaster community.
               </p>
@@ -67,11 +67,11 @@ const Index: React.FC = () => {
                 <img 
                   src="/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png" 
                   alt="Farcaster Logo"
-                  className="h-16 opacity-70"
+                  className="h-16"
                 />
               </div>
               
-              <p className="text-white/70 text-sm">
+              <p className="text-white/70 text-sm font-scroll">
                 Connect your Farcaster account to access all features and share wisdom with your network.
               </p>
             </CardContent>

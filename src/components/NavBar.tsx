@@ -18,7 +18,7 @@ const NavBar: React.FC = () => {
   };
 
   return (
-    <header className="bg-scripture text-white p-2 sticky top-0 z-10">
+    <header className="bg-base-blue text-white p-2 sticky top-0 z-10">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center group" onClick={() => handleNavClick("coin")}>
           <PixelIcon 
@@ -29,51 +29,51 @@ const NavBar: React.FC = () => {
             glow={false}
             className="mr-2"
           />
-          <h1 className="text-2xl font-sans tracking-tight font-medium text-white group-hover:opacity-90 transition-opacity">
-            <span className="text-base-blue">Bible</span>.fi
+          <h1 className="text-2xl font-scroll tracking-tight font-medium text-white group-hover:opacity-90 transition-opacity">
+            <span className="text-scripture-light">Bible</span>.fi
           </h1>
         </Link>
         
         <nav className="flex items-center space-x-4">
           <Link 
             to="/" 
-            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/") ? "bg-base-blue" : "hover:bg-scripture-dark"}`} 
+            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/") ? "bg-scripture" : "hover:bg-base-dark"}`} 
             onClick={() => handleNavClick("select")}
           >
             <Home size={20} />
-            <span className="text-xs">Home</span>
+            <span className="text-xs font-scroll">Home</span>
           </Link>
           <Link 
             to="/wisdom" 
-            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/wisdom") ? "bg-base-blue" : "hover:bg-scripture-dark"}`}
+            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/wisdom") ? "bg-scripture" : "hover:bg-base-dark"}`}
             onClick={() => handleNavClick("scroll")}
           >
             <BookOpen size={20} />
-            <span className="text-xs">Wisdom</span>
+            <span className="text-xs font-scroll">Wisdom</span>
           </Link>
           <Link 
             to="/staking" 
-            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/staking") ? "bg-base-blue" : "hover:bg-scripture-dark"}`}
+            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/staking") ? "bg-scripture" : "hover:bg-base-dark"}`}
             onClick={() => handleNavClick("coin")}
           >
             <Coins size={20} />
-            <span className="text-xs">Staking</span>
+            <span className="text-xs font-scroll">Staking</span>
           </Link>
           <Link 
             to="/tithe" 
-            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/tithe") ? "bg-base-blue" : "hover:bg-scripture-dark"}`}
+            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/tithe") ? "bg-scripture" : "hover:bg-base-dark"}`}
             onClick={() => handleNavClick("scroll")}
           >
             <Church size={20} />
-            <span className="text-xs">Tithe</span>
+            <span className="text-xs font-scroll">Tithe</span>
           </Link>
           <Link 
             to="/taxes" 
-            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/taxes") ? "bg-base-blue" : "hover:bg-scripture-dark"}`}
+            className={`flex flex-col items-center px-2 py-1 rounded ${isActive("/taxes") ? "bg-scripture" : "hover:bg-base-dark"}`}
             onClick={() => handleNavClick("select")}
           >
             <BarChart size={20} />
-            <span className="text-xs">Taxes</span>
+            <span className="text-xs font-scroll">Taxes</span>
           </Link>
         </nav>
       </div>
