@@ -63,27 +63,27 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Bible.Fi custom colors - more vibrant retro game colors
+				// Bible.Fi custom colors - Farcaster purple and Base blue
 				scripture: {
-					DEFAULT: '#FF44FF', // Bright neon pink
-					dark: '#BB00BB',    // Darker pink
-					light: '#FFB3FF',   // Light pink
+					DEFAULT: '#9B87F5', // Farcaster purple
+					dark: '#7E69AB',    // Darker purple
+					light: '#D6BCFA',   // Light purple
 				},
 				ancient: {
-					scroll: '#FFFF00',  // Bright retro yellow
-					gold: '#FFAA00',    // Gold orange for important elements
-					temple: '#00FF66',  // Bright green for temple elements
+					scroll: '#FFF7C2',  // Parchment yellow
+					gold: '#FFD700',    // Gold for important elements
+					temple: '#00FF66',  // Green for temple elements
 				},
 				// Retro game colors
 				pixel: {
-					red: '#FF0000',
-					blue: '#0088FF',
-					green: '#00FF00',
-					yellow: '#FFFF00',
-					orange: '#FF8800',
-					pink: '#FF44FF',
+					red: '#FF5555',
+					blue: '#0052FF',    // Base blue
+					green: '#55FF55',
+					yellow: '#FFFF55',
+					orange: '#FF9955',
+					pink: '#FF55FF',
 					cyan: '#00FFFF',
-					purple: '#8800FF',
+					purple: '#9B87F5',  // Farcaster purple
 					black: '#000000',
 					white: '#FFFFFF',
 				},
@@ -119,20 +119,8 @@ export default {
 					'50%': { transform: 'translateY(-10px)' }
 				},
 				'pulse-glow': {
-					'0%, 100%': { filter: 'drop-shadow(0 0 5px rgba(255, 68, 255, 0.5))' },
-					'50%': { filter: 'drop-shadow(0 0 20px rgba(255, 68, 255, 0.8))' }
-				},
-				'pixel-shift': {
-					'0%, 100%': { transform: 'translate(0, 0)' },
-					'10%': { transform: 'translate(-2px, 0)' },
-					'20%': { transform: 'translate(2px, 0)' },
-					'30%': { transform: 'translate(-2px, 0)' },
-					'40%': { transform: 'translate(2px, 0)' },
-					'50%': { transform: 'translate(0, 0)' }
-				},
-				'scanline': {
-					'0%': { transform: 'translateY(0)' },
-					'100%': { transform: 'translateY(100%)' }
+					'0%, 100%': { filter: 'drop-shadow(0 0 5px rgba(142, 93, 246, 0.5))' },
+					'50%': { filter: 'drop-shadow(0 0 20px rgba(142, 93, 246, 0.8))' }
 				}
 			},
 			animation: {
@@ -141,13 +129,11 @@ export default {
 				'coin-spin': 'coin-spin 2s ease-in-out infinite',
 				'scroll-unfurl': 'scroll-unfurl 0.5s ease-out',
 				'float': 'float 3s ease-in-out infinite',
-				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-				'pixel-shift': 'pixel-shift 5s ease-in-out infinite',
-				'scanline': 'scanline 8s linear infinite'
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
 			},
 			fontFamily: {
 				pixel: ['VT323', 'monospace'],
-				scroll: ['Cinzel', 'serif'],
+				scroll: ['Cinzel', 'Playfair Display', 'serif'],
 				game: ['"Press Start 2P"', 'cursive']
 			}
 		}
