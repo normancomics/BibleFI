@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
-import HomeHeader from "@/components/home/HomeHeader";
 import FeatureCards from "@/components/home/FeatureCards";
 import TaxSection from "@/components/home/TaxSection";
 import { useSound } from "@/contexts/SoundContext";
@@ -12,7 +11,6 @@ import SoundInitializer from "@/components/SoundInitializer";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Volume2 } from "lucide-react";
 import BiblefiHero from "@/components/home/BiblefiHero";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
 import BibleCharacterSelector from "@/components/characters/BibleCharacterSelector";
@@ -37,7 +35,7 @@ const Index: React.FC = () => {
   }, [setUserInteracted]);
   
   // Get a random financial verse for the wisdom card
-  const financialVerse = getRandomVerse("finance");
+  const financialVerse = getRandomVerse();
   
   // Simple component for iOS audio unlocking
   const AudioUnlocker = () => {
@@ -53,7 +51,6 @@ const Index: React.FC = () => {
             className="bg-red-600 hover:bg-red-700 flex items-center gap-2 px-4 py-3 text-white font-bold animate-pulse"
             size="lg"
           >
-            <Volume2 className="h-6 w-6" />
             <span className="font-bold">UNLOCK SOUNDS (SAFARI)</span>
           </Button>
         ) : (
@@ -130,7 +127,7 @@ const Index: React.FC = () => {
               reference={financialVerse.reference}
               principle="Wise stewardship requires careful planning and management of resources."
               application="Apply this by creating a monthly budget that prioritizes giving, saving, and responsible spending."
-              tags={["stewardship", "planning", "finance"]}
+              tags={[financialVerse.category]}
             />
           </div>
         </div>

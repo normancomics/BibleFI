@@ -15,28 +15,28 @@ const FeatureShowcase: React.FC = () => {
   const features = [
     {
       title: "Biblical Wisdom",
-      icon: "scroll",
+      iconName: "scroll",
       color: "text-scripture",
       description: "Discover financial principles from scripture and apply them to your life",
       path: "/wisdom"
     },
     {
       title: "Digital Tithing",
-      icon: "coin",
+      iconName: "coin",
       color: "text-ancient-gold",
       description: "Support your church with crypto or traditional payments",
       path: "/tithe"
     },
     {
       title: "Stablecoin Staking",
-      icon: "temple",
+      iconName: "temple",
       color: "text-base-blue",
       description: "Earn yield while aligning with biblical principles",
       path: "/staking"
     },
     {
       title: "Render Unto Caesar",
-      icon: "tax",
+      iconName: "tax",
       color: "text-white",
       description: "Navigate crypto taxes with biblical guidance",
       path: "/taxes"
@@ -88,7 +88,7 @@ const FeatureShowcase: React.FC = () => {
               <CardContent className="p-0">
                 <div className="p-6 flex flex-col h-full">
                   <div className={`bg-black/40 p-4 rounded-lg mb-4 ${feature.color} flex justify-center`}>
-                    <PixelIcon icon={feature.icon} className="w-12 h-12" />
+                    <PixelIcon name={feature.iconName} className="w-12 h-12" />
                   </div>
                   
                   <h3 className={`text-xl font-pixel mb-3 ${feature.color}`}>{feature.title}</h3>

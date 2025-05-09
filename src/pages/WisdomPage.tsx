@@ -30,27 +30,27 @@ const WisdomPage: React.FC = () => {
   };
   
   const wisdomVerses = [
-    getRandomVerse("finance"),
-    getRandomVerse("finance"),
-    getRandomVerse("finance"),
+    getRandomVerse(),
+    getRandomVerse(),
+    getRandomVerse(),
   ];
   
   const principles = [
     {
       title: "Stewardship",
-      scripture: "The earth is the LORD's, and everything in it, the world, and all who live in it.",
+      verse: "The earth is the LORD's, and everything in it, the world, and all who live in it.",
       reference: "Psalm 24:1",
       description: "All wealth ultimately belongs to God, and we are merely stewards of what He has entrusted to us."
     },
     {
       title: "Avoiding Debt",
-      scripture: "The borrower is slave to the lender.",
+      verse: "The borrower is slave to the lender.",
       reference: "Proverbs 22:7",
       description: "Borrowing can lead to financial bondage. Living debt-free provides financial freedom and security."
     },
     {
       title: "Generosity",
-      scripture: "Whoever is kind to the poor lends to the LORD, and he will reward them for what they have done.",
+      verse: "Whoever is kind to the poor lends to the LORD, and he will reward them for what they have done.",
       reference: "Proverbs 19:17",
       description: "Giving generously brings spiritual rewards and reflects God's character."
     }
@@ -86,7 +86,7 @@ const WisdomPage: React.FC = () => {
           
           <TabsContent value="scriptures" className="mt-6">
             <div className="mb-6">
-              <ScriptureFilter onFilterChange={setFilter} />
+              <ScriptureFilter verses={wisdomVerses} />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -95,13 +95,13 @@ const WisdomPage: React.FC = () => {
                   key={index}
                   scripture={verse.text}
                   reference={verse.reference}
-                  principle={verse.categories[0] === "finance" ? 
+                  principle={verse.category === "finance" ? 
                     "Financial wisdom requires careful planning and foresight" : 
                     "Trust in God's provision while being a faithful steward"}
-                  application={verse.categories[0] === "finance" ? 
+                  application={verse.category === "finance" ? 
                     "Create a budget that includes saving, giving and spending with purpose" : 
                     "Apply biblical principles to manage your resources faithfully"}
-                  tags={verse.categories}
+                  tags={[verse.category]}
                 />
               ))}
             </div>
@@ -113,7 +113,7 @@ const WisdomPage: React.FC = () => {
                 <FinancialPrinciple 
                   key={index}
                   title={principle.title}
-                  scripture={principle.scripture}
+                  verse={principle.verse}
                   reference={principle.reference}
                   description={principle.description}
                 />
