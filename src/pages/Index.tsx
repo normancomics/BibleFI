@@ -12,7 +12,8 @@ import SoundInitializer from "@/components/SoundInitializer";
 import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import IOSAudioUnlocker from "@/components/IOSAudioUnlocker";
+import { Button } from "@/components/ui/button";
+import { Volume2 } from "lucide-react";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -30,9 +31,51 @@ const Index: React.FC = () => {
     setUserInteracted(true);
   }, [setUserInteracted]);
   
+  // Simple component for iOS audio unlocking
+  const AudioUnlocker = () => {
+    const [showControls, setShowControls] = useState(false);
+    
+    if (!isIOS && !isSafari) return null;
+    
+    return (
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-2">
+        {!showControls ? (
+          <Button
+            onClick={() => setShowControls(true)}
+            className="bg-red-600 hover:bg-red-700 flex items-center gap-2 px-4 py-3 text-white font-bold animate-pulse"
+            size="lg"
+          >
+            <Volume2 className="h-6 w-6" />
+            <span className="font-bold">UNLOCK SOUNDS (SAFARI)</span>
+          </Button>
+        ) : (
+          <div className="bg-black/90 border-2 border-red-500 p-4 rounded-lg w-[300px] max-w-full">
+            <h3 className="text-white font-bold mb-2">Tap Play on ANY Sound:</h3>
+            
+            <div className="space-y-2">
+              {["/sounds/click.mp3", "/sounds/coin.mp3", "/sounds/powerup.mp3"].map((src, i) => (
+                <div key={i} className="bg-gray-800 p-2 rounded">
+                  <audio src={src} controls className="w-full" />
+                </div>
+              ))}
+            </div>
+            
+            <Button 
+              onClick={() => setShowControls(false)} 
+              className="mt-3 w-full"
+              variant="outline"
+            >
+              Close Audio Panel
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   return (
     <div className="min-h-screen">
-      <IOSAudioUnlocker />
+      <AudioUnlocker />
       <SoundInitializer />
       <NavBar />
       
