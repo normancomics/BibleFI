@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
 import HomeHeader from "@/components/home/HomeHeader";
@@ -14,27 +14,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 
 const Index: React.FC = () => {
-  const { playSound, setUserInteracted } = useSound();
+  const { setUserInteracted } = useSound();
   
   // Check if user is on iOS
   const isIOS = typeof navigator !== 'undefined' && 
     (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
   
-  useEffect(() => {
-    // On non-iOS we can try to auto-enable
-    if (!isIOS) {
-      // Force enable user interaction for development
-      setUserInteracted(true);
-      
-      // Try to play a sound to unlock audio context
-      const timer = setTimeout(() => {
-        playSound("select");
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [playSound, setUserInteracted, isIOS]);
+  const isSafari = typeof navigator !== 'undefined' && 
+    /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   
   return (
     <div className="min-h-screen">
@@ -48,20 +36,22 @@ const Index: React.FC = () => {
         
         <HomeHeader />
         
-        {isIOS && (
-          <div className="mb-6 bg-yellow-900/30 border-2 border-yellow-500/50 rounded-lg p-4 text-center">
+        {(isIOS || isSafari) && (
+          <div className="mb-6 bg-yellow-900/30 border-2 border-yellow-500 rounded-lg p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
               <AlertTriangle className="text-yellow-500" />
-              <h3 className="text-xl font-bold text-yellow-500">iPad/iOS Sound Notice</h3>
+              <h3 className="text-xl font-bold text-yellow-500">
+                iPad Sound Fix: Use Safari Browser
+              </h3>
             </div>
             <p className="text-white">
-              Apple devices require direct user interaction before allowing sound to play.
-              Please tap the buttons in the Sound Test Center below to enable audio.
+              For iPad users: <strong>Apple Safari</strong> works best for sound. Edge and Chrome 
+              have more restrictions on iOS. Please tap the red "SHOW SAFARI AUDIO CONTROLS" button below.
             </p>
           </div>
         )}
         
-        <div className="mb-10">
+        <div id="sound-test-target" className="mb-10">
           <SoundTestPanel />
         </div>
         

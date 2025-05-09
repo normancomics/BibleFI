@@ -1,102 +1,74 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSound } from "@/contexts/SoundContext";
 import { Button } from "@/components/ui/button";
-import { VolumeOff, Volume2 } from "lucide-react";
+import { Volume2 } from "lucide-react";
 
 // This component helps initialize sounds early in the app lifecycle
-// and provides a mobile-friendly way to unlock audio
 const SoundInitializer: React.FC = () => {
-  const { setUserInteracted, playSound, isSoundEnabled, toggleSound } = useSound();
-  const [showUnlockButton, setShowUnlockButton] = useState(true);
-  const [unlockAttempts, setUnlockAttempts] = useState(0);
+  const { setUserInteracted } = useSound();
   
-  // Function to unlock audio context on mobile devices
-  const unlockAudio = () => {
-    try {
-      console.log("🔊 Attempting to unlock audio context...");
-      
-      // Create and play multiple silent sounds to maximize chances of unlocking
-      const audioElements = [];
-      const soundTypes = ["click", "coin", "select"];
-      
-      soundTypes.forEach(soundType => {
-        const audio = new Audio(`/sounds/${soundType}.mp3`);
-        audio.volume = 0.01; // Nearly silent
-        audio.muted = false; // Ensure not muted
-        audio.loop = false;
-        audio.load();
-        
-        // Play with user gesture
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => console.log(`✅ Unlocked audio with ${soundType}`))
-            .catch(e => console.log(`❌ Failed to unlock with ${soundType}:`, e));
-        }
-        
-        audioElements.push(audio);
-      });
-      
-      // Set user as interacted
-      setUserInteracted(true);
-      
-      // After a brief delay, try a test sound
-      setTimeout(() => {
-        playSound("click");
-        playSound("coin");
-        setShowUnlockButton(false);
-      }, 500);
-      
-      // Increment unlock attempts
-      setUnlockAttempts(prev => prev + 1);
-    } catch (e) {
-      console.error("Error attempting to unlock audio:", e);
-    }
-  };
+  // Detect iOS
+  const isIOS = typeof navigator !== 'undefined' && 
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+  
+  const isSafari = typeof navigator !== 'undefined' && 
+    /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   
   useEffect(() => {
-    console.log("Sound initializer mounted - awaiting user interaction");
+    // Force enable user interaction for all devices
+    setUserInteracted(true);
     
-    // Detect iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                 (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    // Log device information for debugging
+    console.log("🔍 Device Information:");
+    console.log("- User Agent:", navigator.userAgent);
+    console.log("- Platform:", navigator.platform);
+    console.log("- iOS Device:", isIOS ? "Yes" : "No");
+    console.log("- Safari Browser:", isSafari ? "Yes" : "No");
+    console.log("- Touch Points:", navigator.maxTouchPoints);
     
-    if (isIOS) {
-      console.log("📱 iOS device detected - will require explicit user interaction");
-    } else {
-      // Still try auto-unlock for non-iOS devices
-      const timer = setTimeout(() => {
-        unlockAudio();
-      }, 1000);
+    // Create empty audio elements to help unlock audio 
+    if (isIOS || isSafari) {
+      console.log("📱 iOS/Safari detected - pre-creating audio elements");
       
-      return () => clearTimeout(timer);
+      // We'll silently create some audio elements that might help
+      const soundTypes = ["click", "coin", "select"];
+      
+      soundTypes.forEach(type => {
+        const audio = new Audio(`/sounds/${type}.mp3`);
+        audio.volume = 0.1;
+        audio.muted = false;
+        audio.setAttribute("playsinline", "");
+        audio.setAttribute("webkit-playsinline", "");
+        audio.load();
+        
+        // Don't auto-play - iOS won't allow it anyway
+      });
     }
-  }, []);
+  }, [setUserInteracted, isIOS, isSafari]);
   
-  if (!showUnlockButton) return null;
+  // Only show for iOS/Safari
+  if (!isIOS && !isSafari) return null;
   
   return (
-    <div className="fixed bottom-4 left-4 z-50">
+    <div className="fixed bottom-20 right-4 z-50 animate-bounce">
       <Button
-        onClick={unlockAudio}
+        onClick={() => {
+          // Redirect focus to the main sound panel
+          const soundPanel = document.getElementById('sound-test-target');
+          if (soundPanel) {
+            soundPanel.scrollIntoView({ behavior: 'smooth' });
+          }
+          setUserInteracted(true);
+        }}
         variant="default"
-        className="bg-scripture hover:bg-scripture/90 flex items-center gap-2 px-4 py-2 rounded-full shadow-lg"
+        className="bg-red-600 hover:bg-red-700 flex items-center gap-2 px-4 py-2 rounded-full text-white shadow-lg"
         size="lg"
       >
-        {isSoundEnabled ? (
-          <Volume2 className="h-5 w-5" />
-        ) : (
-          <VolumeOff className="h-5 w-5" />
-        )}
-        <span>Tap to Enable Sound</span>
+        <Volume2 className="h-5 w-5" />
+        <span>Enable Sound</span>
       </Button>
-      
-      {unlockAttempts > 0 && (
-        <div className="text-xs text-white/70 mt-1 text-center">
-          Tap again if sound is not working
-        </div>
-      )}
     </div>
   );
 };
