@@ -12,7 +12,7 @@ import SoundInitializer from "@/components/SoundInitializer";
 import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import IOSAudioUnlocker from "@/components/IOSAudioUnlocker"; // Fixed import path to match case
+import IOSAudioUnlocker from "@/components/IOSAudioUnlocker";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
