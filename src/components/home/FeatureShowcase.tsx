@@ -88,7 +88,7 @@ const FeatureShowcase: React.FC = () => {
               <CardContent className="p-0">
                 <div className="p-6 flex flex-col h-full">
                   <div className={`bg-black/40 p-4 rounded-lg mb-4 ${feature.color} flex justify-center`}>
-                    <PixelIcon name={feature.iconName} className="w-12 h-12" />
+                    <PixelIcon src={`/${feature.iconName}-pixel.png`} alt={feature.title} size={48} />
                   </div>
                   
                   <h3 className={`text-xl font-pixel mb-3 ${feature.color}`}>{feature.title}</h3>
