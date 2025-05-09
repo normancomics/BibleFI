@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
 import HomeHeader from "@/components/home/HomeHeader";
@@ -12,6 +12,7 @@ import SoundInitializer from "@/components/SoundInitializer";
 import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
+import iOSAudioUnlocker from "@/components/iOSAudioUnlocker";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -24,8 +25,14 @@ const Index: React.FC = () => {
   const isSafari = typeof navigator !== 'undefined' && 
     /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   
+  useEffect(() => {
+    // Force enable user interaction
+    setUserInteracted(true);
+  }, [setUserInteracted]);
+  
   return (
     <div className="min-h-screen">
+      <iOSAudioUnlocker />
       <SoundInitializer />
       <NavBar />
       
@@ -37,16 +44,18 @@ const Index: React.FC = () => {
         <HomeHeader />
         
         {(isIOS || isSafari) && (
-          <div className="mb-6 bg-yellow-900/30 border-2 border-yellow-500 rounded-lg p-4 text-center">
+          <div className="mb-6 bg-red-900/30 border-2 border-red-500 rounded-lg p-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <AlertTriangle className="text-yellow-500" />
-              <h3 className="text-xl font-bold text-yellow-500">
-                iPad Sound Fix: Use Safari Browser
+              <AlertTriangle className="text-red-500" />
+              <h3 className="text-xl font-bold text-red-500">
+                iPad Sound Instructions
               </h3>
             </div>
+            <p className="text-white text-lg font-bold mb-2">
+              ⚠️ Look for the RED "UNLOCK SOUNDS" button in the corner! ⚠️
+            </p>
             <p className="text-white">
-              For iPad users: <strong>Apple Safari</strong> works best for sound. Edge and Chrome 
-              have more restrictions on iOS. Please tap the red "SHOW SAFARI AUDIO CONTROLS" button below.
+              Safari requires you to tap the PLAY button on at least one audio control before any sounds will work.
             </p>
           </div>
         )}
