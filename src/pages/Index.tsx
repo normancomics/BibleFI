@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
@@ -9,14 +8,19 @@ import { useSound } from "@/contexts/SoundContext";
 import FarcasterFrame from "@/farcaster/FarcasterFrame";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
 import SoundInitializer from "@/components/SoundInitializer";
-import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Volume2 } from "lucide-react";
+import BiblefiHero from "@/components/home/BiblefiHero";
+import FeatureShowcase from "@/components/home/FeatureShowcase";
+import BibleCharacterSelector from "@/components/characters/BibleCharacterSelector";
+import WisdomCard from "@/components/wisdom/WisdomCard";
+import { getRandomVerse } from "@/data/bibleVerses";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
+  const [selectedCharacter, setSelectedCharacter] = useState("solomon");
   
   // Check if user is on iOS
   const isIOS = typeof navigator !== 'undefined' && 
@@ -30,6 +34,9 @@ const Index: React.FC = () => {
     // Force enable user interaction
     setUserInteracted(true);
   }, [setUserInteracted]);
+  
+  // Get a random financial verse for the wisdom card
+  const financialVerse = getRandomVerse("finance");
   
   // Simple component for iOS audio unlocking
   const AudioUnlocker = () => {
@@ -84,7 +91,8 @@ const Index: React.FC = () => {
           <FarcasterConnect size="sm" />
         </div>
         
-        <HomeHeader />
+        {/* Replace HomeHeader with our new Hero */}
+        <BiblefiHero />
         
         {(isIOS || isSafari) && (
           <div className="mb-6 bg-red-900/30 border-2 border-red-500 rounded-lg p-4 text-center">
@@ -105,6 +113,29 @@ const Index: React.FC = () => {
         
         <div id="sound-test-target" className="mb-10">
           <SoundTestPanel />
+        </div>
+        
+        {/* Feature Showcase */}
+        <FeatureShowcase />
+        
+        {/* Character Selection and Wisdom */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 my-12">
+          <div className="lg:col-span-2">
+            <BibleCharacterSelector 
+              selectedCharacter={selectedCharacter as any}
+              onSelect={(character) => setSelectedCharacter(character)}
+            />
+          </div>
+          
+          <div>
+            <WisdomCard 
+              scripture={financialVerse.text}
+              reference={financialVerse.reference}
+              principle="Wise stewardship requires careful planning and management of resources."
+              application="Apply this by creating a monthly budget that prioritizes giving, saving, and responsible spending."
+              tags={["stewardship", "planning", "finance"]}
+            />
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
