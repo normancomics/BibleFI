@@ -1,202 +1,162 @@
 
 import React, { useState, useEffect } from "react";
-import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
-import { useNavigate } from "react-router-dom";
-import { ExternalLink, Wallet, Book } from "lucide-react";
-import { motion } from "framer-motion";
-import { CharacterType } from "@/components/PixelCharacter";
-import PixelCharacter from "@/components/PixelCharacter";
+import { ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// Bible characters to animate through
-const characters: CharacterType[] = ["solomon", "moses", "jesus", "david"];
+import PixelButton from "@/components/PixelButton";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 const BiblefiHero: React.FC = () => {
-  const { playSound } = useSound();
-  const navigate = useNavigate();
+  const { playSound, isSoundEnabled, toggleSound, setUserInteracted } = useSound();
   const { toast } = useToast();
-  const [currentCharacter, setCurrentCharacter] = useState<CharacterType>("solomon");
-  const [characterIndex, setCharacterIndex] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
   
-  // Cycle through characters
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCharacterIndex((prev) => {
-        const nextIndex = (prev + 1) % characters.length;
-        setCurrentCharacter(characters[nextIndex]);
-        return nextIndex;
-      });
-    }, 3000);
-    
-    return () => clearInterval(interval);
+    // Mark as loaded after a short delay to trigger animations
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => clearTimeout(timer);
   }, []);
   
-  const handleConnectWallet = () => {
-    playSound("powerup");
-    toast({
-      title: "Connect Wallet",
-      description: "Opening wallet connection dialog...",
-    });
-    // In a real implementation, this would open a wallet connection modal
-  };
-  
-  const handleLearnMore = () => {
-    playSound("scroll");
-    navigate("/wisdom");
-  };
-  
   const handleOpenFarcaster = () => {
+    setUserInteracted(true);
     playSound("select");
+    toast({
+      title: "Farcaster Integration",
+      description: "Opening Bible.fi mini-app in Farcaster...",
+    });
+    
+    // Open Farcaster frame
     window.open("/frame.html", "_blank");
   };
   
+  const handleSoundToggle = () => {
+    toggleSound();
+    setUserInteracted(true);
+    
+    if (!isSoundEnabled) {
+      // Try to play a sound when enabling
+      setTimeout(() => playSound("click"), 100);
+    }
+  };
+  
   return (
-    <section className="relative overflow-hidden py-8 md:py-16">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-radial from-scripture/30 to-transparent opacity-40"></div>
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <h1 className="text-4xl md:text-5xl font-pixel text-ancient-gold mb-4">
-                Bible.fi
-              </h1>
-              
-              <h2 className="text-xl md:text-2xl text-white/90 mb-6">
-                Biblical wisdom for your financial journey
-              </h2>
-              
-              <p className="text-white/80 mb-8 max-w-md">
-                Learn biblical principles for finances, tithe digitally to your church, 
-                and explore DeFi opportunities aligned with scripture — all on Base Chain.
-              </p>
-              
-              <div className="flex flex-wrap gap-4 mb-8">
-                <PixelButton 
-                  onClick={handleConnectWallet}
-                  className="flex items-center"
-                >
-                  <Wallet size={18} className="mr-2" />
-                  Connect Wallet
-                </PixelButton>
-                
-                <PixelButton
-                  onClick={handleLearnMore}
-                  variant="outline"
-                  className="flex items-center"
-                >
-                  <Book size={18} className="mr-2" />
-                  Biblical Wisdom
-                </PixelButton>
-              </div>
-              
-              <div className="inline-flex items-center justify-center md:justify-start px-4 py-2 bg-base-blue/20 border border-base-blue/50 rounded-md">
-                <img 
-                  src="https://base.org/images/favicon.png" 
-                  alt="Base Chain" 
-                  className="w-5 h-5 mr-2" 
-                />
-                <span className="text-white/90 text-sm font-medium">Built on Base Chain</span>
-              </div>
-              
-              <div className="mt-4">
-                <button 
-                  onClick={handleOpenFarcaster} 
-                  className="flex items-center text-white/70 hover:text-white/90 text-sm font-medium transition-colors"
-                >
-                  <ExternalLink size={16} className="mr-1" />
-                  Open as Farcaster Frame
-                </button>
-              </div>
-            </motion.div>
-          </div>
-          
-          <div className="flex justify-center md:justify-end">
-            <div className="relative h-[300px] w-[300px]">
-              {/* Biblical coin animation */}
-              <motion.div
-                animate={{ 
-                  rotate: 360,
-                  y: [0, -10, 0]
-                }}
-                transition={{ 
-                  rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                  y: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                }}
-                className="absolute top-8 right-8"
-              >
-                <img 
-                  src="/coin-pixel.png" 
-                  alt="Bible Coin" 
-                  className="w-12 h-12 object-contain" 
-                />
-              </motion.div>
-              
-              {/* Biblical scroll animation */}
-              <motion.div
-                animate={{ 
-                  y: [0, -5, 0],
-                  x: [0, 5, 0]
-                }}
-                transition={{ 
-                  duration: 3.5, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="absolute bottom-10 left-10"
-              >
-                <img 
-                  src="/scroll-pixel.png" 
-                  alt="Biblical Scroll" 
-                  className="w-16 h-16 object-contain" 
-                />
-              </motion.div>
-              
-              {/* Main character */}
-              <motion.div
-                key={currentCharacter}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.5 }}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              >
-                <PixelCharacter 
-                  character={currentCharacter} 
-                  size="xxl" 
-                  animate
-                />
-              </motion.div>
-              
-              {/* Logo */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  opacity: [0.8, 1, 0.8]
-                }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="absolute top-0 left-1/2 transform -translate-x-1/2"
-              >
-                <img 
-                  src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-                  alt="Bible.fi Logo" 
-                  className="w-28 h-28 object-contain" 
-                />
-              </motion.div>
-            </div>
-          </div>
-        </div>
+    <section className="relative text-center py-8 mb-12">
+      {/* Background elements */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/50 via-black/80 to-black opacity-80"></div>
+        <div 
+          className="absolute top-0 left-0 w-full h-full opacity-30"
+          style={{
+            backgroundImage: "url('/pixel-temple-bg.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></div>
       </div>
+      
+      {/* Logo and main content */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
+      >
+        <img 
+          src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
+          alt="Bible.fi" 
+          className="h-32 mx-auto"
+        />
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={isLoaded ? { opacity: 1 } : {}}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <p className="text-xl max-w-2xl mx-auto mb-6 text-white">
+          Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
+        </p>
+        
+        <div className="flex justify-center items-center mt-2 mb-4">
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={isLoaded ? { scale: 1, opacity: 1 } : {}}
+            transition={{ delay: 0.5, duration: 0.3 }}
+            className="bg-black/70 py-2 px-6 rounded-lg inline-block mx-auto border-2 border-ancient-gold/50"
+          >
+            <span className="text-white mr-3 font-pixel tracking-wider text-lg">MADE ON</span>
+            <img 
+              src="https://base.org/images/favicon.png" 
+              alt="Base Chain Logo" 
+              className="w-6 h-6 inline-block"
+            />
+            <span className="ml-2 text-base-blue font-pixel font-bold tracking-wider text-lg">BASE CHAIN</span>
+          </motion.div>
+        </div>
+      </motion.div>
+      
+      {/* Action buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+        transition={{ delay: 0.7, duration: 0.5 }}
+        className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 mb-6"
+      >
+        <PixelButton 
+          onClick={handleOpenFarcaster}
+          className="inline-flex items-center px-6 py-3 text-lg"
+          size="lg"
+        >
+          <ExternalLink size={20} className="mr-2" />
+          Open in Farcaster
+        </PixelButton>
+        
+        <Button
+          onClick={handleSoundToggle}
+          variant="outline"
+          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-black/50 hover:bg-black/70"
+        >
+          {isSoundEnabled ? (
+            <>
+              <Volume2 size={18} className="text-ancient-gold" />
+              <span>Sound ON</span>
+            </>
+          ) : (
+            <>
+              <VolumeX size={18} className="text-gray-400" />
+              <span>Sound OFF</span>
+            </>
+          )}
+        </Button>
+      </motion.div>
+      
+      {/* Biblical characters */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+        transition={{ delay: 0.9, duration: 0.5 }}
+        className="flex justify-center items-end mt-8 -mb-8 overflow-hidden"
+      >
+        <div className="flex gap-4 md:gap-8 px-2 overflow-x-auto pb-4 justify-center">
+          {["solomon", "jesus", "moses", "david"].map((character, index) => (
+            <motion.div
+              key={character}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
+              transition={{ delay: 1 + index * 0.2, duration: 0.4 }}
+              className="flex-shrink-0"
+            >
+              <img 
+                src={`/pixel-${character}.png`} 
+                alt={`${character} character`}
+                className="h-24 md:h-32 object-contain"
+              />
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   );
 };

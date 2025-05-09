@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
 import HomeHeader from "@/components/home/HomeHeader";
@@ -20,7 +21,7 @@ import { getRandomVerse } from "@/data/bibleVerses";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
-  const [selectedCharacter, setSelectedCharacter] = useState("solomon");
+  const [selectedCharacter, setSelectedCharacter] = React.useState("solomon");
   
   // Check if user is on iOS
   const isIOS = typeof navigator !== 'undefined' && 
@@ -40,7 +41,7 @@ const Index: React.FC = () => {
   
   // Simple component for iOS audio unlocking
   const AudioUnlocker = () => {
-    const [showControls, setShowControls] = useState(false);
+    const [showControls, setShowControls] = React.useState(false);
     
     if (!isIOS && !isSafari) return null;
     
@@ -91,7 +92,7 @@ const Index: React.FC = () => {
           <FarcasterConnect size="sm" />
         </div>
         
-        {/* Replace HomeHeader with our new Hero */}
+        {/* Hero section */}
         <BiblefiHero />
         
         {(isIOS || isSafari) && (
@@ -110,10 +111,6 @@ const Index: React.FC = () => {
             </p>
           </div>
         )}
-        
-        <div id="sound-test-target" className="mb-10">
-          <SoundTestPanel />
-        </div>
         
         {/* Feature Showcase */}
         <FeatureShowcase />
