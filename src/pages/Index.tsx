@@ -12,7 +12,7 @@ import SoundInitializer from "@/components/SoundInitializer";
 import SoundTestPanel from "@/components/home/SoundTestPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
-import IOSAudioUnlocker from "@/components/iOSAudioUnlocker"; // Fixed import with capital I for iOS
+import IOSAudioUnlocker from "@/components/IOSAudioUnlocker"; // Fixed import path to match case
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -32,7 +32,7 @@ const Index: React.FC = () => {
   
   return (
     <div className="min-h-screen">
-      <IOSAudioUnlocker /> {/* Fixed with capital I */}
+      <IOSAudioUnlocker />
       <SoundInitializer />
       <NavBar />
       
