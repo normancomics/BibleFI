@@ -1,102 +1,171 @@
 
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import NavBar from "@/components/NavBar";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import StakingPool from "@/components/StakingPool";
 import StakingTransparency from "@/components/StakingTransparency";
-import BibleCharacter from "@/components/BibleCharacter";
-import { getVersesByCategory } from "@/data/bibleVerses";
-import ScriptureCard from "@/components/ScriptureCard";
-import { useSound } from "@/contexts/SoundContext";
+import StakingHeader from "@/components/staking/StakingHeader";
+import StakingDetails from "@/components/staking/StakingDetails";
+import StakingForm from "@/components/staking/StakingForm";
+import RiskBadge from "@/components/staking/RiskBadge";
+import MultiWalletConnector from "@/components/wallet/MultiWalletConnector";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookOpen, Coins, Lock, Shield } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const StakingPage: React.FC = () => {
-  const wealthVerses = getVersesByCategory("wealth");
-  const { playSound, userInteracted } = useSound();
+  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
+  const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
   
-  useEffect(() => {
-    if (userInteracted) {
-      playSound("coin");
-    }
-  }, [userInteracted, playSound]);
-  
+  const handleWalletConnect = (provider: string, address: string) => {
+    setConnectedWallet(provider);
+    setConnectedAddress(address);
+  };
+
   return (
     <div className="min-h-screen">
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
-        <section className="text-center mb-12">
-          <h1 className="text-4xl font-scroll text-scripture-dark mb-4">Biblical Staking</h1>
-          <p className="text-xl max-w-2xl mx-auto">
-            Grow your wealth little by little through faithful stewardship.
-          </p>
-        </section>
-        
-        <div className="mb-8">
-          <BibleCharacter
-            character="solomon"
-            message="Wealth gained hastily will dwindle, but whoever gathers little by little will increase it. - Proverbs 13:11"
-            className="mb-4 max-w-2xl mx-auto"
-            showWisdomLevel={true}
-          />
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <h1 className="text-3xl font-scroll text-ancient-gold mb-4 md:mb-0">Biblical Staking Pools</h1>
+          
+          {!connectedWallet ? (
+            <MultiWalletConnector 
+              onConnect={handleWalletConnect}
+              buttonText="Connect Wallet to Stake"
+              buttonVariant="outline"
+              buttonClassName="border-ancient-gold text-ancient-gold hover:bg-ancient-gold/20"
+            />
+          ) : (
+            <div className="flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full border border-ancient-gold/30">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-white font-medium">Connected: {connectedAddress?.substring(0, 6)}...{connectedAddress?.substring(38)}</span>
+            </div>
+          )}
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          <div>
-            <h2 className="text-2xl font-scroll mb-4">Staking Pools</h2>
-            <div className="space-y-6">
-              <StakingPool 
-                title="Proverbs Pool" 
-                apy={5.2} 
-                description="A conservative staking pool based on the wisdom of Proverbs for steady, reliable growth."
-                lockPeriod="30 days" 
-                supportedTokens={["USDC", "DAI", "ETH"]}
-              />
-              
-              <StakingPool 
-                title="Ecclesiastes Pool" 
-                apy={8.4} 
-                description="A balanced approach to wealth that understands there is a time for everything under heaven."
-                lockPeriod="90 days" 
-                riskLevel="medium"
-                supportedTokens={["USDC", "DAI", "ETH", "USDT"]}
-              />
-              
-              <StakingPool 
-                title="Genesis Pool" 
-                apy={12.7} 
-                description="Be fruitful and multiply your wealth with this higher-yield, longer-term commitment."
-                lockPeriod="180 days" 
-                riskLevel="high"
-                supportedTokens={["USDC", "DAI"]}
-              />
-            </div>
-          </div>
+        <Alert className="mb-8 border-amber-500/50 bg-amber-500/10">
+          <Shield className="h-4 w-4 text-amber-500" />
+          <AlertTitle>Biblical Staking Principles</AlertTitle>
+          <AlertDescription>
+            Our staking pools are designed in accordance with biblical principles of stewardship and honest gain.
+            We avoid excessive interest rates that could be considered usury (Exodus 22:25).
+          </AlertDescription>
+        </Alert>
+        
+        <StakingHeader />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-10">
+          <Card className="border-scripture/30 bg-black/40 lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Coins className="text-ancient-gold" />
+                <span>Stake Your Assets</span>
+              </CardTitle>
+              <CardDescription>
+                Earn yield while honoring biblical principles
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="pools">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="pools">Staking Pools</TabsTrigger>
+                  <TabsTrigger value="details">Biblical Details</TabsTrigger>
+                  <TabsTrigger value="transparency">Transparency</TabsTrigger>
+                </TabsList>
+                <TabsContent value="pools" className="pt-6">
+                  <div className="space-y-6">
+                    <StakingPool 
+                      name="Proverbs Pool" 
+                      apy={3.5} 
+                      tvl={243578} 
+                      assets={["USDC"]} 
+                      duration={30}
+                      risk="low"
+                      description="This pool follows Solomon's wisdom of steady, patient growth"
+                    />
+                    
+                    <StakingPool 
+                      name="Talents Pool" 
+                      apy={5.2} 
+                      tvl={1243000} 
+                      assets={["USDC", "USDT", "DAI"]} 
+                      duration={90}
+                      risk="medium"
+                      description="Based on the Parable of the Talents (Matthew 25:14-30)"
+                    />
+                    
+                    <StakingPool 
+                      name="Joseph's Reserve" 
+                      apy={7.0} 
+                      tvl={532000} 
+                      assets={["ETH", "WETH"]} 
+                      duration={180}
+                      risk="medium-high"
+                      description="Inspired by Joseph's 7 years of plenty stored for future use"
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="details" className="pt-6">
+                  <StakingDetails />
+                </TabsContent>
+                <TabsContent value="transparency" className="pt-6">
+                  <StakingTransparency />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
           
-          <div>
-            <h2 className="text-2xl font-scroll mb-4">Stable Growth</h2>
-            
-            <Card className="pixel-card p-6 mb-6">
-              <p className="mb-4">
-                Our staking pools are designed based on Biblical principles of patient growth, 
-                faithful stewardship, and ethical investing.
-              </p>
-              
-              <div className="mb-4">
-                <h3 className="font-bold text-lg mb-2">Key Features:</h3>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>Transparent fund allocation</li>
-                  <li>Ethical investment strategy</li>
-                  <li>Regular rewards distribution</li>
-                  <li>Educational resources</li>
-                </ul>
-              </div>
-              
-              {wealthVerses.length > 0 && (
-                <ScriptureCard verse={wealthVerses[0]} />
-              )}
+          <div className="space-y-6">
+            <Card className="border-scripture/30 bg-black/40">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="text-ancient-gold" />
+                  <span>Start Staking</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {connectedWallet ? (
+                  <StakingForm />
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="mb-4 text-white/70">Connect your wallet to start staking</p>
+                    <MultiWalletConnector 
+                      onConnect={handleWalletConnect}
+                      buttonText="Connect Wallet"
+                      buttonVariant="default"
+                      buttonClassName="bg-scripture hover:bg-scripture/80"
+                    />
+                  </div>
+                )}
+              </CardContent>
             </Card>
             
-            <StakingTransparency />
+            <Card className="border-scripture/30 bg-black/40">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="text-ancient-gold" />
+                  <span>Scripture Basis</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-black/50 p-4 rounded-lg border border-ancient-gold/30">
+                  <p className="italic text-white/80">
+                    "Well done, good and faithful servant! You have been faithful with a few things; I will put you in charge of many things. Come and share your master's happiness!"
+                  </p>
+                  <p className="text-right text-sm text-ancient-gold/70 mt-2">Matthew 25:23</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-white/70">
+                    Our staking pools are designed to encourage biblical stewardship, helping you grow your resources responsibly while avoiding usury and exploitative practices.
+                  </p>
+                </div>
+                
+                <RiskBadge risk="low" />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>

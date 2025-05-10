@@ -1,14 +1,11 @@
 
 import React, { useState, useEffect } from "react";
-import { useSound } from "@/contexts/SoundContext";
-import { ExternalLink, Volume2, VolumeX } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PixelButton from "@/components/PixelButton";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const BiblefiHero: React.FC = () => {
-  const { playSound, isSoundEnabled, toggleSound, setUserInteracted } = useSound();
   const { toast } = useToast();
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -19,8 +16,6 @@ const BiblefiHero: React.FC = () => {
   }, []);
   
   const handleOpenFarcaster = () => {
-    setUserInteracted(true);
-    playSound("select");
     toast({
       title: "Farcaster Integration",
       description: "Opening Bible.fi mini-app in Farcaster...",
@@ -28,16 +23,6 @@ const BiblefiHero: React.FC = () => {
     
     // Open Farcaster frame
     window.open("/frame.html", "_blank");
-  };
-  
-  const handleSoundToggle = () => {
-    toggleSound();
-    setUserInteracted(true);
-    
-    if (!isSoundEnabled) {
-      // Try to play a sound when enabling
-      setTimeout(() => playSound("click"), 100);
-    }
   };
   
   return (
@@ -112,24 +97,6 @@ const BiblefiHero: React.FC = () => {
           <ExternalLink size={20} className="mr-2" />
           Open in Farcaster
         </PixelButton>
-        
-        <Button
-          onClick={handleSoundToggle}
-          variant="outline"
-          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-black/50 hover:bg-black/70"
-        >
-          {isSoundEnabled ? (
-            <>
-              <Volume2 size={18} className="text-ancient-gold" />
-              <span>Sound ON</span>
-            </>
-          ) : (
-            <>
-              <VolumeX size={18} className="text-gray-400" />
-              <span>Sound OFF</span>
-            </>
-          )}
-        </Button>
       </motion.div>
       
       {/* Biblical characters */}

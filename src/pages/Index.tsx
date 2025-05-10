@@ -8,7 +8,6 @@ import { useSound } from "@/contexts/SoundContext";
 import FarcasterFrame from "@/farcaster/FarcasterFrame";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import BiblefiHero from "@/components/home/BiblefiHero";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
 import BibleCharacterSelector from "@/components/characters/BibleCharacterSelector";
@@ -16,7 +15,7 @@ import WisdomCard from "@/components/wisdom/WisdomCard";
 import { getRandomVerse } from "@/data/bibleVerses";
 
 const Index: React.FC = () => {
-  const { setUserInteracted, playSound } = useSound();
+  const { setUserInteracted } = useSound();
   const [selectedCharacter, setSelectedCharacter] = React.useState("solomon");
   
   useEffect(() => {
@@ -28,11 +27,6 @@ const Index: React.FC = () => {
       window.removeEventListener('click', handleUserInteraction);
       window.removeEventListener('keydown', handleUserInteraction);
       window.removeEventListener('touchstart', handleUserInteraction);
-      
-      // Try to play a silent sound to unlock audio
-      const audio = new Audio();
-      audio.volume = 0.01;
-      audio.play().catch(e => console.log("Initial sound play attempt:", e));
     };
     
     // Add event listeners for user interaction
@@ -51,29 +45,6 @@ const Index: React.FC = () => {
   // Get a random financial verse for the wisdom card
   const financialVerse = getRandomVerse();
   
-  // Simple sound tester component
-  const SoundTester = () => {
-    return (
-      <div className="mb-8 py-4 bg-black/40 border border-ancient-gold rounded-lg">
-        <h3 className="text-center font-pixel text-xl text-ancient-gold mb-4">Test Sounds</h3>
-        <div className="flex flex-wrap justify-center gap-3">
-          {["coin", "click", "scroll", "select", "powerup"].map(sound => (
-            <Button
-              key={sound}
-              onClick={() => {
-                setUserInteracted(true);
-                playSound(sound as any);
-              }}
-              className="bg-scripture hover:bg-scripture-light"
-            >
-              Play {sound}
-            </Button>
-          ))}
-        </div>
-      </div>
-    );
-  };
-  
   return (
     <div className="min-h-screen">
       <NavBar />
@@ -85,8 +56,6 @@ const Index: React.FC = () => {
         
         {/* Hero section */}
         <BiblefiHero />
-        
-        <SoundTester />
         
         {/* Feature Showcase */}
         <FeatureShowcase />
