@@ -7,9 +7,7 @@ import TaxSection from "@/components/home/TaxSection";
 import { useSound } from "@/contexts/SoundContext";
 import FarcasterFrame from "@/farcaster/FarcasterFrame";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
-import SoundInitializer from "@/components/SoundInitializer";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BiblefiHero from "@/components/home/BiblefiHero";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
@@ -18,70 +16,66 @@ import WisdomCard from "@/components/wisdom/WisdomCard";
 import { getRandomVerse } from "@/data/bibleVerses";
 
 const Index: React.FC = () => {
-  const { setUserInteracted } = useSound();
+  const { setUserInteracted, playSound } = useSound();
   const [selectedCharacter, setSelectedCharacter] = React.useState("solomon");
   
-  // Check if user is on iOS
-  const isIOS = typeof navigator !== 'undefined' && 
-    (/iPad|iPhone|iPod/.test(navigator.userAgent) || 
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
-  
-  const isSafari = typeof navigator !== 'undefined' && 
-    /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  
   useEffect(() => {
-    // Force enable user interaction
-    setUserInteracted(true);
+    // Enable user interaction on page load
+    const handleUserInteraction = () => {
+      console.log("User interaction detected - enabling sounds");
+      setUserInteracted(true);
+      // Remove listeners after first interaction
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+      
+      // Try to play a silent sound to unlock audio
+      const audio = new Audio();
+      audio.volume = 0.01;
+      audio.play().catch(e => console.log("Initial sound play attempt:", e));
+    };
+    
+    // Add event listeners for user interaction
+    window.addEventListener('click', handleUserInteraction);
+    window.addEventListener('keydown', handleUserInteraction);
+    window.addEventListener('touchstart', handleUserInteraction);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+    };
   }, [setUserInteracted]);
   
   // Get a random financial verse for the wisdom card
   const financialVerse = getRandomVerse();
   
-  // Simple component for iOS audio unlocking
-  const AudioUnlocker = () => {
-    const [showControls, setShowControls] = React.useState(false);
-    
-    if (!isIOS && !isSafari) return null;
-    
+  // Simple sound tester component
+  const SoundTester = () => {
     return (
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-2">
-        {!showControls ? (
-          <Button
-            onClick={() => setShowControls(true)}
-            className="bg-red-600 hover:bg-red-700 flex items-center gap-2 px-4 py-3 text-white font-bold animate-pulse"
-            size="lg"
-          >
-            <span className="font-bold">UNLOCK SOUNDS (SAFARI)</span>
-          </Button>
-        ) : (
-          <div className="bg-black/90 border-2 border-red-500 p-4 rounded-lg w-[300px] max-w-full">
-            <h3 className="text-white font-bold mb-2">Tap Play on ANY Sound:</h3>
-            
-            <div className="space-y-2">
-              {["/sounds/click.mp3", "/sounds/coin.mp3", "/sounds/powerup.mp3"].map((src, i) => (
-                <div key={i} className="bg-gray-800 p-2 rounded">
-                  <audio src={src} controls className="w-full" />
-                </div>
-              ))}
-            </div>
-            
-            <Button 
-              onClick={() => setShowControls(false)} 
-              className="mt-3 w-full"
-              variant="outline"
+      <div className="mb-8 py-4 bg-black/40 border border-ancient-gold rounded-lg">
+        <h3 className="text-center font-pixel text-xl text-ancient-gold mb-4">Test Sounds</h3>
+        <div className="flex flex-wrap justify-center gap-3">
+          {["coin", "click", "scroll", "select", "powerup"].map(sound => (
+            <Button
+              key={sound}
+              onClick={() => {
+                setUserInteracted(true);
+                playSound(sound as any);
+              }}
+              className="bg-scripture hover:bg-scripture-light"
             >
-              Close Audio Panel
+              Play {sound}
             </Button>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
     );
   };
   
   return (
     <div className="min-h-screen">
-      <AudioUnlocker />
-      <SoundInitializer />
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
@@ -92,22 +86,7 @@ const Index: React.FC = () => {
         {/* Hero section */}
         <BiblefiHero />
         
-        {(isIOS || isSafari) && (
-          <div className="mb-6 bg-red-900/30 border-2 border-red-500 rounded-lg p-4 text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <AlertTriangle className="text-red-500" />
-              <h3 className="text-xl font-bold text-red-500">
-                iPad Sound Instructions
-              </h3>
-            </div>
-            <p className="text-white text-lg font-bold mb-2">
-              ⚠️ Look for the RED "UNLOCK SOUNDS" button in the corner! ⚠️
-            </p>
-            <p className="text-white">
-              Safari requires you to tap the PLAY button on at least one audio control before any sounds will work.
-            </p>
-          </div>
-        )}
+        <SoundTester />
         
         {/* Feature Showcase */}
         <FeatureShowcase />

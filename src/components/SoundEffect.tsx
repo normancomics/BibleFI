@@ -15,17 +15,9 @@ const SoundEffect: React.FC<SoundEffectProps> = ({ src, play, volume = 0.5, onEn
     if (play) {
       console.log(`Attempting to play sound: ${src}`);
       
-      // For iOS/Safari compatibility, use a simpler approach
       try {
         const audio = new Audio(src);
         audio.volume = volume;
-        
-        // Set important attributes for iOS
-        audio.setAttribute("playsinline", "");
-        audio.setAttribute("webkit-playsinline", "");
-        
-        // Start loading the audio
-        audio.load();
         
         // Add event listeners
         if (onEnded) {
@@ -38,13 +30,16 @@ const SoundEffect: React.FC<SoundEffectProps> = ({ src, play, volume = 0.5, onEn
         });
         
         // Play the sound
-        audio.play()
-          .then(() => {
-            console.log(`✅ Sound ${src} played successfully`);
-          })
-          .catch(error => {
-            console.error(`Failed to play ${src}:`, error);
-          });
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log(`✅ Sound ${src} played successfully`);
+            })
+            .catch(error => {
+              console.error(`Failed to play ${src}:`, error);
+            });
+        }
           
         // Cleanup function
         return () => {
