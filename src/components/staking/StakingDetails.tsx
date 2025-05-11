@@ -14,7 +14,7 @@ const StakingDetails: React.FC<StakingDetailsProps> = ({
   returnsMechanism,
   biblicalPrinciple,
   onShowTransparency,
-  visible
+  visible = false // Default to not visible
 }) => {
   const { playSound } = useSound();
   

@@ -25,20 +25,36 @@ interface StakingPoolProps {
   returnsMechanism?: string;
   showTransparency?: boolean;
   supportedTokens?: string[];
+  // New props from the StakingPage component
+  name?: string;
+  tvl?: number;
+  assets?: string[];
+  duration?: number;
+  risk?: string;
 }
 
 const StakingPool: React.FC<StakingPoolProps> = ({
   title,
+  name, // Fallback for name prop
   apy,
   description,
   verse,
   lockPeriod,
   riskLevel = "low",
+  risk, // Fallback for risk prop
   biblicalPrinciple = "Careful stewardship of resources",
   returnsMechanism = "Interest from lending to verified projects",
   showTransparency = false,
   supportedTokens = [],
+  assets = [], // Fallback for assets prop
+  tvl, // Optional TVL value
+  duration, // Optional duration value
 }) => {
+  const actualTitle = title || name || "Staking Pool";
+  const actualRiskLevel = riskLevel || (risk as "low" | "medium" | "high") || "low";
+  const actualSupportedTokens = supportedTokens.length > 0 ? supportedTokens : assets;
+  const actualLockPeriod = lockPeriod || (duration ? `${duration} days` : "30 days");
+  
   const safeVerse = verse || getRandomVerse();
   const { playSound } = useSound();
   const { toast } = useToast();
@@ -58,7 +74,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   const handleStakeSubmit = (amount: string, token: string) => {
     toast({
       title: "Preparing to stake",
-      description: `Staking ${amount} ${token} in the ${title}`,
+      description: `Staking ${amount} ${token} in the ${actualTitle}`,
     });
     
     setIsWalletOpen(true);
@@ -96,17 +112,17 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   
   return (
     <Card className="pixel-card overflow-hidden">
-      <StakingHeader title={title} apy={apy} />
+      <StakingHeader title={actualTitle} apy={apy} />
       
       <p className="mb-4 px-4">{description}</p>
       
       <div className="flex items-center mb-4 text-sm text-muted-foreground px-4">
         <BookOpen size={16} className="mr-1" />
-        <span>Lock Period: {lockPeriod}</span>
+        <span>Lock Period: {actualLockPeriod}</span>
       </div>
       
       <div className="flex items-center mb-4 px-4">
-        <RiskBadge riskLevel={riskLevel} />
+        <RiskBadge riskLevel={actualRiskLevel} />
         
         <button 
           className="text-xs flex items-center text-muted-foreground hover:text-foreground"
@@ -119,10 +135,18 @@ const StakingPool: React.FC<StakingPoolProps> = ({
         </button>
       </div>
 
-      {supportedTokens && supportedTokens.length > 0 && (
+      {actualSupportedTokens && actualSupportedTokens.length > 0 && (
         <div className="px-4 mb-4">
           <div className="text-xs text-muted-foreground">
-            Supported tokens: {supportedTokens.join(", ")}
+            Supported tokens: {actualSupportedTokens.join(", ")}
+          </div>
+        </div>
+      )}
+
+      {tvl && (
+        <div className="px-4 mb-4">
+          <div className="text-xs text-muted-foreground">
+            Total Value Locked: ${tvl.toLocaleString()}
           </div>
         </div>
       )}
@@ -137,7 +161,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       {showFullTransparency && <StakingTransparency />}
       
       <StakingForm
-        supportedTokens={supportedTokens} 
+        supportedTokens={actualSupportedTokens} 
         onStakeSubmit={handleStakeSubmit}
         isFormVisible={showStakingForm}
       />

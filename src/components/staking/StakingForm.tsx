@@ -6,15 +6,15 @@ import PixelButton from "@/components/PixelButton";
 import { Wallet } from "lucide-react";
 
 interface StakingFormProps {
-  supportedTokens: string[];
-  onStakeSubmit: (amount: string, token: string) => void;
-  isFormVisible: boolean;
+  supportedTokens?: string[];
+  onStakeSubmit?: (amount: string, token: string) => void;
+  isFormVisible?: boolean;
 }
 
 const StakingForm: React.FC<StakingFormProps> = ({ 
-  supportedTokens = [], 
-  onStakeSubmit,
-  isFormVisible
+  supportedTokens = ["USDC", "DAI", "ETH"], 
+  onStakeSubmit = () => {},
+  isFormVisible = false
 }) => {
   const [stakeAmount, setStakeAmount] = React.useState("");
   const [selectedToken, setSelectedToken] = React.useState(supportedTokens[0] || "USDC");

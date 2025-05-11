@@ -4,10 +4,6 @@ import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import StakingPool from "@/components/StakingPool";
 import StakingTransparency from "@/components/StakingTransparency";
-import StakingHeader from "@/components/staking/StakingHeader";
-import StakingDetails from "@/components/staking/StakingDetails";
-import StakingForm from "@/components/staking/StakingForm";
-import RiskBadge from "@/components/staking/RiskBadge";
 import MultiWalletConnector from "@/components/wallet/MultiWalletConnector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Coins, Lock, Shield } from "lucide-react";
@@ -16,10 +12,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 const StakingPage: React.FC = () => {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   
   const handleWalletConnect = (provider: string, address: string) => {
     setConnectedWallet(provider);
     setConnectedAddress(address);
+  };
+  
+  const handleShowTransparency = () => {
+    setShowDetails(true);
   };
 
   return (
@@ -54,7 +55,9 @@ const StakingPage: React.FC = () => {
           </AlertDescription>
         </Alert>
         
-        <StakingHeader />
+        <div className="text-center mb-6">
+          <h2 className="font-scroll text-2xl text-scripture-light">Simple, Honest, Biblical Returns</h2>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-10">
           <Card className="border-scripture/30 bg-black/40 lg:col-span-2">
@@ -77,38 +80,53 @@ const StakingPage: React.FC = () => {
                 <TabsContent value="pools" className="pt-6">
                   <div className="space-y-6">
                     <StakingPool 
-                      name="Proverbs Pool" 
+                      title="Proverbs Pool" 
                       apy={3.5} 
-                      tvl={243578} 
-                      assets={["USDC"]} 
-                      duration={30}
-                      risk="low"
+                      lockPeriod="30 days"
+                      riskLevel="low"
                       description="This pool follows Solomon's wisdom of steady, patient growth"
+                      supportedTokens={["USDC"]}
+                      biblicalPrinciple="The patient accumulation of wealth as taught by Solomon"
+                      returnsMechanism="Reliable lending to verified biblical businesses"
                     />
                     
                     <StakingPool 
-                      name="Talents Pool" 
+                      title="Talents Pool" 
                       apy={5.2} 
-                      tvl={1243000} 
-                      assets={["USDC", "USDT", "DAI"]} 
-                      duration={90}
-                      risk="medium"
+                      lockPeriod="90 days"
+                      riskLevel="medium"
                       description="Based on the Parable of the Talents (Matthew 25:14-30)"
+                      supportedTokens={["USDC", "USDT", "DAI"]}
+                      biblicalPrinciple="Multiplying what has been entrusted to you"
+                      returnsMechanism="Diversified lending portfolio with biblical governance"
                     />
                     
                     <StakingPool 
-                      name="Joseph's Reserve" 
+                      title="Joseph's Reserve" 
                       apy={7.0} 
-                      tvl={532000} 
-                      assets={["ETH", "WETH"]} 
-                      duration={180}
-                      risk="medium-high"
+                      lockPeriod="180 days"
+                      riskLevel="medium-high"
                       description="Inspired by Joseph's 7 years of plenty stored for future use"
+                      supportedTokens={["ETH", "WETH"]}
+                      biblicalPrinciple="Strategic preparation for future needs"
+                      returnsMechanism="Diversified defi strategy with automated reinvestment"
                     />
                   </div>
                 </TabsContent>
                 <TabsContent value="details" className="pt-6">
-                  <StakingDetails />
+                  {showDetails ? (
+                    <StakingTransparency />
+                  ) : (
+                    <div className="p-6 bg-black/20 rounded-lg border border-scripture/20 text-center">
+                      <p className="mb-4">Learn more about how our biblical staking pools operate and the principles they follow.</p>
+                      <button 
+                        className="text-scripture underline"
+                        onClick={handleShowTransparency}
+                      >
+                        View Transparency Report
+                      </button>
+                    </div>
+                  )}
                 </TabsContent>
                 <TabsContent value="transparency" className="pt-6">
                   <StakingTransparency />
@@ -127,7 +145,13 @@ const StakingPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {connectedWallet ? (
-                  <StakingForm />
+                  <StakingForm 
+                    supportedTokens={["USDC", "DAI", "ETH", "WETH", "USDT"]}
+                    onStakeSubmit={(amount, token) => {
+                      console.log(`Staking ${amount} ${token}`);
+                    }}
+                    isFormVisible={true}
+                  />
                 ) : (
                   <div className="text-center py-8">
                     <p className="mb-4 text-white/70">Connect your wallet to start staking</p>
@@ -163,7 +187,7 @@ const StakingPage: React.FC = () => {
                   </p>
                 </div>
                 
-                <RiskBadge risk="low" />
+                <RiskBadge riskLevel="low" />
               </CardContent>
             </Card>
           </div>
