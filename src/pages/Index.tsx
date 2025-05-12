@@ -10,14 +10,14 @@ import FarcasterConnect from "@/farcaster/FarcasterConnect";
 import { Card, CardContent } from "@/components/ui/card";
 import BiblefiHero from "@/components/home/BiblefiHero";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
-import BibleCharacterSelector from "@/components/characters/BibleCharacterSelector";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import { getRandomVerse } from "@/data/bibleVerses";
 import IntroAnimation from "@/components/home/IntroAnimation";
+import PixelCharacter from "@/components/PixelCharacter";
+import { CharacterType } from "@/components/PixelCharacter";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
-  const [selectedCharacter, setSelectedCharacter] = React.useState("solomon");
   const [showIntro, setShowIntro] = useState(true);
   
   useEffect(() => {
@@ -63,38 +63,134 @@ const Index: React.FC = () => {
           <FarcasterConnect size="sm" />
         </div>
         
-        {/* Hero section */}
+        {/* Hero section with Solomon character */}
         <BiblefiHero />
+        <div className="flex justify-center -mt-16">
+          <PixelCharacter 
+            character="solomon" 
+            arcadeStyle={true}
+            message="Welcome to Bible.fi - I am King Solomon, your guide to biblical financial wisdom!"
+            soundEffect={true}
+            animate={true}
+            size="lg"
+            glow={true}
+          />
+        </div>
         
-        {/* Feature Showcase */}
-        <FeatureShowcase />
-        
-        {/* Character Selection and Wisdom */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 my-12">
-          <div className="lg:col-span-2">
-            <BibleCharacterSelector 
-              selectedCharacter={selectedCharacter as any}
-              onSelect={(character) => setSelectedCharacter(character)}
+        {/* Feature Showcase with Jesus character */}
+        <div className="relative">
+          <div className="absolute -top-6 right-10 z-10">
+            <PixelCharacter 
+              character="jesus" 
+              arcadeStyle={true}
+              message="Render unto Caesar what is Caesar's, and unto God what is God's."
+              soundEffect={true}
+              size="md"
             />
+          </div>
+          <FeatureShowcase />
+        </div>
+        
+        {/* Financial Wisdom section with Moses and David */}
+        <div className="my-12 bg-black/30 border border-ancient-gold/20 rounded-lg p-6">
+          <h2 className="text-2xl font-scroll text-ancient-gold text-center mb-6">Biblical Financial Guides</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex flex-col items-center">
+              <PixelCharacter 
+                character="moses" 
+                arcadeStyle={true}
+                message="Follow God's commandments for financial prosperity."
+                soundEffect={true}
+                size="md"
+              />
+              <div className="mt-4 bg-black/60 p-4 rounded-lg border border-scripture/30">
+                <h3 className="text-lg font-scroll text-ancient-gold mb-2">Financial Law</h3>
+                <p className="text-white/80 font-pixel text-sm">
+                  Moses delivered God's law, which contains principles for honest finances, fair dealings, and care for the poor.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <WisdomCard 
+                scripture={financialVerse.text}
+                reference={financialVerse.reference}
+                principle="Wise stewardship requires careful planning and management of resources."
+                application="Apply this by creating a monthly budget that prioritizes giving, saving, and responsible spending."
+                tags={[financialVerse.category]}
+              />
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <PixelCharacter 
+                character="david" 
+                arcadeStyle={true}
+                message="Honor the Lord with your wealth, with the firstfruits of all your crops."
+                soundEffect={true}
+                size="md"
+              />
+              <div className="mt-4 bg-black/60 p-4 rounded-lg border border-scripture/30">
+                <h3 className="text-lg font-scroll text-ancient-gold mb-2">Royal Wisdom</h3>
+                <p className="text-white/80 font-pixel text-sm">
+                  King David modeled generous giving and responsible stewardship of resources for God's purposes.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Daily Scripture and Farcaster with Paul */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
+          <div className="relative">
+            <div className="absolute -top-10 left-4 z-10">
+              <PixelCharacter 
+                character="paul" 
+                arcadeStyle={true}
+                message="Each of you should give what you have decided in your heart to give."
+                soundEffect={true}
+                size="sm"
+              />
+            </div>
+            <DailyScripture />
           </div>
           
-          <div>
-            <WisdomCard 
-              scripture={financialVerse.text}
-              reference={financialVerse.reference}
-              principle="Wise stewardship requires careful planning and management of resources."
-              application="Apply this by creating a monthly budget that prioritizes giving, saving, and responsible spending."
-              tags={[financialVerse.category]}
-            />
+          <div className="relative">
+            <FarcasterFrame />
+            <div className="absolute -bottom-6 right-4 z-10">
+              <PixelCharacter 
+                character="noah" 
+                arcadeStyle={true}
+                message="Plan ahead for life's storms by saving wisely."
+                soundEffect={true}
+                size="sm"
+              />
+            </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-          <DailyScripture />
-          <FarcasterFrame />
+        {/* Feature cards with Caesar and Tax Collector */}
+        <div className="relative">
+          <div className="absolute -top-10 left-1/3 transform -translate-x-1/2 z-10">
+            <PixelCharacter 
+              character="caesar" 
+              arcadeStyle={true}
+              message="Render unto Caesar what belongs to Caesar."
+              soundEffect={true}
+              size="md"
+            />
+          </div>
+          <div className="absolute -top-10 right-1/3 transform translate-x-1/2 z-10">
+            <PixelCharacter 
+              character="tax-collector" 
+              arcadeStyle={true}
+              message="Pay what you owe and be honest in all dealings."
+              soundEffect={true}
+              size="md"
+            />
+          </div>
+          <FeatureCards />
         </div>
-        
-        <FeatureCards />
         
         <div className="my-12">
           <Card className="bg-scripture/20 border border-ancient-gold shadow-md">
@@ -116,7 +212,19 @@ const Index: React.FC = () => {
           </Card>
         </div>
         
-        <TaxSection />
+        {/* Tax Section with Joseph */}
+        <div className="relative">
+          <div className="absolute -top-6 right-10 z-10">
+            <PixelCharacter 
+              character="joseph" 
+              arcadeStyle={true}
+              message="Store up in times of plenty for the lean years ahead."
+              soundEffect={true}
+              size="md"
+            />
+          </div>
+          <TaxSection />
+        </div>
       </main>
       
       {/* "Made on Base Chain" footer */}

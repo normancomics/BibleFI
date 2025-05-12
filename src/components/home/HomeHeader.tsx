@@ -6,6 +6,7 @@ import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { GlowingText } from "@/components/ui/tailwind-extensions";
+import PixelCharacter from "@/components/PixelCharacter";
 
 const HomeHeader: React.FC = () => {
   const { playSound, isSoundEnabled, toggleSound, setUserInteracted } = useSound();
@@ -37,8 +38,18 @@ const HomeHeader: React.FC = () => {
     <section className="text-center mb-12 animate-fade-in">
       <div className="mb-8">
         <div className="flex flex-col items-center justify-center">
-          <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
+          <div className="text-5xl md:text-6xl font-scroll font-bold mb-2 relative">
             <GlowingText color="gold">Bible.fi</GlowingText>
+            
+            {/* Character on top of logo */}
+            <div className="absolute -top-20 left-1/2 transform -translate-x-1/2">
+              <PixelCharacter 
+                character="solomon" 
+                size="sm"
+                arcadeStyle={true}
+                animate={true}
+              />
+            </div>
           </div>
           <div className="text-lg md:text-xl font-scroll text-ancient-gold opacity-80">
             Biblical Wisdom for Financial Stewardship

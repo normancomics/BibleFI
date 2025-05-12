@@ -14,6 +14,7 @@ interface PixelCharacterProps {
   size?: 'sm' | 'md' | 'lg';
   soundEffect?: boolean;
   glow?: boolean;
+  arcadeStyle?: boolean;
 }
 
 const characterConfig = {
@@ -105,7 +106,8 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
   animate = false,
   size = 'md',
   soundEffect = false,
-  glow = false
+  glow = false,
+  arcadeStyle = false
 }) => {
   const { playSound } = useSound();
   const [isHovered, setIsHovered] = useState(false);
@@ -158,9 +160,12 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
     isHovered ? 'scale-105' : ''
   ].filter(Boolean).join(' ');
 
+  // Arcade style container
+  const arcadeContainer = arcadeStyle ? 'bg-black/70 border-2 border-pixel-yellow p-2 rounded-lg' : '';
+
   return (
     <div
-      className={`flex flex-col items-center justify-center p-4 rounded-lg transition-transform duration-300 ${className}`}
+      className={`flex flex-col items-center justify-center p-2 rounded-lg transition-transform duration-300 ${arcadeContainer} ${className}`}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -172,19 +177,28 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
           className="pixelated w-full h-full"
         />
         
-        {isHovered && (
-          <div className="absolute bottom-[-20px] left-0 right-0 text-center">
-            <span className="bg-black/80 px-2 py-1 text-xs rounded font-pixel text-white">
+        {/* Arcade-style pixel background behind character */}
+        {arcadeStyle && (
+          <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-20"></div>
+        )}
+        
+        {/* Character name label */}
+        {(isHovered || arcadeStyle) && (
+          <div className={`absolute ${arcadeStyle ? 'top-[-20px]' : 'bottom-[-20px]'} left-0 right-0 text-center`}>
+            <span className="bg-black/80 px-2 py-1 text-xs rounded font-pixel text-pixel-yellow">
               {characterLabel}
             </span>
           </div>
         )}
       </div>
       
+      {/* Character message/wisdom */}
       {message && (
-        <p className="text-sm text-center text-white mt-2 font-scroll">
-          {message}
-        </p>
+        <div className={`mt-2 ${arcadeStyle ? 'bg-black/80 border border-pixel-yellow/50 p-2 rounded' : ''}`}>
+          <p className="text-sm text-center font-pixel text-white">
+            {message}
+          </p>
+        </div>
       )}
     </div>
   );
