@@ -29,17 +29,65 @@
   <meta property="fc:frame:button:3" content="Share Wisdom" />
   <meta property="fc:frame:button:3:action" content="post" />
   <meta property="fc:frame:post_url" content="https://biblefi.base.eth/api/frame" />
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #9B87F5;
+      color: #fff;
+      font-family: 'Cinzel', 'Playfair Display', system-ui, -apple-system, sans-serif;
+    }
+    
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      font-weight: 600;
+      font-family: 'Cinzel', serif;
+    }
+    
+    p {
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .card {
+      background: rgba(0, 82, 255, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 0;
+      max-width: 500px;
+    }
+    
+    .footer {
+      font-size: 12px;
+      opacity: 0.6;
+      font-family: 'Cinzel', serif;
+      margin-top: 20px;
+    }
+  </style>
 </head>
-<body style="margin:0;padding:0;background:#9B87F5;color:#fff;font-family:'Cinzel','Playfair Display',system-ui,-apple-system,sans-serif;">
-  <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;text-align:center;">
+<body>
+  <div class="container">
     <div>
       <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="biblefi.base.eth" style="max-width:100%;height:auto;margin-bottom:20px;" />
-      <h1 style="margin:0 0 10px;font-size:24px;font-weight:600;font-family:'Cinzel',serif;">biblefi.base.eth Mini-App</h1>
-      <p style="margin:0 0 20px;opacity:0.8;font-size:16px;font-family:'Playfair Display',serif;">Biblical wisdom for your financial journey</p>
-      <div style="background:rgba(0,82,255,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:15px;margin:20px 0;max-width:500px;">
-        <p style="margin:0;font-size:14px;font-family:'Playfair Display',serif;">This is a Farcaster Frame. View it in a Farcaster client like Warpcast for the full experience.</p>
+      <h1>biblefi.base.eth Mini-App</h1>
+      <p style="margin:0 0 20px;opacity:0.8;font-size:16px;">Biblical wisdom for your financial journey</p>
+      <div class="card">
+        <p style="margin:0;font-size:14px;">This is a Farcaster Frame. View it in a Farcaster client like Warpcast for the full experience.</p>
       </div>
-      <p style="font-size:12px;opacity:0.6;font-family:'Cinzel',serif;">Made with ❤️ on Base Chain</p>
+      <div class="footer">
+        <p>Made with ❤️ on Base Chain</p>
+      </div>
     </div>
   </div>
   

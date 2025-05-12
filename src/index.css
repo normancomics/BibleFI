@@ -29,6 +29,7 @@
     /* Custom colors */
     --scripture: 258 67% 60%;
     --scripture-light: 258 67% 70%;
+    --scripture-dark: 258 40% 50%;
     --ancient-gold: 41 89% 64%;
     --ancient-scroll: 39 70% 90%;
     --base-blue: 217 100% 50%;
@@ -49,8 +50,17 @@
     background-attachment: fixed;
   }
   
+  /* Consistent font styling */
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight font-scroll;
+  }
+  
+  p {
+    @apply font-scroll;
+  }
+  
+  button {
+    @apply font-scroll;
   }
 }
 
@@ -180,7 +190,7 @@
   animation: entrance 0.5s ease-out;
 }
 
-/* Font styles */
+/* Font styles - Updated for consistency */
 @font-face {
   font-family: 'PixelFont';
   src: url('/fonts/pixel.woff2') format('woff2');
@@ -189,6 +199,7 @@
   font-display: swap;
 }
 
+/* Font classes */
 .font-pixel {
   font-family: 'PixelFont', monospace;
 }

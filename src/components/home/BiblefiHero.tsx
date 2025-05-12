@@ -60,26 +60,9 @@ const BiblefiHero: React.FC = () => {
         animate={isLoaded ? { opacity: 1 } : {}}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <p className="text-xl max-w-2xl mx-auto mb-6 text-white">
+        <p className="text-xl max-w-2xl mx-auto mb-6 text-white font-scroll">
           Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
         </p>
-        
-        <div className="flex justify-center items-center mt-2 mb-4">
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={isLoaded ? { scale: 1, opacity: 1 } : {}}
-            transition={{ delay: 0.5, duration: 0.3 }}
-            className="bg-black/70 py-2 px-6 rounded-lg inline-block mx-auto border-2 border-ancient-gold/50"
-          >
-            <span className="text-white mr-3 font-pixel tracking-wider text-lg">MADE ON</span>
-            <img 
-              src="https://base.org/images/favicon.png" 
-              alt="Base Chain Logo" 
-              className="w-6 h-6 inline-block"
-            />
-            <span className="ml-2 text-base-blue font-pixel font-bold tracking-wider text-lg">BASE CHAIN</span>
-          </motion.div>
-        </div>
       </motion.div>
       
       {/* Action buttons */}
@@ -118,12 +101,25 @@ const BiblefiHero: React.FC = () => {
               <img 
                 src={`/pixel-${character}.png`} 
                 alt={`${character} character`}
-                className="h-24 md:h-32 object-contain"
+                className="h-24 md:h-32 object-contain pixelated"
               />
             </motion.div>
           ))}
         </div>
       </motion.div>
+      
+      {/* Base chain attribution - moved to bottom of page */}
+      <div className="absolute bottom-0 left-0 right-0 mt-12 text-center py-2">
+        <p className="text-xs font-pixel tracking-wider text-scripture-dark/60">
+          MADE ON 
+          <img 
+            src="https://base.org/images/favicon.png" 
+            alt="Base Chain Logo" 
+            className="w-3 h-3 inline-block mx-1"
+          />
+          BASE CHAIN
+        </p>
+      </div>
     </section>
   );
 };

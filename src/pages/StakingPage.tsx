@@ -107,7 +107,7 @@ const StakingPage: React.FC = () => {
                       title="Joseph's Reserve" 
                       apy={7.0} 
                       lockPeriod="180 days"
-                      riskLevel="medium-high"
+                      riskLevel="medium"
                       description="Inspired by Joseph's 7 years of plenty stored for future use"
                       supportedTokens={["ETH", "WETH"]}
                       biblicalPrinciple="Strategic preparation for future needs"

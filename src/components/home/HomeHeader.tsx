@@ -42,19 +42,9 @@ const HomeHeader: React.FC = () => {
         />
       </div>
       
-      <p className="text-xl max-w-2xl mx-auto mb-6">
+      <p className="text-xl max-w-2xl mx-auto mb-6 font-scroll">
         Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.
       </p>
-      
-      <div className="flex justify-center items-center mt-2 mb-4 bg-black/70 py-2 px-6 rounded-lg inline-block mx-auto border-2 border-ancient-gold/50">
-        <span className="text-white mr-3 font-pixel tracking-wider text-lg">MADE ON</span>
-        <img 
-          src="https://base.org/images/favicon.png" 
-          alt="Base Chain Logo" 
-          className="w-6 h-6 inline-block"
-        />
-        <span className="ml-2 text-base-blue font-pixel font-bold tracking-wider text-lg">BASE CHAIN</span>
-      </div>
       
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 mb-6">
         <PixelButton 
@@ -84,9 +74,11 @@ const HomeHeader: React.FC = () => {
         </Button>
       </div>
       
-      <div className="text-sm text-white/70 mt-2">
+      <div className="text-sm text-white/70 mt-2 font-scroll">
         <p>Using iPad/iOS? Tap any sound button to enable audio</p>
       </div>
+      
+      {/* Base chain attribution moved to the page footer */}
     </section>
   );
 };

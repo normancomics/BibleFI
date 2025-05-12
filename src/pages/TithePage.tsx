@@ -14,7 +14,7 @@ import { ArrowRight, Church, Coins, HandCoins } from "lucide-react";
 
 const TithePage: React.FC = () => {
   // Get a random verse about giving
-  const financialVerse = getRandomVerse("giving");
+  const financialVerse = getRandomVerse();
 
   return (
     <div className="min-h-screen">

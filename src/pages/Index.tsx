@@ -108,6 +108,19 @@ const Index: React.FC = () => {
         </div>
         
         <TaxSection />
+        
+        {/* Added footer with Base Chain attribution */}
+        <footer className="mt-16 mb-4 text-center">
+          <p className="text-xs font-pixel tracking-wider text-scripture-dark/60">
+            MADE ON 
+            <img 
+              src="https://base.org/images/favicon.png" 
+              alt="Base Chain Logo" 
+              className="w-3 h-3 inline-block mx-1"
+            />
+            BASE CHAIN
+          </p>
+        </footer>
       </main>
     </div>
   );
