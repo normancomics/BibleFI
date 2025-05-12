@@ -17,11 +17,9 @@ export const AnimatedLogo: React.FC<{ size?: "sm" | "md" | "lg", className?: str
   
   return (
     <div className={`relative ${sizeClasses[size]} ${className}`}>
-      <img 
-        src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-        alt="Bible.fi" 
-        className="h-full object-contain"
-      />
+      <div className="font-scroll text-4xl sm:text-5xl md:text-6xl font-bold text-ancient-gold">
+        Bible.fi
+      </div>
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine" />
     </div>
   );
@@ -56,7 +54,7 @@ export const AnimatedSpriteBackground: React.FC<{ opacity?: number }> = ({ opaci
     >
       <div className="absolute inset-0 bg-repeat animate-scroll-slow"
         style={{
-          backgroundImage: 'url("/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png")',
+          backgroundImage: 'url("/pixel-temple-bg.png")',
           backgroundSize: '1000px 1000px',
           filter: 'blur(8px)'
         }}
@@ -80,6 +78,24 @@ export const SpinningCoin: React.FC<{ size?: number, className?: string }> = ({
         height={size}
         className="animate-spin-slow pixelated"
       />
+    </div>
+  );
+};
+
+// Biblical quote component with decorative styling
+export const BibleQuote: React.FC<{
+  children: React.ReactNode;
+  reference?: string;
+  className?: string;
+}> = ({ children, reference, className = "" }) => {
+  return (
+    <div className={`relative p-6 ${className}`}>
+      <div className="absolute top-0 left-0 text-4xl text-ancient-gold/40">"</div>
+      <div className="pl-6 pr-6 italic font-scroll text-white/90">{children}</div>
+      <div className="absolute bottom-0 right-0 text-4xl text-ancient-gold/40">"</div>
+      {reference && (
+        <div className="text-right mt-2 font-scroll text-sm text-ancient-gold">— {reference}</div>
+      )}
     </div>
   );
 };

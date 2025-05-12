@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PixelButton from "@/components/PixelButton";
 import { motion } from "framer-motion";
+import { GlowingText } from "@/components/ui/tailwind-extensions";
 
 const BiblefiHero: React.FC = () => {
   const { toast } = useToast();
@@ -48,11 +49,14 @@ const BiblefiHero: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="mb-8"
       >
-        <img 
-          src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-          alt="Bible.fi" 
-          className="h-32 mx-auto"
-        />
+        <div className="flex flex-col items-center justify-center">
+          <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
+            <GlowingText color="gold">Bible.fi</GlowingText>
+          </div>
+          <div className="text-lg md:text-xl font-scroll text-ancient-gold opacity-80">
+            Biblical Wisdom for Financial Stewardship
+          </div>
+        </div>
       </motion.div>
       
       <motion.div
@@ -82,44 +86,23 @@ const BiblefiHero: React.FC = () => {
         </PixelButton>
       </motion.div>
       
-      {/* Biblical characters */}
+      {/* Biblical scenes */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={isLoaded ? { opacity: 1, y: 0 } : {}}
         transition={{ delay: 0.9, duration: 0.5 }}
-        className="flex justify-center items-end mt-8 -mb-8 overflow-hidden"
+        className="mt-8 mb-4"
       >
-        <div className="flex gap-4 md:gap-8 px-2 overflow-x-auto pb-4 justify-center">
-          {["solomon", "jesus", "moses", "david"].map((character, index) => (
-            <motion.div
-              key={character}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
-              transition={{ delay: 1 + index * 0.2, duration: 0.4 }}
-              className="flex-shrink-0"
-            >
-              <img 
-                src={`/pixel-${character}.png`} 
-                alt={`${character} character`}
-                className="h-24 md:h-32 object-contain pixelated"
-              />
-            </motion.div>
-          ))}
+        <div className="relative h-40 md:h-60 max-w-4xl mx-auto">
+          <div className="absolute inset-0 flex justify-center">
+            <img 
+              src="/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png" 
+              alt="Biblical scene" 
+              className="h-full object-contain"
+            />
+          </div>
         </div>
       </motion.div>
-      
-      {/* Base chain attribution - moved to bottom of page */}
-      <div className="absolute bottom-0 left-0 right-0 mt-12 text-center py-2">
-        <p className="text-xs font-pixel tracking-wider text-scripture-dark/60">
-          MADE ON 
-          <img 
-            src="https://base.org/images/favicon.png" 
-            alt="Base Chain Logo" 
-            className="w-3 h-3 inline-block mx-1"
-          />
-          BASE CHAIN
-        </p>
-      </div>
     </section>
   );
 };

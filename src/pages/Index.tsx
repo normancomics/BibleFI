@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
 import FeatureCards from "@/components/home/FeatureCards";
@@ -13,10 +13,12 @@ import FeatureShowcase from "@/components/home/FeatureShowcase";
 import BibleCharacterSelector from "@/components/characters/BibleCharacterSelector";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import { getRandomVerse } from "@/data/bibleVerses";
+import IntroAnimation from "@/components/home/IntroAnimation";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
   const [selectedCharacter, setSelectedCharacter] = React.useState("solomon");
+  const [showIntro, setShowIntro] = useState(true);
   
   useEffect(() => {
     // Enable user interaction on page load
@@ -45,8 +47,15 @@ const Index: React.FC = () => {
   // Get a random financial verse for the wisdom card
   const financialVerse = getRandomVerse();
   
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    setUserInteracted(true);
+  };
+  
   return (
     <div className="min-h-screen">
+      {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
+      
       <NavBar />
       
       <main className="container mx-auto px-4 py-8">
@@ -110,9 +119,9 @@ const Index: React.FC = () => {
         <TaxSection />
       </main>
       
-      {/* Moved "Made on Base Chain" to the bottom as a footer */}
-      <footer className="py-4 text-center">
-        <p className="text-xs font-pixel tracking-wider text-scripture-dark/40 hover:text-scripture-dark/60 transition-colors">
+      {/* "Made on Base Chain" footer */}
+      <footer className="py-6 text-center bg-gradient-to-t from-black/30 to-transparent">
+        <p className="text-xs font-pixel tracking-wider text-scripture-dark/30 hover:text-scripture-dark/60 transition-colors">
           MADE ON 
           <img 
             src="https://base.org/images/favicon.png" 

@@ -18,43 +18,43 @@ interface PixelCharacterProps {
 
 const characterConfig = {
   god: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png", // Temporary character image
     sound: "powerup",
     alt: "God Pixel Art",
     label: "GOD"
   },
   jesus: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-jesus.png",
     sound: "powerup",
     alt: "Jesus Pixel Art",
     label: "JESUS"
   },
   solomon: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png",
     sound: "coin",
     alt: "Solomon Pixel Art",
     label: "SOLOMON"
   },
   moses: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-moses.png",
     sound: "scroll",
     alt: "Moses Pixel Art",
     label: "MOSES"
   },
   david: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-david.png",
     sound: "select",
     alt: "King David Pixel Art",
     label: "KING DAVID"
   },
   noah: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-noah.png",
     sound: "click",
     alt: "Noah Pixel Art",
     label: "NOAH"
   },
   paul: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-paul.png",
     sound: "success",
     alt: "Paul Pixel Art",
     label: "PAUL"
@@ -66,56 +66,35 @@ const characterConfig = {
     label: "COIN"
   },
   abraham: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png", // Temporary character image
     sound: "scroll",
     alt: "Abraham Pixel Art",
     label: "ABRAHAM"
   },
   joseph: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png", // Temporary character image
     sound: "powerup",
     alt: "Joseph Pixel Art",
     label: "JOSEPH"
   },
   "woman-well": {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png", // Temporary character image
     sound: "select",
     alt: "Woman at the Well Pixel Art",
     label: "WOMAN AT WELL"
   },
   caesar: {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png", // Temporary character image
     sound: "coin",
     alt: "Caesar Pixel Art",
     label: "CAESAR"
   },
   "tax-collector": {
-    src: "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
+    src: "/pixel-solomon.png", // Temporary character image
     sound: "coin",
     alt: "Tax Collector Pixel Art",
     label: "TAX COLLECTOR"
   }
-};
-
-// Helper function to get character position from the sprite sheet
-const getCharacterPosition = (character: CharacterType): { x: number, y: number } => {
-  const positions: Record<CharacterType, { x: number, y: number }> = {
-    god: { x: 0, y: 0 },
-    jesus: { x: 1, y: 0 },
-    moses: { x: 2, y: 0 },
-    abraham: { x: 3, y: 0 },
-    joseph: { x: 0, y: 1 },
-    solomon: { x: 1, y: 1 },
-    david: { x: 2, y: 1 },
-    "woman-well": { x: 3, y: 1 },
-    caesar: { x: 0, y: 2 },
-    "tax-collector": { x: 1, y: 2 },
-    coin: { x: 2, y: 2 },
-    noah: { x: 2, y: 1 }, // Reusing another character
-    paul: { x: 1, y: 2 }  // Reusing another character
-  };
-  
-  return positions[character] || { x: 0, y: 0 };
 };
 
 const PixelCharacter: React.FC<PixelCharacterProps> = ({
@@ -134,12 +113,10 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
 
   // Get character configuration
   const charConfig = characterConfig[character];
+  const characterSrc = charConfig?.src || "/pixel-solomon.png";
   const characterAlt = charConfig?.alt || "Bible Character";
   const characterSound = charConfig?.sound as SoundType || "select";
   const characterLabel = charConfig?.label || character.toUpperCase();
-  
-  // Set up position for sprite extraction
-  const position = getCharacterPosition(character);
 
   // Animation effect
   useEffect(() => {
@@ -190,7 +167,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
     >
       <div className={`${sizeClasses[size]} relative ${animationClasses}`}>
         <img
-          src="/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png"
+          src={characterSrc}
           alt={characterAlt}
           className="pixelated w-full h-full"
         />
@@ -205,7 +182,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
       </div>
       
       {message && (
-        <p className="text-sm text-center text-white mt-2">
+        <p className="text-sm text-center text-white mt-2 font-scroll">
           {message}
         </p>
       )}

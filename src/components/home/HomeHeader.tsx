@@ -5,6 +5,7 @@ import { ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { GlowingText } from "@/components/ui/tailwind-extensions";
 
 const HomeHeader: React.FC = () => {
   const { playSound, isSoundEnabled, toggleSound, setUserInteracted } = useSound();
@@ -35,11 +36,14 @@ const HomeHeader: React.FC = () => {
   return (
     <section className="text-center mb-12 animate-fade-in">
       <div className="mb-8">
-        <img 
-          src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-          alt="Bible.fi" 
-          className="h-32 mx-auto"
-        />
+        <div className="flex flex-col items-center justify-center">
+          <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
+            <GlowingText color="gold">Bible.fi</GlowingText>
+          </div>
+          <div className="text-lg md:text-xl font-scroll text-ancient-gold opacity-80">
+            Biblical Wisdom for Financial Stewardship
+          </div>
+        </div>
       </div>
       
       <p className="text-xl max-w-2xl mx-auto mb-6 font-scroll">

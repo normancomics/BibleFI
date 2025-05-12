@@ -1,23 +1,43 @@
 
 import React, { useEffect, useState } from "react";
 import { useSound } from "@/contexts/SoundContext";
-import PixelCharacter from "@/components/PixelCharacter";
-import { CharacterType } from "@/components/PixelCharacter";
+import { GlowingText } from "@/components/ui/tailwind-extensions";
 
 interface IntroAnimationProps {
   onComplete: () => void;
 }
 
-const biblicalCharacters: CharacterType[] = ["jesus", "solomon", "moses", "david", "abraham", "noah"];
+const biblicalScenes = [
+  {
+    id: "scene1",
+    text: "In the beginning, God created wealth and resources for mankind to steward wisely.",
+    sound: "powerup"
+  },
+  {
+    id: "scene2",
+    text: "The Lord provides wisdom to those who seek it faithfully.",
+    sound: "scroll"
+  },
+  {
+    id: "scene3", 
+    text: "A faithful person will be richly blessed, but one eager to get rich will not go unpunished.",
+    sound: "select"
+  },
+  {
+    id: "scene4",
+    text: "Wealth gained hastily will dwindle, but whoever gathers little by little will increase it.",
+    sound: "coin"
+  }
+];
 
 const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   const { playSound } = useSound();
   const [typedText, setTypedText] = useState("");
-  const [currentCharacter, setCurrentCharacter] = useState<CharacterType>("jesus");
-  const [showCharacters, setShowCharacters] = useState(false);
-  const fullText = "BIBLICAL wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.";
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [showMainTitle, setShowMainTitle] = useState(false);
+  const fullText = "Biblical wisdom for your financial journey. Tithe, Stake, Invest & grow wealth according to scripture.";
   
-  // Handle typing animation
+  // Handle typing animation for the initial text
   useEffect(() => {
     let i = 0;
     const typingInterval = setInterval(() => {
@@ -31,66 +51,81 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
         }
       } else {
         clearInterval(typingInterval);
-        setShowCharacters(true);
-        playSound("scroll");
         
-        // Show main content after typing + character showcase finishes
+        // Start scene transitions after typing finishes
         setTimeout(() => {
-          onComplete();
+          setShowMainTitle(true);
           playSound("powerup");
-        }, 3000);
+          
+          // Scene transition loop
+          const sceneInterval = setInterval(() => {
+            setCurrentSceneIndex(prev => {
+              const nextIndex = prev + 1;
+              if (nextIndex >= biblicalScenes.length) {
+                clearInterval(sceneInterval);
+                
+                // Complete intro after all scenes
+                setTimeout(() => {
+                  onComplete();
+                }, 1500);
+                return prev;
+              }
+              
+              // Play scene sound
+              playSound(biblicalScenes[nextIndex].sound as any);
+              return nextIndex;
+            });
+          }, 3000);
+          
+        }, 1000);
       }
     }, 50);
     
     return () => clearInterval(typingInterval);
   }, [playSound, fullText, onComplete]);
-  
-  // Cycle through characters during intro
-  useEffect(() => {
-    if (showCharacters) {
-      const characterInterval = setInterval(() => {
-        const randomIndex = Math.floor(Math.random() * biblicalCharacters.length);
-        setCurrentCharacter(biblicalCharacters[randomIndex]);
-        playSound("coin");
-      }, 800);
-      
-      return () => clearInterval(characterInterval);
-    }
-    
-    return undefined;
-  }, [showCharacters, playSound]);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black">
-      <div className="text-center max-w-2xl mx-auto p-8">
-        <div className="mb-8 animate-pulse-glow">
-          <img 
-            src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-            alt="Bible.fi" 
-            className="h-32 mx-auto" 
-          />
-        </div>
-        
-        <div className="border-2 border-scripture p-6 bg-black/80">
-          <p className="text-xl font-pixel text-white">
-            {typedText}
-            <span className="animate-pulse">|</span>
-          </p>
-        </div>
-        
-        {showCharacters && (
-          <div className="mt-8 animate-entrance">
-            <div className="flex justify-center gap-4">
-              <PixelCharacter 
-                character={currentCharacter}
-                size="lg"
-                animate={true}
-                soundEffect={false}
-              />
+      <div className="text-center max-w-3xl mx-auto p-8">
+        {showMainTitle ? (
+          <div className="mb-12 animate-entrance">
+            <div className="text-5xl md:text-7xl font-scroll font-bold mb-4">
+              <GlowingText color="gold">Bible.fi</GlowingText>
             </div>
-            
+            <div className="text-xl font-scroll text-ancient-gold/80">
+              Biblical Wisdom for Financial Stewardship
+            </div>
+          </div>
+        ) : (
+          <div className="mb-8 animate-pulse-glow">
+            <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
+              <GlowingText color="gold">Bible.fi</GlowingText>
+            </div>
+          </div>
+        )}
+        
+        <div className="border-2 border-ancient-gold/50 p-6 bg-black/80 min-h-[120px] flex items-center justify-center">
+          {showMainTitle ? (
+            <p className="text-xl font-scroll text-white animate-fade-in">
+              {biblicalScenes[currentSceneIndex]?.text}
+            </p>
+          ) : (
+            <p className="text-xl font-scroll text-white">
+              {typedText}
+              <span className="animate-pulse">|</span>
+            </p>
+          )}
+        </div>
+        
+        {showMainTitle && (
+          <div className="mt-8">
+            <img 
+              src="/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png"
+              alt="Biblical scene" 
+              className="max-w-full h-auto mx-auto animate-entrance" 
+            />
             <div className="mt-4">
-              <p className="text-sm text-white/70">Loading Biblical Wisdom...</p>
+              <p className="text-sm text-white/70 font-scroll">Loading Biblical Wisdom...</p>
             </div>
           </div>
         )}
