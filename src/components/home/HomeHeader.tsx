@@ -49,7 +49,7 @@ const HomeHeader: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 mb-6">
         <PixelButton 
           onClick={handleOpenFarcaster}
-          className="inline-flex items-center px-6 py-3 text-lg"
+          className="inline-flex items-center px-6 py-3 text-lg font-scroll"
         >
           <ExternalLink size={20} className="mr-2" />
           Open in Farcaster
@@ -58,7 +58,7 @@ const HomeHeader: React.FC = () => {
         <Button
           onClick={handleSoundToggle}
           variant="outline"
-          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-black/50 hover:bg-black/70"
+          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-black/50 hover:bg-black/70 font-scroll"
         >
           {isSoundEnabled ? (
             <>
@@ -77,8 +77,6 @@ const HomeHeader: React.FC = () => {
       <div className="text-sm text-white/70 mt-2 font-scroll">
         <p>Using iPad/iOS? Tap any sound button to enable audio</p>
       </div>
-      
-      {/* Base chain attribution moved to the page footer */}
     </section>
   );
 };

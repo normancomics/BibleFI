@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -123,11 +122,11 @@ const TitheForm: React.FC = () => {
           
           <div className="space-y-4">
             <div>
-              <Label htmlFor="amount">Amount to Tithe</Label>
+              <Label htmlFor="amount" className="font-scroll">Amount to Tithe</Label>
               <Input 
                 id="amount" 
                 placeholder="0.00" 
-                className="mt-1" 
+                className="mt-1 font-scroll" 
                 value={amount}
                 onChange={handleAmountChange}
               />
@@ -135,13 +134,13 @@ const TitheForm: React.FC = () => {
             
             <div>
               <div className="flex justify-between mb-2">
-                <Label htmlFor="token">Select Payment Method</Label>
+                <Label htmlFor="token" className="font-scroll">Select Payment Method</Label>
                 <button 
                   onClick={() => {
                     setShowAdvancedOptions(!showAdvancedOptions);
                     playSound("select");
                   }}
-                  className="text-xs flex items-center text-scripture hover:text-scripture-dark"
+                  className="text-xs flex items-center text-scripture hover:text-scripture-dark font-scroll"
                 >
                   {showAdvancedOptions ? (
                     <>Less Options <ChevronUp size={12} className="ml-1" /></>
@@ -152,7 +151,7 @@ const TitheForm: React.FC = () => {
               </div>
               <select 
                 id="token" 
-                className="w-full border border-input rounded px-3 py-2 mt-1"
+                className="w-full border border-input rounded px-3 py-2 mt-1 font-scroll"
                 value={selectedToken}
                 onChange={(e) => {
                   setSelectedToken(e.target.value);
@@ -173,7 +172,7 @@ const TitheForm: React.FC = () => {
             </div>
             
             {amount && !isNaN(Number(amount)) && Number(amount) > 0 && (
-              <div className="border-t border-border pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4 font-scroll">
                 <div className="flex justify-between mb-2">
                   <span>Amount:</span>
                   <span>{amount} {selectedToken}</span>
@@ -190,7 +189,7 @@ const TitheForm: React.FC = () => {
             )}
             
             <PixelButton 
-              className="w-full flex items-center justify-center" 
+              className="w-full flex items-center justify-center font-scroll" 
               onClick={handleTithe}
               disabled={!amount || isNaN(Number(amount)) || Number(amount) <= 0}
             >
@@ -203,11 +202,11 @@ const TitheForm: React.FC = () => {
       {isPaymentModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Complete Your Tithe</h3>
+            <h3 className="text-xl font-bold mb-4 font-scroll">Complete Your Tithe</h3>
             
             <div className="flex border-b mb-4">
               <button
-                className={`px-4 py-2 ${paymentMethod === "crypto" ? "border-b-2 border-scripture font-bold" : "text-muted-foreground"}`}
+                className={`px-4 py-2 font-scroll ${paymentMethod === "crypto" ? "border-b-2 border-scripture font-bold" : "text-muted-foreground"}`}
                 onClick={() => {
                   setPaymentMethod("crypto");
                   playSound("select");
@@ -219,7 +218,7 @@ const TitheForm: React.FC = () => {
                 </div>
               </button>
               <button
-                className={`px-4 py-2 ${paymentMethod === "fiat" ? "border-b-2 border-scripture font-bold" : "text-muted-foreground"}`}
+                className={`px-4 py-2 font-scroll ${paymentMethod === "fiat" ? "border-b-2 border-scripture font-bold" : "text-muted-foreground"}`}
                 onClick={() => {
                   setPaymentMethod("fiat");
                   playSound("select");
@@ -234,57 +233,61 @@ const TitheForm: React.FC = () => {
             
             {paymentMethod === "crypto" ? (
               <div>
-                <p className="mb-4 text-sm">Connect your wallet to complete your tithe of {amount} {selectedToken}.</p>
+                <p className="mb-4 text-sm font-scroll">Connect your wallet to complete your tithe of {amount} {selectedToken}.</p>
                 <WalletConnect onConnect={handleWalletConnected} onCancel={() => setIsPaymentModalOpen(false)} />
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="card-name">Name on Card</Label>
+                  <Label htmlFor="card-name" className="font-scroll">Name on Card</Label>
                   <Input 
                     id="card-name" 
                     placeholder="John Doe" 
                     value={cardDetails.name}
                     onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})}
+                    className="font-scroll"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="card-number">Card Number</Label>
+                  <Label htmlFor="card-number" className="font-scroll">Card Number</Label>
                   <Input 
                     id="card-number" 
                     placeholder="0000 0000 0000 0000" 
                     value={cardDetails.number}
                     onChange={(e) => setCardDetails({...cardDetails, number: e.target.value.replace(/[^\d]/g, '')})}
+                    className="font-scroll"
                   />
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <Label htmlFor="card-expiry">Expiry Date</Label>
+                    <Label htmlFor="card-expiry" className="font-scroll">Expiry Date</Label>
                     <Input 
                       id="card-expiry" 
                       placeholder="MM/YY" 
                       value={cardDetails.expiry}
                       onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})}
+                      className="font-scroll"
                     />
                   </div>
                   <div className="flex-1">
-                    <Label htmlFor="card-cvc">CVC</Label>
+                    <Label htmlFor="card-cvc" className="font-scroll">CVC</Label>
                     <Input 
                       id="card-cvc" 
                       placeholder="123" 
                       value={cardDetails.cvc}
                       onChange={(e) => setCardDetails({...cardDetails, cvc: e.target.value.replace(/[^\d]/g, '').substring(0, 3)})}
+                      className="font-scroll"
                     />
                   </div>
                 </div>
                 <div className="pt-2">
-                  <PixelButton className="w-full" onClick={handleCardPayment}>
+                  <PixelButton className="w-full font-scroll" onClick={handleCardPayment}>
                     Pay ${amount}
                   </PixelButton>
                 </div>
                 <div className="pt-2 text-center">
                   <button 
-                    className="text-sm text-muted-foreground hover:text-foreground"
+                    className="text-sm text-muted-foreground hover:text-foreground font-scroll"
                     onClick={() => setIsPaymentModalOpen(false)}
                   >
                     Cancel

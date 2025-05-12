@@ -74,14 +74,14 @@ const DigitalTithingForm: React.FC = () => {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tithing Amount</FormLabel>
+                  <FormLabel className="font-scroll">Tithing Amount</FormLabel>
                   <FormControl>
-                    <Input placeholder="0.00" {...field} type="number" step="0.01" min="0" />
+                    <Input placeholder="0.00" {...field} type="number" step="0.01" min="0" className="font-scroll" />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="font-scroll">
                     Scripture teaches giving a tenth (10%) of your income
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="font-scroll" />
                 </FormItem>
               )}
             />
@@ -91,25 +91,25 @@ const DigitalTithingForm: React.FC = () => {
               name="currency"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Currency</FormLabel>
+                  <FormLabel className="font-scroll">Currency</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select currency" />
+                      <SelectTrigger className="font-scroll">
+                        <SelectValue placeholder="Select currency" className="font-scroll" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="USDC">USDC</SelectItem>
-                      <SelectItem value="ETH">ETH</SelectItem>
-                      <SelectItem value="USDT">USDT</SelectItem>
-                      <SelectItem value="DAI">DAI</SelectItem>
-                      <SelectItem value="USD">USD (Credit Card)</SelectItem>
+                      <SelectItem value="USDC" className="font-scroll">USDC</SelectItem>
+                      <SelectItem value="ETH" className="font-scroll">ETH</SelectItem>
+                      <SelectItem value="USDT" className="font-scroll">USDT</SelectItem>
+                      <SelectItem value="DAI" className="font-scroll">DAI</SelectItem>
+                      <SelectItem value="USD" className="font-scroll">USD (Credit Card)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="font-scroll">
                     Choose your preferred currency for tithing
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="font-scroll" />
                 </FormItem>
               )}
             />
@@ -119,25 +119,25 @@ const DigitalTithingForm: React.FC = () => {
               name="church"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Church or Ministry</FormLabel>
+                  <FormLabel className="font-scroll">Church or Ministry</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select church" />
+                      <SelectTrigger className="font-scroll">
+                        <SelectValue placeholder="Select church" className="font-scroll" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="local">My Local Church</SelectItem>
-                      <SelectItem value="global">Global Missions</SelectItem>
-                      <SelectItem value="charity">Christian Charity</SelectItem>
-                      <SelectItem value="bible">Bible Translation Work</SelectItem>
-                      <SelectItem value="other">Other Ministry</SelectItem>
+                      <SelectItem value="local" className="font-scroll">My Local Church</SelectItem>
+                      <SelectItem value="global" className="font-scroll">Global Missions</SelectItem>
+                      <SelectItem value="charity" className="font-scroll">Christian Charity</SelectItem>
+                      <SelectItem value="bible" className="font-scroll">Bible Translation Work</SelectItem>
+                      <SelectItem value="other" className="font-scroll">Other Ministry</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="font-scroll">
                     Select where you would like your tithe to go
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="font-scroll" />
                 </FormItem>
               )}
             />
@@ -147,11 +147,11 @@ const DigitalTithingForm: React.FC = () => {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Personal Message (Optional)</FormLabel>
+                  <FormLabel className="font-scroll">Personal Message (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Add a personal message..." {...field} />
+                    <Input placeholder="Add a personal message..." {...field} className="font-scroll" />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="font-scroll" />
                 </FormItem>
               )}
             />
@@ -161,7 +161,7 @@ const DigitalTithingForm: React.FC = () => {
                 type="submit" 
                 disabled={isSubmitting}
                 size="lg"
-                className="bg-scripture hover:bg-scripture-light px-8"
+                className="bg-scripture hover:bg-scripture-light px-8 font-scroll"
               >
                 {isSubmitting ? "Processing..." : "Submit Tithe"}
               </Button>

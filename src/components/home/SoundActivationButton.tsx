@@ -53,7 +53,7 @@ const SoundActivationButton: React.FC<SoundActivationButtonProps> = ({ onActivat
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-2">
       <Button 
         onClick={handleClick} 
-        className={`bg-scripture text-white p-3 rounded-lg shadow-lg flex items-center transition-transform duration-300 ${isAnimating ? 'scale-105' : 'scale-100'}`}
+        className={`bg-scripture text-white p-3 rounded-lg shadow-lg flex items-center transition-transform duration-300 font-scroll ${isAnimating ? 'scale-105' : 'scale-100'}`}
         style={{
           boxShadow: isAnimating ? '0 0 15px rgba(155, 135, 245, 0.7)' : '0 0 5px rgba(155, 135, 245, 0.3)'
         }}
