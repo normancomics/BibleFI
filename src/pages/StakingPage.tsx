@@ -8,6 +8,8 @@ import MultiWalletConnector from "@/components/wallet/MultiWalletConnector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Coins, Lock, Shield } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import StakingForm from "@/components/staking/StakingForm";
+import RiskBadge from "@/components/staking/RiskBadge";
 
 const StakingPage: React.FC = () => {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
