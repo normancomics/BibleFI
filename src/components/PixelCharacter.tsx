@@ -19,43 +19,43 @@ interface PixelCharacterProps {
 
 const characterConfig = {
   god: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "powerup",
     alt: "God Character",
     label: "GOD"
   },
   jesus: {
-    src: "/pixel-jesus.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "powerup",
     alt: "Jesus Character",
     label: "JESUS"
   },
   solomon: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "coin",
     alt: "Solomon Character",
     label: "SOLOMON"
   },
   moses: {
-    src: "/pixel-moses.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "scroll",
     alt: "Moses Character",
     label: "MOSES"
   },
   david: {
-    src: "/pixel-david.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "select",
     alt: "King David Character",
     label: "KING DAVID"
   },
   noah: {
-    src: "/pixel-noah.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "click",
     alt: "Noah Character",
     label: "NOAH"
   },
   paul: {
-    src: "/pixel-paul.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "success",
     alt: "Paul Character",
     label: "PAUL"
@@ -67,31 +67,31 @@ const characterConfig = {
     label: "COIN"
   },
   abraham: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "scroll",
     alt: "Abraham Character",
     label: "ABRAHAM"
   },
   joseph: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "powerup",
     alt: "Joseph Character",
     label: "JOSEPH"
   },
   "woman-well": {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "select",
     alt: "Woman at the Well Character",
     label: "WOMAN AT WELL"
   },
   caesar: {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "coin",
     alt: "Caesar Character",
     label: "CAESAR"
   },
   "tax-collector": {
-    src: "/pixel-solomon.png",
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "coin",
     alt: "Tax Collector Character",
     label: "TAX COLLECTOR"
@@ -115,7 +115,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
 
   // Get character configuration
   const charConfig = characterConfig[character];
-  const characterSrc = charConfig?.src || "/pixel-solomon.png";
+  const characterSrc = charConfig?.src || "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png";
   const characterAlt = charConfig?.alt || "Bible Character";
   const characterSound = charConfig?.sound as SoundType || "select";
   const characterLabel = charConfig?.label || character.toUpperCase();
@@ -160,7 +160,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
     isHovered ? 'scale-105' : ''
   ].filter(Boolean).join(' ');
 
-  // New Base Chain style container - clean, minimalist blue style
+  // Base Chain style container - clean, minimalist blue style
   const containerStyle = arcadeStyle 
     ? 'bg-black/30 border border-base-blue rounded-lg' 
     : '';

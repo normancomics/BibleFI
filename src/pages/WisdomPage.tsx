@@ -72,16 +72,16 @@ const WisdomPage: React.FC = () => {
           <BibleCharacterSelector 
             selectedCharacter={selectedCharacter} 
             onSelect={handleCharacterSelect}
-            className="bg-black/50 border border-ancient-gold/30"
+            className="bg-black/50 border border-base-blue/30"
           />
         </div>
         
         <Tabs defaultValue="scriptures" value={activeTab} onValueChange={handleTabChange} className="mb-12">
-          <TabsList className="bg-black/70 border border-scripture/50 p-1">
-            <TabsTrigger value="scriptures" className="data-[state=active]:bg-scripture/50">Scriptures</TabsTrigger>
-            <TabsTrigger value="principles" className="data-[state=active]:bg-scripture/50">Principles</TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-scripture/50">AI Guidance</TabsTrigger>
-            <TabsTrigger value="community" className="data-[state=active]:bg-scripture/50">Community</TabsTrigger>
+          <TabsList className="bg-black/70 border border-base-blue/50 p-1">
+            <TabsTrigger value="scriptures" className="data-[state=active]:bg-base-blue/50">Scriptures</TabsTrigger>
+            <TabsTrigger value="principles" className="data-[state=active]:bg-base-blue/50">Principles</TabsTrigger>
+            <TabsTrigger value="ai" className="data-[state=active]:bg-base-blue/50">AI Guidance</TabsTrigger>
+            <TabsTrigger value="community" className="data-[state=active]:bg-base-blue/50">Community</TabsTrigger>
           </TabsList>
           
           <TabsContent value="scriptures" className="mt-6">
