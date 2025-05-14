@@ -13,12 +13,12 @@ const SenpiWisdomSection: React.FC = () => {
   };
 
   return (
-    <div className="my-8 bg-black/40 border border-ancient-gold/30 rounded-lg p-6">
-      <h2 className="text-2xl font-scroll mb-4 text-glow">AI-Powered BIBLICAL Wisdom</h2>
+    <div className="my-8 bg-black/40 border border-base-blue/30 rounded-lg p-6">
+      <h2 className="text-2xl font-scroll mb-4 text-base-blue">AI-Powered BIBLICAL Wisdom</h2>
       
       {/* Character demonstrates wisdom */}
       <div className="mb-6">
-        <h3 className="text-xl font-game mb-3 text-pixel-yellow">Meet the BIBLE Characters</h3>
+        <h3 className="text-xl font-game mb-3 text-white">Meet the BIBLE Characters</h3>
         <p className="mb-4 text-white font-pixel">Tap on any character to hear their wisdom!</p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -26,7 +26,6 @@ const SenpiWisdomSection: React.FC = () => {
             character="solomon" 
             message="The wise have wealth and luxury, but fools spend whatever they get. - Proverbs 21:20"
             soundEffect={true}
-            arcadeStyle={true}
             animate={true}
           />
           
@@ -34,7 +33,6 @@ const SenpiWisdomSection: React.FC = () => {
             character="jesus" 
             message="Give, and it will be given to you. - Luke 6:38"
             soundEffect={true}
-            arcadeStyle={true}
             animate={true}
           />
           
@@ -42,7 +40,6 @@ const SenpiWisdomSection: React.FC = () => {
             character="coin" 
             message="Honor the LORD with your wealth. - Proverbs 3:9"
             soundEffect={true}
-            arcadeStyle={true}
             animate={true}
           />
         </div>
@@ -54,7 +51,6 @@ const SenpiWisdomSection: React.FC = () => {
             character="paul" 
             message="For the love of money is a root of all kinds of evil."
             soundEffect={true}
-            arcadeStyle={true}
             size="sm"
           />
         </div>

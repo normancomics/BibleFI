@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSound } from "@/contexts/SoundContext";
@@ -80,9 +80,9 @@ const BibleCharacterSelector: React.FC<BibleCharacterSelectorProps> = ({
   };
   
   return (
-    <Card className={`bg-black/60 border-2 border-ancient-gold/50 shadow-md ${className}`}>
+    <Card className={`bg-black/60 border border-base-blue shadow-md ${className}`}>
       <CardContent className="p-4">
-        <h3 className="text-center text-ancient-gold font-pixel text-lg mb-4">Choose Your Guide</h3>
+        <h3 className="text-center text-base-blue font-pixel text-lg mb-4">Choose Your Guide</h3>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {characters.map((character) => (
@@ -90,8 +90,8 @@ const BibleCharacterSelector: React.FC<BibleCharacterSelectorProps> = ({
               key={character.id}
               className={`cursor-pointer transition-all duration-300 hover:scale-105 rounded-md p-2 ${
                 selectedCharacter === character.id 
-                  ? 'bg-scripture/40 border border-ancient-gold' 
-                  : 'bg-black/30 hover:bg-scripture/20'
+                  ? 'bg-base-blue/10 border border-base-blue' 
+                  : 'bg-black/30 hover:bg-base-blue/5'
               }`}
               onClick={() => handleSelect(character.id)}
             >
@@ -101,7 +101,7 @@ const BibleCharacterSelector: React.FC<BibleCharacterSelectorProps> = ({
                     character={character.id} 
                     size="md" 
                   />
-                  <Badge className="absolute -top-2 -right-2 bg-ancient-gold text-black text-xs font-pixel">
+                  <Badge className="absolute -top-2 -right-2 bg-base-blue text-white text-xs font-pixel">
                     {character.wisdom}
                   </Badge>
                 </div>
@@ -111,7 +111,7 @@ const BibleCharacterSelector: React.FC<BibleCharacterSelectorProps> = ({
                 </h4>
                 
                 <div className="mt-1">
-                  <Badge variant="outline" className="text-xs flex items-center justify-center px-1 py-0.5">
+                  <Badge variant="outline" className="text-xs flex items-center justify-center px-1 py-0.5 text-base-blue">
                     {getSpecialtyIcon(character.specialty)}
                     <span>{character.specialty}</span>
                   </Badge>

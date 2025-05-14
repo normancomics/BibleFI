@@ -7,7 +7,7 @@ export type CharacterType = 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | '
 
 interface PixelCharacterProps {
   character: CharacterType;
-  message?: string;
+  message?: string | null;
   className?: string;
   onClick?: () => void;
   animate?: boolean;
@@ -19,81 +19,81 @@ interface PixelCharacterProps {
 
 const characterConfig = {
   god: {
-    src: "/pixel-solomon.png", // Temporary character image
+    src: "/pixel-solomon.png",
     sound: "powerup",
-    alt: "God Pixel Art",
+    alt: "God Character",
     label: "GOD"
   },
   jesus: {
     src: "/pixel-jesus.png",
     sound: "powerup",
-    alt: "Jesus Pixel Art",
+    alt: "Jesus Character",
     label: "JESUS"
   },
   solomon: {
     src: "/pixel-solomon.png",
     sound: "coin",
-    alt: "Solomon Pixel Art",
+    alt: "Solomon Character",
     label: "SOLOMON"
   },
   moses: {
     src: "/pixel-moses.png",
     sound: "scroll",
-    alt: "Moses Pixel Art",
+    alt: "Moses Character",
     label: "MOSES"
   },
   david: {
     src: "/pixel-david.png",
     sound: "select",
-    alt: "King David Pixel Art",
+    alt: "King David Character",
     label: "KING DAVID"
   },
   noah: {
     src: "/pixel-noah.png",
     sound: "click",
-    alt: "Noah Pixel Art",
+    alt: "Noah Character",
     label: "NOAH"
   },
   paul: {
     src: "/pixel-paul.png",
     sound: "success",
-    alt: "Paul Pixel Art",
+    alt: "Paul Character",
     label: "PAUL"
   },
   coin: {
     src: "/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png",
     sound: "coin",
-    alt: "Coin Pixel Art",
+    alt: "Coin Asset",
     label: "COIN"
   },
   abraham: {
-    src: "/pixel-solomon.png", // Temporary character image
+    src: "/pixel-solomon.png",
     sound: "scroll",
-    alt: "Abraham Pixel Art",
+    alt: "Abraham Character",
     label: "ABRAHAM"
   },
   joseph: {
-    src: "/pixel-solomon.png", // Temporary character image
+    src: "/pixel-solomon.png",
     sound: "powerup",
-    alt: "Joseph Pixel Art",
+    alt: "Joseph Character",
     label: "JOSEPH"
   },
   "woman-well": {
-    src: "/pixel-solomon.png", // Temporary character image
+    src: "/pixel-solomon.png",
     sound: "select",
-    alt: "Woman at the Well Pixel Art",
+    alt: "Woman at the Well Character",
     label: "WOMAN AT WELL"
   },
   caesar: {
-    src: "/pixel-solomon.png", // Temporary character image
+    src: "/pixel-solomon.png",
     sound: "coin",
-    alt: "Caesar Pixel Art",
+    alt: "Caesar Character",
     label: "CAESAR"
   },
   "tax-collector": {
-    src: "/pixel-solomon.png", // Temporary character image
+    src: "/pixel-solomon.png",
     sound: "coin",
-    alt: "Tax Collector Pixel Art",
+    alt: "Tax Collector Character",
     label: "TAX COLLECTOR"
   }
 };
@@ -160,12 +160,14 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
     isHovered ? 'scale-105' : ''
   ].filter(Boolean).join(' ');
 
-  // Arcade style container
-  const arcadeContainer = arcadeStyle ? 'bg-black/70 border-2 border-pixel-yellow p-2 rounded-lg' : '';
+  // New Base Chain style container - clean, minimalist blue style
+  const containerStyle = arcadeStyle 
+    ? 'bg-black/30 border border-base-blue rounded-lg' 
+    : '';
 
   return (
     <div
-      className={`flex flex-col items-center justify-center p-2 rounded-lg transition-transform duration-300 ${arcadeContainer} ${className}`}
+      className={`flex flex-col items-center justify-center p-2 rounded-lg transition-transform duration-300 ${containerStyle} ${className}`}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -174,27 +176,22 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
         <img
           src={characterSrc}
           alt={characterAlt}
-          className="pixelated w-full h-full"
+          className="w-full h-full"
         />
         
-        {/* Arcade-style pixel background behind character */}
-        {arcadeStyle && (
-          <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-20"></div>
-        )}
-        
-        {/* Character name label */}
+        {/* Character name label - updated to match Base Chain style */}
         {(isHovered || arcadeStyle) && (
           <div className={`absolute ${arcadeStyle ? 'top-[-20px]' : 'bottom-[-20px]'} left-0 right-0 text-center`}>
-            <span className="bg-black/80 px-2 py-1 text-xs rounded font-pixel text-pixel-yellow">
+            <span className="bg-black/70 text-base-blue px-2 py-1 text-xs rounded font-pixel">
               {characterLabel}
             </span>
           </div>
         )}
       </div>
       
-      {/* Character message/wisdom */}
+      {/* Character message/wisdom - updated to match Base Chain style */}
       {message && (
-        <div className={`mt-2 ${arcadeStyle ? 'bg-black/80 border border-pixel-yellow/50 p-2 rounded' : ''}`}>
+        <div className={`mt-2 ${arcadeStyle ? 'bg-black/70 border border-base-blue p-2 rounded' : ''}`}>
           <p className="text-sm text-center font-pixel text-white">
             {message}
           </p>

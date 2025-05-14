@@ -5,8 +5,6 @@ import { ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { GlowingText } from "@/components/ui/tailwind-extensions";
-import PixelCharacter from "@/components/PixelCharacter";
 
 const HomeHeader: React.FC = () => {
   const { playSound, isSoundEnabled, toggleSound, setUserInteracted } = useSound();
@@ -38,20 +36,15 @@ const HomeHeader: React.FC = () => {
     <section className="text-center mb-12 animate-fade-in">
       <div className="mb-8">
         <div className="flex flex-col items-center justify-center">
-          <div className="text-5xl md:text-6xl font-scroll font-bold mb-2 relative">
-            <GlowingText color="gold">Bible.fi</GlowingText>
-            
-            {/* Character on top of logo */}
-            <div className="absolute -top-20 left-1/2 transform -translate-x-1/2">
-              <PixelCharacter 
-                character="solomon" 
-                size="sm"
-                arcadeStyle={true}
-                animate={true}
-              />
-            </div>
+          <div className="relative flex items-center justify-center mb-4">
+            <img 
+              src="/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png" 
+              alt="Bible.fi Logo" 
+              className="h-24 md:h-32"
+            />
           </div>
-          <div className="text-lg md:text-xl font-scroll text-ancient-gold opacity-80">
+          
+          <div className="text-lg md:text-xl font-scroll text-base-blue opacity-90">
             Biblical Wisdom for Financial Stewardship
           </div>
         </div>
@@ -73,11 +66,11 @@ const HomeHeader: React.FC = () => {
         <Button
           onClick={handleSoundToggle}
           variant="outline"
-          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-black/50 hover:bg-black/70 font-scroll"
+          className="flex items-center gap-2 border-2 border-base-blue/50 bg-black/50 hover:bg-black/70 font-scroll"
         >
           {isSoundEnabled ? (
             <>
-              <Volume2 size={18} className="text-ancient-gold" />
+              <Volume2 size={18} className="text-base-blue" />
               <span>Sound ON</span>
             </>
           ) : (

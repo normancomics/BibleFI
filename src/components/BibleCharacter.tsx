@@ -135,11 +135,11 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
         <img 
           src={imagePath} 
           alt={characterInfo.name} 
-          className="pixelated w-16 h-16 object-contain"
+          className="w-16 h-16 object-contain"
         />
         
         {showWisdomLevel && (
-          <div className="absolute -top-2 -right-2 bg-ancient-gold/90 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+          <div className="absolute -top-2 -right-2 bg-base-blue/90 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
             {characterInfo.wisdomLevel}
           </div>
         )}
@@ -150,7 +150,7 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
       )}
       
       {message && (
-        <div className="mt-3 max-w-sm bg-black/80 border border-scripture/50 p-2 rounded-md">
+        <div className="mt-3 max-w-sm bg-black/70 border border-base-blue/50 p-2 rounded-md">
           <p className="text-sm text-white/90">{message}</p>
         </div>
       )}
