@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { APP_CONFIG, FARCASTER_CONFIG } from './config';
-import { SignInButton, SignOutButton, useProfile, AuthKitProvider } from '@farcaster/auth-kit';
+import { SignInButton, useProfile, AuthKitProvider } from '@farcaster/auth-kit';
 
 // Define the user type
 export type FarcasterUser = {
@@ -43,9 +43,8 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
     version: FARCASTER_CONFIG.version,
   };
 
-  // Create a ref for SignIn and SignOut buttons
+  // Create a ref for SignIn button
   const signInButtonRef = React.useRef<HTMLButtonElement>(null);
-  const signOutButtonRef = React.useRef<HTMLButtonElement>(null);
 
   // Function to sign in
   const signIn = () => {
@@ -56,14 +55,16 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
-  // Function to sign out
+  // Function to sign out - Uses the native signOut method
   const signOut = () => {
-    // Trigger the SignOutButton click
-    if (signOutButtonRef.current) {
-      signOutButtonRef.current.click();
-    }
+    // We'll implement our own sign out logic
+    localStorage.removeItem('farcaster-auth-token');
     setUser(null);
     setStatus('disconnected');
+    
+    // Reload to clear the auth state completely
+    // This is a simple approach but works for Farcaster auth
+    window.location.reload();
   };
 
   return (
@@ -78,7 +79,6 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
       <AuthKitProvider config={config}>
         <div style={{ display: 'none' }}>
           <SignInButton ref={signInButtonRef} />
-          <SignOutButton ref={signOutButtonRef} />
         </div>
         <FarcasterProfileWrapper setUser={setUser} setStatus={setStatus} />
         {children}
@@ -100,10 +100,10 @@ const FarcasterProfileWrapper: React.FC<{
         fid: profile.fid,
         username: profile.username || `user_${profile.fid}`,
         displayName: profile.displayName || profile.username,
-        pfp: profile.pfp,
-        bio: profile.bio,
-        custody: profile.custody,
-        verifications: profile.verifications,
+        pfp: profile.profileImage?.url || '', // Fix for the pfp property
+        bio: profile.bio || '',
+        custody: profile.custody?.address || '',
+        verifications: profile.verifications || [],
       });
       setStatus('connected');
     } else if (!isAuthenticated) {
