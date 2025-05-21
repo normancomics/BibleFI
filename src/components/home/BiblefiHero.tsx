@@ -30,7 +30,7 @@ const BiblefiHero: React.FC = () => {
     <section className="relative text-center py-8 mb-12">
       {/* Background elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-scripture/60 via-scripture/50 to-scripture/30 opacity-80"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-purple-900/60 via-purple-800/50 to-purple-900/40 opacity-90"></div>
       </div>
       
       {/* Logo and main content */}
@@ -76,24 +76,6 @@ const BiblefiHero: React.FC = () => {
           <ExternalLink size={20} className="mr-2" />
           Open in Farcaster
         </PixelButton>
-      </motion.div>
-      
-      {/* Biblical scenes */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-        transition={{ delay: 0.9, duration: 0.5 }}
-        className="mt-8 mb-4"
-      >
-        <div className="relative h-40 md:h-60 max-w-4xl mx-auto">
-          <div className="absolute inset-0 flex justify-center">
-            <img 
-              src="/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png" 
-              alt="Biblical scene" 
-              className="h-full object-contain"
-            />
-          </div>
-        </div>
       </motion.div>
     </section>
   );

@@ -47,22 +47,17 @@ const SenpiAIWisdom: React.FC<SenpiAIWisdomProps> = ({ apiConfigured = false }) 
       setIsGenerating(false);
       playSound("success");
     }, 1500);
-    
-    // In a real implementation, this would call the Senpi.ai API
-    // Example:
-    // const response = await generateBiblicalFinancialAdvice(prompt, apiKey);
-    // setWisdom(response.text);
   };
 
   return (
-    <Card className="pixel-card">
+    <Card className="pixel-card bg-purple-900/40 border border-ancient-gold/50">
       <CardContent className="pt-6">
-        <div className="flex items-center mb-4 text-scripture">
-          <BrainCircuit size={24} className="mr-2" />
-          <h2 className="text-2xl font-scroll">Biblical AI Wisdom</h2>
+        <div className="flex items-center mb-4">
+          <BrainCircuit size={24} className="mr-2 text-ancient-gold" />
+          <h2 className="text-2xl font-scroll text-ancient-gold">Biblical AI Wisdom</h2>
         </div>
         
-        <p className="mb-4 text-sm">
+        <p className="mb-4 text-sm text-white/90">
           Ask for Biblical financial wisdom on any topic. Our AI will analyze scripture and provide guidance.
         </p>
         
@@ -72,7 +67,7 @@ const SenpiAIWisdom: React.FC<SenpiAIWisdomProps> = ({ apiConfigured = false }) 
               placeholder="E.g., How should I invest according to the Bible?"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="font-pixel bg-black/20 border-ancient-gold/50"
+              className="font-scroll bg-purple-900/30 border-ancient-gold/50"
             />
           </div>
           
@@ -86,17 +81,17 @@ const SenpiAIWisdom: React.FC<SenpiAIWisdomProps> = ({ apiConfigured = false }) 
           </PixelButton>
           
           {wisdom && (
-            <div className="mt-4 p-4 bg-ancient-scroll border border-ancient-gold rounded-md">
+            <div className="mt-4 p-4 bg-purple-900/30 border border-ancient-gold/40 rounded-md">
               <div className="flex items-start">
-                <Lightbulb size={20} className="text-yellow-500 mr-2 mt-1 flex-shrink-0" />
-                <p className="italic">{wisdom}</p>
+                <Lightbulb size={20} className="text-ancient-gold mr-2 mt-1 flex-shrink-0" />
+                <p className="italic text-white/90">{wisdom}</p>
               </div>
             </div>
           )}
           
           {!apiConfigured && (
             <div className="text-xs text-muted-foreground text-center mt-2">
-              Note: Senpi.ai integration is in demonstration mode. For full functionality, please configure your API key.
+              Note: AI integration is in demonstration mode. For full functionality, please configure your API key.
             </div>
           )}
         </div>

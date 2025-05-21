@@ -68,11 +68,11 @@ const Index: React.FC = () => {
         <FeatureShowcase />
         
         {/* Financial Wisdom section */}
-        <div className="my-12 bg-black/30 border border-ancient-gold/20 rounded-lg p-6">
+        <div className="my-12 bg-purple-900/30 border border-ancient-gold/20 rounded-lg p-6">
           <h2 className="text-2xl font-scroll text-ancient-gold text-center mb-6">Biblical Financial Wisdom</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="mt-4 bg-black/60 p-4 rounded-lg border border-scripture/30">
+            <div className="mt-4 bg-purple-900/60 p-4 rounded-lg border border-ancient-gold/30">
               <h3 className="text-lg font-scroll text-ancient-gold mb-2">Financial Law</h3>
               <p className="text-white/80 font-scroll text-sm">
                 Moses delivered God's law, which contains principles for honest finances, fair dealings, and care for the poor.
@@ -89,7 +89,7 @@ const Index: React.FC = () => {
               />
             </div>
             
-            <div className="mt-4 bg-black/60 p-4 rounded-lg border border-scripture/30">
+            <div className="mt-4 bg-purple-900/60 p-4 rounded-lg border border-ancient-gold/30">
               <h3 className="text-lg font-scroll text-ancient-gold mb-2">Royal Wisdom</h3>
               <p className="text-white/80 font-scroll text-sm">
                 King David modeled generous giving and responsible stewardship of resources for God's purposes.
@@ -108,21 +108,13 @@ const Index: React.FC = () => {
         <FeatureCards />
         
         <div className="my-12">
-          <Card className="bg-scripture/20 border border-ancient-gold shadow-md">
+          <Card className="bg-purple-900/20 border border-ancient-gold shadow-md">
             <CardContent className="p-6">
               <h2 className="text-2xl text-ancient-gold font-scroll mb-4">Bible.fi Mini-App</h2>
               <p className="text-white/80 mb-4 font-scroll">
                 Bible.fi is built specifically to run as a mini-app inside Farcaster, 
                 offering biblical financial wisdom directly to the Farcaster community.
               </p>
-              
-              <div className="flex justify-center my-6">
-                <img 
-                  src="/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png" 
-                  alt="Farcaster Logo"
-                  className="h-16"
-                />
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -134,13 +126,7 @@ const Index: React.FC = () => {
       {/* "Made on Base Chain" footer */}
       <footer className="py-6 text-center bg-gradient-to-t from-black/30 to-transparent">
         <p className="text-xs font-pixel tracking-wider text-ancient-gold hover:text-ancient-gold/80 transition-colors">
-          MADE ON 
-          <img 
-            src="https://base.org/images/favicon.png" 
-            alt="Base Chain Logo" 
-            className="w-3 h-3 inline-block mx-1"
-          />
-          BASE CHAIN
+          MADE ON BASE CHAIN
         </p>
       </footer>
     </div>

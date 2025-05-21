@@ -35,8 +35,8 @@ const PixelButton: React.FC<PixelButtonProps> = ({
   
   let buttonClass = "";
   
-  // Determine which style to apply
-  if (farcasterStyle) {
+  // Determine which style to apply (default to farcaster style)
+  if (farcasterStyle || baseStyle) {
     buttonClass = farcasterClass;
   } else if (variant === "default") {
     buttonClass = baseClass;
