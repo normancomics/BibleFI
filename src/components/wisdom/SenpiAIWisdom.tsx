@@ -80,6 +80,7 @@ const SenpiAIWisdom: React.FC<SenpiAIWisdomProps> = ({ apiConfigured = false }) 
             onClick={handleGenerateWisdom}
             disabled={isGenerating}
             className="w-full"
+            farcasterStyle
           >
             {isGenerating ? "Consulting Scripture..." : "Generate Wisdom"}
           </PixelButton>

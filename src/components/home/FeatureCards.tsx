@@ -16,7 +16,7 @@ const FeatureCards: React.FC = () => {
         <h2 className="text-2xl font-scroll mb-2">Digital Tithing</h2>
         <p className="mb-4">Give your tithe to churches worldwide, even if they don't accept crypto.</p>
         <Link to="/tithe" className="mt-auto">
-          <PixelButton className="flex items-center" onClick={() => playSound("scroll")}>
+          <PixelButton className="flex items-center" onClick={() => playSound("scroll")} farcasterStyle>
             Tithe Now <ArrowRight size={16} className="ml-2" />
           </PixelButton>
         </Link>
@@ -27,7 +27,7 @@ const FeatureCards: React.FC = () => {
         <h2 className="text-2xl font-scroll mb-2">BIBLICAL Staking</h2>
         <p className="mb-4">Grow your wealth little by little through our scripture-based staking pools.</p>
         <Link to="/staking" className="mt-auto">
-          <PixelButton className="flex items-center" onClick={() => playSound("coin")}>
+          <PixelButton className="flex items-center" onClick={() => playSound("coin")} farcasterStyle>
             Stake Now <ArrowRight size={16} className="ml-2" />
           </PixelButton>
         </Link>
@@ -38,7 +38,7 @@ const FeatureCards: React.FC = () => {
         <h2 className="text-2xl font-scroll mb-2">Invest Wisely</h2>
         <p className="mb-4">Learn what the BIBLE teaches about money, wealth, and stewardship.</p>
         <Link to="/wisdom" className="mt-auto">
-          <PixelButton className="flex items-center" onClick={() => playSound("select")}>
+          <PixelButton className="flex items-center" onClick={() => playSound("select")} farcasterStyle>
             Learn More <ArrowRight size={16} className="ml-2" />
           </PixelButton>
         </Link>

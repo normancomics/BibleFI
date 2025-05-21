@@ -47,7 +47,7 @@ const SenpiWisdomSection: React.FC = () => {
             <div className="mt-4">
               <PixelButton 
                 onClick={handleLevelUp}
-                className="bg-purple-900 text-ancient-gold border border-ancient-gold/50"
+                farcasterStyle
               >
                 Level Up Your Wisdom
               </PixelButton>

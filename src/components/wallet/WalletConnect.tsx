@@ -138,8 +138,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect, onCancel }) =>
                     <PixelButton 
                       size="sm" 
                       disabled={!wallet.available}
-                      baseStyle={true} // Use base chain style instead of default
-                      className="bg-base-blue hover:bg-base-blue/80"
+                      farcasterStyle 
                     >
                       CONNECT
                     </PixelButton>
@@ -161,12 +160,12 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect, onCancel }) =>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-2">
-              <PixelButton onClick={handleDisconnect} variant="outline" className="flex-1">
+              <PixelButton onClick={handleDisconnect} variant="outline" className="flex-1" farcasterStyle>
                 Disconnect Wallet
               </PixelButton>
               
               {onCancel && (
-                <PixelButton onClick={onCancel} variant="outline" className="flex-1">
+                <PixelButton onClick={onCancel} variant="outline" className="flex-1" farcasterStyle>
                   Cancel
                 </PixelButton>
               )}

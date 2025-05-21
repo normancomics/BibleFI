@@ -116,6 +116,7 @@ const FeatureShowcase: React.FC = () => {
                     variant="link" 
                     className={`justify-end group-hover:text-ancient-gold text-ancient-gold`}
                     size="sm"
+                    farcasterStyle
                   >
                     Explore →
                   </PixelButton>

@@ -69,8 +69,9 @@ const BiblefiHero: React.FC = () => {
       >
         <PixelButton 
           onClick={handleOpenFarcaster}
-          className="inline-flex items-center px-6 py-3 text-lg bg-purple-900 border-2 border-ancient-gold text-ancient-gold"
+          className="inline-flex items-center px-6 py-3 text-lg"
           size="lg"
+          farcasterStyle
         >
           <ExternalLink size={20} className="mr-2" />
           Open in Farcaster

@@ -94,7 +94,7 @@ const CommunityDiscussion: React.FC<CommunityDiscussionProps> = ({ simplified = 
         {!connected ? (
           <div className="text-center py-6">
             <p className="mb-4 text-sm">Connect your Farcaster account to join the discussion on biblical financial principles.</p>
-            <PixelButton onClick={handleConnect}>
+            <PixelButton onClick={handleConnect} farcasterStyle>
               Connect to Farcaster
             </PixelButton>
           </div>
@@ -103,10 +103,10 @@ const CommunityDiscussion: React.FC<CommunityDiscussionProps> = ({ simplified = 
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-scroll">Recent Discussions</h2>
               <div className="flex gap-2">
-                <PixelButton size="sm" variant="outline" onClick={handleShareTopic}>
+                <PixelButton size="sm" variant="outline" onClick={handleShareTopic} farcasterStyle>
                   <Share2 size={16} className="mr-1" /> New Topic
                 </PixelButton>
-                <PixelButton size="sm" onClick={handleJoinGroup}>
+                <PixelButton size="sm" onClick={handleJoinGroup} farcasterStyle>
                   <Users size={16} className="mr-1" /> Study Groups
                 </PixelButton>
               </div>

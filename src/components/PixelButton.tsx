@@ -10,6 +10,7 @@ interface PixelButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   className?: string;
   glitch?: boolean;
   baseStyle?: boolean; // Use this instead of variant="base"
+  farcasterStyle?: boolean; // New prop for Farcaster styling
 }
 
 const PixelButton: React.FC<PixelButtonProps> = ({ 
@@ -19,6 +20,7 @@ const PixelButton: React.FC<PixelButtonProps> = ({
   className = "",
   glitch = false,
   baseStyle = false,
+  farcasterStyle = false,
   ...props 
 }) => {
   // Determine glitch effect classes
@@ -28,12 +30,24 @@ const PixelButton: React.FC<PixelButtonProps> = ({
   // Apply farcaster styling by default
   const baseClass = "bg-purple-900 text-ancient-gold border border-ancient-gold/50 hover:bg-purple-800";
   
+  // New Farcaster style (purple background, gold border and text)
+  const farcasterClass = "bg-purple-900 border-2 border-ancient-gold/70 hover:bg-purple-800 text-ancient-gold";
+  
+  let buttonClass = "";
+  
+  // Determine which style to apply
+  if (farcasterStyle) {
+    buttonClass = farcasterClass;
+  } else if (variant === "default") {
+    buttonClass = baseClass;
+  }
+  
   return (
     <Button
       variant={variant}
       size={size}
       className={cn(
-        variant === "default" ? baseClass : "",
+        buttonClass,
         glitchClass,
         className
       )}

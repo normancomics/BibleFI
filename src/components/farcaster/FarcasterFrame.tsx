@@ -7,8 +7,6 @@ import { Share2, ExternalLink, Copy, GalleryVerticalEnd } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 import { getRandomVerse } from "@/data/bibleVerses";
 import { generateFrameHTML } from "@/integrations/farcaster/client";
-import { CharacterType } from "@/components/PixelCharacter";
-import PixelCharacter from "@/components/PixelCharacter";
 
 // Frame configuration type for rendering frame previews
 interface FramePreviewProps {
@@ -57,25 +55,12 @@ const FramePreview: React.FC<FramePreviewProps> = ({ imageUrl, title, buttons = 
   );
 };
 
-const biblicalCharacters: CharacterType[] = ["jesus", "moses", "solomon", "david"];
-
 const FarcasterFrame: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
   const [frameImage, setFrameImage] = useState("/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png"); // Bible.fi logo
   const verse = getRandomVerse();
   const [previewHTML, setPreviewHTML] = useState<string>("");
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterType>("solomon");
-  
-  // Animation for characters rotation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * biblicalCharacters.length);
-      setSelectedCharacter(biblicalCharacters[randomIndex]);
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
   
   // Generate frame HTML for sharing
   const generateFrameHTMLForPreview = () => {
@@ -148,11 +133,6 @@ const FarcasterFrame: React.FC = () => {
     window.open(url, '_blank');
     URL.revokeObjectURL(url);
   };
-  
-  const handleCharacterClick = (character: CharacterType) => {
-    setSelectedCharacter(character);
-    playSound("powerup");
-  };
 
   return (
     <Card className="pixel-card my-6 border-2 border-ancient-gold bg-gradient-to-b from-black/80 to-black/60">
@@ -178,25 +158,6 @@ const FarcasterFrame: React.FC = () => {
           />
         </div>
         
-        <div className="mb-6">
-          <h3 className="text-lg mb-3 font-pixel">Choose Your Character</h3>
-          <div className="grid grid-cols-4 gap-2">
-            {biblicalCharacters.map((character) => (
-              <div 
-                key={character}
-                className={`cursor-pointer transition-all duration-300 ${selectedCharacter === character ? 'scale-110 bg-black/30 rounded-lg' : 'opacity-70'}`}
-                onClick={() => handleCharacterClick(character)}
-              >
-                <PixelCharacter 
-                  character={character} 
-                  size="sm" 
-                  soundEffect={true} 
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        
         <div className="flex flex-col space-y-3">
           <div className="bg-black/20 p-3 rounded-md mb-3 border border-ancient-gold/30 hover:border-ancient-gold transition-colors duration-300">
             <div className="flex justify-between items-center mb-2">
@@ -206,6 +167,7 @@ const FarcasterFrame: React.FC = () => {
                 variant="outline"
                 onClick={handleCopyFrameHTML}
                 className="flex items-center animate-entrance"
+                farcasterStyle
               >
                 <Copy size={14} className="mr-1" /> Copy HTML
               </PixelButton>
@@ -219,6 +181,7 @@ const FarcasterFrame: React.FC = () => {
             <PixelButton 
               className="w-full flex items-center justify-center animate-bounce-subtle"
               onClick={handleGenerateFrame}
+              farcasterStyle
             >
               <GalleryVerticalEnd size={16} className="mr-2" /> Generate Frame HTML
             </PixelButton>
@@ -227,14 +190,16 @@ const FarcasterFrame: React.FC = () => {
               className="w-full flex items-center justify-center"
               variant="outline"
               onClick={handleOpenFrame}
+              farcasterStyle
             >
               <ExternalLink size={16} className="mr-2" /> Preview Frame
             </PixelButton>
           </div>
           
           <PixelButton 
-            className="w-full flex items-center justify-center mt-3 bg-base-blue hover:bg-base-blue/80"
+            className="w-full flex items-center justify-center mt-3"
             onClick={handleShareToFarcaster}
+            farcasterStyle
           >
             <Share2 size={16} className="mr-2" /> Share to Farcaster
           </PixelButton>

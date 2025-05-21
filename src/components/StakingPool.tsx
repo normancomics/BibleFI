@@ -171,10 +171,10 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       </div>
       
       <div className="flex space-x-2 px-4 pb-4">
-        <PixelButton className="flex-1 flex items-center justify-center" onClick={handleStake}>
+        <PixelButton className="flex-1 flex items-center justify-center" onClick={handleStake} farcasterStyle>
           {!showStakingForm ? "Stake" : "Show Details"}
         </PixelButton>
-        <PixelButton variant="outline" className="flex items-center" onClick={handleLearn}>
+        <PixelButton variant="outline" className="flex items-center" onClick={handleLearn} farcasterStyle>
           Learn <ArrowUpRight size={16} className="ml-1" />
         </PixelButton>
       </div>
