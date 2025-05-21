@@ -1,118 +1,119 @@
 
-import React, { createContext, useState, useEffect, useContext, ReactNode } from "react";
-import { FARCASTER_CONFIG } from "./config";
-import { FarcasterUser, AuthStatus } from "./types";
-import { useToast } from "@/hooks/use-toast";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { APP_CONFIG, FARCASTER_CONFIG } from './config';
+import { SignInButton, SignOutButton, useProfile, AuthKitProvider } from '@farcaster/auth-kit';
 
-interface FarcasterAuthContextType {
-  user: FarcasterUser | null;
-  status: AuthStatus;
-  signIn: () => Promise<void>; // Changed return type to void
-  signOut: () => void;
-  updateUser: (user: FarcasterUser) => void;
-}
-
-const defaultContext: FarcasterAuthContextType = {
-  user: null,
-  status: "disconnected",
-  signIn: async () => {}, // Now returns void
-  signOut: () => {},
-  updateUser: () => {},
+// Define the user type
+export type FarcasterUser = {
+  fid: number;
+  username: string;
+  displayName?: string;
+  pfp?: string;
+  bio?: string;
+  custody?: string;
+  verifications?: string[];
 };
 
-const FarcasterAuthContext = createContext<FarcasterAuthContextType>(defaultContext);
+// Define the authentication state
+type FarcasterAuthState = {
+  user: FarcasterUser | null;
+  status: 'connected' | 'connecting' | 'disconnected';
+  signIn: () => void;
+  signOut: () => void;
+};
 
-interface FarcasterAuthProviderProps {
-  children: ReactNode;
-}
+// Create context for Farcaster Auth
+const FarcasterAuthContext = createContext<FarcasterAuthState>({
+  user: null,
+  status: 'disconnected',
+  signIn: () => {},
+  signOut: () => {},
+});
 
-export const FarcasterAuthProvider: React.FC<FarcasterAuthProviderProps> = ({ children }) => {
+// Create provider for Farcaster Auth
+export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<FarcasterUser | null>(null);
-  const [status, setStatus] = useState<AuthStatus>("disconnected");
-  const { toast } = useToast();
-  
-  // Initialize auth state from localStorage on mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("farcaster_user");
-    
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setStatus("connected");
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("farcaster_user");
-      }
-    }
-  }, []);
+  const [status, setStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
 
-  // Mock implementation of Farcaster auth
-  // In a real app, you would use @farcaster/auth-kit
-  const signIn = async (): Promise<void> => {
-    try {
-      setStatus("connecting");
-      
-      // Mock user data - in a real implementation, this would come from Farcaster auth
-      const mockUser: FarcasterUser = {
-        fid: 12345,
-        username: "demo_user",
-        displayName: "Demo User",
-        pfp: "https://i.imgur.com/pBDThdn.png"
-      };
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update state
-      setUser(mockUser);
-      setStatus("connected");
-      
-      // Store in localStorage for persistence
-      localStorage.setItem("farcaster_user", JSON.stringify(mockUser));
-      
-      toast({
-        title: "Connected to Farcaster",
-        description: `Welcome, ${mockUser.displayName || mockUser.username}!`,
-      });
-      
-      // Return the user (though it's not used in this version)
-      return;
-    } catch (error) {
-      console.error("Farcaster auth error:", error);
-      setStatus("disconnected");
-      
-      toast({
-        title: "Connection Failed",
-        description: "Could not connect to Farcaster. Please try again.",
-        variant: "destructive",
-      });
-      
-      throw error;
+  const config = {
+    domain: FARCASTER_CONFIG.domain,
+    siweUri: FARCASTER_CONFIG.siweUri,
+    rpcUrl: FARCASTER_CONFIG.rpcUrl,
+    relay: FARCASTER_CONFIG.relay,
+    version: FARCASTER_CONFIG.version,
+  };
+
+  // Create a ref for SignIn and SignOut buttons
+  const signInButtonRef = React.useRef<HTMLButtonElement>(null);
+  const signOutButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  // Function to sign in
+  const signIn = () => {
+    setStatus('connecting');
+    // Trigger the SignInButton click
+    if (signInButtonRef.current) {
+      signInButtonRef.current.click();
     }
   };
 
+  // Function to sign out
   const signOut = () => {
+    // Trigger the SignOutButton click
+    if (signOutButtonRef.current) {
+      signOutButtonRef.current.click();
+    }
     setUser(null);
-    setStatus("disconnected");
-    localStorage.removeItem("farcaster_user");
-    
-    toast({
-      title: "Disconnected",
-      description: "You've been signed out of Farcaster.",
-    });
-  };
-
-  const updateUser = (updatedUser: FarcasterUser) => {
-    setUser(updatedUser);
-    localStorage.setItem("farcaster_user", JSON.stringify(updatedUser));
+    setStatus('disconnected');
   };
 
   return (
-    <FarcasterAuthContext.Provider value={{ user, status, signIn, signOut, updateUser }}>
-      {children}
+    <FarcasterAuthContext.Provider
+      value={{
+        user,
+        status,
+        signIn,
+        signOut,
+      }}
+    >
+      <AuthKitProvider config={config}>
+        <div style={{ display: 'none' }}>
+          <SignInButton ref={signInButtonRef} />
+          <SignOutButton ref={signOutButtonRef} />
+        </div>
+        <FarcasterProfileWrapper setUser={setUser} setStatus={setStatus} />
+        {children}
+      </AuthKitProvider>
     </FarcasterAuthContext.Provider>
   );
 };
 
+// Wrapper component to use the useProfile hook
+const FarcasterProfileWrapper: React.FC<{
+  setUser: React.Dispatch<React.SetStateAction<FarcasterUser | null>>;
+  setStatus: React.Dispatch<React.SetStateAction<'connected' | 'connecting' | 'disconnected'>>;
+}> = ({ setUser, setStatus }) => {
+  const { isAuthenticated, profile } = useProfile();
+
+  useEffect(() => {
+    if (isAuthenticated && profile) {
+      setUser({
+        fid: profile.fid,
+        username: profile.username || `user_${profile.fid}`,
+        displayName: profile.displayName || profile.username,
+        pfp: profile.pfp,
+        bio: profile.bio,
+        custody: profile.custody,
+        verifications: profile.verifications,
+      });
+      setStatus('connected');
+    } else if (!isAuthenticated) {
+      setUser(null);
+      setStatus('disconnected');
+    }
+  }, [isAuthenticated, profile, setStatus, setUser]);
+
+  return null;
+};
+
+// Custom hook to use Farcaster Auth
 export const useFarcasterAuth = () => useContext(FarcasterAuthContext);
