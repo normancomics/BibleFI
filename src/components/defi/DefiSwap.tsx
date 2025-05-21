@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDownIcon, RefreshCw, Wallet, AlertTriangle } from "lucide-react";
-import { useZeroX, BASE_TOKENS, Token, formatTokenAmount, parseTokenAmount } from "@/integrations/zerox/client";
+import { useZeroX, BASE_TOKENS, formatTokenAmount, parseTokenAmount } from "@/integrations/zerox/client";
 import { useToast } from "@/hooks/use-toast";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
@@ -26,6 +26,7 @@ const DefiSwap: React.FC = () => {
   const [exchangeRate, setExchangeRate] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("swap");
   const [animateSwap, setAnimateSwap] = useState(false);
+  const [useOdos, setUseOdos] = useState(true);
   
   // Calculate quote whenever inputs change
   useEffect(() => {
@@ -46,6 +47,18 @@ const DefiSwap: React.FC = () => {
           baseTokens[fromToken].decimals
         );
         
+        if (useOdos) {
+          // Simulate Odos quote (would be replaced with actual API call)
+          setTimeout(() => {
+            // Better rate simulation for Odos (5% better than 0x)
+            const simulatedRate = 1.05 * parseFloat(fromAmount) * (toToken === "USDC" ? 1800 : 0.0005);
+            setToAmount(simulatedRate.toFixed(6));
+            setExchangeRate(`1 ${fromToken} ≈ ${(simulatedRate / parseFloat(fromAmount)).toFixed(6)} ${toToken} (Odos)`);
+            setIsLoading(false);
+          }, 700);
+          return;
+        }
+        
         const quote = await getQuote(sellToken, buyToken, sellAmount);
         
         if (quote) {
@@ -58,7 +71,7 @@ const DefiSwap: React.FC = () => {
           
           // Calculate and set exchange rate
           const rate = parseFloat(quote.price);
-          setExchangeRate(`1 ${fromToken} ≈ ${rate.toFixed(6)} ${toToken}`);
+          setExchangeRate(`1 ${fromToken} ≈ ${rate.toFixed(6)} ${toToken} (0x)`);
         } else {
           setToAmount("");
           setExchangeRate("");
@@ -86,7 +99,7 @@ const DefiSwap: React.FC = () => {
       setToAmount(fromAmount);
       setExchangeRate(`1 ${fromToken} = 1 ${toToken}`);
     }
-  }, [fromToken, toToken, fromAmount]);
+  }, [fromToken, toToken, fromAmount, useOdos]);
   
   // Handle token swap
   const handleSwapTokens = () => {
@@ -113,26 +126,43 @@ const DefiSwap: React.FC = () => {
   // Handle submit
   const handleSwapSubmit = () => {
     playSound("powerup");
-    toast({
-      title: "Swap Initiated",
-      description: `Swapping ${fromAmount} ${fromToken} for approximately ${toAmount} ${toToken}`,
-    });
     
-    // In a real implementation, this would connect to the wallet
-    // and execute the swap transaction
-    setTimeout(() => {
-      playSound("success");
+    if (useOdos) {
       toast({
-        title: "Swap Successful",
-        description: `Successfully swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
+        title: "Opening Odos",
+        description: `Preparing to swap ${fromAmount} ${fromToken} using Odos router for best rates.`,
       });
-    }, 2000);
+      
+      // Open Odos in new tab
+      window.open(`https://app.odos.xyz/swap?from=${fromToken}&to=${toToken}&amount=${fromAmount}`, "_blank");
+    } else {
+      toast({
+        title: "Swap Initiated",
+        description: `Swapping ${fromAmount} ${fromToken} for approximately ${toAmount} ${toToken}`,
+      });
+      
+      // In a real implementation, this would connect to the wallet
+      // and execute the swap transaction
+      setTimeout(() => {
+        playSound("success");
+        toast({
+          title: "Swap Successful",
+          description: `Successfully swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
+        });
+      }, 2000);
+    }
   };
   
   // Handle tab change
   const handleTabChange = (value: string) => {
     playSound("click");
     setActiveTab(value);
+  };
+  
+  // Toggle between Odos and 0x
+  const toggleSwapProvider = () => {
+    playSound("select");
+    setUseOdos(!useOdos);
   };
   
   // Get token icon URL
@@ -172,6 +202,18 @@ const DefiSwap: React.FC = () => {
       
       <CardContent className="p-4 space-y-4 mt-2">
         <TabsContent value="swap" className="space-y-4 mt-0">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-white/70">Swap Provider:</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleSwapProvider}
+              className={useOdos ? "bg-purple-900/70 text-ancient-gold border-ancient-gold/50" : ""}
+            >
+              {useOdos ? "Odos (Best Rates)" : "0x Protocol"}
+            </Button>
+          </div>
+          
           {/* From Token */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -270,8 +312,9 @@ const DefiSwap: React.FC = () => {
           {/* Swap Button */}
           <PixelButton
             onClick={handleSwapSubmit}
-            className="w-full py-4 text-lg relative overflow-hidden bg-scripture hover:bg-scripture/80"
+            className="w-full py-4 text-lg relative overflow-hidden"
             disabled={isLoading || !toAmount || parseFloat(fromAmount) <= 0}
+            farcasterStyle
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
@@ -280,7 +323,7 @@ const DefiSwap: React.FC = () => {
               </div>
             ) : (
               <div className="flex items-center justify-center">
-                <span>Swap Tokens</span>
+                <span>{useOdos ? "Swap with Odos" : "Swap Tokens"}</span>
                 {/* Animated coins when hovering the button */}
                 <div className="absolute -right-2 top-1/2 transform -translate-y-1/2">
                   <SpinningCoin size={24} className="opacity-70" />
@@ -318,7 +361,11 @@ const DefiSwap: React.FC = () => {
         <div className="flex items-center gap-2">
           <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" className="h-5" />
           <span className="text-white/70">Powered by</span>
-          <span className="text-scripture font-medium">0x Protocol</span>
+          {useOdos ? (
+            <span className="text-ancient-gold font-medium">Odos</span>
+          ) : (
+            <span className="text-scripture font-medium">0x Protocol</span>
+          )}
           <span className="text-white/70">on</span>
           <span className="text-base-blue font-medium">Base Chain</span>
         </div>

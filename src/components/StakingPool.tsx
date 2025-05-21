@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { BookOpen, ArrowUpRight, Info } from "lucide-react";
+import { BookOpen, ArrowUpRight, Info, ExternalLink } from "lucide-react";
 import PixelButton from "./PixelButton";
 import ScriptureCard from "./ScriptureCard";
 import StakingTransparency from "./StakingTransparency";
@@ -31,6 +31,8 @@ interface StakingPoolProps {
   assets?: string[];
   duration?: number;
   risk?: string;
+  // Superfluid integration
+  useSuperfluid?: boolean;
 }
 
 const StakingPool: React.FC<StakingPoolProps> = ({
@@ -49,6 +51,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   assets = [], // Fallback for assets prop
   tvl, // Optional TVL value
   duration, // Optional duration value
+  useSuperfluid = true, // Default to using Superfluid
 }) => {
   const actualTitle = title || name || "Staking Pool";
   const actualRiskLevel = riskLevel || (risk as "low" | "medium" | "high") || "low";
@@ -72,6 +75,17 @@ const StakingPool: React.FC<StakingPoolProps> = ({
   };
 
   const handleStakeSubmit = (amount: string, token: string) => {
+    if (useSuperfluid) {
+      // Open Superfluid dashboard
+      toast({
+        title: "Opening Superfluid",
+        description: `Preparing to stake ${amount} ${token} using Superfluid's streams.`,
+      });
+      
+      window.open(`https://app.superfluid.finance/?flow=create&token=${token}`, "_blank");
+      return;
+    }
+    
     toast({
       title: "Preparing to stake",
       description: `Staking ${amount} ${token} in the ${actualTitle}`,
@@ -121,18 +135,15 @@ const StakingPool: React.FC<StakingPoolProps> = ({
         <span>Lock Period: {actualLockPeriod}</span>
       </div>
       
-      <div className="flex items-center mb-4 px-4">
+      <div className="flex items-center justify-between mb-4 px-4">
         <RiskBadge riskLevel={actualRiskLevel} />
         
-        <button 
-          className="text-xs flex items-center text-muted-foreground hover:text-foreground"
-          onClick={() => {
-            setShowDetails(!showDetails);
-            playSound("select");
-          }}
-        >
-          <Info size={12} className="mr-1" /> How returns are generated
-        </button>
+        {useSuperfluid && (
+          <div className="flex items-center bg-black/40 px-2 py-1 rounded text-xs border border-ancient-gold/30">
+            <span className="text-ancient-gold mr-1">Superfluid Powered</span>
+            <ExternalLink size={12} className="text-ancient-gold" />
+          </div>
+        )}
       </div>
 
       {actualSupportedTokens && actualSupportedTokens.length > 0 && (
@@ -172,7 +183,7 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       
       <div className="flex space-x-2 px-4 pb-4">
         <PixelButton className="flex-1 flex items-center justify-center" onClick={handleStake} farcasterStyle>
-          {!showStakingForm ? "Stake" : "Show Details"}
+          {!showStakingForm ? (useSuperfluid ? "Stake with Superfluid" : "Stake") : "Show Details"}
         </PixelButton>
         <PixelButton variant="outline" className="flex items-center" onClick={handleLearn} farcasterStyle>
           Learn <ArrowUpRight size={16} className="ml-1" />

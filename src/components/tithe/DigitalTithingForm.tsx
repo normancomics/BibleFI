@@ -15,9 +15,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Coins } from "lucide-react";
+import { Coins, ArrowRight, ExternalLink } from "lucide-react";
+import PixelButton from "@/components/PixelButton";
 
 const formSchema = z.object({
   amount: z.string().min(1, { message: "Tithing amount is required" }),
@@ -29,6 +30,7 @@ const formSchema = z.object({
 const DigitalTithingForm: React.FC = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"daimo" | "wallet">("daimo");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,18 +45,32 @@ const DigitalTithingForm: React.FC = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Tithing values:", values);
-      
+    if (paymentMethod === "daimo") {
       toast({
-        title: "Tithing Initiated",
-        description: `Your tithe of ${values.amount} ${values.currency} has been submitted.`,
+        title: "Opening Daimo",
+        description: `Preparing to send ${values.amount} ${values.currency} using Daimo direct payments.`,
       });
       
-      form.reset();
-      setIsSubmitting(false);
-    }, 1500);
+      // Simulate opening Daimo payment link
+      setTimeout(() => {
+        window.open(`https://app.daimo.com/send?amount=${values.amount}&currency=${values.currency.toLowerCase()}`, "_blank");
+        setIsSubmitting(false);
+        form.reset();
+      }, 1500);
+    } else {
+      // Simulate API call for wallet payment
+      setTimeout(() => {
+        console.log("Tithing values:", values);
+        
+        toast({
+          title: "Tithing Initiated",
+          description: `Your tithe of ${values.amount} ${values.currency} has been submitted.`,
+        });
+        
+        form.reset();
+        setIsSubmitting(false);
+      }, 1500);
+    }
   };
 
   return (
@@ -62,11 +78,28 @@ const DigitalTithingForm: React.FC = () => {
       <CardHeader className="bg-scripture/20">
         <CardTitle className="font-scroll text-2xl text-center flex items-center justify-center gap-2">
           <Coins className="text-ancient-gold" />
-          Digital Tithing
+          Digital Tithing with Daimo
         </CardTitle>
       </CardHeader>
       
       <CardContent className="pt-6">
+        <div className="flex gap-4 mb-6">
+          <Button
+            variant={paymentMethod === "daimo" ? "default" : "outline"}
+            className={paymentMethod === "daimo" ? "bg-purple-900 text-ancient-gold border border-ancient-gold/50 flex-1" : "flex-1"}
+            onClick={() => setPaymentMethod("daimo")}
+          >
+            Daimo Direct
+          </Button>
+          <Button
+            variant={paymentMethod === "wallet" ? "default" : "outline"}
+            className={paymentMethod === "wallet" ? "bg-purple-900 text-ancient-gold border border-ancient-gold/50 flex-1" : "flex-1"}
+            onClick={() => setPaymentMethod("wallet")}
+          >
+            Connect Wallet
+          </Button>
+        </div>
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -157,18 +190,29 @@ const DigitalTithingForm: React.FC = () => {
             />
             
             <div className="text-center">
-              <Button 
+              <PixelButton 
                 type="submit" 
                 disabled={isSubmitting}
                 size="lg"
-                className="bg-scripture hover:bg-scripture-light px-8 font-scroll"
+                className="px-8 font-scroll"
+                farcasterStyle
               >
-                {isSubmitting ? "Processing..." : "Submit Tithe"}
-              </Button>
+                {isSubmitting ? "Processing..." : (paymentMethod === "daimo" ? "Open Daimo" : "Submit Tithe")}
+                {paymentMethod === "daimo" && <ExternalLink size={16} className="ml-2" />}
+              </PixelButton>
             </div>
           </form>
         </Form>
       </CardContent>
+      
+      <CardFooter className="bg-black/30 border-t border-ancient-gold/20 p-3 text-xs text-center justify-center">
+        <div className="flex items-center gap-2">
+          <span className="text-white/70">Powered by</span>
+          <span className="text-ancient-gold font-medium">Daimo</span>
+          <span className="text-white/70">on</span>
+          <span className="text-base-blue font-medium">Base Chain</span>
+        </div>
+      </CardFooter>
     </Card>
   );
 };
