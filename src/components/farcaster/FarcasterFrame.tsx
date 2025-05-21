@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import PixelButton from "@/components/PixelButton";
 import { useToast } from "@/hooks/use-toast";
@@ -26,17 +26,10 @@ const FramePreview: React.FC<FramePreviewProps> = ({ imageUrl, title, buttons = 
         <span className="text-sm font-medium">Farcaster Frame Preview</span>
       </div>
       <div className="relative aspect-[1.91/1] bg-black/40">
-        {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={title} 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-white/50">Image Preview</span>
-          </div>
-        )}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <div className="text-3xl font-bold text-ancient-gold">BIBLE.FI</div>
+          <div className="text-sm text-white/80 mt-2">Biblical Wisdom for Financial Stewardship</div>
+        </div>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
           <h3 className="text-white font-medium text-lg">{title}</h3>
         </div>
@@ -58,17 +51,17 @@ const FramePreview: React.FC<FramePreviewProps> = ({ imageUrl, title, buttons = 
 const FarcasterFrame: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [frameImage, setFrameImage] = useState("/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png"); // Bible.fi logo
   const verse = getRandomVerse();
   const [previewHTML, setPreviewHTML] = useState<string>("");
   
   // Generate frame HTML for sharing
   const generateFrameHTMLForPreview = () => {
     const frameConfig = {
-      image: `${window.location.origin}${frameImage}`,
+      image: `${window.location.origin}/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png`,
       buttons: [
         { label: "Biblical Wisdom", action: "link" as "link", target: `${window.location.origin}/wisdom` },
         { label: "DeFi Swaps", action: "link" as "link", target: `${window.location.origin}/defi` },
+        { label: "Digital Tithing", action: "link" as "link", target: `${window.location.origin}/tithe` },
         { label: "Share Wisdom", action: "post" as "post" }
       ],
       postUrl: `${window.location.origin}/api/frame`,
@@ -113,17 +106,6 @@ const FarcasterFrame: React.FC = () => {
       });
   };
   
-  const handleShareToFarcaster = () => {
-    playSound("coin");
-    toast({
-      title: "Sharing to Farcaster",
-      description: "Opening Farcaster sharing dialog...",
-    });
-    
-    // In a real implementation, this would open the Farcaster sharing dialog
-    window.open("https://warpcast.com/~/compose?text=" + encodeURIComponent("Check out Bible.fi - Biblical wisdom for your financial journey."), "_blank");
-  };
-  
   const handleOpenFrame = () => {
     playSound("select");
     // Open the frame HTML in a new tab
@@ -137,25 +119,26 @@ const FarcasterFrame: React.FC = () => {
   return (
     <Card className="pixel-card my-6 border-2 border-ancient-gold bg-gradient-to-b from-black/80 to-black/60">
       <CardContent className="pt-6">
-        <div className="mb-4 flex justify-center animate-fade-in">
-          <img 
-            src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png"
-            alt="Bible.fi" 
-            className="h-24 object-contain animate-pulse" 
-          />
-        </div>
-        
-        <h2 className="text-2xl mb-4 text-center">Bible.fi on Farcaster</h2>
+        <h2 className="text-2xl mb-4 text-center font-bold text-ancient-gold">BIBLE.FI on Farcaster</h2>
         
         <div className="mb-6 hover:scale-105 transition-transform duration-300">
           <FramePreview 
-            imageUrl={frameImage}
+            imageUrl=""
             title="Biblical wisdom for your financial journey"
             buttons={[
-              { label: "Learn Biblical Finance" },
+              { label: "Biblical Wisdom" },
+              { label: "DeFi Swaps" },
+              { label: "Digital Tithing" },
               { label: "Share Wisdom" },
             ]}
           />
+        </div>
+        
+        <div className="bg-black/20 p-3 rounded-md mb-3 border border-ancient-gold/30">
+          <p className="text-sm text-white/90 mb-3">
+            {verse.text}
+          </p>
+          <p className="text-right text-xs text-ancient-gold/70">{verse.reference}</p>
         </div>
         
         <div className="flex flex-col space-y-3">
@@ -166,7 +149,7 @@ const FarcasterFrame: React.FC = () => {
                 size="sm"
                 variant="outline"
                 onClick={handleCopyFrameHTML}
-                className="flex items-center animate-entrance"
+                className="flex items-center"
                 farcasterStyle
               >
                 <Copy size={14} className="mr-1" /> Copy HTML
@@ -179,7 +162,7 @@ const FarcasterFrame: React.FC = () => {
           
           <div className="flex flex-col sm:flex-row sm:space-y-0 sm:space-x-3 space-y-3">
             <PixelButton 
-              className="w-full flex items-center justify-center animate-bounce-subtle"
+              className="w-full flex items-center justify-center"
               onClick={handleGenerateFrame}
               farcasterStyle
             >
@@ -198,7 +181,7 @@ const FarcasterFrame: React.FC = () => {
           
           <PixelButton 
             className="w-full flex items-center justify-center mt-3"
-            onClick={handleShareToFarcaster}
+            onClick={() => window.open("https://warpcast.com/~/compose?text=" + encodeURIComponent("Check out Bible.fi - Biblical wisdom for your financial journey on Base Chain."), "_blank")}
             farcasterStyle
           >
             <Share2 size={16} className="mr-2" /> Share to Farcaster
@@ -207,7 +190,14 @@ const FarcasterFrame: React.FC = () => {
 
         <div className="mt-6 text-sm text-center text-white/60">
           <p>Learn, implement & share Biblical financial wisdom directly to your network on Farcaster.</p>
-          <p className="mt-2 text-xs">Built & deployed on Base chain.</p>
+          <div className="flex items-center justify-center mt-2">
+            <img
+              src="/lovable-uploads/922260ef-cba9-4437-9d77-07bcba6560aa.png"
+              alt="Base Chain"
+              className="h-4 mr-2"
+            />
+            <span className="text-xs">Built & deployed on Base chain</span>
+          </div>
         </div>
       </CardContent>
     </Card>

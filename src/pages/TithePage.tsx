@@ -10,11 +10,36 @@ import ChurchSearch from "@/components/tithe/ChurchSearch";
 import TithingAchievements from "@/components/tithe/TithingAchievements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRandomVerse } from "@/data/bibleVerses";
-import { ArrowRight, Church, Coins, HandCoins } from "lucide-react";
+import { ArrowRight, Church, Coins, HandCoins, CreditCard } from "lucide-react";
+import { daimoClient } from "@/integrations/daimo/client";
+import PixelButton from "@/components/PixelButton";
+import { useSound } from "@/contexts/SoundContext";
+import { useToast } from "@/hooks/use-toast";
 
 const TithePage: React.FC = () => {
   // Get a random verse about giving
   const financialVerse = getRandomVerse();
+  const { playSound } = useSound();
+  const { toast } = useToast();
+  
+  const handleDaimoQuickTithe = () => {
+    playSound("coin");
+    // Generate a Daimo payment link with default values
+    const paymentLink = daimoClient.generatePaymentLink({
+      recipient: "example-church.eth", // This would be dynamically set based on selected church
+      amount: "10",
+      token: "usdc",
+      message: "Tithe from Bible.fi"
+    });
+    
+    toast({
+      title: "Opening Daimo",
+      description: "Redirecting to Daimo for quick tithing...",
+    });
+    
+    // Open the payment link in a new tab
+    window.open(paymentLink, "_blank");
+  };
 
   return (
     <div className="min-h-screen">
@@ -27,6 +52,17 @@ const TithePage: React.FC = () => {
             "Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this," says the LORD Almighty, "and see if I will not throw open the floodgates of heaven and pour out so much blessing that there will not be room enough to store it."
           </p>
           <p className="text-ancient-gold/70 mt-2 font-scroll">- Malachi 3:10</p>
+          
+          <div className="flex justify-center mt-6">
+            <PixelButton 
+              onClick={handleDaimoQuickTithe} 
+              className="flex items-center bg-gradient-to-r from-purple-800 to-purple-900"
+              farcasterStyle
+            >
+              <CreditCard className="mr-2" size={18} />
+              Quick Tithe with Daimo
+            </PixelButton>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -38,7 +74,7 @@ const TithePage: React.FC = () => {
                   <span>About Digital Tithing</span>
                 </CardTitle>
                 <CardDescription>
-                  Supporting ministries with digital currencies
+                  Supporting ministries with digital currencies via Daimo
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -54,11 +90,15 @@ const TithePage: React.FC = () => {
                   <p className="text-right text-sm text-ancient-gold/70 mt-2">{financialVerse.reference}</p>
                 </div>
                 
-                <h3 className="font-medium text-scripture mb-2">Benefits of Digital Tithing</h3>
+                <h3 className="font-medium text-scripture mb-2">Benefits of Digital Tithing with Daimo</h3>
                 <ul className="space-y-2">
                   <li className="flex items-center gap-2">
                     <ArrowRight size={16} className="text-ancient-gold flex-shrink-0" />
-                    <span>Give from anywhere in the world</span>
+                    <span>Fast, direct payments to churches worldwide</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <ArrowRight size={16} className="text-ancient-gold flex-shrink-0" />
+                    <span>Ultra-low transaction fees on Base Chain</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <ArrowRight size={16} className="text-ancient-gold flex-shrink-0" />
@@ -70,7 +110,7 @@ const TithePage: React.FC = () => {
                   </li>
                   <li className="flex items-center gap-2">
                     <ArrowRight size={16} className="text-ancient-gold flex-shrink-0" />
-                    <span>Automate recurring tithes</span>
+                    <span>Automate recurring tithes with Superfluid streams</span>
                   </li>
                 </ul>
               </CardContent>
