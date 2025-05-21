@@ -25,15 +25,15 @@ const PixelButton: React.FC<PixelButtonProps> = ({
   const glitchClass = glitch ? "glitch-text animate-pixel-shift" : "";
   const glitchAttr = glitch ? { "data-text": typeof children === "string" ? children : "CLICK" } : {};
   
-  // Determine if we should use the base button style instead of pixel button
-  const buttonClass = baseStyle ? "base-button" : "pixel-button";
+  // Apply farcaster styling by default
+  const baseClass = "bg-purple-900 text-ancient-gold border border-ancient-gold/50 hover:bg-purple-800";
   
   return (
     <Button
       variant={variant}
       size={size}
       className={cn(
-        buttonClass,
+        variant === "default" ? baseClass : "",
         glitchClass,
         className
       )}

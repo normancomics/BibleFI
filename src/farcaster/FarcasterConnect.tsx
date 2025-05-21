@@ -57,7 +57,7 @@ const FarcasterConnect: React.FC<FarcasterConnectProps> = ({
               <AvatarFallback>FC</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">{user.displayName || user.username}</p>
+              <p className="text-sm font-medium text-ancient-gold">{user.displayName || user.username}</p>
               <p className="text-xs text-white/60">FID: {user.fid}</p>
             </div>
           </div>
@@ -65,6 +65,7 @@ const FarcasterConnect: React.FC<FarcasterConnectProps> = ({
             size="sm" 
             variant="ghost" 
             onClick={handleConnect}
+            className="text-ancient-gold"
           >
             <LogOut size={16} />
           </PixelButton>
@@ -76,7 +77,7 @@ const FarcasterConnect: React.FC<FarcasterConnectProps> = ({
   return (
     <PixelButton 
       onClick={handleConnect} 
-      className={`bg-black border border-purple-500/40 hover:bg-scripture/20 flex items-center ${sizeClasses[size]} ${className}`}
+      className={`bg-purple-900 border-2 border-ancient-gold/70 hover:bg-purple-800 flex items-center text-ancient-gold ${sizeClasses[size]} ${className}`}
     >
       <LogIn size={16} className="mr-2" />
       Connect Farcaster

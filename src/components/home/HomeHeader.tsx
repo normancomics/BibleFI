@@ -38,13 +38,13 @@ const HomeHeader: React.FC = () => {
         <div className="flex flex-col items-center justify-center">
           <div className="relative flex items-center justify-center mb-4">
             <img 
-              src="/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png" 
+              src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
               alt="Bible.fi Logo" 
               className="h-24 md:h-32"
             />
           </div>
           
-          <div className="text-lg md:text-xl font-scroll text-base-blue opacity-90">
+          <div className="text-lg md:text-xl font-scroll text-ancient-gold">
             Biblical Wisdom for Financial Stewardship
           </div>
         </div>
@@ -57,7 +57,7 @@ const HomeHeader: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 mb-6">
         <PixelButton 
           onClick={handleOpenFarcaster}
-          className="inline-flex items-center px-6 py-3 text-lg font-scroll"
+          className="inline-flex items-center px-6 py-3 text-lg font-scroll bg-purple-900 border-2 border-ancient-gold text-ancient-gold"
         >
           <ExternalLink size={20} className="mr-2" />
           Open in Farcaster
@@ -66,11 +66,11 @@ const HomeHeader: React.FC = () => {
         <Button
           onClick={handleSoundToggle}
           variant="outline"
-          className="flex items-center gap-2 border-2 border-base-blue/50 bg-black/50 hover:bg-black/70 font-scroll"
+          className="flex items-center gap-2 border-2 border-ancient-gold/50 bg-scripture/30 hover:bg-scripture/50 text-ancient-gold font-scroll"
         >
           {isSoundEnabled ? (
             <>
-              <Volume2 size={18} className="text-base-blue" />
+              <Volume2 size={18} className="text-ancient-gold" />
               <span>Sound ON</span>
             </>
           ) : (

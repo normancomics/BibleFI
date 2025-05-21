@@ -1,60 +1,63 @@
 
-import React from "react";
+import React, { useState } from "react";
 import SenpiAIWisdom from "./SenpiAIWisdom";
 import PixelButton from "../PixelButton";
 import { useSound } from "@/contexts/SoundContext";
-import PixelCharacter from "../PixelCharacter";
 
 const SenpiWisdomSection: React.FC = () => {
   const { playSound } = useSound();
-
-  const handleCharacterClick = (character: string) => {
-    playSound("select");
+  const [wisdomLevel, setWisdomLevel] = useState(1);
+  
+  const handleLevelUp = () => {
+    playSound("powerup");
+    setWisdomLevel(prev => Math.min(prev + 1, 10));
   };
+  
+  const wisdomMessages = [
+    "The wise have wealth and luxury, but fools spend whatever they get. - Proverbs 21:20",
+    "Give, and it will be given to you. - Luke 6:38",
+    "The LORD will open the heavens, the storehouse of his bounty. - Deuteronomy 28:12",
+    "The blessing of the LORD brings wealth, without painful toil for it. - Proverbs 10:22"
+  ];
 
   return (
-    <div className="my-8 bg-black/40 border border-base-blue/30 rounded-lg p-6">
-      <h2 className="text-2xl font-scroll mb-4 text-base-blue">AI-Powered BIBLICAL Wisdom</h2>
+    <div className="my-8 bg-black/40 border border-ancient-gold/30 rounded-lg p-6">
+      <h2 className="text-2xl font-scroll mb-4 text-ancient-gold">AI-Powered BIBLICAL Wisdom</h2>
       
-      {/* Character demonstrates wisdom */}
       <div className="mb-6">
-        <h3 className="text-xl font-game mb-3 text-white">Meet the BIBLE Characters</h3>
-        <p className="mb-4 text-white font-pixel">Tap on any character to hear their wisdom!</p>
+        <h3 className="text-xl font-scroll mb-3 text-ancient-gold">Wisdom Level: {wisdomLevel}</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <PixelCharacter 
-            character="solomon" 
-            message="The wise have wealth and luxury, but fools spend whatever they get. - Proverbs 21:20"
-            soundEffect={true}
-            animate={true}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="col-span-1 bg-scripture/20 p-4 rounded-lg border border-ancient-gold/30">
+            <h4 className="text-lg font-scroll text-ancient-gold mb-2">Biblical Financial Wisdom</h4>
+            <p className="text-white/90 font-scroll mb-4">
+              {wisdomMessages[wisdomLevel % wisdomMessages.length]}
+            </p>
+            
+            <div className="bg-black/40 p-3 rounded border border-ancient-gold/30">
+              <h5 className="font-scroll text-ancient-gold">Wisdom Application:</h5>
+              <ul className="list-disc list-inside text-white/90 font-scroll text-sm space-y-1 mt-2">
+                <li>Save at least 10% of your income</li>
+                <li>Diversify investments across multiple assets</li>
+                <li>Avoid debt when possible</li>
+                <li>Give generously to those in need</li>
+              </ul>
+            </div>
+            
+            <div className="mt-4">
+              <PixelButton 
+                onClick={handleLevelUp}
+                className="bg-purple-900 text-ancient-gold border border-ancient-gold/50"
+              >
+                Level Up Your Wisdom
+              </PixelButton>
+            </div>
+          </div>
           
-          <PixelCharacter 
-            character="jesus" 
-            message="Give, and it will be given to you. - Luke 6:38"
-            soundEffect={true}
-            animate={true}
-          />
-          
-          <PixelCharacter 
-            character="coin" 
-            message="Honor the LORD with your wealth. - Proverbs 3:9"
-            soundEffect={true}
-            animate={true}
-          />
+          <div className="col-span-1">
+            <SenpiAIWisdom />
+          </div>
         </div>
-      </div>
-      
-      <div className="relative">
-        <div className="absolute -top-6 right-4 z-10">
-          <PixelCharacter 
-            character="paul" 
-            message="For the love of money is a root of all kinds of evil."
-            soundEffect={true}
-            size="sm"
-          />
-        </div>
-        <SenpiAIWisdom />
       </div>
     </div>
   );

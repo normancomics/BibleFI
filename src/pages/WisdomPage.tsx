@@ -6,27 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import FinancialPrinciple from "@/components/wisdom/FinancialPrinciple";
 import ScriptureFilter from "@/components/wisdom/ScriptureFilter";
-import BibleCharacterSelector from "@/components/characters/BibleCharacterSelector";
 import SenpiWisdomSection from "@/components/wisdom/SenpiWisdomSection";
 import CommunityDiscussion from "@/components/community/CommunityDiscussion";
 import { getRandomVerse } from "@/data/bibleVerses";
-import { CharacterType } from "@/components/PixelCharacter";
 import { useSound } from "@/contexts/SoundContext";
 
 const WisdomPage: React.FC = () => {
   const { playSound } = useSound();
   const [activeTab, setActiveTab] = useState("scriptures");
-  const [selectedCharacter, setSelectedCharacter] = useState<CharacterType>("solomon");
   const [filter, setFilter] = useState<string>("all");
   
   const handleTabChange = (value: string) => {
     playSound("select");
     setActiveTab(value);
-  };
-  
-  const handleCharacterSelect = (character: CharacterType) => {
-    setSelectedCharacter(character);
-    playSound("select");
   };
   
   const wisdomVerses = [
@@ -68,20 +60,12 @@ const WisdomPage: React.FC = () => {
           </p>
         </div>
         
-        <div className="mb-8">
-          <BibleCharacterSelector 
-            selectedCharacter={selectedCharacter} 
-            onSelect={handleCharacterSelect}
-            className="bg-black/50 border border-base-blue/30"
-          />
-        </div>
-        
         <Tabs defaultValue="scriptures" value={activeTab} onValueChange={handleTabChange} className="mb-12">
-          <TabsList className="bg-black/70 border border-base-blue/50 p-1">
-            <TabsTrigger value="scriptures" className="data-[state=active]:bg-base-blue/50">Scriptures</TabsTrigger>
-            <TabsTrigger value="principles" className="data-[state=active]:bg-base-blue/50">Principles</TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-base-blue/50">AI Guidance</TabsTrigger>
-            <TabsTrigger value="community" className="data-[state=active]:bg-base-blue/50">Community</TabsTrigger>
+          <TabsList className="bg-scripture/40 border border-ancient-gold/50 p-1">
+            <TabsTrigger value="scriptures" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">Scriptures</TabsTrigger>
+            <TabsTrigger value="principles" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">Principles</TabsTrigger>
+            <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">AI Guidance</TabsTrigger>
+            <TabsTrigger value="community" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">Community</TabsTrigger>
           </TabsList>
           
           <TabsContent value="scriptures" className="mt-6">

@@ -30,16 +30,7 @@ const BiblefiHero: React.FC = () => {
     <section className="relative text-center py-8 mb-12">
       {/* Background elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/50 via-black/80 to-black opacity-80"></div>
-        <div 
-          className="absolute top-0 left-0 w-full h-full opacity-30"
-          style={{
-            backgroundImage: "url('/pixel-temple-bg.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        ></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-scripture/60 via-scripture/50 to-scripture/30 opacity-80"></div>
       </div>
       
       {/* Logo and main content */}
@@ -78,7 +69,7 @@ const BiblefiHero: React.FC = () => {
       >
         <PixelButton 
           onClick={handleOpenFarcaster}
-          className="inline-flex items-center px-6 py-3 text-lg"
+          className="inline-flex items-center px-6 py-3 text-lg bg-purple-900 border-2 border-ancient-gold text-ancient-gold"
           size="lg"
         >
           <ExternalLink size={20} className="mr-2" />

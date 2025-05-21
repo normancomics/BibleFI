@@ -1,7 +1,6 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSound } from "@/contexts/SoundContext";
@@ -11,6 +10,7 @@ import PixelButton from "@/components/PixelButton";
 const FeatureShowcase: React.FC = () => {
   const navigate = useNavigate();
   const { playSound } = useSound();
+  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
   
   const features = [
     {
@@ -18,34 +18,41 @@ const FeatureShowcase: React.FC = () => {
       iconName: "scroll",
       color: "text-scripture",
       description: "Discover financial principles from scripture and apply them to your life",
-      path: "/wisdom"
+      path: "/wisdom",
+      message: "Get wisdom. Though it cost all you have, get understanding."
     },
     {
       title: "Digital Tithing",
       iconName: "coin",
       color: "text-ancient-gold",
       description: "Support your church with crypto or traditional payments",
-      path: "/tithe"
+      path: "/tithe",
+      message: "Abraham gave a tenth of everything."
     },
     {
       title: "Stablecoin Staking",
       iconName: "temple",
       color: "text-base-blue",
       description: "Earn yield while aligning with biblical principles",
-      path: "/staking"
+      path: "/staking",
+      message: "Noah prepared for the future by building wisely."
     },
     {
       title: "Render Unto Caesar",
       iconName: "tax",
       color: "text-white",
       description: "Navigate crypto taxes with biblical guidance",
-      path: "/taxes"
+      path: "/taxes",
+      message: "Render unto Caesar what is Caesar's."
     }
   ];
   
-  const handleFeatureClick = (path: string) => {
+  const handleFeatureClick = (path: string, index: number) => {
     playSound("select");
-    navigate(path);
+    setHoveredFeature(index);
+    
+    // Short delay for sound effect to play before navigation
+    setTimeout(() => navigate(path), 300);
   };
   
   const containerVariants = {
@@ -82,24 +89,32 @@ const FeatureShowcase: React.FC = () => {
         {features.map((feature, index) => (
           <motion.div key={index} variants={itemVariants}>
             <Card 
-              className="h-full bg-black/60 border-2 border-scripture/30 hover:border-ancient-gold/50 transition-all duration-300 overflow-hidden group"
-              onClick={() => handleFeatureClick(feature.path)}
+              className="h-full bg-scripture/20 border-2 border-ancient-gold/30 hover:border-ancient-gold/70 transition-all duration-300 overflow-hidden group relative"
+              onMouseEnter={() => {
+                setHoveredFeature(index);
+                playSound("scroll");
+              }}
+              onMouseLeave={() => setHoveredFeature(null)}
+              onClick={() => handleFeatureClick(feature.path, index)}
             >
               <CardContent className="p-0">
                 <div className="p-6 flex flex-col h-full">
-                  <div className={`bg-black/40 p-4 rounded-lg mb-4 ${feature.color} flex justify-center`}>
+                  <div className={`bg-black/40 p-4 rounded-lg mb-4 ${feature.color} flex justify-center relative`}>
                     <PixelIcon src={`/${feature.iconName}-pixel.png`} alt={feature.title} size={48} />
+                    
+                    {/* Retro game effect on hover */}
+                    <div className={`absolute inset-0 bg-grid-pattern opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
                   </div>
                   
-                  <h3 className={`text-xl font-pixel mb-3 ${feature.color}`}>{feature.title}</h3>
+                  <h3 className={`text-xl font-scroll mb-3 text-ancient-gold`}>{feature.title}</h3>
                   
-                  <p className="text-white/70 mb-4 flex-grow">
+                  <p className="text-white/70 mb-4 flex-grow font-scroll">
                     {feature.description}
                   </p>
                   
                   <PixelButton 
                     variant="link" 
-                    className={`justify-end group-hover:text-ancient-gold ${feature.color}`}
+                    className={`justify-end group-hover:text-ancient-gold text-ancient-gold`}
                     size="sm"
                   >
                     Explore →

@@ -51,10 +51,10 @@ const FarcasterFrame: React.FC = () => {
   };
 
   return (
-    <Card className="bg-black/80 border border-base-blue shadow-md">
+    <Card className="bg-scripture/20 border border-ancient-gold shadow-md">
       <CardContent className="p-4">
         <div className="text-center mb-4">
-          <h3 className="text-xl text-white font-medium">Bible.fi Frame</h3>
+          <h3 className="text-xl text-ancient-gold font-medium">Bible.fi Frame</h3>
           <p className="text-sm text-white/70">Share biblical wisdom on Farcaster</p>
         </div>
         
@@ -68,29 +68,28 @@ const FarcasterFrame: React.FC = () => {
         
         <div className="space-y-3">
           <PixelButton 
-            className="w-full flex items-center justify-center"
+            className="w-full flex items-center justify-center bg-purple-900 text-ancient-gold border border-ancient-gold/50 hover:bg-purple-800"
             onClick={handleOpenFrame}
           >
             <ExternalLink size={16} className="mr-2" /> Preview Frame
           </PixelButton>
           
           <PixelButton 
-            className="w-full flex items-center justify-center"
-            variant="outline"
+            className="w-full flex items-center justify-center bg-black/40 text-ancient-gold border border-ancient-gold/50 hover:bg-black/60"
             onClick={handleCopyUrl}
           >
             <Copy size={16} className="mr-2" /> {copied ? 'Copied!' : 'Copy Frame URL'}
           </PixelButton>
           
           <PixelButton 
-            className="w-full flex items-center justify-center bg-purple-600 hover:bg-purple-700"
+            className="w-full flex items-center justify-center bg-purple-800 text-ancient-gold border border-ancient-gold/50 hover:bg-purple-900"
             onClick={handleShareToFarcaster}
           >
             <Share2 size={16} className="mr-2" /> Share to Farcaster
           </PixelButton>
         </div>
         
-        <div className="mt-4 text-center text-xs text-white/60">
+        <div className="mt-4 text-center text-xs text-ancient-gold/60">
           <p>Built for Farcaster on Base Chain</p>
         </div>
       </CardContent>

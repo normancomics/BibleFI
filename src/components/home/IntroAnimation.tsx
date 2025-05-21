@@ -85,14 +85,14 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   }, [playSound, fullText, onComplete]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gradient-to-br from-scripture/90 to-scripture/70">
       <div className="text-center max-w-3xl mx-auto p-8">
         {showMainTitle ? (
           <div className="mb-12 animate-entrance">
             <div className="text-5xl md:text-7xl font-scroll font-bold mb-4">
               <GlowingText color="gold">Bible.fi</GlowingText>
             </div>
-            <div className="text-xl font-scroll text-ancient-gold/80">
+            <div className="text-xl font-scroll text-ancient-gold">
               Biblical Wisdom for Financial Stewardship
             </div>
           </div>
@@ -104,7 +104,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
           </div>
         )}
         
-        <div className="border-2 border-ancient-gold/50 p-6 bg-black/80 min-h-[120px] flex items-center justify-center">
+        <div className="border-2 border-ancient-gold/50 p-6 bg-black/30 min-h-[120px] flex items-center justify-center">
           {showMainTitle ? (
             <p className="text-xl font-scroll text-white animate-fade-in">
               {biblicalScenes[currentSceneIndex]?.text}
@@ -125,7 +125,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
               className="max-w-full h-auto mx-auto animate-entrance" 
             />
             <div className="mt-4">
-              <p className="text-sm text-white/70 font-scroll">Loading Biblical Wisdom...</p>
+              <p className="text-sm text-ancient-gold font-scroll">Loading Biblical Wisdom...</p>
             </div>
           </div>
         )}
