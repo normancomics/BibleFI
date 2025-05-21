@@ -78,7 +78,23 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
     >
       <AuthKitProvider config={config}>
         <div style={{ display: 'none' }}>
-          <SignInButton ref={signInButtonRef} />
+          <SignInButton 
+            // Using forwardRef to pass the ref to the button
+            onSuccess={(res) => {
+              console.log('SignIn successful:', res);
+            }}
+            onError={(error) => {
+              console.error('SignIn error:', error);
+              setStatus('disconnected');
+            }}
+          />
+          <button ref={signInButtonRef} onClick={() => {
+            // Find the real SignInButton and click it
+            const realButton = document.querySelector('[data-testid="farcaster-signinbutton"]');
+            if (realButton && realButton instanceof HTMLElement) {
+              realButton.click();
+            }
+          }} style={{display: 'none'}}>Hidden Trigger</button>
         </div>
         <FarcasterProfileWrapper setUser={setUser} setStatus={setStatus} />
         {children}
@@ -100,9 +116,9 @@ const FarcasterProfileWrapper: React.FC<{
         fid: profile.fid,
         username: profile.username || `user_${profile.fid}`,
         displayName: profile.displayName || profile.username,
-        pfp: profile.profileImage?.url || '', // Fix for the pfp property
+        pfp: profile.pfpUrl || '', // Fixed property name to match Farcaster auth-kit types
         bio: profile.bio || '',
-        custody: profile.custody?.address || '',
+        custody: profile.custody || '', // Fixed property access
         verifications: profile.verifications || [],
       });
       setStatus('connected');
