@@ -1,4 +1,3 @@
-
 import { Church } from "@/types/church";
 import { mockChurches } from "@/data/mockChurches";
 import { supabase } from "@/integrations/supabase/client";
@@ -153,5 +152,79 @@ export async function getUserChurches(): Promise<Church[]> {
   } catch (error) {
     console.error("Error getting user churches:", error);
     return [];
+  }
+}
+
+/**
+ * Set a church as the primary church for a user
+ */
+export async function setPrimaryChurch(churchId: string): Promise<boolean> {
+  try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      return false;
+    }
+    
+    // First, reset all churches to non-primary
+    const { error: resetError } = await supabase
+      .from('church_memberships')
+      .update({ primary_church: false })
+      .eq('user_id', user.id);
+    
+    if (resetError) {
+      console.error("Error resetting primary churches:", resetError);
+      return false;
+    }
+    
+    // Then set the selected church as primary
+    const { error } = await supabase
+      .from('church_memberships')
+      .update({ primary_church: true })
+      .eq('church_id', churchId)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error("Error setting primary church:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error setting primary church:", error);
+    return false;
+  }
+}
+
+/**
+ * Leave a church (delete membership)
+ */
+export async function leaveChurch(churchId: string): Promise<boolean> {
+  try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      return false;
+    }
+    
+    const { error } = await supabase
+      .from('church_memberships')
+      .delete()
+      .eq('church_id', churchId)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error("Error leaving church:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error leaving church:", error);
+    return false;
   }
 }

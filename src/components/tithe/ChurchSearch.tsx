@@ -1,19 +1,20 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Church, CheckCircle } from "lucide-react";
+import { Search, Plus, Church, CheckCircle, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { mockChurches } from "@/data/mockChurches";
 import { Church as ChurchType } from "@/types/church";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
-import { searchChurches, joinChurch } from "@/services/churchService";
+import { searchChurches, joinChurch, setPrimaryChurch } from "@/services/churchService";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
 import { supabase } from "@/integrations/supabase/client";
 import { useFarcasterAuth } from "@/farcaster/auth";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface ChurchSearchProps {
   onAddChurch?: () => void;
@@ -26,6 +27,7 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [makeAsPrimary, setMakeAsPrimary] = useState(false);
   const { playSound } = useSound();
   const { toast } = useToast();
   const { user } = useFarcasterAuth();
@@ -96,10 +98,22 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
     
     try {
       // If we have a Supabase session, use that to join the church
-      if (session) {
+      if (session || user) {
         const success = await joinChurch(selectedChurch.id);
         
         if (success) {
+          // If user wants to set this as primary church
+          if (makeAsPrimary) {
+            const primarySuccess = await setPrimaryChurch(selectedChurch.id);
+            
+            if (primarySuccess) {
+              toast({
+                title: "Primary Church Set",
+                description: `${selectedChurch.name} is now your primary church`,
+              });
+            }
+          }
+          
           toast({
             title: "Church Joined",
             description: `You've successfully joined ${selectedChurch.name}`,
@@ -107,12 +121,6 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
         } else {
           throw new Error("Failed to join church");
         }
-      } else {
-        // Just show success for now when using Farcaster
-        toast({
-          title: "Church Selected",
-          description: `${selectedChurch.name} selected as your church`,
-        });
       }
     } catch (error) {
       console.error("Error joining church:", error);
@@ -266,6 +274,20 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
                   </span>
                 ))}
               </div>
+              
+              {(session || user) && (
+                <div className="flex items-center space-x-2 mt-4">
+                  <Switch 
+                    id="primary-church" 
+                    checked={makeAsPrimary}
+                    onCheckedChange={setMakeAsPrimary}
+                  />
+                  <Label htmlFor="primary-church" className="flex items-center">
+                    <Star size={16} className="mr-2 text-yellow-500" />
+                    Set as primary church
+                  </Label>
+                </div>
+              )}
               
               <div className="mt-6">
                 <PixelButton 
