@@ -1,7 +1,7 @@
 
 import { ethers } from 'ethers';
 
-interface SuperfluidToken {
+export interface SuperfluidToken {
   name: string;
   symbol: string;
   address: string;
@@ -38,6 +38,17 @@ export interface VestingSchedule {
   scriptureReference?: string;
   canCancel: boolean;
   status: 'active' | 'cancelled' | 'completed' | 'pending';
+}
+
+export interface TithingStream {
+  id: string;
+  church: string;
+  token: SuperfluidToken;
+  flowRate: string;
+  startDate: Date;
+  endDate?: Date;
+  totalStreamed?: string;
+  status: 'active' | 'cancelled' | 'completed';
 }
 
 export class SuperfluidClient {
@@ -113,6 +124,29 @@ export class SuperfluidClient {
       verified: true
     }
   ];
+  
+  // Active tithing streams (mock data)
+  private tithingStreams: TithingStream[] = [
+    {
+      id: 'tithe-stream-1',
+      church: 'First Biblical Church of Cryptoria',
+      token: this.tokens['USDCx'],
+      flowRate: '0.00023148148148',
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+      status: 'active',
+      totalStreamed: '150.0'
+    },
+    {
+      id: 'tithe-stream-2',
+      church: 'Divine Treasury Assembly',
+      token: this.tokens['DAIx'],
+      flowRate: '0.00011574074074',
+      startDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 days ago
+      endDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000), // 15 days ago
+      status: 'cancelled',
+      totalStreamed: '75.0'
+    }
+  ];
 
   /**
    * Create a Superfluid flow (this is a mock function)
@@ -166,6 +200,14 @@ export class SuperfluidClient {
   public getStakingPools(): StakingPool[] {
     return this.stakingPools;
   }
+  
+  /**
+   * Get active tithing streams
+   */
+  public getTithingStreams(account?: string): TithingStream[] {
+    // In a real implementation, this would filter by account
+    return this.tithingStreams;
+  }
 
   /**
    * Calculate a flow rate from a monthly amount
@@ -175,6 +217,34 @@ export class SuperfluidClient {
   public calculateFlowRate(monthlyAmount: number): string {
     const flowRate = ethers.utils.parseEther(
       (monthlyAmount / (30 * 24 * 60 * 60)).toString()
+    );
+    return flowRate.toString();
+  }
+  
+  /**
+   * Calculate a flow rate from an amount and period
+   * @param amount Amount in tokens
+   * @param period Period (day, week, month)
+   * @returns Flow rate in tokens per second
+   */
+  public calculateFlowRateFromPeriod(amount: number, period: string): string {
+    let secondsInPeriod: number;
+    
+    switch (period) {
+      case 'day':
+        secondsInPeriod = 24 * 60 * 60;
+        break;
+      case 'week':
+        secondsInPeriod = 7 * 24 * 60 * 60;
+        break;
+      case 'month':
+      default:
+        secondsInPeriod = 30 * 24 * 60 * 60;
+        break;
+    }
+    
+    const flowRate = ethers.utils.parseEther(
+      (amount / secondsInPeriod).toString()
     );
     return flowRate.toString();
   }
@@ -217,6 +287,48 @@ export class SuperfluidClient {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error creating vesting schedule'
+      };
+    }
+  }
+  
+  /**
+   * Create a tithing stream (mock implementation)
+   */
+  public async createTithingStream(
+    sender: string,
+    churchAddress: string,
+    tokenSymbol: string,
+    amount: number,
+    period: string,
+    durationInMonths?: number
+  ): Promise<{ success: boolean; streamId?: string; error?: string; setupUrl?: string }> {
+    try {
+      // Get the token details
+      const token = this.getToken(tokenSymbol);
+      if (!token) {
+        return {
+          success: false,
+          error: 'Token not found'
+        };
+      }
+      
+      // Calculate flow rate based on period
+      const flowRate = this.calculateFlowRateFromPeriod(amount, period);
+      
+      // Create Superfluid URL for setting up stream
+      const setupUrl = `https://app.superfluid.finance/stream/base/${churchAddress}/${token.address}/${flowRate}`;
+      
+      // In a real implementation, this would create a Superfluid stream
+      // For now, we'll return a mock response
+      return {
+        success: true,
+        streamId: 'tithe_' + Math.random().toString(16).substr(2, 8),
+        setupUrl
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error creating tithing stream'
       };
     }
   }

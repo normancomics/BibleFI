@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import ChurchSearch from "@/components/tithe/ChurchSearch";
 import TithingAchievements from "@/components/tithe/TithingAchievements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRandomVerse } from "@/data/bibleVerses";
-import { ArrowRight, Church, Coins, HandCoins, CreditCard, UserPlus } from "lucide-react";
+import { ArrowRight, Church, Coins, HandCoins, CreditCard, UserPlus, Clock } from "lucide-react";
 import { daimoClient } from "@/integrations/daimo/client";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
@@ -22,6 +21,7 @@ import { useFarcasterAuth } from "@/farcaster/auth";
 import { getUserChurches } from "@/services/churchService";
 import { supabase } from "@/integrations/supabase/client";
 import { Church as ChurchType } from "@/types/church";
+import SuperfluidTithe from "@/components/tithe/SuperfluidTithe";
 
 const TithePage: React.FC = () => {
   // Get a random verse about giving
@@ -187,7 +187,18 @@ const TithePage: React.FC = () => {
           </div>
           
           <div className="md:col-span-1">
-            <DigitalTithingForm />
+            <Tabs defaultValue="one-time" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="one-time" className="font-scroll">One-Time</TabsTrigger>
+                <TabsTrigger value="recurring" className="font-scroll">Recurring</TabsTrigger>
+              </TabsList>
+              <TabsContent value="one-time">
+                <DigitalTithingForm />
+              </TabsContent>
+              <TabsContent value="recurring">
+                <SuperfluidTithe />
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div className="md:col-span-1">
