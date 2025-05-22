@@ -79,7 +79,6 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
       <AuthKitProvider config={config}>
         <div style={{ display: 'none' }}>
           <SignInButton 
-            // Using forwardRef to pass the ref to the button
             onSuccess={(res) => {
               console.log('SignIn successful:', res);
             }}
