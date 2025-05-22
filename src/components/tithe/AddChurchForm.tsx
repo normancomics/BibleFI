@@ -5,18 +5,41 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
 import PixelButton from "@/components/PixelButton";
+import { addChurch } from "@/services/churchCreationService";
+import { useFarcasterAuth } from "@/farcaster/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddChurchFormProps {
   onComplete?: () => void;
+  onChurchAdded?: (churchId: string) => void;
 }
 
-const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete }) => {
+const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete, onChurchAdded }) => {
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { user } = useFarcasterAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  
+  // Check if user is logged in with Supabase
+  React.useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    
+    getSession();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -51,6 +74,16 @@ const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!session && !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please connect with Farcaster or sign in to add a church",
+        variant: "destructive"
+      });
+      playSound("error");
+      return;
+    }
+    
     // Make sure all required fields are filled
     if (!formData.name || !formData.city || !formData.state || !formData.country) {
       toast({
@@ -63,21 +96,23 @@ const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete }) => {
     }
     
     try {
-      // Simulate API call
+      setIsSubmitting(true);
       playSound("select");
       toast({
         title: "Processing",
         description: "Adding your church to our database...",
       });
       
-      setTimeout(() => {
+      const newChurch = await addChurch(formData);
+      
+      if (newChurch) {
         toast({
           title: "Church Added Successfully",
           description: `${formData.name} has been added to our database.`,
         });
         playSound("success");
         
-        // Reset form and notify parent
+        // Reset form
         setFormData({
           name: "",
           city: "",
@@ -89,15 +124,22 @@ const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete }) => {
           payment_methods: ["cash", "check"]
         });
         
+        // Notify parent components
+        if (onChurchAdded) onChurchAdded(newChurch.id);
         if (onComplete) onComplete();
-      }, 1500);
+      } else {
+        throw new Error("Failed to add church");
+      }
     } catch (error) {
+      console.error("Error adding church:", error);
       toast({
         title: "Error Adding Church",
         description: "There was a problem adding this church. Please try again.",
         variant: "destructive"
       });
       playSound("error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,6 +159,14 @@ const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete }) => {
           </button>
         )}
       </div>
+      
+      {!session && !user && (
+        <div className="bg-amber-50 text-amber-800 p-4 rounded-md mb-4">
+          <p className="text-sm font-medium">
+            You need to be signed in to add a church. Please connect with Farcaster or create an account.
+          </p>
+        </div>
+      )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -202,9 +252,17 @@ const AddChurchForm: React.FC<AddChurchFormProps> = ({ onComplete }) => {
           <PixelButton 
             type="submit" 
             className="w-full flex items-center justify-center"
-            onClick={() => playSound("select")}
+            disabled={isSubmitting || (!session && !user)}
           >
-            <Check size={16} className="mr-2" /> Add Church
+            {isSubmitting ? (
+              <>
+                <Loader2 size={16} className="mr-2 animate-spin" /> Processing...
+              </>
+            ) : (
+              <>
+                <Check size={16} className="mr-2" /> Add Church
+              </>
+            )}
           </PixelButton>
         </div>
       </form>

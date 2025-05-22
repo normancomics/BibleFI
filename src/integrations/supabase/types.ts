@@ -9,15 +9,83 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      churches: {
+      church_memberships: {
         Row: {
-          "## churches.csv": string
+          church_id: string
+          id: string
+          joined_at: string | null
+          primary_church: boolean | null
+          user_id: string
         }
         Insert: {
-          "## churches.csv": string
+          church_id: string
+          id?: string
+          joined_at?: string | null
+          primary_church?: boolean | null
+          user_id: string
         }
         Update: {
-          "## churches.csv"?: string
+          church_id?: string
+          id?: string
+          joined_at?: string | null
+          primary_church?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "church_memberships_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      churches: {
+        Row: {
+          accepts_crypto: boolean
+          address: string | null
+          city: string
+          country: string
+          created_at: string | null
+          created_by: string | null
+          denomination: string | null
+          id: string
+          name: string
+          payment_methods: string[] | null
+          state: string
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          accepts_crypto?: boolean
+          address?: string | null
+          city: string
+          country: string
+          created_at?: string | null
+          created_by?: string | null
+          denomination?: string | null
+          id?: string
+          name: string
+          payment_methods?: string[] | null
+          state: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          accepts_crypto?: boolean
+          address?: string | null
+          city?: string
+          country?: string
+          created_at?: string | null
+          created_by?: string | null
+          denomination?: string | null
+          id?: string
+          name?: string
+          payment_methods?: string[] | null
+          state?: string
+          verified?: boolean | null
+          website?: string | null
         }
         Relationships: []
       }

@@ -1,9 +1,7 @@
 
 import { Church } from "@/types/church";
 import { mockChurches } from "@/data/mockChurches";
-import { isSupabaseConnected } from "@/utils/supabaseConnector";
 import { supabase } from "@/integrations/supabase/client";
-import { extractLocationParts } from "@/utils/locationUtils";
 
 /**
  * Search for churches by name or location
@@ -16,27 +14,126 @@ export async function searchChurches(query: string): Promise<Church[]> {
     return [];
   }
   
-  // Use mock data when Supabase is not connected
-  if (!isSupabaseConnected()) {
-    console.log("Using mock churches data");
+  try {
     const normalizedQuery = query.toLowerCase().trim();
     
-    return mockChurches.filter(church => 
-      church.name.toLowerCase().includes(normalizedQuery) ||
-      church.location?.toLowerCase().includes(normalizedQuery) ||
-      church.city?.toLowerCase().includes(normalizedQuery) ||
-      church.state?.toLowerCase().includes(normalizedQuery) ||
-      church.country?.toLowerCase().includes(normalizedQuery) ||
-      church.denomination?.toLowerCase().includes(normalizedQuery)
-    );
-  }
-  
-  // For future Supabase implementation
-  try {
-    console.log("This would use Supabase in production");
-    return mockChurches; // Use mock data for now
+    // Search for churches in Supabase that match the query
+    const { data, error } = await supabase
+      .from('churches')
+      .select('*')
+      .or(`name.ilike.%${normalizedQuery}%, 
+           city.ilike.%${normalizedQuery}%, 
+           state.ilike.%${normalizedQuery}%, 
+           country.ilike.%${normalizedQuery}%,
+           denomination.ilike.%${normalizedQuery}%`)
+      .limit(20);
+    
+    if (error) {
+      console.error("Error searching churches:", error);
+      return mockChurches; // Fallback to mock data
+    }
+    
+    if (!data || data.length === 0) {
+      console.log("No churches found, using mock data");
+      // Filter mock data as fallback
+      return mockChurches.filter(church => 
+        church.name.toLowerCase().includes(normalizedQuery) ||
+        church.location?.toLowerCase().includes(normalizedQuery) ||
+        church.city?.toLowerCase().includes(normalizedQuery) ||
+        church.state?.toLowerCase().includes(normalizedQuery) ||
+        church.country?.toLowerCase().includes(normalizedQuery) ||
+        church.denomination?.toLowerCase().includes(normalizedQuery)
+      );
+    }
+    
+    // Convert the Supabase church format to our app's Church type
+    const churches: Church[] = data.map(church => ({
+      id: church.id,
+      name: church.name,
+      location: `${church.city}, ${church.state}`,
+      city: church.city,
+      state: church.state,
+      country: church.country,
+      denomination: church.denomination,
+      acceptsCrypto: church.accepts_crypto,
+      website: church.website,
+      payment_methods: church.payment_methods
+    }));
+    
+    console.log(`Found ${churches.length} churches`);
+    return churches;
   } catch (error) {
     console.error("Error searching churches:", error);
     return mockChurches; // Fallback to mock data
+  }
+}
+
+/**
+ * Join a church as a member
+ */
+export async function joinChurch(churchId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('church_memberships')
+      .insert({
+        church_id: churchId,
+      });
+    
+    if (error) {
+      console.error("Error joining church:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error joining church:", error);
+    return false;
+  }
+}
+
+/**
+ * Get current user's church memberships
+ */
+export async function getUserChurches(): Promise<Church[]> {
+  try {
+    const { data, error } = await supabase
+      .from('church_memberships')
+      .select(`
+        church_id,
+        primary_church,
+        churches:church_id (*)
+      `);
+    
+    if (error) {
+      console.error("Error getting user churches:", error);
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      return [];
+    }
+    
+    // Convert the Supabase format to our app's Church type
+    const churches = data.map(membership => {
+      const church = membership.churches;
+      return {
+        id: church.id,
+        name: church.name,
+        location: `${church.city}, ${church.state}`,
+        city: church.city,
+        state: church.state,
+        country: church.country,
+        denomination: church.denomination,
+        acceptsCrypto: church.accepts_crypto,
+        website: church.website,
+        payment_methods: church.payment_methods,
+        isPrimaryChurch: membership.primary_church
+      } as Church;
+    });
+    
+    return churches;
+  } catch (error) {
+    console.error("Error getting user churches:", error);
+    return [];
   }
 }

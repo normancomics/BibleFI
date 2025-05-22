@@ -1,8 +1,8 @@
 
 import { Church } from "@/types/church";
 import { mockChurches } from "@/data/mockChurches";
-import { isSupabaseConnected } from "@/utils/supabaseConnector";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 /**
  * Add a new church to the database
@@ -16,58 +16,53 @@ export async function addChurch(churchData: {
   website: string;
   accepts_crypto: boolean;
   payment_methods: string[];
-}): Promise<Church> {
+}): Promise<Church | null> {
   console.log("Adding new church:", churchData);
   
-  // Use mock data when Supabase is not connected
-  if (!isSupabaseConnected()) {
-    console.log("Using mock data (no Supabase connection)");
-    
-    // Generate a new mock church with a unique ID
-    const newId = `mock-${Date.now()}`;
-    const location = `${churchData.city}, ${churchData.state}`;
-    
-    const newChurch: Church = {
-      id: newId,
-      name: churchData.name,
-      location: location,
-      city: churchData.city,
-      state: churchData.state,
-      country: churchData.country,
-      denomination: churchData.denomination,
-      acceptsCrypto: churchData.accepts_crypto,
-      website: churchData.website,
-      payment_methods: churchData.payment_methods
-    };
-    
-    // In a real app, we would push to Supabase here
-    return newChurch;
-  }
-  
-  // For future Supabase implementation
   try {
-    console.log("This would use Supabase in production");
+    const { data, error } = await supabase
+      .from('churches')
+      .insert({
+        name: churchData.name,
+        city: churchData.city,
+        state: churchData.state,
+        country: churchData.country,
+        denomination: churchData.denomination || null,
+        website: churchData.website || null,
+        accepts_crypto: churchData.accepts_crypto,
+        payment_methods: churchData.payment_methods
+      })
+      .select()
+      .single();
+      
+    if (error) {
+      console.error("Error adding church:", error);
+      throw new Error(error.message);
+    }
     
-    // Mock implementation for now
-    const newId = `mock-${Date.now()}`;
-    const location = `${churchData.city}, ${churchData.state}`;
+    if (!data) {
+      console.error("No data returned when adding church");
+      return null;
+    }
     
+    // Convert the Supabase church format to our app's Church type
     const newChurch: Church = {
-      id: newId,
-      name: churchData.name,
-      location: location,
-      city: churchData.city,
-      state: churchData.state,
-      country: churchData.country,
-      denomination: churchData.denomination,
-      acceptsCrypto: churchData.accepts_crypto,
-      website: churchData.website,
-      payment_methods: churchData.payment_methods
+      id: data.id,
+      name: data.name,
+      location: `${data.city}, ${data.state}`,
+      city: data.city,
+      state: data.state,
+      country: data.country,
+      denomination: data.denomination,
+      acceptsCrypto: data.accepts_crypto,
+      website: data.website,
+      payment_methods: data.payment_methods
     };
     
+    console.log("Church added successfully:", newChurch);
     return newChurch;
   } catch (error) {
     console.error("Error adding church:", error);
-    throw new Error("Failed to add church");
+    return null;
   }
 }

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SaintsWisdom from "@/components/tithe/SaintsWisdom";
@@ -10,7 +10,7 @@ import ChurchSearch from "@/components/tithe/ChurchSearch";
 import TithingAchievements from "@/components/tithe/TithingAchievements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRandomVerse } from "@/data/bibleVerses";
-import { ArrowRight, Church, Coins, HandCoins, CreditCard } from "lucide-react";
+import { ArrowRight, Church, Coins, HandCoins, CreditCard, UserPlus } from "lucide-react";
 import { daimoClient } from "@/integrations/daimo/client";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
@@ -18,13 +18,57 @@ import { useToast } from "@/hooks/use-toast";
 import TitheAndShare from "@/components/tithe/TitheAndShare";
 import AddChurchForm from "@/components/tithe/AddChurchForm";
 import FarcasterFrame from "@/components/farcaster/FarcasterFrame";
+import { useFarcasterAuth } from "@/farcaster/auth";
+import { getUserChurches } from "@/services/churchService";
+import { supabase } from "@/integrations/supabase/client";
+import { Church as ChurchType } from "@/types/church";
 
 const TithePage: React.FC = () => {
   // Get a random verse about giving
   const financialVerse = getRandomVerse();
   const { playSound } = useSound();
   const { toast } = useToast();
+  const { user } = useFarcasterAuth();
   const [showAddChurch, setShowAddChurch] = useState(false);
+  const [activeTab, setActiveTab] = useState("church-search");
+  const [userChurches, setUserChurches] = useState<ChurchType[]>([]);
+  const [session, setSession] = useState<any>(null);
+  const [isLoadingChurches, setIsLoadingChurches] = useState(false);
+  
+  // Check if user is logged in with Supabase
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    
+    getSession();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+  
+  // Fetch user churches when auth state changes
+  useEffect(() => {
+    const fetchUserChurches = async () => {
+      if (!session && !user) return;
+      
+      setIsLoadingChurches(true);
+      try {
+        const churches = await getUserChurches();
+        setUserChurches(churches);
+      } catch (error) {
+        console.error("Error fetching user churches:", error);
+      } finally {
+        setIsLoadingChurches(false);
+      }
+    };
+    
+    fetchUserChurches();
+  }, [session, user]);
   
   const handleDaimoQuickTithe = () => {
     playSound("coin");
@@ -43,6 +87,27 @@ const TithePage: React.FC = () => {
     
     // Open the payment link in a new tab
     window.open(paymentLink, "_blank");
+  };
+  
+  const handleChurchAdded = (churchId: string) => {
+    // After a church is added, refresh the user churches list
+    const fetchUserChurches = async () => {
+      try {
+        const churches = await getUserChurches();
+        setUserChurches(churches);
+        
+        // Switch to "my-churches" tab if it exists
+        if (userChurches.length > 0) {
+          setActiveTab("my-churches");
+        } else {
+          setActiveTab("church-search");
+        }
+      } catch (error) {
+        console.error("Error fetching user churches:", error);
+      }
+    };
+    
+    fetchUserChurches();
   };
 
   return (
@@ -131,20 +196,93 @@ const TithePage: React.FC = () => {
         </div>
         
         {showAddChurch ? (
-          <AddChurchForm onComplete={() => setShowAddChurch(false)} />
+          <AddChurchForm 
+            onComplete={() => setShowAddChurch(false)} 
+            onChurchAdded={handleChurchAdded}
+          />
         ) : (
-          <Tabs defaultValue="church-search" className="mb-12">
-            <TabsList className="w-full grid grid-cols-3">
+          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="mb-12">
+            <TabsList className="w-full grid grid-cols-4">
               <TabsTrigger value="church-search">Find a Church</TabsTrigger>
+              <TabsTrigger value="my-churches" disabled={userChurches.length === 0}>My Churches</TabsTrigger>
               <TabsTrigger value="impact">Impact Stories</TabsTrigger>
               <TabsTrigger value="farcaster">Farcaster Frame</TabsTrigger>
             </TabsList>
+            
             <TabsContent value="church-search" className="pt-4">
               <ChurchSearch onAddChurch={() => setShowAddChurch(true)} />
             </TabsContent>
+            
+            <TabsContent value="my-churches" className="pt-4">
+              {userChurches.length > 0 ? (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-scroll mb-4">My Churches</h2>
+                  
+                  {userChurches.map(church => (
+                    <Card key={church.id} className="mb-4">
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between">
+                          <div>
+                            <h3 className="text-lg font-medium">{church.name}</h3>
+                            <p className="text-sm text-muted-foreground">{church.location}</p>
+                            {church.isPrimaryChurch && (
+                              <span className="inline-block mt-2 bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                                Primary Church
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <PixelButton 
+                              onClick={handleDaimoQuickTithe} 
+                              size="sm"
+                              farcasterStyle
+                            >
+                              <HandCoins size={14} className="mr-1" /> Tithe Now
+                            </PixelButton>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  
+                  <div className="flex justify-center mt-4">
+                    <PixelButton
+                      onClick={() => setShowAddChurch(true)}
+                      variant="outline"
+                      className="flex items-center"
+                    >
+                      <UserPlus size={16} className="mr-2" />
+                      Add Another Church
+                    </PixelButton>
+                  </div>
+                </div>
+              ) : (
+                <Card className="bg-amber-50 border-amber-200 mb-4">
+                  <CardContent className="pt-6 text-center">
+                    <p className="text-amber-700 mb-4">
+                      You haven't joined any churches yet.
+                    </p>
+                    <PixelButton 
+                      onClick={() => setActiveTab("church-search")}
+                      className="mr-2"
+                    >
+                      Find a Church
+                    </PixelButton>
+                    <PixelButton 
+                      variant="outline"
+                      onClick={() => setShowAddChurch(true)}
+                    >
+                      Add Your Church
+                    </PixelButton>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+            
             <TabsContent value="impact" className="pt-4">
               <ImpactStories />
             </TabsContent>
+            
             <TabsContent value="farcaster" className="pt-4">
               <FarcasterFrame />
             </TabsContent>
