@@ -6,7 +6,7 @@ import ActiveStreams from "./ActiveStreams";
 import TithingStats from "./TithingStats";
 import { Badge } from "@/components/ui/badge";
 import PixelButton from "@/components/PixelButton";
-import { CalendarRange, History, ListChecks, Stream } from "lucide-react";
+import { CalendarRange, History, ListChecks, Wallet } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 
 interface TithingHistoryItem {
@@ -111,7 +111,7 @@ const TithingDashboard: React.FC = () => {
             <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
           <TabsTrigger value="streams" className="flex items-center gap-2">
-            <Stream size={16} />
+            <Wallet size={16} />
             <span className="hidden sm:inline">Active Streams</span>
           </TabsTrigger>
           <TabsTrigger value="history" className="flex items-center gap-2">
