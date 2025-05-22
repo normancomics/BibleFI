@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CircularProgressBar } from "@/components/ui/chart";
-import { LightningBolt, BookOpen, Coins, Church, Clock3 } from "lucide-react";
+import { Zap, BookOpen, Coins, Church, Clock3 } from "lucide-react";
 
 interface TithingStatsProps {
   monthlyTotal?: string;
@@ -117,7 +117,7 @@ const TithingStats: React.FC<TithingStatsProps> = ({
           
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <LightningBolt size={16} className="text-ancient-gold mr-2" />
+              <Zap size={16} className="text-ancient-gold mr-2" />
               <span className="text-sm">Biblical Score</span>
             </div>
             <span className="text-sm font-medium text-scripture">14/20</span>
