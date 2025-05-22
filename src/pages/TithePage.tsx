@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SaintsWisdom from "@/components/tithe/SaintsWisdom";
@@ -15,12 +15,16 @@ import { daimoClient } from "@/integrations/daimo/client";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
+import TitheAndShare from "@/components/tithe/TitheAndShare";
+import AddChurchForm from "@/components/tithe/AddChurchForm";
+import FarcasterFrame from "@/components/farcaster/FarcasterFrame";
 
 const TithePage: React.FC = () => {
   // Get a random verse about giving
   const financialVerse = getRandomVerse();
   const { playSound } = useSound();
   const { toast } = useToast();
+  const [showAddChurch, setShowAddChurch] = useState(false);
   
   const handleDaimoQuickTithe = () => {
     playSound("coin");
@@ -65,8 +69,8 @@ const TithePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="md:col-span-1">
             <Card className="h-full border-2 border-scripture/30 bg-black/30">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -117,27 +121,35 @@ const TithePage: React.FC = () => {
             </Card>
           </div>
           
-          <div>
+          <div className="md:col-span-1">
             <DigitalTithingForm />
+          </div>
+          
+          <div className="md:col-span-1">
+            <TitheAndShare />
           </div>
         </div>
         
-        <Tabs defaultValue="church-search" className="mb-12">
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="church-search">Find a Church</TabsTrigger>
-            <TabsTrigger value="impact">Impact Stories</TabsTrigger>
-            <TabsTrigger value="saints">Saints' Wisdom</TabsTrigger>
-          </TabsList>
-          <TabsContent value="church-search" className="pt-4">
-            <ChurchSearch />
-          </TabsContent>
-          <TabsContent value="impact" className="pt-4">
-            <ImpactStories />
-          </TabsContent>
-          <TabsContent value="saints" className="pt-4">
-            <SaintsWisdom />
-          </TabsContent>
-        </Tabs>
+        {showAddChurch ? (
+          <AddChurchForm onComplete={() => setShowAddChurch(false)} />
+        ) : (
+          <Tabs defaultValue="church-search" className="mb-12">
+            <TabsList className="w-full grid grid-cols-3">
+              <TabsTrigger value="church-search">Find a Church</TabsTrigger>
+              <TabsTrigger value="impact">Impact Stories</TabsTrigger>
+              <TabsTrigger value="farcaster">Farcaster Frame</TabsTrigger>
+            </TabsList>
+            <TabsContent value="church-search" className="pt-4">
+              <ChurchSearch onAddChurch={() => setShowAddChurch(true)} />
+            </TabsContent>
+            <TabsContent value="impact" className="pt-4">
+              <ImpactStories />
+            </TabsContent>
+            <TabsContent value="farcaster" className="pt-4">
+              <FarcasterFrame />
+            </TabsContent>
+          </Tabs>
+        )}
         
         <div className="mb-12">
           <TithingAchievements />

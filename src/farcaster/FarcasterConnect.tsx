@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFarcasterAuth } from './auth';
 import PixelButton from '@/components/PixelButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, LogIn } from 'lucide-react';
 import { useSound } from '@/contexts/SoundContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface FarcasterConnectProps {
   size?: 'sm' | 'md' | 'lg';
@@ -18,6 +19,17 @@ const FarcasterConnect: React.FC<FarcasterConnectProps> = ({
 }) => {
   const { user, status, signIn, signOut } = useFarcasterAuth();
   const { playSound } = useSound();
+  const { toast } = useToast();
+  
+  // Handle connection status changes
+  useEffect(() => {
+    if (status === 'connected' && user) {
+      toast({
+        title: "Farcaster Connected",
+        description: `Welcome, ${user.displayName || user.username}!`,
+      });
+    }
+  }, [status, user, toast]);
   
   const handleConnect = async () => {
     playSound('select');
@@ -54,10 +66,10 @@ const FarcasterConnect: React.FC<FarcasterConnectProps> = ({
           <div className="flex items-center">
             <Avatar className="h-8 w-8 mr-2 bg-black/40">
               <AvatarImage src={user.pfp} alt={user.displayName || user.username} />
-              <AvatarFallback>FC</AvatarFallback>
+              <AvatarFallback>{(user.displayName || user.username).substring(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium text-ancient-gold">{user.displayName || user.username}</p>
+              <p className="text-sm font-medium text-ancient-gold truncate max-w-[100px]">{user.displayName || user.username}</p>
               <p className="text-xs text-white/60">FID: {user.fid}</p>
             </div>
           </div>
