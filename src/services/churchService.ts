@@ -73,10 +73,19 @@ export async function searchChurches(query: string): Promise<Church[]> {
  */
 export async function joinChurch(churchId: string): Promise<boolean> {
   try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      return false;
+    }
+    
     const { error } = await supabase
       .from('church_memberships')
       .insert({
         church_id: churchId,
+        user_id: user.id
       });
     
     if (error) {
@@ -96,13 +105,22 @@ export async function joinChurch(churchId: string): Promise<boolean> {
  */
 export async function getUserChurches(): Promise<Church[]> {
   try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('church_memberships')
       .select(`
         church_id,
         primary_church,
         churches:church_id (*)
-      `);
+      `)
+      .eq('user_id', user.id);
     
     if (error) {
       console.error("Error getting user churches:", error);

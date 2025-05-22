@@ -12,4 +12,5 @@ export type Church = {
   email?: string;
   phone?: string;
   payment_methods?: string[];
+  isPrimaryChurch?: boolean;
 };
