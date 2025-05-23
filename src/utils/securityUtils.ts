@@ -22,7 +22,7 @@ export function encryptData(data: any, secret: string): string {
   
   // Use AES encryption from CryptoJS with enhanced key
   const encrypted = CryptoJS.AES.encrypt(stringData, strengthenedSecret, {
-    mode: CryptoJS.mode.GCM,
+    mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
     salt: CryptoJS.lib.WordArray.random(128)
   }).toString();
@@ -50,7 +50,7 @@ export function decryptData(encryptedData: string, secret: string): any {
     
     // Decrypt the data
     const bytes = CryptoJS.AES.decrypt(actualEncrypted, strengthenedSecret, {
-      mode: CryptoJS.mode.GCM,
+      mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     });
     
@@ -167,4 +167,3 @@ export const homomorphicOperations = {
     return encryptData(value * scalar, secret);
   }
 };
-
