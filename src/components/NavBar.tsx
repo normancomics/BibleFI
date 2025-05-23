@@ -1,12 +1,13 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PixelButton from "@/components/PixelButton";
 import { Home, Book, Church, Coins, Wallet, FileText, BookOpen } from "lucide-react";
 import { useSound } from "@/contexts/SoundContext";
 
 export default function NavBar() {
-  const { isMobile } = useMobile();
+  const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { playSound } = useSound();
   
@@ -47,15 +48,19 @@ export default function NavBar() {
                 <span>{item.label}</span>
               </Link>
             ))}
-            <PixelButton 
-              href="https://github.com/username/biblefi"
-              target="_blank"
+            <Link 
+              to="https://github.com/username/biblefi" 
+              target="_blank" 
               rel="noopener noreferrer"
-              variant="outline"
-              size="sm"
+              className="text-white hover:text-ancient-gold"
             >
-              GitHub
-            </PixelButton>
+              <PixelButton
+                variant="outline"
+                size="sm"
+              >
+                GitHub
+              </PixelButton>
+            </Link>
           </div>
         )}
       </div>
