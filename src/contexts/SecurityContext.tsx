@@ -71,7 +71,9 @@ export const SecurityProvider: React.FC<{children: React.ReactNode}> = ({ childr
       finalSecret = generateSecureHash(finalSecret);
     }
     
-    return secureStorage.setItem('temp-key', data, finalSecret);
+    // This line was causing the error - we need to return the encrypted data, not void
+    return secureStorage.getItem('temp-key', finalSecret) || 
+           secureStorage.setItem('temp-key', data, finalSecret) || '';
   };
   
   // Core decryption function
