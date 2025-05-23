@@ -3,8 +3,8 @@
 export const FARCASTER_CONFIG = {
   domain: typeof window !== 'undefined' ? window.location.host : 'bible.fi',
   siweUri: typeof window !== 'undefined' ? `https://${window.location.host}/api/auth/callback` : 'https://bible.fi/api/auth/callback',
-  rpcUrl: process.env.VITE_FARCASTER_RPC_URL || 'https://mainnet.base.org',
-  relay: process.env.VITE_FARCASTER_RELAY_URL || 'https://relay.farcaster.xyz',
+  rpcUrl: import.meta.env.VITE_FARCASTER_RPC_URL || 'https://mainnet.base.org',
+  relay: import.meta.env.VITE_FARCASTER_RELAY_URL || 'https://relay.farcaster.xyz',
   version: 'vNext',
   
   // For Farcaster Mini-App (Frames)
