@@ -1,4 +1,3 @@
-
 import { ethers } from 'ethers';
 import { useToast } from '@/hooks/use-toast';
 import { biblicalWisdomService } from '@/services/biblicalWisdomService';
@@ -22,12 +21,12 @@ interface ChurchDonationParams {
 
 export class DaimoClient {
   /**
-   * Generate a Daimo payment link
+   * Generate a Daimo payment link - CORRECTED URL
    */
   public generatePaymentLink(params: DaimoPaymentParams): string {
     const { recipient, amount, token, message } = params;
     
-    // Create Daimo payment link - Updated to correct URL
+    // Create Daimo payment link - CORRECTED to pay.daimo.com
     let url = `https://pay.daimo.com/send?to=${encodeURIComponent(recipient)}&amount=${amount}&token=${token.toLowerCase()}`;
     
     if (message) {
@@ -173,7 +172,7 @@ export class DaimoClient {
 
   /**
    * Calculate first fruits offering (biblical concept)
-   * Based on Proverbs 3:9-10 - "Honor the LORD with your wealth, with the firstfruits of all your crops"
+   * Based on Proverbs 3:9-10 - "Honor the LORD with your wealth, with the firstfruits"
    */
   public calculateFirstFruits(newIncome: number): number {
     // Biblical first fruits typically refers to giving from the first of your increase

@@ -1,84 +1,99 @@
 
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { SoundType } from "@/components/SoundEffect";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface SoundContextType {
-  playSound: (sound: SoundType) => void;
-  isSoundEnabled: boolean;
-  toggleSound: () => void;
+  isEnabled: boolean;
+  setIsEnabled: (enabled: boolean) => void;
+  playSound: (soundName: string) => void;
   userInteracted: boolean;
-  setUserInteracted: (value: boolean) => void;
+  setUserInteracted: (interacted: boolean) => void;
 }
 
-const SoundContext = createContext<SoundContextType>({
-  playSound: () => {},
-  isSoundEnabled: true,
-  toggleSound: () => {},
-  userInteracted: false,
-  setUserInteracted: () => {},
-});
+const SoundContext = createContext<SoundContextType | undefined>(undefined);
+
+export const useSound = () => {
+  const context = useContext(SoundContext);
+  if (!context) {
+    throw new Error('useSound must be used within a SoundProvider');
+  }
+  return context;
+};
 
 interface SoundProviderProps {
   children: React.ReactNode;
 }
 
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
-  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
-  const [userInteracted, setUserInteracted] = useState<boolean>(false);
-  const [audioElements] = useState<{[key: string]: HTMLAudioElement}>({});
-  
-  // Simple sound player function
-  const playSound = useCallback((sound: SoundType) => {
-    if (!isSoundEnabled || !userInteracted) {
-      console.log(`Sound ${sound} not played: enabled=${isSoundEnabled}, userInteracted=${userInteracted}`);
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  const playSound = (soundName: string) => {
+    if (!isEnabled || !userInteracted) {
+      console.info(`Sound ${soundName} not played: enabled=${isEnabled}, userInteracted=${userInteracted}`);
       return;
     }
-    
+
     try {
-      console.log(`🔊 Playing sound: ${sound}`);
-      
-      // Reuse audio elements when possible to avoid creating too many
-      if (!audioElements[sound]) {
-        audioElements[sound] = new Audio(`/sounds/${sound}.mp3`);
-        audioElements[sound].volume = 0.5;
-      }
-      
-      const audio = audioElements[sound];
-      
-      // Reset audio to beginning if it's already playing
-      audio.currentTime = 0;
-      
-      // Play the sound
-      audio.play().catch(error => {
-        console.warn(`Error playing sound ${sound}:`, error);
-        // Set user interaction to false if there's a NotAllowedError
-        if (error.name === 'NotAllowedError') {
-          setUserInteracted(false);
-          console.warn('Audio permission denied - user must interact with the page first');
-        }
-      });
-    } catch (err) {
-      console.error(`Failed to play sound ${sound}:`, err);
+      // Create simple beep sounds using Web Audio API
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Different frequencies for different sounds
+      const frequencies: { [key: string]: number } = {
+        select: 800,
+        coin: 1200,
+        scroll: 600,
+        powerup: 1500,
+        success: 1000,
+        error: 400
+      };
+
+      oscillator.frequency.setValueAtTime(frequencies[soundName] || 800, audioContext.currentTime);
+      oscillator.type = 'square';
+
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+
+      console.info(`🔊 Playing sound: ${soundName}`);
+    } catch (error) {
+      console.warn(`Error playing sound ${soundName}:`, error);
     }
-  }, [isSoundEnabled, userInteracted, audioElements]);
-  
-  const toggleSound = useCallback(() => {
-    setIsSoundEnabled(prev => !prev);
+  };
+
+  // Enable user interaction tracking
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setUserInteracted(true);
+    };
+
+    document.addEventListener('click', handleUserInteraction, { once: true });
+    document.addEventListener('keydown', handleUserInteraction, { once: true });
+    document.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
   }, []);
-  
+
   return (
-    <SoundContext.Provider 
-      value={{ 
-        playSound, 
-        isSoundEnabled, 
-        toggleSound,
-        userInteracted,
-        setUserInteracted
-      }}
-    >
+    <SoundContext.Provider value={{ isEnabled, setIsEnabled, playSound, userInteracted, setUserInteracted }}>
       {children}
     </SoundContext.Provider>
   );
 };
 
-export const useSound = () => useContext(SoundContext);
+// Default export for backward compatibility
+const SoundInitializer: React.FC = () => {
+  return null; // This component is no longer needed
+};
+
+export default SoundInitializer;
