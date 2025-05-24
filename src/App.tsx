@@ -16,6 +16,7 @@ import { SecurityMonitorProvider } from "./contexts/SecurityMonitorContext";
 import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "./components/ui/toaster";
 import SoundInitializer from "./components/SoundInitializer";
+// Note: IOSAudioUnlocker is still imported but it now returns null
 import IOSAudioUnlocker from "./components/IOSAudioUnlocker";
 import "./App.css";
 
@@ -26,7 +27,6 @@ function App() {
         <SecurityMonitorProvider>
           <SoundProvider>
             <SoundInitializer />
-            <IOSAudioUnlocker />
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
               <Routes>
                 <Route path="/" element={<Index />} />
