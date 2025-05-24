@@ -1,79 +1,69 @@
+import React, { useState, useEffect } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
+import { BookOpen, Coins, Church, Receipt, Sprout } from "lucide-react";
+import WalletConnect from "@/components/wallet/WalletConnect";
+import SoundToggle from "@/components/SoundToggle";
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import PixelButton from "@/components/PixelButton";
-import { Home, Book, Church, Coins, Wallet, FileText, BookOpen } from "lucide-react";
-import { useSound } from "@/contexts/SoundContext";
-
-export default function NavBar() {
-  const isMobile = useIsMobile();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { playSound } = useSound();
+const NavBar: React.FC = () => {
+  const [visible, setVisible] = useState(true);
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const location = useLocation();
   
-  const menuItems = [
-    { label: "Home", href: "/", icon: <Home className="h-4 w-4" /> },
-    { label: "Wisdom", href: "/wisdom", icon: <Book className="h-4 w-4" /> },
-    { label: "Tithe", href: "/tithe", icon: <Church className="h-4 w-4" /> },
-    { label: "DeFi", href: "/defi", icon: <Coins className="h-4 w-4" /> },
-    { label: "Biblical DeFi", href: "/biblical-defi", icon: <BookOpen className="h-4 w-4" /> },
-    { label: "Staking", href: "/staking", icon: <Wallet className="h-4 w-4" /> },
-    { label: "Taxes", href: "/taxes", icon: <FileText className="h-4 w-4" /> }
-  ];
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.pageYOffset;
+      const isVisible = prevScrollPos > currentScrollPos || currentScrollPos < 10;
+      
+      setVisible(isVisible);
+      setPrevScrollPos(currentScrollPos);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [prevScrollPos]);
 
   return (
-    <nav className="bg-black/80 border-b border-ancient-gold/30">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="text-xl font-game text-ancient-gold">
-          BIBLE.FI
+    <header className={`sticky top-0 z-50 w-full backdrop-blur-md bg-black/50 border-b border-gray-800 shadow-lg ${visible ? 'translate-y-0' : '-translate-y-full'} transition-transform duration-300`}>
+      <div className="container flex h-14 mx-auto items-center text-sm">
+        <Link to="/" className="flex items-center gap-2 font-bold text-ancient-gold hover:opacity-80 mr-8">
+          <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi Logo" className="h-8" />
+          <span className="font-game tracking-wide text-lg hidden md:inline">BIBLE.FI</span>
         </Link>
         
-        {isMobile ? (
-          <button 
-            onClick={() => {
-              setIsMenuOpen(!isMenuOpen);
-              playSound("select");
-            }}
-            className="text-white focus:outline-none"
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-            </svg>
-          </button>
-        ) : (
-          <div className="flex items-center space-x-4">
-            {menuItems.map((item) => (
-              <Link key={item.label} to={item.href} className="text-white hover:text-ancient-gold flex items-center space-x-2">
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            ))}
-            <Link 
-              to="https://github.com/username/biblefi" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-white hover:text-ancient-gold"
-            >
-              <PixelButton
-                variant="outline"
-                size="sm"
-              >
-                GitHub
-              </PixelButton>
-            </Link>
+        <div className="ml-auto flex items-center gap-4">
+          <nav className="flex items-center gap-1 md:gap-2">
+            <NavLink to="/wisdom" className="nav-link px-2 md:px-3 py-2">
+              <BookOpen className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Wisdom</span>
+            </NavLink>
+            <NavLink to="/defi" className="nav-link px-2 md:px-3 py-2">
+              <Coins className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">DeFi</span>
+            </NavLink>
+            <NavLink to="/farming" className="nav-link px-2 md:px-3 py-2">
+              <Sprout className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Farming</span>
+            </NavLink>
+            <NavLink to="/tithe" className="nav-link px-2 md:px-3 py-2">
+              <Church className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Tithe</span>
+            </NavLink>
+            <NavLink to="/taxes" className="nav-link px-2 md:px-3 py-2">
+              <Receipt className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Taxes</span>
+            </NavLink>
+          </nav>
+          
+          <SoundToggle className="ml-2" />
+          
+          <div className="hidden sm:block">
+            <WalletConnect />
           </div>
-        )}
-      </div>
-      
-      {isMobile && isMenuOpen && (
-        <div className="bg-black/80 py-2 px-4">
-          {menuItems.map((item) => (
-            <Link key={item.label} to={item.href} className="block text-white py-2 hover:text-ancient-gold">
-              {item.label}
-            </Link>
-          ))}
         </div>
-      )}
-    </nav>
+      </div>
+    </header>
   );
-}
+};
+
+export default NavBar;

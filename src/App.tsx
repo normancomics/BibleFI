@@ -1,51 +1,32 @@
-
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import DefiPage from "./pages/DefiPage";
-import WisdomPage from "./pages/WisdomPage";
-import TithePage from "./pages/TithePage";
-import StakingPage from "./pages/StakingPage";
-import TaxesPage from "./pages/TaxesPage";
-import AdminPage from "./pages/AdminPage";
-import BiblicalDefiPage from "./pages/BiblicalDefiPage";
-import SecurityPage from "./pages/SecurityPage";
-import { SoundProvider } from "./contexts/SoundContext";
-import { SecurityProvider } from "./contexts/SecurityContext";
-import { SecurityMonitorProvider } from "./contexts/SecurityMonitorContext";
-import { ThemeProvider } from "./components/theme-provider";
-import { Toaster } from "./components/ui/toaster";
-import SoundInitializer from "./components/SoundInitializer";
-// Note: IOSAudioUnlocker is still imported but it now returns null
-import IOSAudioUnlocker from "./components/IOSAudioUnlocker";
-import "./App.css";
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Link, NavLink } from 'react-router-dom';
+import './App.css';
+import SoundInitializer from '@/contexts/SoundContext';
+import SoundToggle from '@/components/SoundToggle';
+import WalletConnect from '@/components/wallet/WalletConnect';
+import HomePage from "@/pages/HomePage";
+import WisdomPage from "@/pages/WisdomPage";
+import DefiPage from "@/pages/DefiPage";
+import TaxesPage from "@/pages/TaxesPage";
+import TithePage from "@/pages/TithePage";
+import AboutPage from "@/pages/AboutPage";
+import FarmingPage from "@/pages/FarmingPage";
 
 function App() {
   return (
-    <BrowserRouter>
-      <SecurityProvider>
-        <SecurityMonitorProvider>
-          <SoundProvider>
-            <SoundInitializer />
-            <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/defi" element={<DefiPage />} />
-                <Route path="/wisdom" element={<WisdomPage />} />
-                <Route path="/tithe" element={<TithePage />} />
-                <Route path="/staking" element={<StakingPage />} />
-                <Route path="/taxes" element={<TaxesPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
-                <Route path="/security" element={<SecurityPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Toaster />
-            </ThemeProvider>
-          </SoundProvider>
-        </SecurityMonitorProvider>
-      </SecurityProvider>
-    </BrowserRouter>
+    <Router>
+      <SoundInitializer />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/wisdom" element={<WisdomPage />} />
+        <Route path="/defi" element={<DefiPage />} />
+        <Route path="/tax" element={<TaxesPage />} />
+        <Route path="/taxes" element={<TaxesPage />} />
+        <Route path="/tithe" element={<TithePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/farming" element={<FarmingPage />} />
+      </Routes>
+    </Router>
   );
 }
 

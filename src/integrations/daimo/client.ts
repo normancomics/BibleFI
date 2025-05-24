@@ -1,5 +1,7 @@
+
 import { ethers } from 'ethers';
 import { useToast } from '@/hooks/use-toast';
+import { biblicalWisdomService } from '@/services/biblicalWisdomService';
 
 interface DaimoPaymentParams {
   recipient: string;
@@ -62,6 +64,37 @@ export class DaimoClient {
       {symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18},
       {symbol: 'USDT', name: 'Tether USD', decimals: 6}
     ];
+  }
+
+  /**
+   * Calculate tithing amount based on biblical principles
+   * @param income Total income amount
+   * @param tithingPercentage Custom tithing percentage (default 10%)
+   * @returns Recommended tithing amount
+   */
+  public calculateBiblicalTithe(income: number, tithingPercentage: number = 10): number {
+    return income * (tithingPercentage / 100);
+  }
+
+  /**
+   * Suggest additional offering based on prosperity
+   * @param income Total income
+   * @param expenses Total expenses
+   * @returns Suggested additional offering
+   */
+  public suggestAdditionalOffering(income: number, expenses: number): number {
+    const surplus = income - expenses;
+    if (surplus <= 0) return 0;
+    
+    // Bible-based progressive offering suggestion
+    // "Each of you should give what you have decided in your heart to give" - 2 Cor 9:7
+    if (surplus < 500) {
+      return surplus * 0.05; // 5% of surplus
+    } else if (surplus < 2000) {
+      return surplus * 0.08; // 8% of surplus
+    } else {
+      return surplus * 0.12; // 12% of surplus
+    }
   }
 
   /**
@@ -137,6 +170,30 @@ export class DaimoClient {
       };
     }
   }
+
+  /**
+   * Calculate first fruits offering (biblical concept)
+   * Based on Proverbs 3:9-10 - "Honor the LORD with your wealth, with the firstfruits of all your crops"
+   */
+  public calculateFirstFruits(newIncome: number): number {
+    // Biblical first fruits typically refers to giving from the first of your increase
+    return newIncome * 0.10; // 10% of new income as first fruits
+  }
+
+  /**
+   * Get a biblical financial principle related to tithing
+   */
+  public getTithingPrinciple(): string {
+    const principles = [
+      "Give, and it will be given to you. (Luke 6:38)",
+      "Bring the whole tithe into the storehouse. (Malachi 3:10)",
+      "Each of you should give what you have decided in your heart to give. (2 Corinthians 9:7)",
+      "Honor the LORD with your wealth, with the firstfruits. (Proverbs 3:9)",
+      "God loves a cheerful giver. (2 Corinthians 9:7)"
+    ];
+    
+    return principles[Math.floor(Math.random() * principles.length)];
+  }
 }
 
 // Create a hook to use the Daimo client with toast notifications
@@ -183,6 +240,10 @@ export const useDaimo = () => {
     generateChurchDonationLink: client.generateChurchDonationLink.bind(client),
     setupRecurringTithe: client.setupRecurringTithe.bind(client),
     getSupportedTokens: client.getSupportedTokens.bind(client),
+    calculateBiblicalTithe: client.calculateBiblicalTithe.bind(client),
+    suggestAdditionalOffering: client.suggestAdditionalOffering.bind(client),
+    calculateFirstFruits: client.calculateFirstFruits.bind(client),
+    getTithingPrinciple: client.getTithingPrinciple.bind(client),
   };
 };
 
