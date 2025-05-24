@@ -1,4 +1,3 @@
-
 import { ethers } from 'ethers';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,9 +25,8 @@ export class DaimoClient {
   public generatePaymentLink(params: DaimoPaymentParams): string {
     const { recipient, amount, token, message } = params;
     
-    // Create Daimo payment link
-    // In a real implementation, this would use actual Daimo API
-    let url = `https://app.daimo.com/send?to=${encodeURIComponent(recipient)}&amount=${amount}&token=${token.toLowerCase()}`;
+    // Create Daimo payment link - Updated to correct URL
+    let url = `https://pay.daimo.com/send?to=${encodeURIComponent(recipient)}&amount=${amount}&token=${token.toLowerCase()}`;
     
     if (message) {
       url += `&message=${encodeURIComponent(message)}`;

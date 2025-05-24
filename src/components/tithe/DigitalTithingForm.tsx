@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { useToast } from "@/hooks/use-toast";
 import { Coins, ArrowRight, ExternalLink } from "lucide-react";
 import PixelButton from "@/components/PixelButton";
+import { useDaimo } from "@/integrations/daimo/client";
 
 const formSchema = z.object({
   amount: z.string().min(1, { message: "Tithing amount is required" }),
@@ -31,6 +32,7 @@ const DigitalTithingForm: React.FC = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"daimo" | "wallet">("daimo");
+  const { generatePaymentLink } = useDaimo();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,9 +53,17 @@ const DigitalTithingForm: React.FC = () => {
         description: `Preparing to send ${values.amount} ${values.currency} using Daimo direct payments.`,
       });
       
-      // Simulate opening Daimo payment link
+      // Using correct URL pattern for Daimo
+      const paymentLink = generatePaymentLink({
+        recipient: `church-${values.church}.eth`, // This would be the actual church address
+        amount: values.amount,
+        token: values.currency.toLowerCase(),
+        message: values.message || "Tithe from Bible.fi"
+      });
+      
+      // Open Daimo payment link
       setTimeout(() => {
-        window.open(`https://app.daimo.com/send?amount=${values.amount}&currency=${values.currency.toLowerCase()}`, "_blank");
+        window.open(paymentLink, "_blank");
         setIsSubmitting(false);
         form.reset();
       }, 1500);

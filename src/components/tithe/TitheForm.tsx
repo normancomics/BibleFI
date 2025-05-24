@@ -8,6 +8,7 @@ import PixelCharacter from "@/components/PixelCharacter";
 import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
 import WalletConnect from "@/components/wallet/WalletConnect";
+import { daimoClient } from "@/integrations/daimo/client";
 
 const TitheForm: React.FC = () => {
   const { playSound } = useSound();
