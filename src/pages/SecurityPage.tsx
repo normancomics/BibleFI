@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { securityMonitor } from "@/utils/securityMonitoring";
+import { securityMonitor, SecurityLogLevel } from "@/utils/securityMonitoring";
 import { generateSecureHash } from "@/utils/securityUtils";
 
 const SecurityPage: React.FC = () => {
@@ -34,7 +34,7 @@ const SecurityPage: React.FC = () => {
 
   useEffect(() => {
     // Log page visit
-    securityMonitor.logEvent("page_visit", "info", { page: "security" });
+    securityMonitor.logEvent("page_visit", SecurityLogLevel.INFO, { page: "security" });
   }, []);
 
   const handleSecurityLevelChange = (level: 'standard' | 'enhanced' | 'maximum' | 'quantum') => {
@@ -52,7 +52,7 @@ const SecurityPage: React.FC = () => {
     const hash = generateSecureHash(randomString);
     
     playSound("success");
-    securityMonitor.logEvent("hash_generated", "info", { 
+    securityMonitor.logEvent("hash_generated", SecurityLogLevel.INFO, { 
       inputLength: randomString.length,
       outputLength: hash.length 
     });
@@ -69,7 +69,7 @@ const SecurityPage: React.FC = () => {
     switch(eventType) {
       case "anomaly":
         for (let i = 0; i < 5; i++) {
-          securityMonitor.logEvent("simulated_anomaly", "warning", {
+          securityMonitor.logEvent("simulated_anomaly", SecurityLogLevel.WARNING, {
             simulation: true,
             timestamp: new Date().toISOString(),
             sequence: i
@@ -84,7 +84,7 @@ const SecurityPage: React.FC = () => {
         break;
         
       case "breach":
-        securityMonitor.logEvent("simulated_breach", "critical", {
+        securityMonitor.logEvent("simulated_breach", SecurityLogLevel.CRITICAL, {
           simulation: true,
           timestamp: new Date().toISOString()
         });
