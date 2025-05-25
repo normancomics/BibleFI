@@ -7,6 +7,8 @@ interface SoundContextType {
   playSound: (soundName: string) => void;
   userInteracted: boolean;
   setUserInteracted: (interacted: boolean) => void;
+  isSoundEnabled: boolean;
+  toggleSound: () => void;
 }
 
 const SoundContext = createContext<SoundContextType | undefined>(undefined);
@@ -26,6 +28,10 @@ interface SoundProviderProps {
 export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   const [isEnabled, setIsEnabled] = useState(true);
   const [userInteracted, setUserInteracted] = useState(false);
+
+  const toggleSound = () => {
+    setIsEnabled(!isEnabled);
+  };
 
   const playSound = (soundName: string) => {
     if (!isEnabled || !userInteracted) {
@@ -85,7 +91,15 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SoundContext.Provider value={{ isEnabled, setIsEnabled, playSound, userInteracted, setUserInteracted }}>
+    <SoundContext.Provider value={{ 
+      isEnabled, 
+      setIsEnabled, 
+      playSound, 
+      userInteracted, 
+      setUserInteracted,
+      isSoundEnabled: isEnabled,
+      toggleSound
+    }}>
       {children}
     </SoundContext.Provider>
   );
