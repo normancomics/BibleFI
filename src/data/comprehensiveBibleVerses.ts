@@ -153,7 +153,7 @@ export const comprehensiveBibleVerses: ComprehensiveBibleVerse[] = [
     key: "proverbs-10-9",
     text: "Whoever walks in integrity walks securely, but whoever takes crooked paths will be found out.",
     reference: "Proverbs 10:9",
-    category: "honesty"
+    category: "stewardship"
   },
   {
     key: "proverbs-22-1",
