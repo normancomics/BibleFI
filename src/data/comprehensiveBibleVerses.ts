@@ -1,3 +1,4 @@
+
 import { BibleVerse } from './bibleVerses';
 
 export interface ComprehensiveBibleVerse extends BibleVerse {
@@ -7,8 +8,9 @@ export interface ComprehensiveBibleVerse extends BibleVerse {
   financial_keywords?: string[];
 }
 
-export const comprehensiveBibleVerses = [
+export const comprehensiveBibleVerses: ComprehensiveBibleVerse[] = [
   {
+    key: "proverbs-22-7",
     text: "The rich rule over the poor, and the borrower is slave to the lender.",
     reference: "Proverbs 22:7",
     category: "debt",
@@ -18,6 +20,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["debt", "lending", "borrowing", "financial freedom"]
   },
   {
+    key: "psalm-37-21",
     text: "The wicked borrow and do not repay, but the righteous give generously.",
     reference: "Psalm 37:21",
     category: "debt",
@@ -27,6 +30,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["debt", "repayment", "generosity", "integrity"]
   },
   {
+    key: "romans-13-7",
     text: "Give to everyone what you owe them: If you owe taxes, pay taxes; if revenue, then revenue; if respect, then respect; if honor, then honor.",
     reference: "Romans 13:7",
     category: "stewardship",
@@ -36,6 +40,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["taxes", "obligations", "financial responsibility"]
   },
   {
+    key: "proverbs-13-11",
     text: "Dishonest money dwindles away, but whoever gathers money little by little makes it grow.",
     reference: "Proverbs 13:11",
     category: "wealth",
@@ -45,6 +50,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["honesty", "patience", "saving", "sustainable growth"]
   },
   {
+    key: "ecclesiastes-5-10",
     text: "Whoever loves money never has enough; whoever loves wealth is never satisfied with their income. This too is meaningless.",
     reference: "Ecclesiastes 5:10",
     category: "wealth",
@@ -54,6 +60,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["contentment", "greed", "materialism"]
   },
   {
+    key: "proverbs-3-9",
     text: "Honor the Lord with your wealth, with the firstfruits of all your crops.",
     reference: "Proverbs 3:9",
     category: "giving",
@@ -63,6 +70,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["giving", "tithing", "firstfruits", "priorities"]
   },
   {
+    key: "2-corinthians-9-7",
     text: "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.",
     reference: "2 Corinthians 9:7",
     category: "giving",
@@ -72,6 +80,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["giving", "generosity", "attitude", "cheerfulness"]
   },
   {
+    key: "luke-16-10",
     text: "Whoever can be trusted with very little can also be trusted with much, and whoever is dishonest with very little will also be dishonest with much.",
     reference: "Luke 16:10",
     category: "stewardship",
@@ -81,6 +90,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["trustworthiness", "integrity", "stewardship", "character"]
   },
   {
+    key: "matthew-6-19-20",
     text: "Do not store up for yourselves treasures on earth, where moths and vermin destroy, and where thieves break in and steal. But store up for yourselves treasures in heaven.",
     reference: "Matthew 6:19-20",
     category: "wealth",
@@ -90,6 +100,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["eternal perspective", "priorities", "investment", "materialism"]
   },
   {
+    key: "ecclesiastes-5-12",
     text: "The sleep of a laborer is sweet, whether they eat little or much, but as for the rich, their abundance permits them no sleep.",
     reference: "Ecclesiastes 5:12",
     category: "work",
@@ -99,6 +110,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["contentment", "work ethic", "anxiety", "peace"]
   },
   {
+    key: "proverbs-10-4",
     text: "Lazy hands make for poverty, but diligent hands bring wealth.",
     reference: "Proverbs 10:4",
     category: "work",
@@ -108,6 +120,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["diligence", "work ethic", "productivity", "laziness"]
   },
   {
+    key: "proverbs-21-5",
     text: "The plans of the diligent lead to profit as surely as haste leads to poverty.",
     reference: "Proverbs 21:5",
     category: "stewardship",
@@ -117,6 +130,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["planning", "patience", "impulsivity", "research"]
   },
   {
+    key: "proverbs-22-16",
     text: "Whoever oppresses the poor for his own increase and whoever gives to the rich, both come to poverty.",
     reference: "Proverbs 22:16",
     category: "wealth",
@@ -126,6 +140,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["ethics", "exploitation", "justice", "sustainable wealth"]
   },
   {
+    key: "proverbs-16-8",
     text: "Better a little with righteousness than much gain with injustice.",
     reference: "Proverbs 16:8",
     category: "wealth",
@@ -135,11 +150,13 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["ethics", "integrity", "contentment", "justice"]
   },
   {
+    key: "proverbs-10-9",
     text: "Whoever walks in integrity walks securely, but whoever takes crooked paths will be found out.",
     reference: "Proverbs 10:9",
     category: "honesty"
   },
   {
+    key: "proverbs-22-1",
     text: "A good name is more desirable than great riches; to be esteemed is better than silver or gold.",
     reference: "Proverbs 22:1",
     category: "wealth",
@@ -149,6 +166,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["reputation", "integrity", "priorities", "values"]
   },
   {
+    key: "proverbs-18-11",
     text: "The wealth of the rich is their fortified city; they imagine it a wall too high to scale.",
     reference: "Proverbs 18:11",
     category: "wealth",
@@ -158,6 +176,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["security", "trust", "risk", "diversification"]
   },
   {
+    key: "proverbs-23-5",
     text: "Cast but a glance at riches, and they are gone, for they will surely sprout wings and fly off to the sky like an eagle.",
     reference: "Proverbs 23:5",
     category: "wealth",
@@ -167,6 +186,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["volatility", "impermanence", "detachment", "risk"]
   },
   {
+    key: "luke-14-28",
     text: "Suppose one of you wants to build a tower. Won't you first sit down and estimate the cost to see if you have enough money to complete it?",
     reference: "Luke 14:28",
     category: "stewardship",
@@ -176,6 +196,7 @@ export const comprehensiveBibleVerses = [
     financial_keywords: ["planning", "budgeting", "foresight", "calculation"]
   },
   {
+    key: "proverbs-22-7b",
     text: "The borrower is slave to the lender.",
     reference: "Proverbs 22:7b",
     category: "debt",
