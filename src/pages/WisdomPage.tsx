@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,19 +5,37 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import FinancialPrinciple from "@/components/wisdom/FinancialPrinciple";
 import ScriptureFilter from "@/components/wisdom/ScriptureFilter";
-import SenpiWisdomSection from "@/components/wisdom/SenpiWisdomSection";
+import EnhancedBiblicalAdvisor from "@/components/wisdom/EnhancedBiblicalAdvisor";
 import CommunityDiscussion from "@/components/community/CommunityDiscussion";
 import { getRandomVerse } from "@/data/bibleVerses";
 import { useSound } from "@/contexts/SoundContext";
+import { Button } from "@/components/ui/button";
+import { Database, Sparkles } from "lucide-react";
+import { populateBiblicalKnowledge } from "@/services/biblicalKnowledgeService";
 
 const WisdomPage: React.FC = () => {
   const { playSound } = useSound();
-  const [activeTab, setActiveTab] = useState("scriptures");
-  const [filter, setFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState("rag-advisor");
+  const [populatingKnowledge, setPopulatingKnowledge] = useState(false);
   
   const handleTabChange = (value: string) => {
     playSound("select");
     setActiveTab(value);
+  };
+  
+  const handlePopulateKnowledge = async () => {
+    setPopulatingKnowledge(true);
+    playSound("select");
+    
+    try {
+      await populateBiblicalKnowledge();
+      playSound("success");
+    } catch (error) {
+      console.error("Failed to populate knowledge:", error);
+      playSound("error");
+    } finally {
+      setPopulatingKnowledge(false);
+    }
   };
   
   const wisdomVerses = [
@@ -54,19 +71,55 @@ const WisdomPage: React.FC = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-scroll text-ancient-gold mb-2">Biblical Financial Wisdom</h1>
-          <p className="text-white/80 max-w-2xl">
-            Discover God's timeless principles for handling money wisely and building wealth with purpose.
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-scroll text-ancient-gold mb-2">
+                RAG-Enhanced Biblical Financial Wisdom
+              </h1>
+              <p className="text-white/80 max-w-2xl">
+                Experience AI-powered biblical guidance with vector search and semantic verse retrieval.
+              </p>
+            </div>
+            
+            <Button
+              onClick={handlePopulateKnowledge}
+              disabled={populatingKnowledge}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {populatingKnowledge ? (
+                <>
+                  <Database className="w-4 h-4 mr-2 animate-pulse" />
+                  Populating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Initialize RAG Knowledge Base
+                </>
+              )}
+            </Button>
+          </div>
         </div>
         
-        <Tabs defaultValue="scriptures" value={activeTab} onValueChange={handleTabChange} className="mb-12">
+        <Tabs defaultValue="rag-advisor" value={activeTab} onValueChange={handleTabChange} className="mb-12">
           <TabsList className="bg-scripture/40 border border-ancient-gold/50 p-1">
-            <TabsTrigger value="scriptures" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">Scriptures</TabsTrigger>
-            <TabsTrigger value="principles" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">Principles</TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">AI Guidance</TabsTrigger>
-            <TabsTrigger value="community" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">Community</TabsTrigger>
+            <TabsTrigger value="rag-advisor" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">
+              RAG Advisor
+            </TabsTrigger>
+            <TabsTrigger value="scriptures" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">
+              Scriptures
+            </TabsTrigger>
+            <TabsTrigger value="principles" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">
+              Principles
+            </TabsTrigger>
+            <TabsTrigger value="community" className="data-[state=active]:bg-purple-900/70 text-ancient-gold">
+              Community
+            </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="rag-advisor" className="mt-6">
+            <EnhancedBiblicalAdvisor />
+          </TabsContent>
           
           <TabsContent value="scriptures" className="mt-6">
             <div className="mb-6">
@@ -103,10 +156,6 @@ const WisdomPage: React.FC = () => {
                 />
               ))}
             </div>
-          </TabsContent>
-          
-          <TabsContent value="ai" className="mt-6">
-            <SenpiWisdomSection />
           </TabsContent>
           
           <TabsContent value="community" className="mt-6">

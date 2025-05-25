@@ -9,6 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_context_sessions: {
+        Row: {
+          biblical_references: string[] | null
+          context_data: Json
+          created_at: string
+          expires_at: string
+          id: string
+          session_type: string
+          user_id: string | null
+        }
+        Insert: {
+          biblical_references?: string[] | null
+          context_data: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_type: string
+          user_id?: string | null
+        }
+        Update: {
+          biblical_references?: string[] | null
+          context_data?: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          session_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      biblical_knowledge_base: {
+        Row: {
+          application: string | null
+          category: string
+          created_at: string
+          defi_relevance: string | null
+          embedding: string | null
+          financial_keywords: string[] | null
+          id: string
+          principle: string | null
+          reference: string
+          updated_at: string
+          verse_text: string
+        }
+        Insert: {
+          application?: string | null
+          category: string
+          created_at?: string
+          defi_relevance?: string | null
+          embedding?: string | null
+          financial_keywords?: string[] | null
+          id?: string
+          principle?: string | null
+          reference: string
+          updated_at?: string
+          verse_text: string
+        }
+        Update: {
+          application?: string | null
+          category?: string
+          created_at?: string
+          defi_relevance?: string | null
+          embedding?: string | null
+          financial_keywords?: string[] | null
+          id?: string
+          principle?: string | null
+          reference?: string
+          updated_at?: string
+          verse_text?: string
+        }
+        Relationships: []
+      }
       church_memberships: {
         Row: {
           church_id: string
@@ -89,12 +161,155 @@ export type Database = {
         }
         Relationships: []
       }
+      wisdom_scores: {
+        Row: {
+          biblical_verse_id: string | null
+          calculation_date: string
+          factors: Json
+          id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          biblical_verse_id?: string | null
+          calculation_date?: string
+          factors: Json
+          id?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          biblical_verse_id?: string | null
+          calculation_date?: string
+          factors?: Json
+          id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wisdom_scores_biblical_verse_id_fkey"
+            columns: ["biblical_verse_id"]
+            isOneToOne: false
+            referencedRelation: "biblical_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      binary_quantize: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
+      halfvec_avg: {
+        Args: { "": number[] }
+        Returns: unknown
+      }
+      halfvec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      halfvec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      halfvec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      hnsw_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnsw_sparsevec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      hnswhandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_bit_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflat_halfvec_support: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      ivfflathandler: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      l2_norm: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: number
+      }
+      l2_normalize: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      search_biblical_knowledge: {
+        Args: {
+          query_embedding: string
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          id: string
+          verse_text: string
+          reference: string
+          category: string
+          principle: string
+          application: string
+          defi_relevance: string
+          similarity: number
+        }[]
+      }
+      sparsevec_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      sparsevec_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      sparsevec_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      vector_avg: {
+        Args: { "": number[] }
+        Returns: string
+      }
+      vector_dims: {
+        Args: { "": string } | { "": unknown }
+        Returns: number
+      }
+      vector_norm: {
+        Args: { "": string }
+        Returns: number
+      }
+      vector_out: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: { "": string }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
