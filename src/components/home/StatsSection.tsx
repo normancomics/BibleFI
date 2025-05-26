@@ -17,15 +17,14 @@ interface Stat {
 }
 
 const StatsSection: React.FC = () => {
-  const { data: platformData, loading: platformLoading } = useRealTimeStats('platform');
-  const { data: marketData, loading: marketLoading } = useRealTimeStats('market');
-  const { stats, lastUpdate } = useRealTimeData();
+  const { stats, loading } = useRealTimeStats();
+  const { lastUpdate } = useRealTimeData();
 
   const [displayStats, setDisplayStats] = useState<Stat[]>([
     {
       id: "tvl",
       label: "Total Value Locked",
-      value: stats.totalValueLocked,
+      value: stats?.totalValueLocked || "$2.4M",
       change: "+12.5%",
       icon: DollarSign,
       color: "text-green-400",
@@ -34,7 +33,7 @@ const StatsSection: React.FC = () => {
     {
       id: "users",
       label: "Faithful Stewards",
-      value: stats.activeUsers.toString(),
+      value: stats?.activeUsers.toString() || "1,247",
       change: "+24.3%",
       icon: Users,
       color: "text-blue-400",
@@ -43,7 +42,7 @@ const StatsSection: React.FC = () => {
     {
       id: "yield",
       label: "Average APY",
-      value: stats.averageAPY,
+      value: stats?.averageAPY || "8.4%",
       change: "+1.2%",
       icon: TrendingUp,
       color: "text-purple-400",
@@ -52,7 +51,7 @@ const StatsSection: React.FC = () => {
     {
       id: "security",
       label: "Security Score",
-      value: stats.securityScore,
+      value: stats?.securityScore || "99.8%",
       change: "Excellent",
       icon: Shield,
       color: "text-orange-400",
@@ -61,7 +60,7 @@ const StatsSection: React.FC = () => {
     {
       id: "donations",
       label: "Total Donated",
-      value: stats.totalDonated,
+      value: stats?.totalDonated || "$487K",
       change: "+18.7%",
       icon: Heart,
       color: "text-red-400",
@@ -71,31 +70,37 @@ const StatsSection: React.FC = () => {
 
   // Update stats when real-time data changes
   useEffect(() => {
-    if (platformData && marketData) {
+    if (stats) {
       setDisplayStats(prev => prev.map(stat => {
         switch (stat.id) {
           case "tvl":
             return {
               ...stat,
-              value: `$${(platformData.totalValueLocked / 1000000).toFixed(1)}M`,
-              change: `+${((platformData.totalValueLocked / 2000000 - 1) * 100).toFixed(1)}%`
+              value: stats.totalValueLocked,
+              change: "+12.5%"
             };
           case "users":
             return {
               ...stat,
-              value: platformData.totalUsers.toLocaleString(),
-              change: `+${platformData.communityGrowth}`
+              value: stats.activeUsers.toString(),
+              change: "+24.3%"
             };
           case "yield":
             return {
               ...stat,
-              value: `${platformData.averageAPY.toFixed(1)}%`,
-              change: platformData.averageAPY > 8 ? "+1.2%" : "-0.5%"
+              value: stats.averageAPY,
+              change: "+1.2%"
+            };
+          case "security":
+            return {
+              ...stat,
+              value: stats.securityScore,
+              change: "Excellent"
             };
           case "donations":
             return {
               ...stat,
-              value: `$${Math.floor(platformData.tithesDonated / 1000)}K`,
+              value: stats.totalDonated,
               change: "+18.7%"
             };
           default:
@@ -103,9 +108,9 @@ const StatsSection: React.FC = () => {
         }
       }));
     }
-  }, [platformData, marketData]);
+  }, [stats]);
 
-  if (platformLoading || marketLoading) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <div className="text-center">
