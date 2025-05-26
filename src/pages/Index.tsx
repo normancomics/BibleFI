@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
@@ -13,6 +12,7 @@ import FeatureShowcase from "@/components/home/FeatureShowcase";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import { getRandomVerse } from "@/data/bibleVerses";
 import IntroAnimation from "@/components/home/IntroAnimation";
+import UniversalWalletConnect from "@/components/wallet/UniversalWalletConnect";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -58,7 +58,14 @@ const Index: React.FC = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-end mb-4">
-          <FarcasterConnect size="sm" />
+          <div className="flex items-center gap-3">
+            <FarcasterConnect size="sm" />
+            <UniversalWalletConnect 
+              buttonText="Connect Wallet"
+              buttonVariant="outline"
+              buttonClassName="border-ancient-gold text-ancient-gold hover:bg-ancient-gold hover:text-black"
+            />
+          </div>
         </div>
         
         {/* Hero section */}
