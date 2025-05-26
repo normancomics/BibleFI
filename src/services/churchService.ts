@@ -123,7 +123,7 @@ export async function getUserChurches(): Promise<Church[]> {
           website,
           payment_methods
         ),
-        is_primary
+        primary_church
       `)
       .eq('user_id', user.id);
     
@@ -143,7 +143,7 @@ export async function getUserChurches(): Promise<Church[]> {
       acceptsCrypto: membership.churches.accepts_crypto || false,
       website: membership.churches.website,
       payment_methods: membership.churches.payment_methods || ["cash", "check"],
-      isPrimaryChurch: membership.is_primary
+      isPrimaryChurch: membership.primary_church
     }));
   } catch (error) {
     console.log("Error fetching user churches:", error);
@@ -162,13 +162,13 @@ export async function setPrimaryChurch(churchId: string): Promise<boolean> {
     // First, remove primary status from all churches
     await supabase
       .from('church_memberships')
-      .update({ is_primary: false })
+      .update({ primary_church: false })
       .eq('user_id', user.id);
     
     // Then set the new primary church
     const { error } = await supabase
       .from('church_memberships')
-      .update({ is_primary: true })
+      .update({ primary_church: true })
       .eq('church_id', churchId)
       .eq('user_id', user.id);
     
