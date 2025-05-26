@@ -1,10 +1,10 @@
-
 import React from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SimpleSwapForm from "@/components/defi/SimpleSwapForm";
 import DefiSwap from "@/components/defi/DefiSwap";
+import SwapErrorBoundary from "@/components/defi/SwapErrorBoundary";
 import { BookOpen, Coins, ExternalLink, Info, ShieldAlert } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,9 @@ const DefiPage: React.FC = () => {
                   <TabsContent value="swap" className="pt-6">
                     <div className="flex flex-col md:flex-row gap-8">
                       <div className="md:w-1/2">
-                        <SimpleSwapForm />
+                        <SwapErrorBoundary>
+                          <SimpleSwapForm />
+                        </SwapErrorBoundary>
                       </div>
                       <div className="md:w-1/2">
                         <Card className="h-full border border-scripture/20 bg-black/30">
@@ -187,7 +189,9 @@ const DefiPage: React.FC = () => {
           </div>
         </div>
         
-        <DefiSwap />
+        <SwapErrorBoundary>
+          <DefiSwap />
+        </SwapErrorBoundary>
       </main>
     </div>
   );

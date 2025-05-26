@@ -153,7 +153,11 @@ export const comprehensiveBibleVerses: ComprehensiveBibleVerse[] = [
     key: "proverbs-10-9",
     text: "Whoever walks in integrity walks securely, but whoever takes crooked paths will be found out.",
     reference: "Proverbs 10:9",
-    category: "stewardship"
+    category: "stewardship",
+    principle: "Integrity provides security while dishonesty leads to exposure and consequences.",
+    application: "Build your financial life on honest practices that can withstand scrutiny.",
+    defi_relevance: "Choose transparent, audited DeFi protocols over questionable projects promising unrealistic returns.",
+    financial_keywords: ["integrity", "security", "transparency", "honesty"]
   },
   {
     key: "proverbs-22-1",
