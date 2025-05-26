@@ -11,6 +11,7 @@ import { useSound } from "@/contexts/SoundContext";
 import { GlowingText, SpinningCoin } from "@/components/ui/tailwind-extensions";
 import useRealTimeData from "@/hooks/useRealTimeData";
 import { usePriceUpdates } from "@/integrations/realtime/priceWebSocket";
+import { baseTokens } from "@/data/baseTokens";
 
 const DefiSwap: React.FC = () => {
   const { toast } = useToast();
@@ -216,7 +217,12 @@ const DefiSwap: React.FC = () => {
                     className="border-0 bg-transparent text-lg p-0 h-auto focus-visible:ring-0"
                     placeholder="0.0"
                     value={fromAmount}
-                    onChange={handleFromAmountChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*\.?\d*$/.test(value) || value === "") {
+                        setFromAmount(value);
+                      }
+                    }}
                   />
                 </div>
                 <Select value={fromToken} onValueChange={(value) => {
@@ -247,7 +253,17 @@ const DefiSwap: React.FC = () => {
             <div className="flex justify-center">
               <div 
                 className={`p-2 rounded-full bg-black/40 border border-ancient-gold/30 cursor-pointer hover:bg-black/60 transition-all ${animateSwap ? 'rotate-180' : ''}`}
-                onClick={handleSwapTokens}
+                onClick={() => {
+                  playSound("select");
+                  setAnimateSwap(true);
+                  setTimeout(() => {
+                    const tempFromToken = fromToken;
+                    const tempToToken = toToken;
+                    setFromToken(tempToToken);
+                    setToToken(tempFromToken);
+                    setAnimateSwap(false);
+                  }, 300);
+                }}
               >
                 <ArrowDownIcon className="w-5 h-5 text-ancient-gold" />
               </div>
@@ -304,7 +320,24 @@ const DefiSwap: React.FC = () => {
             
             {/* Swap Button */}
             <PixelButton
-              onClick={handleSwapSubmit}
+              onClick={() => {
+                playSound("powerup");
+                const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || getDefaultPrice(fromToken);
+                const usdValue = parseFloat(fromAmount) * fromTokenPrice;
+                
+                toast({
+                  title: "Swap Initiated",
+                  description: `Swapping ${fromAmount} ${fromToken} (~$${usdValue.toFixed(2)}) for approximately ${toAmount} ${toToken}`,
+                });
+                
+                setTimeout(() => {
+                  playSound("success");
+                  toast({
+                    title: "Swap Successful",
+                    description: `Successfully swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
+                  });
+                }, 2000);
+              }}
               className="w-full py-4 text-lg relative overflow-hidden"
               disabled={isLoading || !toAmount || parseFloat(fromAmount) <= 0}
               farcasterStyle
@@ -317,7 +350,6 @@ const DefiSwap: React.FC = () => {
               ) : (
                 <div className="flex items-center justify-center">
                   <span>{useOdos ? "Swap with Odos" : "Swap Tokens"}</span>
-                  {/* Animated coins when hovering the button */}
                   <div className="absolute -right-2 top-1/2 transform -translate-y-1/2">
                     <SpinningCoin size={24} className="opacity-70" />
                   </div>

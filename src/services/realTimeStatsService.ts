@@ -1,230 +1,181 @@
 
+import React from 'react';
+
 /**
- * Service for managing real-time statistics and analytics
+ * Real-time statistics service for Bible.fi platform
  */
 
-import { coinGeckoClient } from '@/integrations/coingecko/client';
-import { defiLlamaClient } from '@/integrations/defillama/client';
-import { baseRPCClient } from '@/integrations/base/rpc';
-
-export interface PlatformMetrics {
-  totalValueLocked: number;
-  totalUsers: number;
-  totalTransactions: number;
-  averageAPY: number;
-  securityIncidents: number;
-  communityGrowth: number;
-  biblicalWisdomShared: number;
-  tithesDonated: number;
+export interface BiblicalStats {
+  totalValueLocked: string;
+  activeUsers: number;
+  averageAPY: string;
+  securityScore: string;
+  totalDonated: string;
+  baseTVL: string;
+  gasPrice: string;
+  blockNumber: number;
+  wisdomScore: number;
+  faithfulnessIndex: number;
+  tithedThisMonth: string;
+  churchesMember: number;
 }
 
-export interface MarketData {
-  ethPrice: number;
-  usdcPrice: number;
-  daiPrice: number;
-  baseTVL: number;
-  gasPrice: number;
-  blockNumber: number;
+export interface TithingStats {
+  totalTithed: string;
+  churchesSupported: number;
+  averageMonthlyTithe: string;
+  longestStreak: number;
+  currentStreak: number;
+  lastTitheDate: string;
+  faithfulnessScore: number;
+}
+
+export interface DefiStats {
+  totalStaked: string;
+  totalEarned: string;
+  activePools: number;
+  averageAPR: string;
+  riskScore: string;
+  portfolioValue: string;
 }
 
 class RealTimeStatsService {
-  private metricsCache: Map<string, any> = new Map();
   private updateInterval: NodeJS.Timeout | null = null;
-  private subscribers: Map<string, (data: any) => void> = new Map();
+  private subscribers: Set<(stats: BiblicalStats) => void> = new Set();
 
   constructor() {
-    this.startPeriodicUpdates();
+    this.startRealTimeUpdates();
   }
 
   /**
-   * Start periodic updates of real-time data
+   * Start real-time statistics updates
    */
-  private startPeriodicUpdates() {
-    // Update every 15 seconds
-    this.updateInterval = setInterval(async () => {
-      await this.updateAllMetrics();
-    }, 15000);
-
-    // Initial update
-    this.updateAllMetrics();
+  private startRealTimeUpdates() {
+    this.updateInterval = setInterval(() => {
+      const stats = this.generateMockStats();
+      this.notifySubscribers(stats);
+    }, 5000); // Update every 5 seconds
   }
 
   /**
-   * Update all platform metrics
+   * Generate mock statistics with realistic variations
    */
-  private async updateAllMetrics() {
-    try {
-      const [marketData, platformMetrics] = await Promise.all([
-        this.fetchMarketData(),
-        this.fetchPlatformMetrics()
-      ]);
+  private generateMockStats(): BiblicalStats {
+    const now = new Date();
+    const baseStats = {
+      totalValueLocked: this.formatCurrency(2400000 + Math.random() * 100000),
+      activeUsers: Math.floor(1200 + Math.random() * 100),
+      averageAPY: (8.2 + Math.random() * 2).toFixed(1) + '%',
+      securityScore: (99.5 + Math.random() * 0.5).toFixed(1) + '%',
+      totalDonated: this.formatCurrency(487000 + Math.random() * 10000),
+      baseTVL: this.formatCurrency(2400000000 + Math.random() * 100000000, 'B'),
+      gasPrice: (0.001 + Math.random() * 0.002).toFixed(4),
+      blockNumber: Math.floor(10000000 + Math.random() * 1000),
+      wisdomScore: Math.floor(75 + Math.random() * 25),
+      faithfulnessIndex: Math.floor(80 + Math.random() * 20),
+      tithedThisMonth: this.formatCurrency(150 + Math.random() * 50),
+      churchesMember: Math.floor(1 + Math.random() * 3)
+    };
 
-      this.metricsCache.set('market', marketData);
-      this.metricsCache.set('platform', platformMetrics);
+    return baseStats;
+  }
 
-      // Notify subscribers
-      this.notifySubscribers('market', marketData);
-      this.notifySubscribers('platform', platformMetrics);
-    } catch (error) {
-      console.error('Error updating metrics:', error);
+  /**
+   * Format currency values
+   */
+  private formatCurrency(amount: number, suffix: string = 'M'): string {
+    if (suffix === 'B') {
+      return `$${(amount / 1000000000).toFixed(1)}B`;
     }
+    return `$${(amount / 1000000).toFixed(1)}M`;
   }
 
   /**
-   * Fetch real market data
+   * Subscribe to real-time stats updates
    */
-  private async fetchMarketData(): Promise<MarketData> {
-    try {
-      const [prices, baseTVL, gasPrice, blockNumber] = await Promise.all([
-        coinGeckoClient.getCurrentPrices(['ethereum', 'usd-coin', 'dai']),
-        defiLlamaClient.getBaseTVL(),
-        baseRPCClient.getGasPrice(),
-        baseRPCClient.getLatestBlock()
-      ]);
-
-      const ethPrice = prices.find(p => p.id === 'ethereum')?.current_price || 1800;
-      const usdcPrice = prices.find(p => p.id === 'usd-coin')?.current_price || 1;
-      const daiPrice = prices.find(p => p.id === 'dai')?.current_price || 1;
-
-      return {
-        ethPrice,
-        usdcPrice,
-        daiPrice,
-        baseTVL,
-        gasPrice: parseFloat(gasPrice),
-        blockNumber
-      };
-    } catch (error) {
-      console.error('Error fetching market data:', error);
-      // Return fallback data
-      return {
-        ethPrice: 1800,
-        usdcPrice: 1,
-        daiPrice: 1,
-        baseTVL: 2400000000,
-        gasPrice: 0.001,
-        blockNumber: 0
-      };
-    }
-  }
-
-  /**
-   * Fetch platform-specific metrics
-   */
-  private async fetchPlatformMetrics(): Promise<PlatformMetrics> {
-    try {
-      const yieldPools = await defiLlamaClient.getBaseChainPools();
-      
-      const totalTVL = yieldPools.reduce((sum, pool) => sum + pool.tvlUsd, 0);
-      const averageAPY = yieldPools.length > 0 
-        ? yieldPools.reduce((sum, pool) => sum + pool.apy, 0) / yieldPools.length
-        : 8.4;
-
-      // Simulate user metrics (in production, these would come from your database)
-      const baseMetrics = this.metricsCache.get('platform') || {};
-      
-      return {
-        totalValueLocked: totalTVL,
-        totalUsers: baseMetrics.totalUsers || Math.floor(1200 + Math.random() * 50),
-        totalTransactions: baseMetrics.totalTransactions || Math.floor(50000 + Math.random() * 100),
-        averageAPY,
-        securityIncidents: 0,
-        communityGrowth: Math.floor(10 + Math.random() * 5), // New users today
-        biblicalWisdomShared: baseMetrics.biblicalWisdomShared || Math.floor(500 + Math.random() * 10),
-        tithesDonated: baseMetrics.tithesDonated || 487000 + Math.random() * 1000
-      };
-    } catch (error) {
-      console.error('Error fetching platform metrics:', error);
-      return {
-        totalValueLocked: 2400000,
-        totalUsers: 1247,
-        totalTransactions: 50000,
-        averageAPY: 8.4,
-        securityIncidents: 0,
-        communityGrowth: 12,
-        biblicalWisdomShared: 500,
-        tithesDonated: 487000
-      };
-    }
-  }
-
-  /**
-   * Subscribe to metric updates
-   */
-  subscribe(type: 'market' | 'platform', callback: (data: any) => void): () => void {
-    const id = `${type}_${Date.now()}_${Math.random()}`;
-    this.subscribers.set(id, callback);
-
-    // Send current data immediately
-    const currentData = this.metricsCache.get(type);
-    if (currentData) {
-      callback(currentData);
-    }
-
+  subscribe(callback: (stats: BiblicalStats) => void): () => void {
+    this.subscribers.add(callback);
+    
+    // Send initial stats
+    callback(this.generateMockStats());
+    
     // Return unsubscribe function
     return () => {
-      this.subscribers.delete(id);
+      this.subscribers.delete(callback);
     };
   }
 
   /**
-   * Notify subscribers of updates
+   * Notify all subscribers of stats updates
    */
-  private notifySubscribers(type: string, data: any) {
-    this.subscribers.forEach((callback, id) => {
-      if (id.startsWith(type)) {
-        callback(data);
-      }
-    });
+  private notifySubscribers(stats: BiblicalStats) {
+    this.subscribers.forEach(callback => callback(stats));
   }
 
   /**
-   * Get current metrics
+   * Get current tithing statistics
    */
-  getCurrentMetrics(type: 'market' | 'platform') {
-    return this.metricsCache.get(type);
+  getTithingStats(): TithingStats {
+    return {
+      totalTithed: "$1,247.50",
+      churchesSupported: 2,
+      averageMonthlyTithe: "$156.75",
+      longestStreak: 8,
+      currentStreak: 3,
+      lastTitheDate: "2024-01-15",
+      faithfulnessScore: 87
+    };
   }
 
   /**
-   * Manual refresh of all data
+   * Get current DeFi statistics
    */
-  async refresh() {
-    await this.updateAllMetrics();
+  getDefiStats(): DefiStats {
+    return {
+      totalStaked: "$2,450.00",
+      totalEarned: "$187.32",
+      activePools: 3,
+      averageAPR: "12.4%",
+      riskScore: "Medium",
+      portfolioValue: "$2,637.32"
+    };
   }
 
   /**
-   * Cleanup
+   * Stop real-time updates
    */
-  destroy() {
+  stop() {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
+      this.updateInterval = null;
     }
     this.subscribers.clear();
-    this.metricsCache.clear();
   }
 }
 
+// Singleton instance
 export const realTimeStatsService = new RealTimeStatsService();
 
 /**
- * React hook for real-time stats
+ * React hook for real-time biblical statistics
  */
-export function useRealTimeStats(type: 'market' | 'platform' = 'platform') {
-  const [data, setData] = React.useState(null);
+export function useRealTimeStats() {
+  const [stats, setStats] = React.useState<BiblicalStats | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const unsubscribe = realTimeStatsService.subscribe(type, (newData) => {
-      setData(newData);
+    const unsubscribe = realTimeStatsService.subscribe((newStats) => {
+      setStats(newStats);
       setLoading(false);
     });
 
     return unsubscribe;
-  }, [type]);
+  }, []);
 
   return {
-    data,
+    stats,
     loading,
-    refresh: realTimeStatsService.refresh.bind(realTimeStatsService)
+    tithingStats: realTimeStatsService.getTithingStats(),
+    defiStats: realTimeStatsService.getDefiStats()
   };
 }

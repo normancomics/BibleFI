@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 /**
  * Real-time price WebSocket connection
  * Uses CoinGecko WebSocket for live price updates

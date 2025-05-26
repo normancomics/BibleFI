@@ -38,4 +38,64 @@ export const mockChurches: Church[] = [
     website: "https://hopecity.org",
     payment_methods: ["Credit Card", "ACH", "Bitcoin"]
   },
+  {
+    id: "4",
+    name: "The Father's House",
+    location: "Leesburg, FL",
+    city: "Leesburg",
+    state: "FL", 
+    country: "USA",
+    denomination: "Pentecostal",
+    acceptsCrypto: true,
+    website: "https://thefathershouse.org",
+    payment_methods: ["Credit Card", "ACH", "Bitcoin", "Ethereum", "USDC"]
+  },
+  {
+    id: "5",
+    name: "Cross Point Community",
+    location: "Nashville, TN",
+    city: "Nashville",
+    state: "TN",
+    country: "USA", 
+    denomination: "Non-denominational",
+    acceptsCrypto: true,
+    website: "https://crosspoint.org",
+    payment_methods: ["Credit Card", "ACH", "Bitcoin", "Ethereum"]
+  },
+  {
+    id: "6",
+    name: "The Cross Fellowship", 
+    location: "Austin, TX",
+    city: "Austin",
+    state: "TX",
+    country: "USA",
+    denomination: "Evangelical",
+    acceptsCrypto: false,
+    website: "https://thecross.org", 
+    payment_methods: ["Cash", "Check", "Credit Card", "ACH"]
+  },
+  {
+    id: "7",
+    name: "Cornerstone Church",
+    location: "Phoenix, AZ", 
+    city: "Phoenix",
+    state: "AZ",
+    country: "USA",
+    denomination: "Baptist",
+    acceptsCrypto: true,
+    website: "https://cornerstone.org",
+    payment_methods: ["Credit Card", "ACH", "Bitcoin"]
+  },
+  {
+    id: "8", 
+    name: "New Life Christian Center",
+    location: "Orlando, FL",
+    city: "Orlando", 
+    state: "FL",
+    country: "USA",
+    denomination: "Charismatic",
+    acceptsCrypto: true,
+    website: "https://newlifechristian.org",
+    payment_methods: ["Credit Card", "ACH", "Bitcoin", "Ethereum", "USDC"]
+  }
 ];

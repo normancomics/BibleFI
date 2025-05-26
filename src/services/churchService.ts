@@ -16,7 +16,7 @@ export async function searchChurches(query: string): Promise<Church[]> {
   try {
     const normalizedQuery = query.toLowerCase().trim();
     
-    // Search for churches in Supabase that match the query
+    // Try to search for churches in Supabase
     const { data, error } = await supabase
       .from('churches')
       .select('*')
@@ -28,12 +28,20 @@ export async function searchChurches(query: string): Promise<Church[]> {
       .limit(20);
     
     if (error) {
-      console.error("Error searching churches:", error);
-      return mockChurches; // Fallback to mock data
+      console.log("Supabase error, falling back to mock data:", error);
+      // Fallback to mock data search
+      return mockChurches.filter(church => 
+        church.name.toLowerCase().includes(normalizedQuery) ||
+        church.location?.toLowerCase().includes(normalizedQuery) ||
+        church.city?.toLowerCase().includes(normalizedQuery) ||
+        church.state?.toLowerCase().includes(normalizedQuery) ||
+        church.country?.toLowerCase().includes(normalizedQuery) ||
+        church.denomination?.toLowerCase().includes(normalizedQuery)
+      );
     }
     
     if (!data || data.length === 0) {
-      console.log("No churches found, using mock data");
+      console.log("No churches found in database, using mock data");
       // Filter mock data as fallback
       return mockChurches.filter(church => 
         church.name.toLowerCase().includes(normalizedQuery) ||
@@ -59,11 +67,28 @@ export async function searchChurches(query: string): Promise<Church[]> {
       payment_methods: church.payment_methods
     }));
     
-    console.log(`Found ${churches.length} churches`);
+    console.log(`Found ${churches.length} churches in database`);
     return churches;
   } catch (error) {
-    console.error("Error searching churches:", error);
-    return mockChurches; // Fallback to mock data
+    console.log("Error accessing database, using mock data:", error);
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    // Enhanced mock data search with better matching
+    const filteredChurches = mockChurches.filter(church => {
+      const searchTerms = [
+        church.name,
+        church.location,
+        church.city,
+        church.state,
+        church.country,
+        church.denomination
+      ].filter(Boolean).map(term => term?.toLowerCase());
+      
+      return searchTerms.some(term => term?.includes(normalizedQuery));
+    });
+    
+    console.log(`Found ${filteredChurches.length} churches in mock data`);
+    return filteredChurches;
   }
 }
 
