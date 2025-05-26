@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { baseRPCClient } from '@/integrations/base/rpc';
-import { baseTokens } from '@/data/baseTokens';
 
 export interface RealTimeStats {
   totalValueLocked: string;
@@ -43,14 +42,14 @@ export function useRealTimeData() {
     try {
       setLoading(true);
 
-      // Use mock data to avoid API errors
+      // Mock pool data
       const mockPoolData = [
         { project: 'Aave', apy: 8.5, tvlUsd: 2400000 },
         { project: 'Compound', apy: 7.2, tvlUsd: 1800000 },
         { project: 'Uniswap', apy: 12.3, tvlUsd: 3200000 }
       ];
 
-      // Simulate Base chain data
+      // Try to get real Base chain data
       let gasPrice = "0.001";
       let blockNumber = 10000000;
       
@@ -60,8 +59,12 @@ export function useRealTimeData() {
           baseRPCClient.getLatestBlock()
         ]);
         
-        if (gasPriceResult.status === 'fulfilled') gasPrice = gasPriceResult.value;
-        if (blockResult.status === 'fulfilled') blockNumber = blockResult.value;
+        if (gasPriceResult.status === 'fulfilled' && gasPriceResult.value) {
+          gasPrice = gasPriceResult.value;
+        }
+        if (blockResult.status === 'fulfilled' && blockResult.value) {
+          blockNumber = blockResult.value;
+        }
       } catch (error) {
         console.log("Using mock Base chain data:", error);
       }
@@ -112,7 +115,7 @@ export function useRealTimeData() {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchAllData();
-    }, 30000); // Update every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [fetchAllData]);

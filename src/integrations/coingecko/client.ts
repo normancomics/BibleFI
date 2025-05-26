@@ -73,38 +73,63 @@ class CoinGeckoClient {
 
   async getCurrentPrices(coinIds: string[]): Promise<CoinPrice[]> {
     try {
+      if (!coinIds || coinIds.length === 0) {
+        return this.getFallbackDataWithVariation();
+      }
+
       const idsParam = coinIds.join(',');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(
         `${this.baseUrl}/coins/markets?vs_currency=usd&ids=${idsParam}&order=market_cap_desc&per_page=100&page=1&sparkline=false`,
         {
           headers: {
             'Accept': 'application/json',
             'Cache-Control': 'no-cache'
-          }
+          },
+          signal: controller.signal
         }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      return data || this.fallbackData;
+      
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        throw new Error('No data received from API');
+      }
+
+      return data;
     } catch (error) {
       console.log('CoinGecko API error, using fallback data:', error);
-      // Return fallback data with slight variations to simulate real-time updates
-      return this.fallbackData.map(coin => ({
-        ...coin,
-        current_price: coin.current_price * (0.98 + Math.random() * 0.04),
-        price_change_percentage_24h: (Math.random() - 0.5) * 10
-      }));
+      return this.getFallbackDataWithVariation();
     }
+  }
+
+  private getFallbackDataWithVariation(): CoinPrice[] {
+    return this.fallbackData.map(coin => ({
+      ...coin,
+      current_price: coin.current_price * (0.98 + Math.random() * 0.04),
+      price_change_percentage_24h: (Math.random() - 0.5) * 10
+    }));
   }
 
   async getTrendingCoins(): Promise<TrendingCoin[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/search/trending`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(`${this.baseUrl}/search/trending`, {
+        signal: controller.signal
+      });
       
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -119,9 +144,19 @@ class CoinGeckoClient {
 
   async getCoinDetails(coinId: string): Promise<any> {
     try {
+      if (!coinId) {
+        return null;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
       const response = await fetch(
-        `${this.baseUrl}/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
+        `${this.baseUrl}/coins/${coinId}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`,
+        { signal: controller.signal }
       );
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

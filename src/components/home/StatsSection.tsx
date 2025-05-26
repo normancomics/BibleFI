@@ -24,7 +24,7 @@ const StatsSection: React.FC = () => {
     {
       id: "tvl",
       label: "Total Value Locked",
-      value: stats?.totalValueLocked || "$2.4M",
+      value: "$2.4M",
       change: "+12.5%",
       icon: DollarSign,
       color: "text-green-400",
@@ -33,7 +33,7 @@ const StatsSection: React.FC = () => {
     {
       id: "users",
       label: "Faithful Stewards",
-      value: stats?.activeUsers.toString() || "1,247",
+      value: "1,247",
       change: "+24.3%",
       icon: Users,
       color: "text-blue-400",
@@ -42,7 +42,7 @@ const StatsSection: React.FC = () => {
     {
       id: "yield",
       label: "Average APY",
-      value: stats?.averageAPY || "8.4%",
+      value: "8.4%",
       change: "+1.2%",
       icon: TrendingUp,
       color: "text-purple-400",
@@ -51,7 +51,7 @@ const StatsSection: React.FC = () => {
     {
       id: "security",
       label: "Security Score",
-      value: stats?.securityScore || "99.8%",
+      value: "99.8%",
       change: "Excellent",
       icon: Shield,
       color: "text-orange-400",
@@ -60,7 +60,7 @@ const StatsSection: React.FC = () => {
     {
       id: "donations",
       label: "Total Donated",
-      value: stats?.totalDonated || "$487K",
+      value: "$487K",
       change: "+18.7%",
       icon: Heart,
       color: "text-red-400",
@@ -74,35 +74,15 @@ const StatsSection: React.FC = () => {
       setDisplayStats(prev => prev.map(stat => {
         switch (stat.id) {
           case "tvl":
-            return {
-              ...stat,
-              value: stats.totalValueLocked,
-              change: "+12.5%"
-            };
+            return { ...stat, value: stats.totalValueLocked };
           case "users":
-            return {
-              ...stat,
-              value: stats.activeUsers.toString(),
-              change: "+24.3%"
-            };
+            return { ...stat, value: stats.activeUsers.toString() };
           case "yield":
-            return {
-              ...stat,
-              value: stats.averageAPY,
-              change: "+1.2%"
-            };
+            return { ...stat, value: stats.averageAPY };
           case "security":
-            return {
-              ...stat,
-              value: stats.securityScore,
-              change: "Excellent"
-            };
+            return { ...stat, value: stats.securityScore };
           case "donations":
-            return {
-              ...stat,
-              value: stats.totalDonated,
-              change: "+18.7%"
-            };
+            return { ...stat, value: stats.totalDonated };
           default:
             return stat;
         }
@@ -198,7 +178,6 @@ const StatsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Real-time data indicator */}
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-2 text-xs text-green-400">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>

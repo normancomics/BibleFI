@@ -26,7 +26,7 @@ export class PriceWebSocketClient {
 
   private connect() {
     try {
-      // Since we can't use real WebSocket without proper endpoint, use interval updates
+      // Use mock updates since we don't have a real WebSocket endpoint
       this.startMockPriceUpdates();
     } catch (error) {
       console.log('WebSocket connection error, using mock data:', error);
