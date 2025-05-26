@@ -21,16 +21,16 @@ interface ChurchDonationParams {
 
 export class DaimoClient {
   /**
-   * Generate a Daimo payment link - CORRECTED URL
+   * Generate a Daimo payment link - CORRECTED URL to use daimo.com/l/send
    */
   public generatePaymentLink(params: DaimoPaymentParams): string {
     const { recipient, amount, token, message } = params;
     
-    // Create Daimo payment link - CORRECTED to pay.daimo.com
-    let url = `https://pay.daimo.com/send?to=${encodeURIComponent(recipient)}&amount=${amount}&token=${token.toLowerCase()}`;
+    // Create Daimo payment link - CORRECTED to use daimo.com/l/send
+    let url = `https://daimo.com/l/send?recipient=${encodeURIComponent(recipient)}&amount=${amount}&coin=${token.toUpperCase()}`;
     
     if (message) {
-      url += `&message=${encodeURIComponent(message)}`;
+      url += `&memo=${encodeURIComponent(message)}`;
     }
     
     return url;

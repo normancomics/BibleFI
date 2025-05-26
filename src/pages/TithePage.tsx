@@ -74,9 +74,9 @@ const TithePage: React.FC = () => {
   
   const handleDaimoQuickTithe = () => {
     playSound("coin");
-    // Generate a Daimo payment link with default values
+    // Generate a Daimo payment link with default values using a Base wallet address
     const paymentLink = daimoClient.generatePaymentLink({
-      recipient: "example-church.eth", // This would be dynamically set based on selected church
+      recipient: "0x742d35Cc6634C0532925a3b8D435bADFF5D6C5b4", // Example Base wallet address
       amount: "10",
       token: "usdc",
       message: "Tithe from Bible.fi"
