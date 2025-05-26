@@ -1,11 +1,13 @@
+
 import React from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SimpleSwapForm from "@/components/defi/SimpleSwapForm";
 import DefiSwap from "@/components/defi/DefiSwap";
+import DefiPortfolio from "@/components/defi/DefiPortfolio";
 import SwapErrorBoundary from "@/components/defi/SwapErrorBoundary";
-import { BookOpen, Coins, ExternalLink, Info, ShieldAlert } from "lucide-react";
+import { BookOpen, Coins, ExternalLink, Info, ShieldAlert, Wallet } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -46,8 +48,9 @@ const DefiPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="swap">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="swap">Swap</TabsTrigger>
+                    <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
                     <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
                     <TabsTrigger value="earn">Earn</TabsTrigger>
                   </TabsList>
@@ -97,6 +100,11 @@ const DefiPage: React.FC = () => {
                         </Card>
                       </div>
                     </div>
+                  </TabsContent>
+                  <TabsContent value="portfolio" className="pt-6">
+                    <SwapErrorBoundary>
+                      <DefiPortfolio />
+                    </SwapErrorBoundary>
                   </TabsContent>
                   <TabsContent value="liquidity" className="pt-6">
                     <div className="bg-black/50 p-6 rounded-lg border border-scripture/20">
