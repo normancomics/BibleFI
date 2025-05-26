@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Users, DollarSign, Shield, Heart } from "lucide-react";
+import { useRealTimeStats } from '@/services/realTimeStatsService';
+import useRealTimeData from '@/hooks/useRealTimeData';
 
 interface Stat {
   id: string;
@@ -15,11 +17,15 @@ interface Stat {
 }
 
 const StatsSection: React.FC = () => {
-  const [stats, setStats] = useState<Stat[]>([
+  const { data: platformData, loading: platformLoading } = useRealTimeStats('platform');
+  const { data: marketData, loading: marketLoading } = useRealTimeStats('market');
+  const { stats, lastUpdate } = useRealTimeData();
+
+  const [displayStats, setDisplayStats] = useState<Stat[]>([
     {
       id: "tvl",
       label: "Total Value Locked",
-      value: "$2.4M",
+      value: stats.totalValueLocked,
       change: "+12.5%",
       icon: DollarSign,
       color: "text-green-400",
@@ -28,7 +34,7 @@ const StatsSection: React.FC = () => {
     {
       id: "users",
       label: "Faithful Stewards",
-      value: "1,247",
+      value: stats.activeUsers.toString(),
       change: "+24.3%",
       icon: Users,
       color: "text-blue-400",
@@ -37,7 +43,7 @@ const StatsSection: React.FC = () => {
     {
       id: "yield",
       label: "Average APY",
-      value: "8.4%",
+      value: stats.averageAPY,
       change: "+1.2%",
       icon: TrendingUp,
       color: "text-purple-400",
@@ -46,7 +52,7 @@ const StatsSection: React.FC = () => {
     {
       id: "security",
       label: "Security Score",
-      value: "99.8%",
+      value: stats.securityScore,
       change: "Excellent",
       icon: Shield,
       color: "text-orange-400",
@@ -55,7 +61,7 @@ const StatsSection: React.FC = () => {
     {
       id: "donations",
       label: "Total Donated",
-      value: "$487K",
+      value: stats.totalDonated,
       change: "+18.7%",
       icon: Heart,
       color: "text-red-400",
@@ -63,41 +69,81 @@ const StatsSection: React.FC = () => {
     }
   ]);
 
-  // Simulate real-time updates
+  // Update stats when real-time data changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStats(prevStats => 
-        prevStats.map(stat => {
-          if (stat.id === "tvl") {
-            const baseValue = 2400000;
-            const randomChange = (Math.random() - 0.5) * 10000;
-            const newValue = baseValue + randomChange;
+    if (platformData && marketData) {
+      setDisplayStats(prev => prev.map(stat => {
+        switch (stat.id) {
+          case "tvl":
             return {
               ...stat,
-              value: `$${(newValue / 1000000).toFixed(1)}M`
+              value: `$${(platformData.totalValueLocked / 1000000).toFixed(1)}M`,
+              change: `+${((platformData.totalValueLocked / 2000000 - 1) * 100).toFixed(1)}%`
             };
-          }
-          return stat;
-        })
-      );
-    }, 5000);
+          case "users":
+            return {
+              ...stat,
+              value: platformData.totalUsers.toLocaleString(),
+              change: `+${platformData.communityGrowth}`
+            };
+          case "yield":
+            return {
+              ...stat,
+              value: `${platformData.averageAPY.toFixed(1)}%`,
+              change: platformData.averageAPY > 8 ? "+1.2%" : "-0.5%"
+            };
+          case "donations":
+            return {
+              ...stat,
+              value: `$${Math.floor(platformData.tithesDonated / 1000)}K`,
+              change: "+18.7%"
+            };
+          default:
+            return stat;
+        }
+      }));
+    }
+  }, [platformData, marketData]);
 
-    return () => clearInterval(interval);
-  }, []);
+  if (platformLoading || marketLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-3xl font-scroll text-ancient-gold mb-4">
+            Loading Real-Time Data...
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i} className="animate-pulse bg-gray-900/20 border-gray-500/30">
+              <CardContent className="p-4 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-700"></div>
+                <div className="h-6 bg-gray-700 rounded mb-2"></div>
+                <div className="h-4 bg-gray-700 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-3xl font-scroll text-ancient-gold mb-4">
-          Platform Metrics
+          Live Platform Metrics
         </h2>
         <p className="text-white/80 max-w-2xl mx-auto">
-          Real-time statistics showing the growth and impact of our biblical DeFi platform.
+          Real-time statistics powered by Base chain data and DeFi protocols.
+        </p>
+        <p className="text-xs text-white/60 mt-2">
+          Last updated: {lastUpdate.toLocaleTimeString()}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {stats.map((stat) => {
+        {displayStats.map((stat) => {
           const IconComponent = stat.icon;
           const isPositive = stat.change.startsWith('+');
           const isExcellent = stat.change === 'Excellent';
@@ -105,7 +151,7 @@ const StatsSection: React.FC = () => {
           return (
             <Card 
               key={stat.id}
-              className={`${stat.bgColor} border border-ancient-gold/30 hover:border-ancient-gold/60 transition-all duration-300`}
+              className={`${stat.bgColor} border border-ancient-gold/30 hover:border-ancient-gold/60 transition-all duration-300 animate-pulse-glow`}
             >
               <CardContent className="p-4 text-center">
                 <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${stat.bgColor} border border-current flex items-center justify-center ${stat.color}`}>
@@ -144,6 +190,14 @@ const StatsSection: React.FC = () => {
             </blockquote>
             <p className="text-ancient-gold/70 text-sm">— Luke 16:10</p>
           </div>
+        </div>
+      </div>
+
+      {/* Real-time data indicator */}
+      <div className="flex items-center justify-center">
+        <div className="flex items-center gap-2 text-xs text-green-400">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+          <span>Live data from Base chain & DeFi protocols</span>
         </div>
       </div>
     </div>

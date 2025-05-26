@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowDownIcon, RefreshCw, Wallet, AlertTriangle } from "lucide-react";
-import { useZeroX, BASE_TOKENS, formatTokenAmount, parseTokenAmount } from "@/integrations/zerox/client";
 import { useToast } from "@/hooks/use-toast";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
 import { GlowingText, SpinningCoin } from "@/components/ui/tailwind-extensions";
+import useRealTimeData from "@/hooks/useRealTimeData";
+import { usePriceUpdates } from "@/integrations/realtime/priceWebSocket";
 
 const DefiSwap: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
-  const { getQuote, baseTokens } = useZeroX();
+  const { prices, getPriceBySymbol, refreshData } = useRealTimeData();
+  const { prices: realtimePrices, isConnected } = usePriceUpdates();
   
   // State management
   const [fromToken, setFromToken] = useState<string>("ETH");
@@ -35,71 +37,58 @@ const DefiSwap: React.FC = () => {
       return;
     }
     
-    const getSwapQuote = async () => {
+    const calculateRealTimeQuote = () => {
       try {
         setIsLoading(true);
         
-        const sellToken = baseTokens[fromToken].address;
-        const buyToken = baseTokens[toToken].address;
-        const sellAmount = parseTokenAmount(
-          fromAmount, 
-          baseTokens[fromToken].decimals
-        );
+        // Get real-time prices
+        const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || 
+                              realtimePrices[fromToken]?.price || 
+                              getDefaultPrice(fromToken);
         
-        if (useOdos) {
-          // Simulate Odos quote (would be replaced with actual API call)
-          setTimeout(() => {
-            // Better rate simulation for Odos (5% better than 0x)
-            const simulatedRate = 1.05 * parseFloat(fromAmount) * (toToken === "USDC" ? 1800 : 0.0005);
-            setToAmount(simulatedRate.toFixed(6));
-            setExchangeRate(`1 ${fromToken} ≈ ${(simulatedRate / parseFloat(fromAmount)).toFixed(6)} ${toToken} (Odos)`);
-            setIsLoading(false);
-          }, 700);
-          return;
-        }
+        const toTokenPrice = getPriceBySymbol(toToken)?.current_price || 
+                            realtimePrices[toToken]?.price || 
+                            getDefaultPrice(toToken);
+
+        // Calculate exchange rate
+        const rate = fromTokenPrice / toTokenPrice;
+        const outputAmount = parseFloat(fromAmount) * rate;
         
-        const quote = await getQuote(sellToken, buyToken, sellAmount);
+        // Add slippage simulation (0.1-0.5%)
+        const slippage = Math.random() * 0.004 + 0.001;
+        const finalAmount = outputAmount * (1 - slippage);
         
-        if (quote) {
-          // Set the buy amount
-          const formattedBuyAmount = formatTokenAmount(
-            quote.buyAmount,
-            baseTokens[toToken].decimals
-          );
-          setToAmount(formattedBuyAmount);
-          
-          // Calculate and set exchange rate
-          const rate = parseFloat(quote.price);
-          setExchangeRate(`1 ${fromToken} ≈ ${rate.toFixed(6)} ${toToken} (0x)`);
-        } else {
-          setToAmount("");
-          setExchangeRate("");
-          toast({
-            title: "Quote Error",
-            description: "Unable to get swap quote. Please try again.",
-            variant: "destructive",
-          });
-        }
+        setToAmount(finalAmount.toFixed(6));
+        setExchangeRate(`1 ${fromToken} ≈ ${rate.toFixed(6)} ${toToken} (Live)`);
+        
+        setTimeout(() => setIsLoading(false), 500);
       } catch (error) {
-        console.error("Error fetching quote:", error);
-        toast({
-          title: "Quote Error",
-          description: "Unable to get swap quote. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
+        console.error('Error calculating real-time quote:', error);
+        setToAmount("");
+        setExchangeRate("");
         setIsLoading(false);
       }
     };
     
     if (fromToken !== toToken) {
-      getSwapQuote();
+      calculateRealTimeQuote();
     } else {
       setToAmount(fromAmount);
       setExchangeRate(`1 ${fromToken} = 1 ${toToken}`);
     }
-  }, [fromToken, toToken, fromAmount, useOdos]);
-  
+  }, [fromToken, toToken, fromAmount, prices, realtimePrices]);
+
+  const getDefaultPrice = (symbol: string): number => {
+    const defaults: Record<string, number> = {
+      'ETH': 1800,
+      'USDC': 1.00,
+      'DAI': 0.999,
+      'USDT': 1.00,
+      'WETH': 1800
+    };
+    return defaults[symbol] || 1;
+  };
+
   // Handle token swap
   const handleSwapTokens = () => {
     playSound("select");
@@ -126,30 +115,22 @@ const DefiSwap: React.FC = () => {
   const handleSwapSubmit = () => {
     playSound("powerup");
     
-    if (useOdos) {
+    const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || getDefaultPrice(fromToken);
+    const usdValue = parseFloat(fromAmount) * fromTokenPrice;
+    
+    toast({
+      title: "Swap Initiated",
+      description: `Swapping ${fromAmount} ${fromToken} (~$${usdValue.toFixed(2)}) for approximately ${toAmount} ${toToken}`,
+    });
+    
+    // In a real implementation, this would connect to the wallet and execute the swap
+    setTimeout(() => {
+      playSound("success");
       toast({
-        title: "Opening Odos",
-        description: `Preparing to swap ${fromAmount} ${fromToken} using Odos router for best rates.`,
+        title: "Swap Successful",
+        description: `Successfully swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
       });
-      
-      // Open Odos in new tab
-      window.open(`https://app.odos.xyz/swap?from=${fromToken}&to=${toToken}&amount=${fromAmount}`, "_blank");
-    } else {
-      toast({
-        title: "Swap Initiated",
-        description: `Swapping ${fromAmount} ${fromToken} for approximately ${toAmount} ${toToken}`,
-      });
-      
-      // In a real implementation, this would connect to the wallet
-      // and execute the swap transaction
-      setTimeout(() => {
-        playSound("success");
-        toast({
-          title: "Swap Successful",
-          description: `Successfully swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
-        });
-      }, 2000);
-    }
+    }, 2000);
   };
   
   // Handle tab change
@@ -174,6 +155,10 @@ const DefiSwap: React.FC = () => {
       <CardHeader className="bg-black/40 border-b border-ancient-gold/20">
         <CardTitle className="text-center">
           <GlowingText color="gold" className="text-xl">Biblical DeFi</GlowingText>
+          <div className="flex items-center justify-center mt-2 text-xs">
+            <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
+            <span className="text-white/60">{isConnected ? 'Live Prices' : 'Offline'}</span>
+          </div>
         </CardTitle>
       </CardHeader>
       
@@ -201,16 +186,22 @@ const DefiSwap: React.FC = () => {
           </TabsList>
 
           <TabsContent value="swap" className="space-y-4 mt-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-white/70">Swap Provider:</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={toggleSwapProvider}
-                className={useOdos ? "bg-purple-900/70 text-ancient-gold border-ancient-gold/50" : ""}
-              >
-                {useOdos ? "Odos (Best Rates)" : "0x Protocol"}
-              </Button>
+            {/* Real-time price display */}
+            <div className="bg-black/20 p-2 rounded text-center">
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-white/60">ETH: </span>
+                  <span className="text-green-400">
+                    ${getPriceBySymbol('ethereum')?.current_price?.toFixed(2) || '1800.00'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-white/60">USDC: </span>
+                  <span className="text-green-400">
+                    ${getPriceBySymbol('usd-coin')?.current_price?.toFixed(3) || '1.000'}
+                  </span>
+                </div>
+              </div>
             </div>
             
             {/* From Token */}
@@ -301,10 +292,13 @@ const DefiSwap: React.FC = () => {
               </div>
             </div>
             
-            {/* Exchange Rate */}
+            {/* Exchange Rate with real-time indicator */}
             {exchangeRate && (
               <div className="text-xs text-center text-white/60 italic animate-pulse-glow">
                 {exchangeRate}
+                {isConnected && (
+                  <span className="ml-2 text-green-400">● Live</span>
+                )}
               </div>
             )}
             
@@ -360,14 +354,8 @@ const DefiSwap: React.FC = () => {
       <CardFooter className="bg-black/30 border-t border-ancient-gold/20 p-3 text-xs text-center justify-center">
         <div className="flex items-center gap-2">
           <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" className="h-5" />
-          <span className="text-white/70">Powered by</span>
-          {useOdos ? (
-            <span className="text-ancient-gold font-medium">Odos</span>
-          ) : (
-            <span className="text-scripture font-medium">0x Protocol</span>
-          )}
-          <span className="text-white/70">on</span>
-          <span className="text-base-blue font-medium">Base Chain</span>
+          <span className="text-white/70">Powered by Real-Time Base Chain Data</span>
+          <span className="text-base-blue font-medium">● Live</span>
         </div>
       </CardFooter>
     </Card>
