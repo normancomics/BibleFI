@@ -155,7 +155,7 @@ const UniversalWalletConnect: React.FC<UniversalWalletConnectProps> = ({
   const socialWallets = walletOptions.filter(w => w.type === 'social');
 
   return (
-    <Dialog open={open} onValueChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant={buttonVariant as any} className={`${buttonClassName} bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0`}>
           <Wallet className="mr-2 h-4 w-4" />

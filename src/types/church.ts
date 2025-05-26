@@ -1,16 +1,18 @@
 
-export type Church = {
+export interface Church {
   id: string;
   name: string;
-  location?: string;
-  city?: string;
-  state?: string;
-  country?: string;
   denomination?: string;
-  acceptsCrypto: boolean;
+  location: string; // Combined city, state, country for display
+  address?: string;
+  city: string;
+  state: string;
+  country: string;
   website?: string;
-  email?: string;
-  phone?: string;
+  acceptsCrypto: boolean;
   payment_methods?: string[];
-  isPrimaryChurch?: boolean;
-};
+  verified?: boolean;
+  created_at?: string;
+  created_by?: string;
+  isPrimaryChurch?: boolean; // For user church relationships
+}
