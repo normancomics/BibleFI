@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Church, CheckCircle, Star } from "lucide-react";
+import { Search, Plus, Church, CheckCircle, Star, Globe, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +7,7 @@ import { Church as ChurchType } from "@/types/church";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
 import { searchChurches, joinChurch, setPrimaryChurch } from "@/services/churchService";
+import { ExternalChurchService } from "@/services/externalChurchService";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import FarcasterConnect from "@/farcaster/FarcasterConnect";
@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFarcasterAuth } from "@/farcaster/auth";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ChurchSearchProps {
   onAddChurch?: () => void;
@@ -23,11 +24,13 @@ interface ChurchSearchProps {
 const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChurch, setSelectedChurch] = useState<ChurchType | null>(null);
-  const [filteredChurches, setFilteredChurches] = useState<ChurchType[]>([]);
+  const [localChurches, setLocalChurches] = useState<ChurchType[]>([]);
+  const [externalChurches, setExternalChurches] = useState<ChurchType[]>([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [makeAsPrimary, setMakeAsPrimary] = useState(false);
+  const [activeTab, setActiveTab] = useState("local");
   const { playSound } = useSound();
   const { toast } = useToast();
   const { user } = useFarcasterAuth();
@@ -55,14 +58,25 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
     setLoading(true);
     
     try {
-      const results = await searchChurches(searchQuery);
-      setFilteredChurches(results);
+      // Search both local and external sources
+      const [localResults, externalResults] = await Promise.all([
+        searchChurches(searchQuery),
+        ExternalChurchService.searchGooglePlaces(searchQuery)
+      ]);
+      
+      setLocalChurches(localResults);
+      setExternalChurches(externalResults);
       setSearched(true);
       
-      if (results.length === 0) {
+      if (localResults.length === 0 && externalResults.length === 0) {
         toast({
           title: "No churches found",
           description: "Try different search terms or add your church",
+        });
+      } else {
+        toast({
+          title: "Search Complete",
+          description: `Found ${localResults.length + externalResults.length} churches`,
         });
       }
     } catch (error) {
@@ -97,12 +111,10 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
     playSound("success");
     
     try {
-      // If we have a Supabase session, use that to join the church
       if (session || user) {
         const success = await joinChurch(selectedChurch.id);
         
         if (success) {
-          // If user wants to set this as primary church
           if (makeAsPrimary) {
             const primarySuccess = await setPrimaryChurch(selectedChurch.id);
             
@@ -132,13 +144,80 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
     }
   };
   
+  const renderChurchList = (churches: ChurchType[], isExternal = false) => {
+    if (churches.length === 0) return null;
+
+    return (
+      <Card className="pixel-card mb-4">
+        <CardContent className="pt-6 space-y-4">
+          {churches.map((church) => (
+            <React.Fragment key={church.id}>
+              <div 
+                className="flex justify-between items-center cursor-pointer hover:bg-muted/50 p-2 rounded"
+                onClick={() => handleChurchSelect(church)}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold">{church.name}</h3>
+                    {isExternal && <Globe size={16} className="text-blue-500" />}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin size={12} />
+                    <span>{church.location}</span>
+                  </div>
+                  {church.denomination && (
+                    <p className="text-xs text-muted-foreground">{church.denomination}</p>
+                  )}
+                  {church.website && (
+                    <a 
+                      href={church.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-500 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Visit Website
+                    </a>
+                  )}
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex flex-wrap gap-1">
+                    {church.acceptsCrypto && (
+                      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                        Accepts Crypto
+                      </span>
+                    )}
+                    {church.payment_methods?.includes('credit_card') && (
+                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                        Cards
+                      </span>
+                    )}
+                    {church.payment_methods?.includes('paypal') && (
+                      <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                        PayPal
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    ID: {typeof church.id === 'string' ? church.id.substring(0, 8) : church.id}
+                  </span>
+                </div>
+              </div>
+              <Separator />
+            </React.Fragment>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  };
+  
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-scroll mb-4">Find Your Church</h2>
       
       <div className="flex gap-2 mb-4">
         <Input
-          placeholder="Search by church name or location"
+          placeholder="Search by church name, denomination, or location"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1"
@@ -171,7 +250,7 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
         </Card>
       )}
       
-      {searched && filteredChurches.length === 0 && (
+      {searched && localChurches.length === 0 && externalChurches.length === 0 && !loading && (
         <Card className="bg-amber-50 border-amber-200 mb-4">
           <CardContent className="pt-6">
             <p className="text-amber-700 mb-4">
@@ -206,45 +285,68 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
         </Card>
       )}
       
-      {filteredChurches.length > 0 && !selectedChurch && !loading && (
-        <Card className="pixel-card mb-4">
-          <CardContent className="pt-6 space-y-4">
-            {filteredChurches.map((church) => (
-              <React.Fragment key={church.id}>
-                <div 
-                  className="flex justify-between items-center cursor-pointer hover:bg-muted/50 p-2 rounded"
-                  onClick={() => handleChurchSelect(church)}
-                >
-                  <div>
-                    <h3 className="font-bold">{church.name}</h3>
-                    <p className="text-sm text-muted-foreground">{church.location}</p>
-                  </div>
-                  <div className="flex items-center">
-                    {church.acceptsCrypto && (
-                      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded mr-2">
-                        Accepts Crypto
-                      </span>
-                    )}
-                    <span className="text-xs">ID: {typeof church.id === 'string' ? church.id.substring(0, 8) : church.id}</span>
-                  </div>
+      {(localChurches.length > 0 || externalChurches.length > 0) && !selectedChurch && !loading && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="local">
+              Local Database ({localChurches.length})
+            </TabsTrigger>
+            <TabsTrigger value="external">
+              <div className="flex items-center gap-2">
+                <Globe size={16} />
+                Online Search ({externalChurches.length})
+              </div>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="local" className="mt-4">
+            {localChurches.length > 0 ? (
+              renderChurchList(localChurches, false)
+            ) : (
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="pt-6 text-center">
+                  <p className="text-blue-700 mb-2">No churches in our local database</p>
+                  <p className="text-sm text-blue-600">Try the "Online Search" tab or add your church</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="external" className="mt-4">
+            {externalChurches.length > 0 ? (
+              <>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-blue-700">
+                    <Globe size={16} className="inline mr-2" />
+                    These churches were found through online search. Contact them directly to verify payment methods.
+                  </p>
                 </div>
-                <Separator />
-              </React.Fragment>
-            ))}
-            
-            <div className="pt-2 text-center">
-              <button 
-                className="text-sm text-scripture underline hover:text-scripture-dark"
-                onClick={() => {
-                  playSound("select");
-                  if (onAddChurch) onAddChurch();
-                }}
-              >
-                Don't see your church? Add it now
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+                {renderChurchList(externalChurches, true)}
+              </>
+            ) : (
+              <Card className="bg-gray-50 border-gray-200">
+                <CardContent className="pt-6 text-center">
+                  <p className="text-gray-700 mb-2">No churches found in online search</p>
+                  <p className="text-sm text-gray-600">Try different search terms or check the local database</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      )}
+      
+      {searched && (localChurches.length > 0 || externalChurches.length > 0) && !selectedChurch && !loading && (
+        <div className="text-center">
+          <button 
+            className="text-sm text-scripture underline hover:text-scripture-dark"
+            onClick={() => {
+              playSound("select");
+              if (onAddChurch) onAddChurch();
+            }}
+          >
+            Don't see your church? Add it now
+          </button>
+        </div>
       )}
       
       {selectedChurch && (
@@ -263,16 +365,41 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
               </span>
             </div>
             
-            <p className="text-muted-foreground">{selectedChurch.location}</p>
+            <div className="flex items-center gap-1 mt-2">
+              <MapPin size={16} className="text-muted-foreground" />
+              <p className="text-muted-foreground">{selectedChurch.location}</p>
+            </div>
+
+            {selectedChurch.denomination && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Denomination: {selectedChurch.denomination}
+              </p>
+            )}
+
+            {selectedChurch.website && (
+              <a 
+                href={selectedChurch.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-blue-500 hover:underline mt-1 block"
+              >
+                Visit Website →
+              </a>
+            )}
             
             <div className="mt-4">
-              <p className="text-sm">Accepted payment methods:</p>
+              <p className="text-sm mb-2">Accepted payment methods:</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {selectedChurch.payment_methods?.map((method) => (
                   <span key={method} className="bg-muted px-2 py-1 text-xs rounded">
-                    {method.charAt(0).toUpperCase() + method.slice(1)}
+                    {method.charAt(0).toUpperCase() + method.slice(1).replace('_', ' ')}
                   </span>
                 ))}
+                {selectedChurch.acceptsCrypto && (
+                  <span className="bg-green-100 text-green-800 px-2 py-1 text-xs rounded">
+                    Cryptocurrency
+                  </span>
+                )}
               </div>
               
               {(session || user) && (

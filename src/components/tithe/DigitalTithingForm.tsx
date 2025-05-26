@@ -1,229 +1,239 @@
 
 import React, { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { Coins, ArrowRight, ExternalLink } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRight, CreditCard, Coins, Building2, Smartphone } from "lucide-react";
 import PixelButton from "@/components/PixelButton";
-import { useDaimo } from "@/integrations/daimo/client";
-
-const formSchema = z.object({
-  amount: z.string().min(1, { message: "Tithing amount is required" }),
-  currency: z.string().min(1, { message: "Please select a currency" }),
-  church: z.string().min(1, { message: "Please select a church or ministry" }),
-  message: z.string().optional(),
-});
+import PixelCharacter from "@/components/PixelCharacter";
+import { useSound } from "@/contexts/SoundContext";
+import { useToast } from "@/hooks/use-toast";
+import WalletConnect from "@/components/wallet/WalletConnect";
+import FiatPaymentForm from "./FiatPaymentForm";
+import { FiatPaymentService } from "@/services/fiatPaymentService";
 
 const DigitalTithingForm: React.FC = () => {
+  const { playSound } = useSound();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"daimo" | "wallet">("daimo");
-  const { generatePaymentLink } = useDaimo();
+  const [amount, setAmount] = useState("");
+  const [selectedToken, setSelectedToken] = useState("USDC");
+  const [paymentType, setPaymentType] = useState<"crypto" | "fiat">("crypto");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      amount: "",
-      currency: "USDC",
-      church: "",
-      message: "",
-    },
-  });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsSubmitting(true);
-    
-    if (paymentMethod === "daimo") {
-      toast({
-        title: "Opening Daimo",
-        description: `Preparing to send ${values.amount} ${values.currency} using Daimo direct payments.`,
-      });
-      
-      // Using correct URL pattern for Daimo
-      const paymentLink = generatePaymentLink({
-        recipient: `church-${values.church}.eth`, // This would be the actual church address
-        amount: values.amount,
-        token: values.currency.toLowerCase(),
-        message: values.message || "Tithe from Bible.fi"
-      });
-      
-      // Open Daimo payment link
-      setTimeout(() => {
-        window.open(paymentLink, "_blank");
-        setIsSubmitting(false);
-        form.reset();
-      }, 1500);
-    } else {
-      // Simulate API call for wallet payment
-      setTimeout(() => {
-        console.log("Tithing values:", values);
-        
-        toast({
-          title: "Tithing Initiated",
-          description: `Your tithe of ${values.amount} ${values.currency} has been submitted.`,
-        });
-        
-        form.reset();
-        setIsSubmitting(false);
-      }, 1500);
-    }
+  // Mock church data - in real app, this would come from selected church
+  const mockChurch = {
+    id: "mock-church-1",
+    name: "Sample Community Church",
+    location: "New York, NY",
+    acceptsCrypto: true,
+    payment_methods: ["credit_card", "paypal", "bank_transfer", "crypto"]
   };
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9.]/g, "");
+    setAmount(value);
+  };
+
+  const calculateFee = () => {
+    if (!amount || isNaN(Number(amount))) return 0;
+    return Number(amount) * 0.02; // 2% fee for crypto
+  };
+
+  const handleTithe = () => {
+    playSound("select");
+    
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid amount for your tithe",
+        variant: "destructive"
+      });
+      playSound("error");
+      return;
+    }
+    
+    setShowPaymentModal(true);
+  };
+
+  const handleWalletConnected = (address: string) => {
+    toast({
+      title: "Wallet Connected",
+      description: `Connected with ${address.substring(0, 6)}...${address.substring(address.length - 4)}`,
+    });
+    
+    setTimeout(() => {
+      toast({
+        title: "Tithing Successful",
+        description: `Your tithe of ${amount} ${selectedToken} has been processed. God bless you!`,
+        variant: "default",
+      });
+      
+      setAmount("");
+      setShowPaymentModal(false);
+      playSound("success");
+    }, 1500);
+  };
+
+  const handleFiatPaymentComplete = (transactionId: string) => {
+    toast({
+      title: "Donation Successful",
+      description: `Transaction ID: ${transactionId}. Thank you for your generosity!`,
+    });
+    setAmount("");
+    setShowPaymentModal(false);
+  };
+
+  const supportedFiatMethods = FiatPaymentService.getPaymentMethodsByCurrency("USD");
+
   return (
-    <Card className="border-2 border-ancient-gold/30">
-      <CardHeader className="bg-scripture/20">
-        <CardTitle className="font-scroll text-2xl text-center flex items-center justify-center gap-2">
-          <Coins className="text-ancient-gold" />
-          Digital Tithing with Daimo
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="pt-6">
-        <div className="flex gap-4 mb-6">
-          <Button
-            variant={paymentMethod === "daimo" ? "default" : "outline"}
-            className={paymentMethod === "daimo" ? "bg-purple-900 text-ancient-gold border border-ancient-gold/50 flex-1" : "flex-1"}
-            onClick={() => setPaymentMethod("daimo")}
+    <>
+      <Card className="pixel-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Coins size={24} className="text-ancient-gold" />
+            Digital Tithing
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="mb-6">
+            <PixelCharacter 
+              character="solomon" 
+              message="Honor the LORD with your wealth, with the firstfruits of all your crops. - Proverbs 3:9"
+              size="md"
+              soundEffect={true}
+            />
+          </div>
+
+          <Tabs value={paymentType} onValueChange={(value) => setPaymentType(value as "crypto" | "fiat")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="crypto" className="flex items-center gap-2">
+                <Coins size={16} />
+                Cryptocurrency
+              </TabsTrigger>
+              <TabsTrigger value="fiat" className="flex items-center gap-2">
+                <CreditCard size={16} />
+                Traditional Payment
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="crypto" className="space-y-4">
+              <div>
+                <Label htmlFor="amount" className="font-scroll">Amount to Tithe</Label>
+                <Input 
+                  id="amount" 
+                  placeholder="0.00" 
+                  className="mt-1 font-scroll" 
+                  value={amount}
+                  onChange={handleAmountChange}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="token" className="font-scroll">Select Cryptocurrency</Label>
+                <Select value={selectedToken} onValueChange={setSelectedToken}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USDC">USDC</SelectItem>
+                    <SelectItem value="DAI">DAI</SelectItem>
+                    <SelectItem value="ETH">ETH</SelectItem>
+                    <SelectItem value="USDT">USDT</SelectItem>
+                    <SelectItem value="WETH">WETH</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {amount && !isNaN(Number(amount)) && Number(amount) > 0 && (
+                <div className="border-t border-border pt-4 mt-4 font-scroll">
+                  <div className="flex justify-between mb-2">
+                    <span>Amount:</span>
+                    <span>{amount} {selectedToken}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span>Network Fee:</span>
+                    <span>{calculateFee().toFixed(4)} {selectedToken}</span>
+                  </div>
+                  <div className="flex justify-between font-bold">
+                    <span>Total:</span>
+                    <span>{(Number(amount) + calculateFee()).toFixed(4)} {selectedToken}</span>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="fiat" className="space-y-4">
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-900 mb-2">Traditional Payment Methods</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {supportedFiatMethods.slice(0, 6).map(method => (
+                    <div key={method.id} className="flex items-center gap-2 text-sm text-blue-700">
+                      {method.icon === 'CreditCard' && <CreditCard size={16} />}
+                      {method.icon === 'Building2' && <Building2 size={16} />}
+                      {method.icon === 'Smartphone' && <Smartphone size={16} />}
+                      {method.icon === 'Wallet' && <CreditCard size={16} />}
+                      <span>{method.name}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-blue-600 mt-2">
+                  Supports major currencies: USD, EUR, GBP, CAD, AUD
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="fiat-amount" className="font-scroll">Donation Amount</Label>
+                <Input 
+                  id="fiat-amount" 
+                  placeholder="0.00" 
+                  className="mt-1 font-scroll" 
+                  value={amount}
+                  onChange={handleAmountChange}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Choose currency and payment method in the next step
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <PixelButton 
+            className="w-full flex items-center justify-center font-scroll" 
+            onClick={handleTithe}
+            disabled={!amount || isNaN(Number(amount)) || Number(amount) <= 0}
           >
-            Daimo Direct
-          </Button>
-          <Button
-            variant={paymentMethod === "wallet" ? "default" : "outline"}
-            className={paymentMethod === "wallet" ? "bg-purple-900 text-ancient-gold border border-ancient-gold/50 flex-1" : "flex-1"}
-            onClick={() => setPaymentMethod("wallet")}
-          >
-            Connect Wallet
-          </Button>
+            Continue to Payment <ArrowRight size={16} className="ml-2" />
+          </PixelButton>
+        </CardContent>
+      </Card>
+
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-0 max-w-md w-full max-h-[90vh] overflow-auto">
+            {paymentType === "crypto" ? (
+              <div className="p-6">
+                <h3 className="text-xl font-bold mb-4 font-scroll">Complete Your Tithe</h3>
+                <p className="mb-4 text-sm font-scroll">
+                  Connect your wallet to complete your tithe of {amount} {selectedToken}.
+                </p>
+                <WalletConnect 
+                  onConnect={handleWalletConnected} 
+                  onCancel={() => setShowPaymentModal(false)} 
+                />
+              </div>
+            ) : (
+              <FiatPaymentForm
+                church={mockChurch}
+                onPaymentComplete={handleFiatPaymentComplete}
+                onCancel={() => setShowPaymentModal(false)}
+              />
+            )}
+          </div>
         </div>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-scroll">Tithing Amount</FormLabel>
-                  <FormControl>
-                    <Input placeholder="0.00" {...field} type="number" step="0.01" min="0" className="font-scroll" />
-                  </FormControl>
-                  <FormDescription className="font-scroll">
-                    Scripture teaches giving a tenth (10%) of your income
-                  </FormDescription>
-                  <FormMessage className="font-scroll" />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="currency"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-scroll">Currency</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="font-scroll">
-                        <SelectValue placeholder="Select currency" className="font-scroll" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="USDC" className="font-scroll">USDC</SelectItem>
-                      <SelectItem value="ETH" className="font-scroll">ETH</SelectItem>
-                      <SelectItem value="USDT" className="font-scroll">USDT</SelectItem>
-                      <SelectItem value="DAI" className="font-scroll">DAI</SelectItem>
-                      <SelectItem value="USD" className="font-scroll">USD (Credit Card)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription className="font-scroll">
-                    Choose your preferred currency for tithing
-                  </FormDescription>
-                  <FormMessage className="font-scroll" />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="church"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-scroll">Church or Ministry</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="font-scroll">
-                        <SelectValue placeholder="Select church" className="font-scroll" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="local" className="font-scroll">My Local Church</SelectItem>
-                      <SelectItem value="global" className="font-scroll">Global Missions</SelectItem>
-                      <SelectItem value="charity" className="font-scroll">Christian Charity</SelectItem>
-                      <SelectItem value="bible" className="font-scroll">Bible Translation Work</SelectItem>
-                      <SelectItem value="other" className="font-scroll">Other Ministry</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription className="font-scroll">
-                    Select where you would like your tithe to go
-                  </FormDescription>
-                  <FormMessage className="font-scroll" />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-scroll">Personal Message (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Add a personal message..." {...field} className="font-scroll" />
-                  </FormControl>
-                  <FormMessage className="font-scroll" />
-                </FormItem>
-              )}
-            />
-            
-            <div className="text-center">
-              <PixelButton 
-                type="submit" 
-                disabled={isSubmitting}
-                size="lg"
-                className="px-8 font-scroll"
-                farcasterStyle
-              >
-                {isSubmitting ? "Processing..." : (paymentMethod === "daimo" ? "Open Daimo" : "Submit Tithe")}
-                {paymentMethod === "daimo" && <ExternalLink size={16} className="ml-2" />}
-              </PixelButton>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-      
-      <CardFooter className="bg-black/30 border-t border-ancient-gold/20 p-3 text-xs text-center justify-center">
-        <div className="flex items-center gap-2">
-          <span className="text-white/70">Powered by</span>
-          <span className="text-ancient-gold font-medium">Daimo</span>
-          <span className="text-white/70">on</span>
-          <span className="text-base-blue font-medium">Base Chain</span>
-        </div>
-      </CardFooter>
-    </Card>
+      )}
+    </>
   );
 };
 
