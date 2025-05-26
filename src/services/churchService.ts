@@ -1,14 +1,11 @@
+
 import { Church } from "@/types/church";
 import { mockChurches } from "@/data/mockChurches";
 import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Search for churches by name or location
- */
 export async function searchChurches(query: string): Promise<Church[]> {
   console.log("Searching churches with query:", query);
   
-  // If no query provided or too short, return empty array
   if (!query || query.trim().length < 2) {
     return [];
   }
@@ -16,7 +13,7 @@ export async function searchChurches(query: string): Promise<Church[]> {
   try {
     const normalizedQuery = query.toLowerCase().trim();
     
-    // Try to search for churches in Supabase
+    // Always try Supabase first, but have robust fallback
     const { data, error } = await supabase
       .from('churches')
       .select('*')
@@ -27,33 +24,12 @@ export async function searchChurches(query: string): Promise<Church[]> {
            denomination.ilike.%${normalizedQuery}%`)
       .limit(20);
     
-    if (error) {
-      console.log("Supabase error, falling back to mock data:", error);
-      // Fallback to mock data search
-      return mockChurches.filter(church => 
-        church.name.toLowerCase().includes(normalizedQuery) ||
-        church.location?.toLowerCase().includes(normalizedQuery) ||
-        church.city?.toLowerCase().includes(normalizedQuery) ||
-        church.state?.toLowerCase().includes(normalizedQuery) ||
-        church.country?.toLowerCase().includes(normalizedQuery) ||
-        church.denomination?.toLowerCase().includes(normalizedQuery)
-      );
+    if (error || !data || data.length === 0) {
+      console.log("Using mock church data");
+      return searchMockChurches(normalizedQuery);
     }
     
-    if (!data || data.length === 0) {
-      console.log("No churches found in database, using mock data");
-      // Filter mock data as fallback
-      return mockChurches.filter(church => 
-        church.name.toLowerCase().includes(normalizedQuery) ||
-        church.location?.toLowerCase().includes(normalizedQuery) ||
-        church.city?.toLowerCase().includes(normalizedQuery) ||
-        church.state?.toLowerCase().includes(normalizedQuery) ||
-        church.country?.toLowerCase().includes(normalizedQuery) ||
-        church.denomination?.toLowerCase().includes(normalizedQuery)
-      );
-    }
-    
-    // Convert the Supabase church format to our app's Church type
+    // Convert Supabase data to Church format
     const churches: Church[] = data.map(church => ({
       id: church.id,
       name: church.name,
@@ -61,48 +37,54 @@ export async function searchChurches(query: string): Promise<Church[]> {
       city: church.city,
       state: church.state,
       country: church.country,
-      denomination: church.denomination,
-      acceptsCrypto: church.accepts_crypto,
+      denomination: church.denomination || "Non-denominational",
+      acceptsCrypto: church.accepts_crypto || false,
       website: church.website,
-      payment_methods: church.payment_methods
+      payment_methods: church.payment_methods || ["cash", "check"]
     }));
     
-    console.log(`Found ${churches.length} churches in database`);
+    console.log(`Found ${churches.length} churches`);
     return churches;
   } catch (error) {
-    console.log("Error accessing database, using mock data:", error);
-    const normalizedQuery = query.toLowerCase().trim();
-    
-    // Enhanced mock data search with better matching
-    const filteredChurches = mockChurches.filter(church => {
-      const searchTerms = [
-        church.name,
-        church.location,
-        church.city,
-        church.state,
-        church.country,
-        church.denomination
-      ].filter(Boolean).map(term => term?.toLowerCase());
-      
-      return searchTerms.some(term => term?.includes(normalizedQuery));
-    });
-    
-    console.log(`Found ${filteredChurches.length} churches in mock data`);
-    return filteredChurches;
+    console.log("Church search error, using mock data:", error);
+    return searchMockChurches(query.toLowerCase().trim());
   }
 }
 
-/**
- * Join a church as a member
- */
+function searchMockChurches(normalizedQuery: string): Church[] {
+  return mockChurches.filter(church => {
+    const searchTerms = [
+      church.name,
+      church.location,
+      church.city,
+      church.state,
+      church.country,
+      church.denomination
+    ].filter(Boolean).map(term => term?.toLowerCase());
+    
+    return searchTerms.some(term => term?.includes(normalizedQuery));
+  });
+}
+
 export async function joinChurch(churchId: string): Promise<boolean> {
   try {
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      console.error("No authenticated user found");
+      console.log("No authenticated user");
       return false;
+    }
+    
+    // Check existing membership
+    const { data: existing } = await supabase
+      .from('church_memberships')
+      .select('id')
+      .eq('church_id', churchId)
+      .eq('user_id', user.id)
+      .single();
+    
+    if (existing) {
+      return true; // Already a member
     }
     
     const { error } = await supabase
@@ -112,127 +94,96 @@ export async function joinChurch(churchId: string): Promise<boolean> {
         user_id: user.id
       });
     
-    if (error) {
-      console.error("Error joining church:", error);
-      return false;
-    }
-    
-    return true;
+    return !error;
   } catch (error) {
-    console.error("Error joining church:", error);
+    console.log("Error joining church:", error);
     return false;
   }
 }
 
-/**
- * Get current user's church memberships
- */
 export async function getUserChurches(): Promise<Church[]> {
   try {
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      console.error("No authenticated user found");
       return [];
     }
     
     const { data, error } = await supabase
       .from('church_memberships')
       .select(`
-        church_id,
-        primary_church,
-        churches:church_id (*)
+        churches:church_id (
+          id,
+          name,
+          city,
+          state,
+          country,
+          denomination,
+          accepts_crypto,
+          website,
+          payment_methods
+        ),
+        is_primary
       `)
       .eq('user_id', user.id);
     
-    if (error) {
-      console.error("Error getting user churches:", error);
+    if (error || !data) {
+      console.log("Error fetching user churches:", error);
       return [];
     }
     
-    if (!data || data.length === 0) {
-      return [];
-    }
-    
-    // Convert the Supabase format to our app's Church type
-    const churches = data.map(membership => {
-      const church = membership.churches;
-      return {
-        id: church.id,
-        name: church.name,
-        location: `${church.city}, ${church.state}`,
-        city: church.city,
-        state: church.state,
-        country: church.country,
-        denomination: church.denomination,
-        acceptsCrypto: church.accepts_crypto,
-        website: church.website,
-        payment_methods: church.payment_methods,
-        isPrimaryChurch: membership.primary_church
-      } as Church;
-    });
-    
-    return churches;
+    return data.map((membership: any) => ({
+      id: membership.churches.id,
+      name: membership.churches.name,
+      location: `${membership.churches.city}, ${membership.churches.state}`,
+      city: membership.churches.city,
+      state: membership.churches.state,
+      country: membership.churches.country,
+      denomination: membership.churches.denomination || "Non-denominational",
+      acceptsCrypto: membership.churches.accepts_crypto || false,
+      website: membership.churches.website,
+      payment_methods: membership.churches.payment_methods || ["cash", "check"],
+      isPrimaryChurch: membership.is_primary
+    }));
   } catch (error) {
-    console.error("Error getting user churches:", error);
+    console.log("Error fetching user churches:", error);
     return [];
   }
 }
 
-/**
- * Set a church as the primary church for a user
- */
 export async function setPrimaryChurch(churchId: string): Promise<boolean> {
   try {
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      console.error("No authenticated user found");
       return false;
     }
     
-    // First, reset all churches to non-primary
-    const { error: resetError } = await supabase
+    // First, remove primary status from all churches
+    await supabase
       .from('church_memberships')
-      .update({ primary_church: false })
+      .update({ is_primary: false })
       .eq('user_id', user.id);
     
-    if (resetError) {
-      console.error("Error resetting primary churches:", resetError);
-      return false;
-    }
-    
-    // Then set the selected church as primary
+    // Then set the new primary church
     const { error } = await supabase
       .from('church_memberships')
-      .update({ primary_church: true })
+      .update({ is_primary: true })
       .eq('church_id', churchId)
       .eq('user_id', user.id);
     
-    if (error) {
-      console.error("Error setting primary church:", error);
-      return false;
-    }
-    
-    return true;
+    return !error;
   } catch (error) {
-    console.error("Error setting primary church:", error);
+    console.log("Error setting primary church:", error);
     return false;
   }
 }
 
-/**
- * Leave a church (delete membership)
- */
 export async function leaveChurch(churchId: string): Promise<boolean> {
   try {
-    // Get the current user
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      console.error("No authenticated user found");
       return false;
     }
     
@@ -242,14 +193,9 @@ export async function leaveChurch(churchId: string): Promise<boolean> {
       .eq('church_id', churchId)
       .eq('user_id', user.id);
     
-    if (error) {
-      console.error("Error leaving church:", error);
-      return false;
-    }
-    
-    return true;
+    return !error;
   } catch (error) {
-    console.error("Error leaving church:", error);
+    console.log("Error leaving church:", error);
     return false;
   }
 }

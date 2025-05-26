@@ -1,10 +1,6 @@
 
 import React from 'react';
-
-/**
- * Real-time price WebSocket connection
- * Uses CoinGecko WebSocket for live price updates
- */
+import { baseTokens } from '@/data/baseTokens';
 
 export interface PriceUpdate {
   symbol: string;
@@ -14,11 +10,15 @@ export interface PriceUpdate {
 }
 
 export class PriceWebSocketClient {
-  private ws: WebSocket | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectInterval = 5000;
+  private updateInterval: NodeJS.Timeout | null = null;
   private subscribers: Map<string, (update: PriceUpdate) => void> = new Map();
+  private basePrices: Record<string, number> = {
+    'ETH': 1800,
+    'USDC': 1.00,
+    'DAI': 0.999,
+    'USDT': 1.001,
+    'WETH': 1800
+  };
 
   constructor() {
     this.connect();
@@ -26,31 +26,20 @@ export class PriceWebSocketClient {
 
   private connect() {
     try {
-      // Using a mock WebSocket connection since CoinGecko's WebSocket requires pro subscription
-      // In production, this would connect to the actual WebSocket endpoint
+      // Since we can't use real WebSocket without proper endpoint, use interval updates
       this.startMockPriceUpdates();
     } catch (error) {
-      console.error('WebSocket connection error:', error);
-      this.scheduleReconnect();
+      console.log('WebSocket connection error, using mock data:', error);
+      this.startMockPriceUpdates();
     }
   }
 
-  /**
-   * Mock real-time price updates for demonstration
-   * In production, this would be replaced with actual WebSocket data
-   */
   private startMockPriceUpdates() {
-    const tokens = ['ETH', 'USDC', 'DAI', 'WETH'];
-    const basePrices: Record<string, number> = {
-      'ETH': 1800,
-      'USDC': 1.00,
-      'DAI': 0.999,
-      'WETH': 1800
-    };
+    const tokens = Object.keys(this.basePrices);
 
-    setInterval(() => {
+    this.updateInterval = setInterval(() => {
       tokens.forEach(symbol => {
-        const basePrice = basePrices[symbol];
+        const basePrice = this.basePrices[symbol];
         const variation = (Math.random() - 0.5) * 0.02; // ±1% variation
         const newPrice = basePrice * (1 + variation);
         const change24h = (Math.random() - 0.5) * 10; // ±5% daily change
@@ -64,7 +53,7 @@ export class PriceWebSocketClient {
 
         this.notifySubscribers(symbol, update);
       });
-    }, 2000); // Update every 2 seconds
+    }, 5000); // Update every 5 seconds
   }
 
   private notifySubscribers(symbol: string, update: PriceUpdate) {
@@ -75,53 +64,41 @@ export class PriceWebSocketClient {
     });
   }
 
-  private scheduleReconnect() {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      setTimeout(() => {
-        this.reconnectAttempts++;
-        this.connect();
-      }, this.reconnectInterval);
-    }
-  }
-
-  /**
-   * Subscribe to price updates for a specific token
-   */
   subscribe(symbol: string, callback: (update: PriceUpdate) => void): () => void {
-    const id = `${symbol}_${Date.now()}`;
+    const id = `${symbol}_${Date.now()}_${Math.random()}`;
     this.subscribers.set(id, callback);
 
-    // Return unsubscribe function
+    // Send initial price
+    if (symbol !== 'ALL' && this.basePrices[symbol]) {
+      const initialUpdate: PriceUpdate = {
+        symbol,
+        price: this.basePrices[symbol],
+        change24h: (Math.random() - 0.5) * 10,
+        timestamp: Date.now()
+      };
+      callback(initialUpdate);
+    }
+
     return () => {
       this.subscribers.delete(id);
     };
   }
 
-  /**
-   * Subscribe to all price updates
-   */
   subscribeToAll(callback: (update: PriceUpdate) => void): () => void {
     return this.subscribe('ALL', callback);
   }
 
-  /**
-   * Close WebSocket connection
-   */
   disconnect() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
     }
     this.subscribers.clear();
   }
 }
 
-// Singleton instance
 export const priceWebSocketClient = new PriceWebSocketClient();
 
-/**
- * React hook for real-time price updates
- */
 export function usePriceUpdates(symbol?: string) {
   const [prices, setPrices] = React.useState<Map<string, PriceUpdate>>(new Map());
 
@@ -138,6 +115,6 @@ export function usePriceUpdates(symbol?: string) {
   return {
     prices: Object.fromEntries(prices),
     getPrice: (sym: string) => prices.get(sym),
-    isConnected: true // Mock connection status
+    isConnected: true
   };
 }
