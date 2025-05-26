@@ -1,4 +1,3 @@
-
 import React from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SimpleSwapForm from "@/components/defi/SimpleSwapForm";
 import DefiSwap from "@/components/defi/DefiSwap";
 import DefiPortfolio from "@/components/defi/DefiPortfolio";
+import DefiLending from "@/components/defi/DefiLending";
 import SwapErrorBoundary from "@/components/defi/SwapErrorBoundary";
-import { BookOpen, Coins, ExternalLink, Info, ShieldAlert, Wallet } from "lucide-react";
+import { BookOpen, Coins, ExternalLink, Info, ShieldAlert, Wallet, Banknote } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -43,14 +43,15 @@ const DefiPage: React.FC = () => {
                   <span>DeFi Tools</span>
                 </CardTitle>
                 <CardDescription>
-                  Swap, provide liquidity, and earn yield while honoring biblical principles
+                  Swap, provide liquidity, earn yield, and lend while honoring biblical principles
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="swap">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="swap">Swap</TabsTrigger>
                     <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+                    <TabsTrigger value="lending">Lending</TabsTrigger>
                     <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
                     <TabsTrigger value="earn">Earn</TabsTrigger>
                   </TabsList>
@@ -104,6 +105,11 @@ const DefiPage: React.FC = () => {
                   <TabsContent value="portfolio" className="pt-6">
                     <SwapErrorBoundary>
                       <DefiPortfolio />
+                    </SwapErrorBoundary>
+                  </TabsContent>
+                  <TabsContent value="lending" className="pt-6">
+                    <SwapErrorBoundary>
+                      <DefiLending />
                     </SwapErrorBoundary>
                   </TabsContent>
                   <TabsContent value="liquidity" className="pt-6">
