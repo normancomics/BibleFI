@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import BiblicalFinancialAdvisor from "@/components/wisdom/BiblicalFinancialAdvisor";
@@ -8,7 +8,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Coins, Sparkles } from "lucide-react";
 
 const BiblicalDefiPage: React.FC = () => {
-  const principles = getBiblicalFinancialPrinciples();
+  const [principles, setPrinciples] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const loadPrinciples = async () => {
+      try {
+        const data = await getBiblicalFinancialPrinciples();
+        setPrinciples(data);
+      } catch (error) {
+        console.error("Error loading principles:", error);
+        setPrinciples([]);
+      }
+    };
+    
+    loadPrinciples();
+  }, []);
   
   return (
     <div className="min-h-screen">
@@ -57,10 +71,13 @@ const BiblicalDefiPage: React.FC = () => {
                   {principles.map((principle) => (
                     <Card key={principle.id} className="bg-black/40 border border-ancient-gold/20">
                       <CardContent className="p-4">
-                        <p className="italic text-white/80 mb-2">"{principle.verse}"</p>
-                        <p className="text-right text-sm text-ancient-gold mb-4">{principle.reference}</p>
-                        <h3 className="text-scripture font-medium mb-1">{principle.principle}</h3>
-                        <p className="text-sm text-white/70">{principle.application}</p>
+                        <h3 className="text-scripture font-medium mb-2">{principle.title}</h3>
+                        <p className="text-sm text-white/70 mb-3">{principle.description}</p>
+                        <div className="space-y-1">
+                          {principle.scripture_references?.map((ref: string, index: number) => (
+                            <p key={index} className="text-xs text-ancient-gold">{ref}</p>
+                          ))}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

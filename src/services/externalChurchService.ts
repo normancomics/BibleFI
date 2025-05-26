@@ -76,10 +76,9 @@ export class ExternalChurchService {
           state: city.split(',')[1]?.trim() || 'CA',
           country: 'United States',
           denomination: churchType.replace(' Church', ''),
+          address: `${streetNumber} ${streetName}`,
           acceptsCrypto: Math.random() > 0.7, // 30% chance of accepting crypto
           website: `https://www.${query.replace(/\s+/g, '').toLowerCase()}${churchType.replace(/\s+/g, '').toLowerCase()}.org`,
-          email: `info@${query.replace(/\s+/g, '').toLowerCase()}${churchType.replace(/\s+/g, '').toLowerCase()}.org`,
-          phone: `(${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
           payment_methods: this.generatePaymentMethods()
         });
       }
