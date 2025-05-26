@@ -1,119 +1,198 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-export interface BiblicalAdviceRequest {
-  query: string;
-  context?: {
-    userId?: string;
-    financialSituation?: string;
-    goals?: string[];
-    riskTolerance?: 'low' | 'medium' | 'high';
-  };
+export interface BiblicalPrinciple {
+  id: string;
+  title: string;
+  description: string;
+  scripture_references: string[];
+  category: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface BiblicalAdviceResponse {
-  advice: string;
-  relevant_verses: Array<{
-    id: string;
-    reference: string;
-    verse_text: string;
-    principle: string;
-    application: string;
-  }>;
-  biblical_principles: string[];
-}
-
-// For compatibility with existing components
-export interface FinancialGuidanceResponse {
+export interface BiblicalAdvice {
   answer: string;
   relevantScriptures: Array<{
-    text: string;
     reference: string;
+    text: string;
   }>;
-  defiSuggestions?: Array<{
+  defiSuggestions: Array<{
     protocol: string;
     action: string;
     rationale: string;
   }>;
 }
 
-export async function getBiblicalAdvice(request: BiblicalAdviceRequest): Promise<BiblicalAdviceResponse> {
+export async function getBiblicalFinancialPrinciples(): Promise<BiblicalPrinciple[]> {
   try {
-    const { data, error } = await supabase.functions.invoke('biblical-advisor', {
-      body: request
-    });
-
-    if (error) {
-      console.error('Error calling biblical advisor:', error);
-      throw new Error(`Biblical advisor error: ${error.message}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error in getBiblicalAdvice:', error);
+    const { data, error } = await supabase
+      .from('biblical_financial_principles')
+      .select('*')
+      .order('created_at', { ascending: true });
     
-    // Fallback response if the service fails
-    return {
-      advice: "I'm currently unable to connect to the biblical wisdom database. However, remember Proverbs 21:5 - 'The plans of the diligent lead to profit as surely as haste leads to poverty.' Consider seeking wise counsel and making thoughtful financial decisions based on biblical principles.",
-      relevant_verses: [
-        {
-          id: "fallback-1",
-          reference: "Proverbs 21:5",
-          verse_text: "The plans of the diligent lead to profit as surely as haste leads to poverty.",
-          principle: "Diligent planning leads to financial success",
-          application: "Create detailed financial plans and avoid hasty investment decisions"
-        }
-      ],
-      biblical_principles: ["Diligent planning", "Avoiding hasty decisions"]
-    };
-  }
-}
-
-// Alias for compatibility
-export const getBiblicalFinancialGuidance = async (request: { query: string }): Promise<FinancialGuidanceResponse> => {
-  const response = await getBiblicalAdvice(request);
-  
-  return {
-    answer: response.advice,
-    relevantScriptures: response.relevant_verses.map(verse => ({
-      text: verse.verse_text,
-      reference: verse.reference
-    })),
-    defiSuggestions: []
-  };
-};
-
-export async function getFinancialPrinciples(): Promise<any[]> {
-  try {
-    // Fallback to hardcoded principles since the table doesn't exist in types yet
-    return [
-      {
-        id: "1",
-        title: "Stewardship",
-        description: "All wealth ultimately belongs to God, and we are merely stewards of what He has entrusted to us.",
-        scripture_references: ["Psalm 24:1", "Matthew 25:14-30"],
-        category: "stewardship"
-      },
-      {
-        id: "2",
-        title: "Avoiding Debt",
-        description: "Borrowing can lead to financial bondage. Living debt-free provides financial freedom and security.",
-        scripture_references: ["Proverbs 22:7", "Romans 13:8"],
-        category: "debt"
-      },
-      {
-        id: "3",
-        title: "Generosity",
-        description: "Giving generously brings spiritual rewards and reflects God's character.",
-        scripture_references: ["Proverbs 19:17", "2 Corinthians 9:6-7"],
-        category: "generosity"
-      }
-    ];
+    if (error) {
+      console.error("Error fetching biblical principles:", error);
+      return [];
+    }
+    
+    return data || [];
   } catch (error) {
-    console.error('Error in getFinancialPrinciples:', error);
+    console.error("Error in getBiblicalFinancialPrinciples:", error);
     return [];
   }
 }
 
-// Alias for compatibility
-export const getBiblicalFinancialPrinciples = getFinancialPrinciples;
+export async function searchBiblicalKnowledge(query: string): Promise<any[]> {
+  try {
+    // For now, we'll use a simple text search until we implement vector search
+    const { data, error } = await supabase
+      .from('biblical_knowledge_base')
+      .select('*')
+      .or(`verse_text.ilike.%${query}%, principle.ilike.%${query}%, application.ilike.%${query}%`)
+      .limit(5);
+    
+    if (error) {
+      console.error("Error searching biblical knowledge:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in searchBiblicalKnowledge:", error);
+    return [];
+  }
+}
+
+export async function getBiblicalAdvice(question: string): Promise<BiblicalAdvice> {
+  try {
+    // Search for relevant biblical knowledge
+    const knowledgeResults = await searchBiblicalKnowledge(question);
+    
+    // Generate advice based on the question and results
+    const advice: BiblicalAdvice = {
+      answer: generateBiblicalAnswer(question, knowledgeResults),
+      relevantScriptures: knowledgeResults.slice(0, 3).map(result => ({
+        reference: result.reference,
+        text: result.verse_text
+      })),
+      defiSuggestions: generateDefiSuggestions(question, knowledgeResults)
+    };
+    
+    return advice;
+  } catch (error) {
+    console.error("Error getting biblical advice:", error);
+    return {
+      answer: "I apologize, but I'm having trouble accessing the biblical knowledge base right now. Please try again later.",
+      relevantScriptures: [],
+      defiSuggestions: []
+    };
+  }
+}
+
+function generateBiblicalAnswer(question: string, knowledgeResults: any[]): string {
+  if (knowledgeResults.length === 0) {
+    return "Based on biblical principles, I encourage you to seek wisdom through prayer and study of Scripture. Consider consulting with wise financial advisors and your church community for guidance on your financial decisions.";
+  }
+  
+  const primaryResult = knowledgeResults[0];
+  let answer = `Based on ${primaryResult.reference}: "${primaryResult.verse_text}" `;
+  
+  if (primaryResult.principle) {
+    answer += `\n\nBiblical Principle: ${primaryResult.principle}`;
+  }
+  
+  if (primaryResult.application) {
+    answer += `\n\nPractical Application: ${primaryResult.application}`;
+  }
+  
+  return answer;
+}
+
+function generateDefiSuggestions(question: string, knowledgeResults: any[]): Array<{protocol: string, action: string, rationale: string}> {
+  const suggestions = [];
+  
+  const lowerQuestion = question.toLowerCase();
+  
+  if (lowerQuestion.includes('invest') || lowerQuestion.includes('yield')) {
+    suggestions.push({
+      protocol: "Stable Yield Pools",
+      action: "Consider low-risk stablecoin yields",
+      rationale: "Aligns with biblical principles of steady, prudent growth"
+    });
+  }
+  
+  if (lowerQuestion.includes('give') || lowerQuestion.includes('tithe')) {
+    suggestions.push({
+      protocol: "Bible.fi Tithing",
+      action: "Set up automated digital tithing",
+      rationale: "Fulfills the biblical command to give faithfully and consistently"
+    });
+  }
+  
+  if (lowerQuestion.includes('save') || lowerQuestion.includes('emergency')) {
+    suggestions.push({
+      protocol: "USDC Savings",
+      action: "Build emergency fund in stablecoins",
+      rationale: "Follows Proverbs 21:20 - 'The wise store up choice food and olive oil'"
+    });
+  }
+  
+  return suggestions;
+}
+
+export async function calculateWisdomScore(userActions: {
+  diversification: number;
+  generosity: number;
+  risk: number;
+  planning: number;
+  contentment: number;
+  stewardship: number;
+}): Promise<{
+  score: number;
+  strengths: string[];
+  improvements: string[];
+  guidance: string;
+}> {
+  const { diversification, generosity, risk, planning, contentment, stewardship } = userActions;
+  
+  // Calculate weighted score (higher generosity and stewardship weight)
+  const totalScore = Math.round(
+    (diversification * 0.15) +
+    (generosity * 0.25) +
+    ((100 - risk) * 0.15) + // Lower risk is better
+    (planning * 0.15) +
+    (contentment * 0.15) +
+    (stewardship * 0.15)
+  );
+  
+  // Identify strengths and areas for improvement
+  const factors = [
+    { name: 'diversification', score: diversification },
+    { name: 'generosity', score: generosity },
+    { name: 'risk management', score: 100 - risk },
+    { name: 'planning', score: planning },
+    { name: 'contentment', score: contentment },
+    { name: 'stewardship', score: stewardship }
+  ];
+  
+  const sortedFactors = [...factors].sort((a, b) => b.score - a.score);
+  const strengths = sortedFactors.slice(0, 2).map(f => f.name);
+  const improvements = sortedFactors.slice(-2).map(f => f.name);
+  
+  // Generate guidance based on the lowest scoring areas
+  let guidance = "Continue growing in biblical financial wisdom. ";
+  if (improvements.includes('generosity')) {
+    guidance += "Consider increasing your giving as God has blessed you. ";
+  }
+  if (improvements.includes('planning')) {
+    guidance += "Develop a clearer financial plan based on biblical principles. ";
+  }
+  
+  return {
+    score: totalScore,
+    strengths,
+    improvements,
+    guidance
+  };
+}

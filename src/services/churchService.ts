@@ -1,22 +1,23 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Church } from "@/types/church";
+import { ExternalChurchService } from "./externalChurchService";
 
 export async function searchChurches(query: string): Promise<Church[]> {
   try {
-    const { data, error } = await supabase
+    // Search local database first
+    const { data: localChurches, error } = await supabase
       .from('churches')
       .select('*')
       .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state.ilike.%${query}%`)
-      .limit(20);
+      .limit(10);
     
     if (error) {
-      console.error("Error searching churches:", error);
-      return [];
+      console.error("Error searching local churches:", error);
     }
     
     // Transform database format to Church interface
-    return data?.map(church => ({
+    const transformedLocal = localChurches?.map(church => ({
       id: church.id,
       name: church.name,
       denomination: church.denomination,
@@ -32,6 +33,22 @@ export async function searchChurches(query: string): Promise<Church[]> {
       created_at: church.created_at,
       created_by: church.created_by
     })) || [];
+    
+    // Search external sources for additional results
+    let externalChurches: Church[] = [];
+    try {
+      externalChurches = await ExternalChurchService.searchGooglePlaces(query);
+    } catch (error) {
+      console.error("Error searching external churches:", error);
+    }
+    
+    // Combine and deduplicate results
+    const allChurches = [...transformedLocal, ...externalChurches];
+    const uniqueChurches = allChurches.filter((church, index, self) => 
+      index === self.findIndex(c => c.name === church.name && c.city === church.city)
+    );
+    
+    return uniqueChurches.slice(0, 20);
   } catch (error) {
     console.error("Error in searchChurches:", error);
     return [];
@@ -46,12 +63,11 @@ export async function getUserChurches(): Promise<Church[]> {
       return [];
     }
     
-    // Use church_memberships table instead of user_churches for now
     const { data, error } = await supabase
-      .from('church_memberships')
+      .from('user_churches')
       .select(`
         church_id,
-        primary_church,
+        is_primary_church,
         churches (*)
       `)
       .eq('user_id', user.id);
@@ -76,7 +92,7 @@ export async function getUserChurches(): Promise<Church[]> {
       verified: item.churches.verified,
       created_at: item.churches.created_at,
       created_by: item.churches.created_by,
-      isPrimaryChurch: item.primary_church
+      isPrimaryChurch: item.is_primary_church
     })) || [];
   } catch (error) {
     console.error("Error in getUserChurches:", error);
@@ -93,11 +109,11 @@ export async function joinChurch(churchId: string): Promise<boolean> {
     }
     
     const { error } = await supabase
-      .from('church_memberships')
+      .from('user_churches')
       .insert({
         user_id: user.id,
         church_id: churchId,
-        primary_church: false
+        is_primary_church: false
       });
     
     if (error) {
@@ -122,14 +138,14 @@ export async function setPrimaryChurch(churchId: string): Promise<boolean> {
     
     // First, unset all primary churches for this user
     await supabase
-      .from('church_memberships')
-      .update({ primary_church: false })
+      .from('user_churches')
+      .update({ is_primary_church: false })
       .eq('user_id', user.id);
     
     // Then set the new primary church
     const { error } = await supabase
-      .from('church_memberships')
-      .update({ primary_church: true })
+      .from('user_churches')
+      .update({ is_primary_church: true })
       .eq('user_id', user.id)
       .eq('church_id', churchId);
     
@@ -154,7 +170,7 @@ export async function leaveChurch(churchId: string): Promise<boolean> {
     }
     
     const { error } = await supabase
-      .from('church_memberships')
+      .from('user_churches')
       .delete()
       .eq('user_id', user.id)
       .eq('church_id', churchId);

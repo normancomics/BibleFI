@@ -65,7 +65,7 @@ const UniversalWalletConnect: React.FC<UniversalWalletConnectProps> = ({
     },
     {
       id: "walletconnect",
-      name: "Reown (WalletConnect)",
+      name: "WalletConnect",
       icon: "https://walletconnect.com/meta/favicon.ico",
       type: "crypto",
       description: "Connect any compatible wallet",
@@ -157,7 +157,10 @@ const UniversalWalletConnect: React.FC<UniversalWalletConnectProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={buttonVariant as any} className={`${buttonClassName} bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0`}>
+        <Button 
+          variant={buttonVariant as any} 
+          className={`${buttonClassName} bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0`}
+        >
           <Wallet className="mr-2 h-4 w-4" />
           {buttonText}
         </Button>

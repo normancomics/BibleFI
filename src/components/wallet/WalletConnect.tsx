@@ -1,6 +1,7 @@
 
 import React from "react";
 import UniversalWalletConnect from "./UniversalWalletConnect";
+import { Button } from "@/components/ui/button";
 
 interface WalletConnectProps {
   onConnect?: (address: string) => void;
@@ -18,17 +19,18 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ onConnect, onCancel }) =>
     <div className="space-y-4">
       <UniversalWalletConnect 
         onConnect={handleConnect}
-        buttonText="Connect to Bible.fi"
-        buttonClassName="w-full"
+        buttonText="Connect Wallet"
+        buttonClassName="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
       />
       
       {onCancel && (
-        <button 
+        <Button 
+          variant="ghost"
           onClick={onCancel}
-          className="w-full text-sm text-white/70 hover:text-white transition-colors"
+          className="w-full text-white/70 hover:text-white hover:bg-white/10"
         >
           Cancel
-        </button>
+        </Button>
       )}
     </div>
   );
