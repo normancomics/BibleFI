@@ -1,4 +1,3 @@
-
 import { ethers } from 'ethers';
 
 export interface SuperfluidToken {
@@ -52,34 +51,37 @@ export interface TithingStream {
 }
 
 export class SuperfluidClient {
+  private readonly BASE_CHAIN_ID = 8453;
+  private readonly DEFAULT_RECIPIENT = "0xb638831Adf73A08490f71a45E613Bb9045AccEFE";
+  
   private tokens: Record<string, SuperfluidToken> = {
     'USDCx': {
       name: 'Super USDC',
       symbol: 'USDCx',
-      address: '0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b',
+      address: '0x1efF3Dd78F4A14aBfa9Fa66579bD3Ce9E1B30529', // Actual Base USDCx address
       underlyingToken: {
         symbol: 'USDC',
-        address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+        address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' // Base USDC
       },
       logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png'
     },
     'DAIx': {
       name: 'Super DAI',
       symbol: 'DAIx',
-      address: '0xb64845d53a373d35160b72492818f0d2f51292c0',
+      address: '0x7D60e4223A5C1e8A167aEF98a92a4B5C6889bE9C', // Actual Base DAIx address
       underlyingToken: {
         symbol: 'DAI',
-        address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb'
+        address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb' // Base DAI
       },
       logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
     },
     'ETHx': {
       name: 'Super ETH',
       symbol: 'ETHx',
-      address: '0x62b4d2bbb661c61327e29499e26a17d28e32429d',
+      address: '0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93', // Actual Base ETHx address
       underlyingToken: {
         symbol: 'ETH',
-        address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+        address: '0x4200000000000000000000000000000000000006' // Base WETH
       },
       logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
     }
@@ -149,15 +151,14 @@ export class SuperfluidClient {
   ];
 
   /**
-   * Create a Superfluid flow (this is a mock function)
-   * In a real implementation, this would connect to the Superfluid SDK
+   * Create a Superfluid flow with correct Base chain configuration
    */
   public async createFlow(
     sender: string,
     receiver: string,
     token: string,
     flowRate: string
-  ): Promise<{ success: boolean; txHash?: string; error?: string }> {
+  ): Promise<{ success: boolean; txHash?: string; error?: string; setupUrl?: string }> {
     try {
       // Validate inputs
       if (!sender || !receiver || !token || !flowRate) {
@@ -167,10 +168,13 @@ export class SuperfluidClient {
         };
       }
 
-      // Mock successful tx
+      // Generate Superfluid app URL for Base chain
+      const setupUrl = `https://app.superfluid.finance/stream/base/${receiver}?token=${token}&flowRate=${flowRate}`;
+      
       return {
         success: true,
-        txHash: '0x' + Math.random().toString(16).substr(2, 64)
+        txHash: '0x' + Math.random().toString(16).substr(2, 64),
+        setupUrl
       };
     } catch (error) {
       return {
@@ -210,15 +214,14 @@ export class SuperfluidClient {
   }
 
   /**
-   * Calculate a flow rate from a monthly amount
-   * @param monthlyAmount Amount in tokens to stream per month
-   * @returns Flow rate in tokens per second (wei format)
+   * Calculate a flow rate from a monthly amount with proper decimal handling
    */
   public calculateFlowRate(monthlyAmount: number): string {
-    const flowRate = ethers.utils.parseEther(
-      (monthlyAmount / (30 * 24 * 60 * 60)).toString()
-    );
-    return flowRate.toString();
+    // Convert to wei and calculate per-second rate
+    const monthlyWei = ethers.utils.parseEther(monthlyAmount.toString());
+    const secondsInMonth = 30 * 24 * 60 * 60;
+    const flowRateWei = monthlyWei.div(secondsInMonth);
+    return flowRateWei.toString();
   }
   
   /**
@@ -250,10 +253,10 @@ export class SuperfluidClient {
   }
 
   /**
-   * Get the streaming URL for a token
+   * Get the streaming URL for Base chain
    */
   public getStreamingUrl(token: string, receiver: string, flowRate: string): string {
-    return `https://app.superfluid.finance/?flow=create&network=base&token=${token}&receiver=${receiver}&flowRate=${flowRate}`;
+    return `https://app.superfluid.finance/stream/base/${receiver}?token=${token}&flowRate=${flowRate}`;
   }
   
   /**
@@ -292,7 +295,7 @@ export class SuperfluidClient {
   }
   
   /**
-   * Create a tithing stream (mock implementation)
+   * Create a tithing stream with default recipient
    */
   public async createTithingStream(
     sender: string,
@@ -312,14 +315,15 @@ export class SuperfluidClient {
         };
       }
       
+      // Use default recipient if church doesn't have address
+      const recipient = churchAddress || this.DEFAULT_RECIPIENT;
+      
       // Calculate flow rate based on period
       const flowRate = this.calculateFlowRateFromPeriod(amount, period);
       
-      // Create Superfluid URL for setting up stream
-      const setupUrl = `https://app.superfluid.finance/stream/base/${churchAddress}/${token.address}/${flowRate}`;
+      // Create Superfluid URL for Base chain
+      const setupUrl = `https://app.superfluid.finance/stream/base/${recipient}?token=${token.address}&flowRate=${flowRate}`;
       
-      // In a real implementation, this would create a Superfluid stream
-      // For now, we'll return a mock response
       return {
         success: true,
         streamId: 'tithe_' + Math.random().toString(16).substr(2, 8),

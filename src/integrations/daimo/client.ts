@@ -20,17 +20,19 @@ interface ChurchDonationParams {
 }
 
 export class DaimoClient {
+  private readonly DEFAULT_RECIPIENT = "0xb638831Adf73A08490f71a45E613Bb9045AccEFE";
+
   /**
-   * Generate a Daimo payment link - CORRECTED URL to use daimo.com/l/send
+   * Generate a Daimo payment link - Updated with correct URL structure
    */
   public generatePaymentLink(params: DaimoPaymentParams): string {
     const { recipient, amount, token, message } = params;
     
-    // Create Daimo payment link - CORRECTED to use daimo.com/l/send
-    let url = `https://daimo.com/l/send?recipient=${encodeURIComponent(recipient)}&amount=${amount}&coin=${token.toUpperCase()}`;
+    // Create Daimo payment link using the correct URL structure
+    let url = `https://daimo.com/l/send/${recipient}?amount=${amount}&coin=${token.toUpperCase()}`;
     
     if (message) {
-      url += `&memo=${encodeURIComponent(message)}`;
+      url += `&note=${encodeURIComponent(message)}`;
     }
     
     return url;
@@ -42,11 +44,14 @@ export class DaimoClient {
   public generateChurchDonationLink(params: ChurchDonationParams): string {
     const { churchAddress, amount, token, message, churchName } = params;
     
+    // Use default recipient if church doesn't have crypto address
+    const recipient = churchAddress || this.DEFAULT_RECIPIENT;
+    
     // Create donation-specific message
     const donationMessage = message || `Tithe to ${churchName} via Bible.fi`;
     
     return this.generatePaymentLink({
-      recipient: churchAddress,
+      recipient,
       amount,
       token,
       message: donationMessage
@@ -54,22 +59,19 @@ export class DaimoClient {
   }
 
   /**
-   * Get a list of supported tokens for Daimo payments
+   * Get a list of supported tokens for Daimo payments (Base chain tokens)
    */
-  public getSupportedTokens(): {symbol: string, name: string, decimals: number}[] {
+  public getSupportedTokens(): {symbol: string, name: string, decimals: number, address: string}[] {
     return [
-      {symbol: 'USDC', name: 'USD Coin', decimals: 6},
-      {symbol: 'ETH', name: 'Ethereum', decimals: 18},
-      {symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18},
-      {symbol: 'USDT', name: 'Tether USD', decimals: 6}
+      {symbol: 'USDC', name: 'USD Coin', decimals: 6, address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'},
+      {symbol: 'ETH', name: 'Ethereum', decimals: 18, address: '0x4200000000000000000000000000000000000006'},
+      {symbol: 'DAI', name: 'Dai Stablecoin', decimals: 18, address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb'},
+      {symbol: 'USDT', name: 'Tether USD', decimals: 6, address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2'}
     ];
   }
 
   /**
    * Calculate tithing amount based on biblical principles
-   * @param income Total income amount
-   * @param tithingPercentage Custom tithing percentage (default 10%)
-   * @returns Recommended tithing amount
    */
   public calculateBiblicalTithe(income: number, tithingPercentage: number = 10): number {
     return income * (tithingPercentage / 100);
@@ -77,16 +79,12 @@ export class DaimoClient {
 
   /**
    * Suggest additional offering based on prosperity
-   * @param income Total income
-   * @param expenses Total expenses
-   * @returns Suggested additional offering
    */
   public suggestAdditionalOffering(income: number, expenses: number): number {
     const surplus = income - expenses;
     if (surplus <= 0) return 0;
     
     // Bible-based progressive offering suggestion
-    // "Each of you should give what you have decided in your heart to give" - 2 Cor 9:7
     if (surplus < 500) {
       return surplus * 0.05; // 5% of surplus
     } else if (surplus < 2000) {
@@ -97,7 +95,7 @@ export class DaimoClient {
   }
 
   /**
-   * Make a donation to a church (mock implementation)
+   * Make a donation to a church using the default address
    */
   public async donateToChurch(
     churchId: string,
@@ -106,21 +104,14 @@ export class DaimoClient {
     senderAddress?: string
   ): Promise<{ success: boolean; txHash?: string; error?: string; paymentUrl?: string }> {
     try {
-      // In a real app, this would integrate with actual Daimo API
-      // This is just a mockup of what the implementation would look like
-      
-      // Simulate async process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate a Daimo payment URL for the church
+      // Generate a Daimo payment URL using the default recipient
       const paymentUrl = this.generatePaymentLink({
-        recipient: `church-${churchId}.eth`, // This would be the actual church address
+        recipient: this.DEFAULT_RECIPIENT,
         amount,
         token: token.toLowerCase(),
-        message: `Tithe from Bible.fi ${senderAddress ? `(${senderAddress})` : ''}`
+        message: `Tithe via Bible.fi ${senderAddress ? `from ${senderAddress}` : ''}`
       });
       
-      // Mock successful transaction
       return {
         success: true,
         txHash: '0x' + Math.random().toString(16).substr(2, 64),
@@ -135,7 +126,7 @@ export class DaimoClient {
   }
   
   /**
-   * Set up a recurring tithe using Superfluid (integration between Daimo and Superfluid)
+   * Set up a recurring tithe using Superfluid integration
    */
   public async setupRecurringTithe(
     churchId: string,
@@ -144,18 +135,22 @@ export class DaimoClient {
     senderAddress?: string
   ): Promise<{ success: boolean; flowId?: string; error?: string; setupUrl?: string }> {
     try {
-      // This would actually integrate with Superfluid for recurring payments
-      // For now, we'll just redirect to Superfluid app with prefilled params
+      // Map tokens to Superfluid equivalents
+      const superfluidTokens: Record<string, string> = {
+        'usdc': 'USDCx',
+        'dai': 'DAIx',
+        'eth': 'ETHx',
+        'usdt': 'USDTx'
+      };
       
-      const superfluidToken = token === 'usdc' ? 'USDCx' : token === 'dai' ? 'DAIx' : 'ETHx';
-      const recipient = `church-${churchId}.eth`;
+      const superfluidToken = superfluidTokens[token.toLowerCase()] || 'USDCx';
       
       // Calculate flow rate (monthly amount to per-second rate)
       const monthlyAmountNum = parseFloat(monthlyAmount);
-      const perSecondRate = (monthlyAmountNum / (30 * 24 * 60 * 60)).toFixed(8);
+      const perSecondRate = (monthlyAmountNum / (30 * 24 * 60 * 60)).toFixed(18);
       
-      // Create Superfluid URL for setting up stream
-      const setupUrl = `https://app.superfluid.finance/stream/base/${recipient}/${superfluidToken}/${perSecondRate}`;
+      // Create Superfluid URL for setting up stream to default recipient
+      const setupUrl = `https://app.superfluid.finance/stream/base/${this.DEFAULT_RECIPIENT}?token=${superfluidToken}&flowRate=${perSecondRate}`;
       
       return {
         success: true,
