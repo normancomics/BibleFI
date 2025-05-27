@@ -24,10 +24,32 @@ export interface BiblicalAdvice {
   }>;
 }
 
+export interface FinancialGuidanceRequest {
+  query: string;
+  context?: {
+    walletBalance?: string;
+    churchName?: string;
+    previousTithes?: number;
+  };
+}
+
+export interface FinancialGuidanceResponse {
+  answer: string;
+  relevantScriptures: {
+    reference: string;
+    text: string;
+  }[];
+  defiSuggestions?: {
+    protocol: string;
+    action: string;
+    rationale: string;
+  }[];
+}
+
 export async function getBiblicalFinancialPrinciples(): Promise<BiblicalPrinciple[]> {
   try {
     const { data, error } = await supabase
-      .from('biblical_financial_principles')
+      .from('biblical_knowledge_base')
       .select('*')
       .order('created_at', { ascending: true });
     
@@ -36,7 +58,16 @@ export async function getBiblicalFinancialPrinciples(): Promise<BiblicalPrincipl
       return [];
     }
     
-    return data || [];
+    // Transform the data to match BiblicalPrinciple interface
+    return data?.map(item => ({
+      id: item.id,
+      title: item.reference,
+      description: item.principle || item.verse_text,
+      scripture_references: [item.reference],
+      category: item.category,
+      created_at: item.created_at,
+      updated_at: item.updated_at
+    })) || [];
   } catch (error) {
     console.error("Error in getBiblicalFinancialPrinciples:", error);
     return [];
@@ -45,7 +76,6 @@ export async function getBiblicalFinancialPrinciples(): Promise<BiblicalPrincipl
 
 export async function searchBiblicalKnowledge(query: string): Promise<any[]> {
   try {
-    // For now, we'll use a simple text search until we implement vector search
     const { data, error } = await supabase
       .from('biblical_knowledge_base')
       .select('*')
@@ -61,6 +91,32 @@ export async function searchBiblicalKnowledge(query: string): Promise<any[]> {
   } catch (error) {
     console.error("Error in searchBiblicalKnowledge:", error);
     return [];
+  }
+}
+
+export async function getBiblicalFinancialGuidance(request: FinancialGuidanceRequest): Promise<FinancialGuidanceResponse> {
+  try {
+    // Search for relevant biblical knowledge
+    const knowledgeResults = await searchBiblicalKnowledge(request.query);
+    
+    // Generate advice based on the question and results
+    const guidance: FinancialGuidanceResponse = {
+      answer: generateBiblicalAnswer(request.query, knowledgeResults),
+      relevantScriptures: knowledgeResults.slice(0, 3).map(result => ({
+        reference: result.reference,
+        text: result.verse_text
+      })),
+      defiSuggestions: generateDefiSuggestions(request.query, knowledgeResults)
+    };
+    
+    return guidance;
+  } catch (error) {
+    console.error("Error getting biblical guidance:", error);
+    return {
+      answer: "I apologize, but I'm having trouble accessing the biblical knowledge base right now. Please try again later.",
+      relevantScriptures: [],
+      defiSuggestions: []
+    };
   }
 }
 

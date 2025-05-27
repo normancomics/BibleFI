@@ -29,3 +29,16 @@ export interface FinancialGuidanceResponse {
     rationale: string;
   }[];
 }
+
+export interface BiblicalAdvice {
+  answer: string;
+  relevantScriptures: Array<{
+    reference: string;
+    text: string;
+  }>;
+  defiSuggestions: Array<{
+    protocol: string;
+    action: string;
+    rationale: string;
+  }>;
+}
