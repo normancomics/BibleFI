@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { BookOpen, Coins, Church, Receipt, Sprout } from "lucide-react";
+import { BookOpen, Coins, Church, Receipt, Sprout, Rocket } from "lucide-react";
 import WalletConnect from "@/components/wallet/WalletConnect";
 import SoundToggle from "@/components/SoundToggle";
 
@@ -52,6 +53,10 @@ const NavBar: React.FC = () => {
             <NavLink to="/taxes" className="nav-link px-2 md:px-3 py-2">
               <Receipt className="h-4 w-4 mr-1" />
               <span className="hidden md:inline">Taxes</span>
+            </NavLink>
+            <NavLink to="/deploy" className="nav-link px-2 md:px-3 py-2">
+              <Rocket className="h-4 w-4 mr-1" />
+              <span className="hidden md:inline">Deploy</span>
             </NavLink>
           </nav>
           

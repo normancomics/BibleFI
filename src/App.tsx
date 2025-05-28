@@ -12,6 +12,7 @@ import TaxesPage from "@/pages/TaxesPage";
 import TithePage from "@/pages/TithePage";
 import AboutPage from "@/pages/AboutPage";
 import FarmingPage from "@/pages/FarmingPage";
+import DeploymentPage from "@/pages/DeploymentPage";
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
             <Route path="/tithe" element={<TithePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/farming" element={<FarmingPage />} />
+            <Route path="/deploy" element={<DeploymentPage />} />
+            <Route path="/deployment" element={<DeploymentPage />} />
           </Routes>
         </Router>
       </SoundProvider>
