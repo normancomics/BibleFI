@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
 import ScriptureCard from "@/components/ScriptureCard";
@@ -6,7 +5,7 @@ import PixelButton from "@/components/PixelButton";
 import { getVersesByCategory } from "@/data/bibleVerses";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowDownToLine, FileSpreadsheet, BarChart3, Calculator, Brain } from "lucide-react";
+import { ArrowDownToLine, FileSpreadsheet, BarChart3, Calculator, Brain, AlertTriangle } from "lucide-react";
 import PixelCharacter from "@/components/PixelCharacter";
 import BiblicalTaxAdvisor from "@/components/taxes/BiblicalTaxAdvisor";
 import TaxSavingTips from "@/components/taxes/TaxSavingTips";

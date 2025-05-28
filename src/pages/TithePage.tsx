@@ -23,6 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Church as ChurchType } from "@/types/church";
 import SuperfluidTithe from "@/components/tithe/SuperfluidTithe";
 import TithingDashboard from "@/components/tithe/TithingDashboard";
+import CBDCEducation from "@/components/education/CBDCEducation";
+import { Heart, BarChart3, Zap, AlertTriangle } from "lucide-react";
 
 const TithePage: React.FC = () => {
   // Get a random verse about giving
@@ -216,16 +218,36 @@ const TithePage: React.FC = () => {
               </div>
               
               <div className="md:col-span-1">
-                <Tabs defaultValue="one-time" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="one-time" className="font-scroll">One-Time</TabsTrigger>
-                    <TabsTrigger value="recurring" className="font-scroll">Recurring</TabsTrigger>
+                <Tabs defaultValue="tithe-form" className="w-full">
+                  <TabsList className="bg-scripture/40 border border-ancient-gold/50 p-1 mb-6">
+                    <TabsTrigger value="tithe-form" className="data-[state=active]:bg-green-900/70 text-ancient-gold">
+                      <Heart className="w-4 h-4 mr-2" />
+                      Give
+                    </TabsTrigger>
+                    <TabsTrigger value="dashboard" className="data-[state=active]:bg-green-900/70 text-ancient-gold">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </TabsTrigger>
+                    <TabsTrigger value="streams" className="data-[state=active]:bg-green-900/70 text-ancient-gold">
+                      <Zap className="w-4 h-4 mr-2" />
+                      Streams
+                    </TabsTrigger>
+                    <TabsTrigger value="cbdc-education" className="data-[state=active]:bg-green-900/70 text-ancient-gold">
+                      <AlertTriangle className="w-4 h-4 mr-2" />
+                      CBDC Awareness
+                    </TabsTrigger>
                   </TabsList>
-                  <TabsContent value="one-time">
-                    <DigitalTithingForm />
+                  <TabsContent value="tithe-form">
+                    <TitheForm />
                   </TabsContent>
-                  <TabsContent value="recurring">
+                  <TabsContent value="dashboard">
+                    <TithingDashboard />
+                  </TabsContent>
+                  <TabsContent value="streams">
                     <SuperfluidTithe />
+                  </TabsContent>
+                  <TabsContent value="cbdc-education">
+                    <CBDCEducation />
                   </TabsContent>
                 </Tabs>
               </div>
