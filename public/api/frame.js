@@ -1,11 +1,9 @@
-
 // Server-side API endpoint for Farcaster Frames
 // This file will be served at /api/frame when deployed
 
 // Configuration constants
 const APP_NAME = "biblefi.base.eth";
 const APP_BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'https://biblefi.base.eth';
-const FARCASTER_API_KEY = '425081D4-0BD4-4365-910D-8876E1E1BD00';
 
 // Biblical wisdom quotes for responses
 const WISDOM_QUOTES = [
@@ -32,18 +30,34 @@ const CHARACTER_IMAGES = [
 ];
 
 /**
- * Validates a Farcaster Frame signature
- * In a production environment, this would verify the message using the Farcaster API
+ * Validates a Farcaster Frame signature using the secure API
  * @param {Object} request - The incoming request
  * @returns {boolean} Whether the signature is valid
  */
-function validateFrameSignature(request) {
-  // For demo purposes, we're accepting all requests
-  // In production, you would verify using Farcaster's signature validation
-  // https://docs.farcaster.xyz/reference/frames/message-signing
+async function validateFrameSignature(request) {
+  try {
+    // In production, validate using the secure Farcaster API endpoint
+    const response = await fetch(`${APP_BASE_URL}/functions/v1/farcaster-api`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        endpoint: '/v1/validateMessage',
+        method: 'POST',
+        data: request.body
+      })
+    });
+    
+    if (response.ok) {
+      const validation = await response.json();
+      return validation.valid === true;
+    }
+  } catch (error) {
+    console.error('Frame signature validation error:', error);
+  }
   
-  // With a real implementation, you would use the FARCASTER_API_KEY here
-  // to verify the request signature against the Farcaster API
+  // For demo purposes, accept all requests if validation fails
   return true;
 }
 

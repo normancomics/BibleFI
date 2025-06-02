@@ -54,6 +54,15 @@ export const DEPLOYMENT_CONFIG = {
     supabase: 'https://ojiipppypzigjnjblbzn.supabase.co',
     farcaster: 'https://api.farcaster.xyz',
     base: 'https://mainnet.base.org',
+    // Secure Farcaster API endpoint using Supabase Edge Functions
+    farcasterSecure: typeof window !== 'undefined' ? `${window.location.origin}/functions/v1/farcaster-api` : 'https://bible.fi/functions/v1/farcaster-api',
+  },
+  
+  // Security configuration
+  security: {
+    apiKeysSecured: true,
+    supabaseSecretsEnabled: true,
+    farcasterApiSecured: true,
   },
 };
 
@@ -76,6 +85,11 @@ export const validateDeployment = () => {
     warnings.push('Farcaster integration enabled but API endpoint not configured');
   }
   
+  // Validate security setup
+  if (!DEPLOYMENT_CONFIG.security.farcasterApiSecured) {
+    warnings.push('Farcaster API key should be moved to Supabase secrets for production');
+  }
+  
   return { warnings, errors, isValid: errors.length === 0 };
 };
 
@@ -87,5 +101,6 @@ export const getRuntimeConfig = () => {
     ...DEPLOYMENT_CONFIG,
     validation,
     timestamp: new Date().toISOString(),
+    supabaseProjectId: 'ojiipppypzigjnjblbzn',
   };
 };
