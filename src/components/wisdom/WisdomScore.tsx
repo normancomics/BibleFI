@@ -1,226 +1,139 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import PixelButton from "@/components/PixelButton";
-import { Sparkles, Award, BookOpen, Share2, TrendingUp, FileCheck } from "lucide-react";
-import { biblicalWisdomService, WisdomScoreFactors } from '@/services/biblicalWisdomService';
-import { getRandomVerseByCategory } from '@/data/bibleVerses';
-import { farcasterClient } from '@/integrations/farcaster/client';
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Star, TrendingUp, BookOpen, Heart, Shield, Target } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { getRandomVerse } from '@/data/bibleVerses';
 
-const WisdomScore: React.FC<{
-  userActivities?: {
-    tithingPercentage: number;
-    hasDiversifiedInvestments: boolean;
-    hasEmergencyFund: boolean;
-    hasDebt: boolean;
-    hasFinancialPlan: boolean;
-    sharesWisdomWithOthers: boolean;
-    riskProfile: 'conservative' | 'balanced' | 'aggressive';
-  }
-}> = ({ userActivities }) => {
-  const [score, setScore] = useState<number>(0);
-  const [strengths, setStrengths] = useState<string[]>([]);
-  const [improvements, setImprovements] = useState<string[]>([]);
-  const [guidanceVerse, setGuidanceVerse] = useState(getRandomVerseByCategory('stewardship'));
+const WisdomScore: React.FC = () => {
+  const [score, setScore] = useState(75);
+  const [factors, setFactors] = useState({
+    diversification: 80,
+    generosity: 70,
+    risk: 65, // Lower is better for risk
+    planning: 85,
+    contentment: 90,
+    stewardship: 75
+  });
+  const [isCalculating, setIsCalculating] = useState(false);
   const { toast } = useToast();
-  
-  // Calculate wisdom score based on user activities
-  useEffect(() => {
-    if (!userActivities) {
-      // Default values for demo
-      const scoreResult = biblicalWisdomService.calculateWisdomScore({
-        diversification: 65,
-        generosity: 80,
-        risk: 40,
-        planning: 60,
-        contentment: 75,
-        stewardship: 70
-      });
-      
-      setScore(scoreResult.score);
-      setStrengths(scoreResult.strengths);
-      setImprovements(scoreResult.improvements);
-      setGuidanceVerse(scoreResult.verseGuidance);
-      return;
-    }
+  const verse = getRandomVerse();
+
+  const calculateWisdomScore = async () => {
+    setIsCalculating(true);
     
-    // Calculate based on actual user activities
-    const scoreFactors: WisdomScoreFactors = {
-      diversification: userActivities.hasDiversifiedInvestments ? 85 : 40,
-      generosity: calculateGenerosityScore(userActivities.tithingPercentage),
-      risk: calculateRiskScore(userActivities.riskProfile, userActivities.hasEmergencyFund),
-      planning: userActivities.hasFinancialPlan ? 90 : 30,
-      contentment: 70, // Default value, could be calculated from other factors
-      stewardship: calculateStewardshipScore(userActivities)
-    };
+    // Simulate calculation
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const scoreResult = biblicalWisdomService.calculateWisdomScore(scoreFactors);
-    setScore(scoreResult.score);
-    setStrengths(scoreResult.strengths);
-    setImprovements(scoreResult.improvements);
-    setGuidanceVerse(scoreResult.verseGuidance);
-  }, [userActivities]);
-  
-  // Helper functions for score calculation
-  const calculateGenerosityScore = (tithingPercentage: number): number => {
-    if (tithingPercentage >= 10) return 100;
-    if (tithingPercentage >= 5) return 80;
-    if (tithingPercentage > 0) return 60;
-    return 30;
-  };
-  
-  const calculateRiskScore = (profile: 'conservative' | 'balanced' | 'aggressive', hasEmergencyFund: boolean): number => {
-    let baseScore = profile === 'conservative' ? 30 : profile === 'balanced' ? 50 : 70;
-    return hasEmergencyFund ? Math.max(baseScore - 20, 10) : baseScore;
-  };
-  
-  const calculateStewardshipScore = (activities: any): number => {
-    let score = 60; // Base score
+    // Calculate new score based on factors
+    const newScore = Math.round(
+      (factors.diversification * 0.15) +
+      (factors.generosity * 0.25) +
+      ((100 - factors.risk) * 0.15) + // Lower risk is better
+      (factors.planning * 0.15) +
+      (factors.contentment * 0.15) +
+      (factors.stewardship * 0.15)
+    );
     
-    if (activities.hasFinancialPlan) score += 15;
-    if (activities.hasEmergencyFund) score += 15;
-    if (!activities.hasDebt) score += 10;
-    if (activities.sharesWisdomWithOthers) score += 10;
-    if (activities.tithingPercentage >= 10) score += 10;
+    setScore(newScore);
+    setIsCalculating(false);
     
-    return Math.min(score, 100);
+    toast({
+      title: "Wisdom Score Updated! 📊",
+      description: `Your biblical financial wisdom score is ${newScore}/100`,
+    });
   };
-  
-  // Score color based on score value
-  const getScoreColor = () => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    if (score >= 40) return "text-orange-500";
-    return "text-red-500";
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-400';
+    if (score >= 60) return 'text-yellow-400';
+    return 'text-red-400';
   };
-  
-  // Progress color based on score value
-  const getProgressColor = () => {
-    if (score >= 80) return "bg-green-500";
-    if (score >= 60) return "bg-yellow-500";
-    if (score >= 40) return "bg-orange-500";
-    return "bg-red-500";
+
+  const getScoreLevel = (score: number) => {
+    if (score >= 90) return { level: 'Solomon-like', color: 'bg-purple-500' };
+    if (score >= 80) return { level: 'Wise Steward', color: 'bg-green-500' };
+    if (score >= 70) return { level: 'Growing in Wisdom', color: 'bg-blue-500' };
+    if (score >= 60) return { level: 'Learning', color: 'bg-yellow-500' };
+    return { level: 'Seek Wisdom', color: 'bg-red-500' };
   };
-  
-  const handleShare = () => {
-    try {
-      const shareUrl = farcasterClient.generateVerseSharingUrl(
-        guidanceVerse.text,
-        guidanceVerse.reference
-      );
-      
-      window.open(shareUrl, "_blank");
-      
-      toast({
-        title: "Ready to Share",
-        description: "Share your biblical wisdom score on Farcaster",
-      });
-    } catch (error) {
-      toast({
-        title: "Share Failed",
-        description: "Could not generate sharing link",
-        variant: "destructive",
-      });
-    }
+
+  const factorIcons = {
+    diversification: Target,
+    generosity: Heart,
+    risk: Shield,
+    planning: BookOpen,
+    contentment: Star,
+    stewardship: TrendingUp
   };
+
+  const { level, color } = getScoreLevel(score);
 
   return (
-    <Card className="border-2 border-ancient-gold/30">
-      <CardHeader className="bg-scripture/20">
-        <CardTitle className="flex items-center gap-2 text-2xl">
-          <Sparkles className="text-ancient-gold" />
-          <span>Biblical Financial Wisdom Score</span>
+    <Card className="border-scripture/30 bg-black/40">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Star className="text-ancient-gold" />
+          Biblical Wisdom Score
         </CardTitle>
-        <CardDescription>
-          Based on biblical principles and your financial activities
-        </CardDescription>
       </CardHeader>
-      
-      <CardContent className="pt-6 space-y-6">
+      <CardContent className="space-y-6">
         <div className="text-center">
-          <div className="relative inline-block">
-            <div className={`text-6xl font-bold ${getScoreColor()}`}>
-              {score}
-            </div>
-            <div className="text-sm text-muted-foreground">out of 100</div>
-            {score >= 80 && (
-              <Badge className="absolute -top-2 -right-8 bg-ancient-gold text-black">
-                Blessed
-              </Badge>
-            )}
+          <div className={`text-4xl font-bold ${getScoreColor(score)}`}>
+            {score}/100
           </div>
-          
-          <div className="mt-4">
-            <Progress value={score} className={`h-2 ${getProgressColor()}`} />
-          </div>
+          <Badge className={`${color} text-white mt-2`}>
+            {level}
+          </Badge>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-black/30 p-4 rounded-lg border border-green-500/30">
-            <h3 className="font-medium flex items-center gap-2 text-green-400">
-              <Award size={18} />
-              <span>Your Strengths</span>
-            </h3>
-            <ul className="mt-2 space-y-1">
-              {strengths.map((strength, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <span className="text-xs">✓</span>
-                  <span className="capitalize">{strength}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          <div className="bg-black/30 p-4 rounded-lg border border-yellow-500/30">
-            <h3 className="font-medium flex items-center gap-2 text-yellow-400">
-              <TrendingUp size={18} />
-              <span>Growth Areas</span>
-            </h3>
-            <ul className="mt-2 space-y-1">
-              {improvements.map((improvement, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <span className="text-xs">→</span>
-                  <span className="capitalize">{improvement}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+
+        <div className="space-y-4">
+          {Object.entries(factors).map(([factor, value]) => {
+            const IconComponent = factorIcons[factor as keyof typeof factorIcons];
+            const displayValue = factor === 'risk' ? 100 - value : value; // Invert risk for display
+            
+            return (
+              <div key={factor} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <IconComponent className="h-4 w-4 text-ancient-gold" />
+                    <span className="text-sm capitalize">{factor}</span>
+                  </div>
+                  <span className="text-sm font-medium">{displayValue}%</span>
+                </div>
+                <Progress value={displayValue} className="h-2" />
+              </div>
+            );
+          })}
         </div>
-        
-        <div className="bg-scripture/10 p-4 rounded-lg border border-ancient-gold/20">
-          <h3 className="font-medium flex items-center gap-2 text-ancient-gold">
-            <BookOpen size={18} />
-            <span>Scripture Guidance</span>
-          </h3>
-          <blockquote className="mt-2 italic text-white/80">
-            "{guidanceVerse.text}"
-          </blockquote>
-          <p className="text-right text-sm text-ancient-gold/70 mt-1">
-            {guidanceVerse.reference}
-          </p>
+
+        <Button 
+          onClick={calculateWisdomScore}
+          disabled={isCalculating}
+          className="w-full bg-scripture hover:bg-scripture/80"
+        >
+          {isCalculating ? 'Calculating...' : 'Recalculate Score'}
+        </Button>
+
+        <div className="bg-black/50 p-4 rounded-lg border border-ancient-gold/30">
+          <h4 className="font-medium text-ancient-gold mb-2">Scripture Guidance:</h4>
+          <p className="italic text-white/80 text-sm">{verse.text}</p>
+          <p className="text-right text-xs text-ancient-gold/70 mt-2">{verse.reference}</p>
+        </div>
+
+        <div className="space-y-2">
+          <h4 className="font-medium text-white">Improvement Areas:</h4>
+          <div className="space-y-1 text-sm text-white/70">
+            {score < 80 && <div>• Consider diversifying your DeFi positions</div>}
+            {factors.generosity < 75 && <div>• Increase tithing and charitable giving</div>}
+            {factors.risk > 70 && <div>• Reduce exposure to high-risk protocols</div>}
+            {factors.planning < 80 && <div>• Create a more detailed financial plan</div>}
+          </div>
         </div>
       </CardContent>
-      
-      <CardFooter className="flex flex-col sm:flex-row gap-3 border-t border-border pt-6">
-        <PixelButton 
-          className="flex items-center justify-center w-full sm:w-auto"
-          onClick={handleShare}
-        >
-          <Share2 size={16} className="mr-2" />
-          Share on Farcaster
-        </PixelButton>
-        
-        <PixelButton 
-          variant="outline"
-          className="flex items-center justify-center w-full sm:w-auto"
-        >
-          <FileCheck size={16} className="mr-2" />
-          Get Detailed Analysis
-        </PixelButton>
-      </CardFooter>
     </Card>
   );
 };

@@ -2,160 +2,106 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, FileText, Heart, TrendingUp, BookOpen } from 'lucide-react';
-import PixelCharacter from '@/components/PixelCharacter';
+import { TrendingDown, Calendar, Receipt, BookOpen } from 'lucide-react';
 
 const TaxSavingTips: React.FC = () => {
-  const taxTips = [
+  const tips = [
     {
-      category: "Charitable Giving",
-      icon: <Heart size={20} className="text-red-400" />,
-      scripture: "Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver. - 2 Corinthians 9:7",
-      tips: [
-        {
-          tip: "Maximize charitable deductions through systematic tithing",
-          description: "Document all tithes and offerings. Use Bible.fi's tithing streams for automatic records.",
-          savings: "Up to 50% of AGI"
-        },
-        {
-          tip: "Donate appreciated crypto directly",
-          description: "Avoid capital gains tax while getting full deduction for market value.",
-          savings: "15-20% capital gains tax savings"
-        },
-        {
-          tip: "Bunch charitable contributions",
-          description: "Group multiple years of giving into one tax year to exceed standard deduction.",
-          savings: "Varies by income bracket"
-        }
-      ]
+      title: "Hold for Long-Term Capital Gains",
+      description: "Hold crypto assets for more than one year to qualify for lower long-term capital gains rates (0%, 15%, or 20% vs short-term rates up to 37%)",
+      savings: "Up to 17% tax savings",
+      difficulty: "Easy",
+      biblical: "The wise store up choice food and olive oil, but fools gulp theirs down. - Proverbs 21:20",
+      icon: Calendar
     },
     {
-      category: "Crypto Tax Strategies",
-      icon: <TrendingUp size={20} className="text-blue-400" />,
-      scripture: "The plans of the diligent lead to profit as surely as haste leads to poverty. - Proverbs 21:5",
-      tips: [
-        {
-          tip: "Strategic tax-loss harvesting",
-          description: "Realize crypto losses to offset gains while maintaining exposure through different assets.",
-          savings: "Up to $3,000 loss deduction annually"
-        },
-        {
-          tip: "Long-term capital gains strategy",
-          description: "Hold crypto investments for over one year to qualify for lower tax rates.",
-          savings: "Up to 20% vs ordinary income rates"
-        },
-        {
-          tip: "DeFi staking considerations",
-          description: "Understand when staking rewards are taxable and plan accordingly.",
-          savings: "Proper timing can defer taxes"
-        }
-      ]
+      title: "Tax-Loss Harvesting",
+      description: "Sell losing crypto positions to offset gains from winning positions. Unlike stocks, crypto has no wash sale rule restrictions.",
+      savings: "Varies by portfolio",
+      difficulty: "Medium",
+      biblical: "The simple believe anything, but the prudent give thought to their steps. - Proverbs 14:15",
+      icon: TrendingDown
     },
     {
-      category: "Business & Ministry",
-      icon: <FileText size={20} className="text-green-400" />,
-      scripture: "The worker deserves his wages. - Luke 10:7",
-      tips: [
-        {
-          tip: "Home office deduction for ministry",
-          description: "Deduct portion of home used exclusively for ministry or religious business.",
-          savings: "Percentage of home expenses"
-        },
-        {
-          tip: "Religious education expenses",
-          description: "Deduct seminary, theological courses, and ministry training costs.",
-          savings: "Up to $4,000 in education credits"
-        },
-        {
-          tip: "Ministry travel and equipment",
-          description: "Deduct legitimate ministry-related travel, equipment, and supplies.",
-          savings: "100% of qualifying expenses"
-        }
-      ]
+      title: "Keep Detailed Records",
+      description: "Track all transactions, dates, costs, and fair market values. Good records can help you claim all legitimate deductions.",
+      savings: "Avoid penalties",
+      difficulty: "Easy",
+      biblical: "Suppose one of you wants to build a tower. Won't you first sit down and estimate the cost? - Luke 14:28",
+      icon: Receipt
     },
     {
-      category: "Biblical Stewardship",
-      icon: <BookOpen size={20} className="text-purple-400" />,
-      scripture: "Whoever can be trusted with very little can also be trusted with much. - Luke 16:10",
-      tips: [
-        {
-          tip: "Retirement account contributions",
-          description: "Maximize tax-deferred retirement savings while practicing biblical planning.",
-          savings: "Current year tax deduction"
-        },
-        {
-          tip: "Health Savings Account (HSA)",
-          description: "Triple tax advantage: deductible, grows tax-free, tax-free withdrawals for medical.",
-          savings: "Immediate deduction + future tax-free growth"
-        },
-        {
-          tip: "Qualified Small Business Stock",
-          description: "Invest in qualifying small businesses for potential tax-free gains.",
-          savings: "Up to $10M or 10x basis tax-free"
-        }
-      ]
+      title: "Consider Charitable Giving",
+      description: "Donate appreciated crypto directly to qualified charities to avoid capital gains tax while claiming a deduction for the full fair market value.",
+      savings: "Double tax benefit",
+      difficulty: "Medium",
+      biblical: "Each of you should give what you have decided in your heart to give. - 2 Corinthians 9:7",
+      icon: BookOpen
     }
   ];
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'Medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'Hard': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-r from-green-900/20 to-blue-900/20 border-ancient-gold/30">
-        <CardHeader>
-          <CardTitle className="text-ancient-gold flex items-center gap-2">
-            <DollarSign size={24} />
-            Biblical Tax-Saving Wisdom
-          </CardTitle>
-          <p className="text-white/70">
-            Practical strategies rooted in biblical principles to minimize your tax burden while honoring God and Caesar.
-          </p>
-        </CardHeader>
-      </Card>
+      <div className="text-center">
+        <h2 className="text-2xl font-scroll text-ancient-gold mb-2">Biblical Tax Saving Strategies</h2>
+        <p className="text-white/70">Wise stewardship principles applied to crypto taxation</p>
+      </div>
 
-      {taxTips.map((category, categoryIndex) => (
-        <Card key={categoryIndex} className="bg-black/40 border-ancient-gold/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-ancient-gold">
-              {category.icon}
-              {category.category}
-            </CardTitle>
-            <div className="bg-black/20 p-3 rounded-md border border-ancient-gold/20">
-              <p className="text-white/90 italic text-sm font-scroll">
-                "{category.scripture}"
-              </p>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {category.tips.map((tip, tipIndex) => (
-              <div key={tipIndex} className="bg-black/20 p-4 rounded-lg border border-ancient-gold/20">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-white">{tip.tip}</h4>
-                  <Badge className="bg-green-600 text-white">
-                    {tip.savings}
-                  </Badge>
+      <div className="grid gap-6">
+        {tips.map((tip, index) => {
+          const IconComponent = tip.icon;
+          return (
+            <Card key={index} className="border-scripture/30 bg-black/40">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-scripture/20 rounded-lg">
+                      <IconComponent className="h-5 w-5 text-ancient-gold" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{tip.title}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className={getDifficultyColor(tip.difficulty)}>
+                          {tip.difficulty}
+                        </Badge>
+                        <Badge variant="outline" className="border-green-500/30 text-green-400">
+                          {tip.savings}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-white/80 text-sm">{tip.description}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ))}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-white/80">{tip.description}</p>
+                
+                <div className="bg-black/50 p-4 rounded-lg border border-ancient-gold/30">
+                  <h4 className="font-medium text-ancient-gold mb-2">Biblical Wisdom:</h4>
+                  <p className="italic text-white/80 text-sm">{tip.biblical}</p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-      <Card className="bg-black/40 border-ancient-gold/30">
+      <Card className="border-amber-500/30 bg-amber-500/10">
         <CardContent className="pt-6">
-          <div className="flex items-center mb-4">
-            <PixelCharacter 
-              character="solomon" 
-              message="Remember: True wealth comes from wisdom and righteousness, not from avoiding taxes through questionable means." 
-              size="md"
-              soundEffect={true}
-            />
-          </div>
-          <div className="bg-yellow-900/20 border border-yellow-600/30 p-4 rounded-lg">
-            <h4 className="font-semibold text-yellow-400 mb-2">Important Disclaimer</h4>
-            <p className="text-white/80 text-sm">
-              This information is for educational purposes and should not replace professional tax advice. 
-              Always consult with a qualified tax professional for your specific situation. 
-              Bible.fi promotes biblical stewardship and legal tax optimization strategies.
+          <div className="text-center">
+            <h3 className="font-medium text-amber-400 mb-2">Important Reminder</h3>
+            <p className="text-amber-200/80 text-sm">
+              "Plans fail for lack of counsel, but with many advisers they succeed." - Proverbs 15:22
+              <br />
+              Always consult with a qualified tax professional for your specific situation.
             </p>
           </div>
         </CardContent>

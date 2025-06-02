@@ -1,34 +1,27 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { InfoIcon, BarChart4, Sprout, BookOpen, Check, ExternalLink } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { BibleVerse } from '@/data/bibleVerses';
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink, TrendingUp, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useSound } from '@/contexts/SoundContext';
 
 interface BiblicalFarmingStrategyProps {
   name: string;
   apy: string;
   riskLevel: 'low' | 'medium' | 'high';
   description: string;
-  asset1: {
-    symbol: string;
-    logoUrl?: string;
-  };
-  asset2: {
-    symbol: string;
-    logoUrl?: string;
-  };
+  asset1: { symbol: string };
+  asset2: { symbol: string };
   platform: string;
-  platformUrl?: string;
+  platformUrl: string;
   biblicalPrinciple: {
     verse: string;
     reference: string;
     principle: string;
   };
-  requirements?: string[];
+  requirements: string[];
 }
 
 const BiblicalFarmingStrategy: React.FC<BiblicalFarmingStrategyProps> = ({
@@ -41,154 +34,110 @@ const BiblicalFarmingStrategy: React.FC<BiblicalFarmingStrategyProps> = ({
   platform,
   platformUrl,
   biblicalPrinciple,
-  requirements = []
+  requirements
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  
-  const handleFarm = () => {
-    toast({
-      title: "Preparing Strategy",
-      description: "Connecting to farming platform...",
-    });
-    
-    if (platformUrl) {
-      setTimeout(() => {
-        window.open(platformUrl, '_blank');
-      }, 1000);
-    } else {
-      toast({
-        title: "Platform Unavailable",
-        description: "The farming platform is currently unavailable.",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  const getRiskBadgeColor = () => {
-    switch (riskLevel) {
-      case 'low':
-        return 'bg-green-500/20 text-green-500 border-green-500/30';
-      case 'medium':
-        return 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30';
-      case 'high':
-        return 'bg-red-500/20 text-red-500 border-red-500/30';
-      default:
-        return 'bg-blue-500/20 text-blue-500 border-blue-500/30';
+  const { playSound } = useSound();
+
+  const getRiskColor = (risk: string) => {
+    switch (risk) {
+      case 'low': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'high': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
 
+  const handleStartFarming = () => {
+    playSound('coin');
+    toast({
+      title: "Strategy Selected! 🌾",
+      description: `Starting ${name} on ${platform}`,
+    });
+    window.open(platformUrl, '_blank');
+  };
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+    playSound('select');
+  };
+
   return (
-    <Card className="relative overflow-hidden border border-ancient-gold/20 hover:border-ancient-gold/40 transition-all duration-300">
-      <CardHeader className="bg-scripture/10 pb-2">
-        <div className="flex justify-between items-start">
+    <Card className="border-scripture/30 bg-black/40 hover:border-ancient-gold/50 transition-colors">
+      <CardHeader>
+        <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="font-scroll text-xl">{name}</CardTitle>
-            <CardDescription className="text-sm mt-1">{platform}</CardDescription>
+            <CardTitle className="text-lg text-ancient-gold">{name}</CardTitle>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge className={getRiskColor(riskLevel)}>
+                <Shield className="w-3 h-3 mr-1" />
+                {riskLevel} risk
+              </Badge>
+              <Badge variant="outline" className="border-green-500/30 text-green-400">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                {apy}
+              </Badge>
+            </div>
           </div>
-          <Badge className={`${getRiskBadgeColor()} border capitalize`}>
-            {riskLevel} risk
-          </Badge>
+          <div className="text-right">
+            <div className="text-sm text-white/60">on {platform}</div>
+            <div className="text-xs text-ancient-gold/70">{asset1.symbol}-{asset2.symbol}</div>
+          </div>
         </div>
       </CardHeader>
       
-      <CardContent className="pt-4">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center -space-x-2">
-              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center border border-ancient-gold/30">
-                <span className="text-xs font-mono">{asset1.symbol}</span>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center border border-ancient-gold/30">
-                <span className="text-xs font-mono">{asset2.symbol}</span>
+      <CardContent className="space-y-4">
+        <p className="text-white/80 text-sm">{description}</p>
+        
+        {isExpanded && (
+          <div className="space-y-4">
+            <div className="bg-black/50 p-4 rounded-lg border border-ancient-gold/30">
+              <h4 className="font-medium text-ancient-gold mb-2">Biblical Foundation:</h4>
+              <p className="italic text-white/80 text-sm mb-2">"{biblicalPrinciple.verse}"</p>
+              <p className="text-right text-xs text-ancient-gold/70 mb-2">{biblicalPrinciple.reference}</p>
+              <p className="text-white/70 text-sm">{biblicalPrinciple.principle}</p>
+            </div>
+            
+            <div>
+              <h4 className="font-medium text-white mb-2">Requirements:</h4>
+              <div className="space-y-1">
+                {requirements.map((req, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm text-white/70">
+                    <CheckCircle className="w-3 h-3 text-green-400" />
+                    <span>{req}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <span className="text-sm text-muted-foreground">
-              {asset1.symbol}/{asset2.symbol} Pool
-            </span>
           </div>
+        )}
+        
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleStartFarming}
+            className="flex-1 bg-scripture hover:bg-scripture/80"
+          >
+            Start Farming
+            <ExternalLink className="ml-2 h-4 w-4" />
+          </Button>
           
-          <div className="text-right">
-            <div className="text-2xl font-bold text-ancient-gold">{apy}</div>
-            <div className="text-xs text-muted-foreground">Annual Yield</div>
-          </div>
+          <Button 
+            variant="outline"
+            onClick={toggleExpand}
+            className="border-ancient-gold/50 text-ancient-gold hover:bg-ancient-gold/20"
+          >
+            {isExpanded ? 'Less' : 'Details'}
+          </Button>
         </div>
         
-        <p className="text-sm mb-4">{description}</p>
-        
-        <div className="bg-black/20 rounded-lg p-3 mb-3 border border-ancient-gold/20">
-          <div className="flex items-center gap-2 text-ancient-gold mb-1">
-            <BookOpen size={14} />
-            <span className="font-medium text-sm">Biblical Principle</span>
-          </div>
-          <p className="text-sm italic mb-1 text-white/80">"{biblicalPrinciple.verse}"</p>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-ancient-gold/70">{biblicalPrinciple.reference}</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <InfoIcon size={14} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="max-w-xs text-xs">{biblicalPrinciple.principle}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        </div>
-        
-        {isDetailsOpen && (
-          <div className="mt-4 space-y-3">
-            {requirements.length > 0 && (
-              <div>
-                <h4 className="font-medium text-sm mb-2 flex items-center gap-1">
-                  <BarChart4 size={14} /> Requirements
-                </h4>
-                <ul className="space-y-1">
-                  {requirements.map((req, index) => (
-                    <li key={index} className="text-xs flex items-start gap-1">
-                      <Check size={12} className="mt-1 flex-shrink-0 text-green-500" />
-                      <span>{req}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+        {riskLevel === 'high' && (
+          <div className="flex items-center gap-2 text-amber-400 text-xs">
+            <AlertTriangle className="w-3 h-3" />
+            <span>High risk - invest only what you can afford to lose</span>
           </div>
         )}
       </CardContent>
-      
-      <CardFooter className="flex flex-col gap-2 border-t border-border pt-4">
-        <Button 
-          onClick={handleFarm} 
-          className="w-full bg-gradient-to-r from-ancient-gold/80 to-ancient-gold/70 hover:from-ancient-gold hover:to-ancient-gold/90 text-black flex items-center gap-2"
-        >
-          <Sprout size={16} />
-          <span>Farm with Biblical Wisdom</span>
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-xs text-scripture w-full"
-          onClick={() => setIsDetailsOpen(!isDetailsOpen)}
-        >
-          {isDetailsOpen ? "Hide Details" : "Show Details"}
-        </Button>
-      </CardFooter>
-      
-      <div className="absolute top-0 right-0 p-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={() => window.open(platformUrl, '_blank')}
-        >
-          <ExternalLink size={14} />
-        </Button>
-      </div>
     </Card>
   );
 };
