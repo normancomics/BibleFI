@@ -1,73 +1,87 @@
 
-import React, { useState, useEffect } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { BookOpen, Coins, Church, Receipt, Sprout, Rocket } from "lucide-react";
-import WalletConnect from "@/components/wallet/WalletConnect";
-import SoundToggle from "@/components/SoundToggle";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Home, 
+  BookOpen, 
+  TrendingUp, 
+  Users, 
+  Heart, 
+  Shield,
+  Coins,
+  Calculator,
+  Settings,
+  Wheat
+} from 'lucide-react';
+import SoundToggle from '@/components/SoundToggle';
 
 const NavBar: React.FC = () => {
-  const [visible, setVisible] = useState(true);
-  const [prevScrollPos, setPrevScrollPos] = useState(0);
   const location = useLocation();
   
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollPos = window.pageYOffset;
-      const isVisible = prevScrollPos > currentScrollPos || currentScrollPos < 10;
-      
-      setVisible(isVisible);
-      setPrevScrollPos(currentScrollPos);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [prevScrollPos]);
+  const navItems = [
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/defi', label: 'DeFi', icon: TrendingUp },
+    { path: '/staking', label: 'Staking', icon: Coins },
+    { path: '/farming', label: 'Farming', icon: Wheat },
+    { path: '/token', label: '$BIBLE', icon: Coins, badge: 'NEW' },
+    { path: '/tithe', label: 'Tithe', icon: Heart },
+    { path: '/wisdom', label: 'Wisdom', icon: BookOpen },
+    { path: '/taxes', label: 'Taxes', icon: Calculator },
+    { path: '/security', label: 'Security', icon: Shield },
+  ];
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className={`sticky top-0 z-50 w-full backdrop-blur-md bg-black/50 border-b border-gray-800 shadow-lg ${visible ? 'translate-y-0' : '-translate-y-full'} transition-transform duration-300`}>
-      <div className="container flex h-14 mx-auto items-center text-sm">
-        <Link to="/" className="flex items-center gap-2 font-bold text-ancient-gold hover:opacity-80 mr-8">
-          <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi Logo" className="h-8" />
-          <span className="font-game tracking-wide text-lg hidden md:inline">BIBLE.FI</span>
-        </Link>
-        
-        <div className="ml-auto flex items-center gap-4">
-          <nav className="flex items-center gap-1 md:gap-2">
-            <NavLink to="/wisdom" className="nav-link px-2 md:px-3 py-2">
-              <BookOpen className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">Wisdom</span>
-            </NavLink>
-            <NavLink to="/defi" className="nav-link px-2 md:px-3 py-2">
-              <Coins className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">DeFi</span>
-            </NavLink>
-            <NavLink to="/farming" className="nav-link px-2 md:px-3 py-2">
-              <Sprout className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">Farming</span>
-            </NavLink>
-            <NavLink to="/tithe" className="nav-link px-2 md:px-3 py-2">
-              <Church className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">Tithe</span>
-            </NavLink>
-            <NavLink to="/taxes" className="nav-link px-2 md:px-3 py-2">
-              <Receipt className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">Taxes</span>
-            </NavLink>
-            <NavLink to="/deploy" className="nav-link px-2 md:px-3 py-2">
-              <Rocket className="h-4 w-4 mr-1" />
-              <span className="hidden md:inline">Deploy</span>
-            </NavLink>
-          </nav>
-          
-          <SoundToggle className="ml-2" />
-          
-          <div className="hidden sm:block">
-            <WalletConnect />
+    <nav className="bg-black/80 backdrop-blur-md border-b border-ancient-gold/20 sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-ancient-gold rounded-lg flex items-center justify-center">
+              <span className="text-black font-bold text-sm">B</span>
+            </div>
+            <span className="font-scroll text-ancient-gold text-xl hidden sm:block">
+              Bible.fi
+            </span>
+          </Link>
+
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-1 overflow-x-auto scrollbar-hide">
+            {navItems.map((item) => (
+              <Link key={item.path} to={item.path}>
+                <Button
+                  variant={isActive(item.path) ? "default" : "ghost"}
+                  size="sm"
+                  className={`
+                    flex items-center gap-1 whitespace-nowrap
+                    ${isActive(item.path) 
+                      ? 'bg-ancient-gold text-black hover:bg-ancient-gold/90' 
+                      : 'text-white/80 hover:text-ancient-gold hover:bg-ancient-gold/10'
+                    }
+                  `}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{item.label}</span>
+                  {item.badge && (
+                    <Badge variant="secondary" className="ml-1 text-xs bg-scripture text-white">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            ))}
+          </div>
+
+          {/* Sound Toggle */}
+          <div className="flex items-center">
+            <SoundToggle />
           </div>
         </div>
       </div>
-    </header>
+    </nav>
   );
 };
 
