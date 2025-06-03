@@ -25,4 +25,3 @@ const TokenPage: React.FC = () => {
 };
 
 export default TokenPage;
-```

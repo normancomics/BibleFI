@@ -253,4 +253,3 @@ const BibleTokenDashboard: React.FC = () => {
 };
 
 export default BibleTokenDashboard;
-```
