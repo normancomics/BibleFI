@@ -2,6 +2,7 @@
 import React from 'react';
 import NavBar from '@/components/NavBar';
 import BibleTokenDashboard from '@/components/token/BibleTokenDashboard';
+import ContractDeploymentGuide from '@/components/deployment/ContractDeploymentGuide';
 
 const TokenPage: React.FC = () => {
   return (
@@ -18,7 +19,10 @@ const TokenPage: React.FC = () => {
           </p>
         </div>
         
-        <BibleTokenDashboard />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <BibleTokenDashboard />
+          <ContractDeploymentGuide />
+        </div>
       </main>
     </div>
   );
