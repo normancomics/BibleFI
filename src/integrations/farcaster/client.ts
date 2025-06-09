@@ -1,4 +1,3 @@
-
 import { FARCASTER_CONFIG, APP_CONFIG } from '@/farcaster/config';
 
 // Types for Farcaster Frame configuration
@@ -67,7 +66,7 @@ export const generateFrameHTML = (config: FrameConfig): string => {
   <div style="text-align: center; color: white; font-family: system-ui, sans-serif;">
     <h1 style="color: gold;">Bible.fi Frame</h1>
     <p>This HTML is meant to be embedded as a Farcaster Frame.</p>
-    <p>Visit <a href="https://bible.fi" style="color: gold; text-decoration: none;">Bible.fi</a> to explore biblical financial wisdom.</p>
+    <p>Visit <a href="https://biblefi.base.eth" style="color: gold; text-decoration: none;">Bible.fi</a> to explore biblical financial wisdom.</p>
   </div>
 </body>
 </html>`;
@@ -122,13 +121,13 @@ export class FarcasterClient {
    */
   public generateVerseFrame(verse: string, reference: string): string {
     return generateFrameHTML({
-      image: `${window.location.origin}/api/verse-image?verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`,
+      image: `https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=verse&verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`,
       buttons: [
-        { label: "Get More Wisdom", action: "link", target: `${window.location.origin}/wisdom` },
+        { label: "Get More Wisdom", action: "link", target: "https://biblefi.base.eth/wisdom" },
         { label: "Share This Verse", action: "post" },
-        { label: "Open Bible.fi", action: "link", target: window.location.origin },
+        { label: "Open Bible.fi", action: "link", target: "https://biblefi.base.eth" },
       ],
-      postUrl: `${window.location.origin}/api/share-verse`,
+      postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
       state: generateFrameState({ verse, reference })
     });
   }
@@ -142,13 +141,13 @@ export class FarcasterClient {
    */
   public generateTithingFrame(church: string, amount: string, token: string): string {
     return generateFrameHTML({
-      image: `${window.location.origin}/api/tithe-image?church=${encodeURIComponent(church)}&amount=${amount}&token=${token}`,
+      image: `https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=tithe&church=${encodeURIComponent(church)}&amount=${amount}&token=${token}`,
       buttons: [
-        { label: "Tithe Now", action: "link", target: `${window.location.origin}/tithe` },
-        { label: "Learn Biblical Finance", action: "link", target: `${window.location.origin}/wisdom` },
+        { label: "Tithe Now", action: "link", target: "https://biblefi.base.eth/tithe" },
+        { label: "Learn Biblical Finance", action: "link", target: "https://biblefi.base.eth/wisdom" },
         { label: "Share Your Tithing", action: "post" },
       ],
-      postUrl: `${window.location.origin}/api/share-tithe`,
+      postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
       state: generateFrameState({ church, amount, token })
     });
   }
@@ -162,13 +161,13 @@ export class FarcasterClient {
    */
   public generateWisdomScoreFrame(score: number, strengths: string[], verse: string): string {
     return generateFrameHTML({
-      image: `${window.location.origin}/api/wisdom-score?score=${score}&strengths=${encodeURIComponent(strengths.join(','))}&verse=${encodeURIComponent(verse)}`,
+      image: `https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=wisdom&score=${score}&strengths=${encodeURIComponent(strengths.join(','))}&verse=${encodeURIComponent(verse)}`,
       buttons: [
-        { label: "Get Your Wisdom Score", action: "link", target: `${window.location.origin}/wisdom` },
-        { label: "Apply Biblical Finance", action: "link", target: `${window.location.origin}/defi` },
+        { label: "Get Your Wisdom Score", action: "link", target: "https://biblefi.base.eth/wisdom" },
+        { label: "Apply Biblical Finance", action: "link", target: "https://biblefi.base.eth/defi" },
         { label: "Share Your Score", action: "post" },
       ],
-      postUrl: `${window.location.origin}/api/share-wisdom-score`,
+      postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
       state: generateFrameState({ score, strengths, verse })
     });
   }
@@ -179,13 +178,14 @@ export class FarcasterClient {
    */
   public generateDefaultFrame(): string {
     return generateFrameHTML({
-      image: APP_CONFIG.icon,
-      buttons: FARCASTER_CONFIG.frameConfig.buttons.map(btn => ({
-        label: btn.label,
-        action: btn.action as "link" | "post" | "mint" | "tx",
-        target: btn.target
-      })),
-      postUrl: FARCASTER_CONFIG.frameConfig.postUrl,
+      image: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=default",
+      buttons: [
+        { label: "Biblical Wisdom", action: "post" },
+        { label: "DeFi Swaps", action: "post" },
+        { label: "Digital Tithing", action: "post" },
+        { label: "Share Wisdom", action: "post" }
+      ],
+      postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
       state: generateFrameState({ referrer: "default-frame" })
     });
   }
@@ -198,7 +198,7 @@ export class FarcasterClient {
    */
   public generateVerseSharingUrl(verse: string, reference: string): string {
     const text = `"${verse}" - ${reference}\n\nBiblical wisdom from Bible.fi`;
-    const frameUrl = `${window.location.origin}/frame.html?verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`;
+    const frameUrl = `https://biblefi.base.eth/frame.html?verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`;
     
     return generateFarcasterShareUrl(text, frameUrl);
   }
