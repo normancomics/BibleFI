@@ -1,1 +1,11 @@
+
 project_id = "ojiipppypzigjnjblbzn"
+
+[functions.farcaster-api]
+verify_jwt = false
+
+[functions.frame-handler]
+verify_jwt = false
+
+[functions.generate-image]
+verify_jwt = false

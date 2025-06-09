@@ -14,24 +14,21 @@
   <!-- Basic Open Graph meta tags -->
   <meta property="og:title" content="Bible.fi - Biblical Financial Wisdom" />
   <meta property="og:description" content="Learn biblical principles for your financial journey on Base Chain." />
-  <meta property="og:image" content="https://biblefi.base.eth/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png" />
+  <meta property="og:image" content="https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=default" />
   
   <!-- Farcaster Frame meta tags -->
   <meta property="fc:frame" content="vNext" />
-  <meta property="fc:frame:image" content="https://biblefi.base.eth/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png" />
+  <meta property="fc:frame:image" content="https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=default" />
   <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
   <meta property="fc:frame:button:1" content="Biblical Wisdom" />
-  <meta property="fc:frame:button:1:action" content="link" />
-  <meta property="fc:frame:button:1:target" content="https://biblefi.base.eth/wisdom" />
+  <meta property="fc:frame:button:1:action" content="post" />
   <meta property="fc:frame:button:2" content="DeFi Swaps" />
-  <meta property="fc:frame:button:2:action" content="link" />
-  <meta property="fc:frame:button:2:target" content="https://biblefi.base.eth/defi" />
+  <meta property="fc:frame:button:2:action" content="post" />
   <meta property="fc:frame:button:3" content="Digital Tithing" />
-  <meta property="fc:frame:button:3:action" content="link" />
-  <meta property="fc:frame:button:3:target" content="https://biblefi.base.eth/tithe" />
+  <meta property="fc:frame:button:3:action" content="post" />
   <meta property="fc:frame:button:4" content="Share Wisdom" />
   <meta property="fc:frame:button:4:action" content="post" />
-  <meta property="fc:frame:post_url" content="https://biblefi.base.eth/api/frame" />
+  <meta property="fc:frame:post_url" content="https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler" />
   
   <style>
     body {
@@ -99,6 +96,17 @@
       margin: 15px 0;
       border: 1px solid rgba(255, 215, 0, 0.2);
     }
+    
+    .status-badge {
+      display: inline-block;
+      background: #10B981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -114,6 +122,8 @@
           • Digital tithing to churches<br/>
           • Biblical financial education<br/>
           • ZK privacy protection</p>
+          
+          <div class="status-badge">✅ Frame Endpoints Active</div>
         </div>
         
         <p style="margin: 10px 0; font-size: 14px; color: #FFD700;">
@@ -126,7 +136,7 @@
           <img src="/lovable-uploads/922260ef-cba9-4437-9d77-07bcba6560aa.png" alt="Base" class="base-logo">
         </p>
         <p style="font-size: 10px; margin-top: 5px;">
-          View in Warpcast for full interactive experience
+          Interactive frame powered by Supabase Edge Functions
         </p>
       </div>
     </div>
@@ -156,6 +166,21 @@
         property: tag.getAttribute('property'),
         content: tag.getAttribute('content')
       })));
+      
+      // Test endpoint connectivity
+      fetch('https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=default')
+        .then(response => {
+          console.log('Image endpoint status:', response.status);
+          if (response.ok) {
+            document.querySelector('.status-badge').textContent = '✅ All Endpoints Active';
+          }
+        })
+        .catch(error => {
+          console.error('Endpoint test failed:', error);
+          const badge = document.querySelector('.status-badge');
+          badge.textContent = '⚠️ Check Supabase Status';
+          badge.style.background = '#F59E0B';
+        });
     });
   </script>
 </body>

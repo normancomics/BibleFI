@@ -1,45 +1,42 @@
 
 // Configuration for Farcaster integration
 export const FARCASTER_CONFIG = {
-  domain: typeof window !== 'undefined' ? window.location.host : 'biblefi.base.eth',
-  siweUri: typeof window !== 'undefined' ? `https://${window.location.host}/api/auth/callback` : 'https://biblefi.base.eth/api/auth/callback',
-  rpcUrl: import.meta.env.VITE_FARCASTER_RPC_URL || 'https://mainnet.base.org',
-  relay: import.meta.env.VITE_FARCASTER_RELAY_URL || 'https://relay.farcaster.xyz',
+  domain: 'biblefi.base.eth',
+  siweUri: 'https://biblefi.base.eth/api/auth/callback',
+  rpcUrl: 'https://mainnet.base.org',
+  relay: 'https://relay.farcaster.xyz',
   version: 'vNext',
   
   // For Farcaster Mini-App (Frames)
   frameConfig: {
-    imageUrl: 'https://biblefi.base.eth/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
+    imageUrl: 'https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=default',
     aspectRatio: '1.91:1',
     buttons: [
       {
         label: 'Biblical Wisdom',
-        action: 'link',
-        target: 'https://biblefi.base.eth/wisdom'
+        action: 'post'
       },
       {
         label: 'DeFi Swaps',
-        action: 'link',
-        target: 'https://biblefi.base.eth/defi'
-      },
-      {
-        label: 'Share Wisdom',
         action: 'post'
       },
       {
         label: 'Digital Tithing',
-        action: 'link',
-        target: 'https://biblefi.base.eth/tithe'
+        action: 'post'
+      },
+      {
+        label: 'Share Wisdom',
+        action: 'post'
       }
     ],
-    postUrl: 'https://biblefi.base.eth/api/frame'
+    postUrl: 'https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler'
   }
 };
 
 export const APP_CONFIG = {
   name: 'biblefi.base.eth',
   description: 'Biblical wisdom for your financial journey',
-  icon: '/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
+  icon: 'https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=default',
   canonical: 'https://biblefi.base.eth',
   // Farcaster API key will be retrieved from Supabase secrets in server-side functions
   farcasterApi: {
