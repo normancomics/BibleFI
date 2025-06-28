@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
 import DailyScripture from "@/components/DailyScripture";
@@ -6,14 +5,14 @@ import FeatureCards from "@/components/home/FeatureCards";
 import TaxSection from "@/components/home/TaxSection";
 import { useSound } from "@/contexts/SoundContext";
 import FarcasterFrame from "@/farcaster/FarcasterFrame";
-import FarcasterConnect from "@/farcaster/FarcasterConnect";
 import { Card, CardContent } from "@/components/ui/card";
 import BiblefiHero from "@/components/home/BiblefiHero";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import { getRandomVerse } from "@/data/bibleVerses";
 import IntroAnimation from "@/components/home/IntroAnimation";
-import UniversalWalletConnect from "@/components/wallet/UniversalWalletConnect";
+import FixedFarcasterConnect from "@/components/farcaster/FixedFarcasterConnect";
+import RealWalletConnect from "@/components/wallet/RealWalletConnect";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -60,8 +59,8 @@ const Index: React.FC = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-end mb-4">
           <div className="flex items-center gap-3">
-            <FarcasterConnect size="sm" />
-            <UniversalWalletConnect 
+            <FixedFarcasterConnect size="sm" />
+            <RealWalletConnect 
               buttonText="Connect Wallet"
               buttonVariant="outline"
               buttonClassName="border-ancient-gold text-ancient-gold hover:bg-ancient-gold hover:text-black"
