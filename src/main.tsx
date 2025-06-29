@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SoundContextProvider } from "@/contexts/SoundContext";
+import { SoundProvider } from "@/contexts/SoundContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import { FarcasterAuthProvider } from "@/farcaster/auth";
 import { WagmiProvider } from 'wagmi';
@@ -30,12 +30,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <BrowserRouter>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <SecurityProvider>
-              <SoundContextProvider>
+              <SoundProvider>
                 <FarcasterAuthProvider>
                   <App />
                   <Toaster />
                 </FarcasterAuthProvider>
-              </SoundContextProvider>
+              </SoundProvider>
             </SecurityProvider>
           </ThemeProvider>
         </BrowserRouter>

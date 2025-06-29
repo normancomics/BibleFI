@@ -108,7 +108,8 @@ const FixedFarcasterConnect: React.FC<FixedFarcasterConnectProps> = ({
           playSound('error');
           setIsConnecting(false);
         }}
-      >
+      />
+      <div style={{ display: 'none' }}>
         <PixelButton 
           onClick={handleSignIn}
           className={`bg-purple-900 border-2 border-ancient-gold/70 hover:bg-purple-800 flex items-center text-ancient-gold ${sizeClasses[size]}`}
@@ -116,7 +117,7 @@ const FixedFarcasterConnect: React.FC<FixedFarcasterConnectProps> = ({
           <LogIn size={16} className="mr-2" />
           Connect Farcaster
         </PixelButton>
-      </SignInButton>
+      </div>
     </div>
   );
 };
