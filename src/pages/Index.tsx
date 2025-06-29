@@ -13,6 +13,7 @@ import { getRandomVerse } from "@/data/bibleVerses";
 import IntroAnimation from "@/components/home/IntroAnimation";
 import FixedFarcasterConnect from "@/components/farcaster/FixedFarcasterConnect";
 import RealWalletConnect from "@/components/wallet/RealWalletConnect";
+import MobileSetupGuide from "@/components/setup/MobileSetupGuide";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -70,6 +71,11 @@ const Index: React.FC = () => {
         
         {/* Hero section */}
         <BiblefiHero />
+        
+        {/* Mobile Setup Guide for iPad users */}
+        <div className="my-12">
+          <MobileSetupGuide />
+        </div>
         
         {/* Feature Showcase */}
         <FeatureShowcase />
