@@ -58,32 +58,62 @@ export class SuperfluidClient {
     'USDCx': {
       name: 'Super USDC',
       symbol: 'USDCx',
-      address: '0x1efF3Dd78F4A14aBfa9Fa66579bD3Ce9E1B30529', // Actual Base USDCx address
+      address: '0x1efF3Dd78F4A14aBfa9Fa66579bD3Ce9E1B30529',
       underlyingToken: {
         symbol: 'USDC',
-        address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' // Base USDC
+        address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
       },
       logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png'
     },
     'DAIx': {
       name: 'Super DAI',
       symbol: 'DAIx',
-      address: '0x7D60e4223A5C1e8A167aEF98a92a4B5C6889bE9C', // Actual Base DAIx address
+      address: '0x7D60e4223A5C1e8A167aEF98a92a4B5C6889bE9C',
       underlyingToken: {
         symbol: 'DAI',
-        address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb' // Base DAI
+        address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb'
       },
       logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
     },
     'ETHx': {
       name: 'Super ETH',
       symbol: 'ETHx',
-      address: '0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93', // Actual Base ETHx address
+      address: '0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93',
       underlyingToken: {
         symbol: 'ETH',
-        address: '0x4200000000000000000000000000000000000006' // Base WETH
+        address: '0x4200000000000000000000000000000000000006'
       },
       logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
+    },
+    'USDTx': {
+      name: 'Super USDT',
+      symbol: 'USDTx',
+      address: '0x8430f084b939208e2eded1584889c9a66b90562f',
+      underlyingToken: {
+        symbol: 'USDT',
+        address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2'
+      },
+      logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png'
+    },
+    'FRAXx': {
+      name: 'Super FRAX',
+      symbol: 'FRAXx',
+      address: '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22',
+      underlyingToken: {
+        symbol: 'FRAX',
+        address: '0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F'
+      },
+      logoURI: 'https://assets.coingecko.com/coins/images/13422/small/frax_logo.png'
+    },
+    'WBTCx': {
+      name: 'Super WBTC',
+      symbol: 'WBTCx',
+      address: '0x1ceA84203673764244E05693e42E6Ace62bE9BA5',
+      underlyingToken: {
+        symbol: 'WBTC',
+        address: '0x1ceA84203673764244E05693e42E6Ace62bE9BA5'
+      },
+      logoURI: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png'
     }
   };
 
