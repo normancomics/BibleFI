@@ -22,10 +22,10 @@ serve(async (req) => {
 
     const { endpoint, method = 'GET', data } = await req.json();
     
-    const farcasterResponse = await fetch(`https://api.farcaster.xyz${endpoint}`, {
+    const farcasterResponse = await fetch(`https://api.neynar.com/v2${endpoint}`, {
       method,
       headers: {
-        'Authorization': `Bearer ${farcasterApiKey}`,
+        'api_key': farcasterApiKey,
         'Content-Type': 'application/json',
       },
       body: data ? JSON.stringify(data) : undefined,

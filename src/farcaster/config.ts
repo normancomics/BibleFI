@@ -1,8 +1,8 @@
 
 // Configuration for Farcaster integration
 export const FARCASTER_CONFIG = {
-  domain: 'biblefi.base.eth',
-  siweUri: 'https://biblefi.base.eth/api/auth/callback',
+  domain: typeof window !== 'undefined' ? window.location.hostname : 'biblefi.base.eth',
+  siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://biblefi.base.eth/api/auth/callback',
   rpcUrl: 'https://mainnet.base.org',
   relay: 'https://relay.farcaster.xyz',
   version: 'vNext',
