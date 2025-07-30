@@ -14,10 +14,12 @@ import IntroAnimation from "@/components/home/IntroAnimation";
 import FixedFarcasterConnect from "@/components/farcaster/FixedFarcasterConnect";
 import RealWalletConnect from "@/components/wallet/RealWalletConnect";
 import MobileSetupGuide from "@/components/setup/MobileSetupGuide";
+import { useNavigate } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
   const [showIntro, setShowIntro] = useState(true);
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Enable user interaction on page load
@@ -108,19 +110,31 @@ const Index: React.FC = () => {
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              <button className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg p-4 text-left transition-colors">
+              <button 
+                onClick={() => navigate('/defi')}
+                className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg p-4 text-left transition-colors"
+              >
                 <div className="text-blue-600 text-sm font-medium">Swap</div>
                 <div className="text-gray-500 text-xs">Exchange tokens</div>
               </button>
-              <button className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg p-4 text-left transition-colors">
+              <button 
+                onClick={() => navigate('/staking')}
+                className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg p-4 text-left transition-colors"
+              >
                 <div className="text-green-600 text-sm font-medium">Stake</div>
                 <div className="text-gray-500 text-xs">Earn rewards</div>
               </button>
-              <button className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg p-4 text-left transition-colors">
+              <button 
+                onClick={() => navigate('/tithe')}
+                className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg p-4 text-left transition-colors"
+              >
                 <div className="text-purple-600 text-sm font-medium">Tithe</div>
                 <div className="text-gray-500 text-xs">Give generously</div>
               </button>
-              <button className="bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg p-4 text-left transition-colors">
+              <button 
+                onClick={() => navigate('/wisdom')}
+                className="bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg p-4 text-left transition-colors"
+              >
                 <div className="text-orange-600 text-sm font-medium">Learn</div>
                 <div className="text-gray-500 text-xs">Biblical wisdom</div>
               </button>
