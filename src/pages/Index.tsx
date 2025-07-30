@@ -52,7 +52,7 @@ const Index: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-black via-pixel-purple/10 to-black">
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       
       <NavBar />
@@ -64,13 +64,26 @@ const Index: React.FC = () => {
             <RealWalletConnect 
               buttonText="Connect Wallet"
               buttonVariant="outline"
-              buttonClassName="border-ancient-gold text-ancient-gold hover:bg-ancient-gold hover:text-black"
+              buttonClassName="border-retro-cyan text-retro-cyan hover:bg-retro-cyan hover:text-black font-pixel"
             />
           </div>
         </div>
         
-        {/* Hero section */}
-        <BiblefiHero />
+        {/* Retro Hero Section */}
+        <div className="text-center mb-12 relative">
+          <div className="absolute inset-0 bg-[url('/pixel-temple-bg.png')] bg-cover bg-center opacity-20" />
+          <div className="relative z-10">
+            <h1 className="font-orbitron text-6xl font-bold text-retro-cyan mb-4 text-shadow-neon">
+              BIBLE.FI
+            </h1>
+            <p className="font-pixel text-retro-green text-xl mb-2">
+              🎮 RETRO DEFI WISDOM 🎮
+            </p>
+            <p className="font-pixel text-pixel-gold text-sm">
+              MADE ON BASE CHAIN
+            </p>
+          </div>
+        </div>
         
         {/* Mobile Setup Guide for iPad users */}
         <div className="my-12">
@@ -80,15 +93,17 @@ const Index: React.FC = () => {
         {/* Feature Showcase */}
         <FeatureShowcase />
         
-        {/* Financial Wisdom section */}
-        <div className="my-12 bg-purple-900/30 border border-ancient-gold/20 rounded-lg p-6">
-          <h2 className="text-2xl font-scroll text-ancient-gold text-center mb-6">Biblical Financial Wisdom</h2>
+        {/* Retro Wisdom Section */}
+        <div className="my-12 retro-card p-6 bg-gradient-to-r from-pixel-purple/20 to-pixel-cyan/20 border-2 border-pixel-gold">
+          <h2 className="text-2xl font-orbitron text-pixel-gold text-center mb-6 text-shadow-neon">
+            🎮 BIBLICAL FINANCIAL WISDOM 🎮
+          </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="mt-4 bg-purple-900/60 p-4 rounded-lg border border-ancient-gold/30">
-              <h3 className="text-lg font-scroll text-ancient-gold mb-2">Financial Law</h3>
-              <p className="text-white/80 font-scroll text-sm">
-                Moses delivered God's law, which contains principles for honest finances, fair dealings, and care for the poor.
+            <div className="retro-card bg-black/60 p-4 border-2 border-retro-green">
+              <h3 className="text-lg font-orbitron text-retro-green mb-2">⚖️ FINANCIAL LAW</h3>
+              <p className="text-retro-cyan font-pixel text-sm">
+                Moses delivered God's law for honest finances and fair dealings
               </p>
             </div>
             
@@ -96,16 +111,16 @@ const Index: React.FC = () => {
               <WisdomCard 
                 scripture={financialVerse.text}
                 reference={financialVerse.reference}
-                principle="Wise stewardship requires careful planning and management of resources."
-                application="Apply this by creating a monthly budget that prioritizes giving, saving, and responsible spending."
+                principle="Wise stewardship requires careful planning"
+                application="Create a budget that prioritizes giving and saving"
                 tags={[financialVerse.category]}
               />
             </div>
             
-            <div className="mt-4 bg-purple-900/60 p-4 rounded-lg border border-ancient-gold/30">
-              <h3 className="text-lg font-scroll text-ancient-gold mb-2">Royal Wisdom</h3>
-              <p className="text-white/80 font-scroll text-sm">
-                King David modeled generous giving and responsible stewardship of resources for God's purposes.
+            <div className="retro-card bg-black/60 p-4 border-2 border-retro-yellow">
+              <h3 className="text-lg font-orbitron text-retro-yellow mb-2">👑 ROYAL WISDOM</h3>
+              <p className="text-retro-cyan font-pixel text-sm">
+                King David modeled generous giving and stewardship
               </p>
             </div>
           </div>
@@ -121,25 +136,24 @@ const Index: React.FC = () => {
         <FeatureCards />
         
         <div className="my-12">
-          <Card className="bg-purple-900/20 border border-ancient-gold shadow-md">
-            <CardContent className="p-6">
-              <h2 className="text-2xl text-ancient-gold font-scroll mb-4">Bible.fi Mini-App</h2>
-              <p className="text-white/80 mb-4 font-scroll">
-                Bible.fi is built specifically to run as a mini-app inside Farcaster, 
-                offering biblical financial wisdom directly to the Farcaster community.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="retro-card p-6 bg-gradient-to-r from-pixel-purple/20 to-retro-green/20 border-2 border-retro-cyan">
+            <h2 className="text-2xl text-retro-cyan font-orbitron mb-4 text-shadow-neon">
+              🎮 BIBLE.FI MINI-APP 🎮
+            </h2>
+            <p className="text-retro-green mb-4 font-pixel">
+              Built for Farcaster with retro DeFi wisdom!
+            </p>
+          </div>
         </div>
         
         {/* Tax Section */}
         <TaxSection />
       </main>
       
-      {/* "Made on Base Chain" footer */}
-      <footer className="py-6 text-center bg-gradient-to-t from-black/30 to-transparent">
-        <p className="text-xs font-pixel tracking-wider text-ancient-gold hover:text-ancient-gold/80 transition-colors">
-          MADE ON BASE CHAIN
+      {/* Retro Footer */}
+      <footer className="py-6 text-center bg-gradient-to-t from-black/80 to-transparent border-t border-pixel-gold">
+        <p className="text-pixel-gold font-pixel tracking-wider text-shadow-neon animate-pulse">
+          🎮 MADE ON BASE CHAIN 🎮
         </p>
       </footer>
     </div>
