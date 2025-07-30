@@ -52,106 +52,114 @@ const Index: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-black">
+    <div className="min-h-screen bg-white">
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       
       <NavBar />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-end mb-4">
-          <div className="flex items-center gap-3">
+      <main className="container mx-auto px-4 py-8 max-w-2xl">
+        {/* Header with Connect */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Bible.fi</h1>
+            <p className="text-gray-500 text-sm">Biblical DeFi on Base</p>
+          </div>
+          <div className="flex items-center gap-2">
             <FixedFarcasterConnect size="sm" />
             <RealWalletConnect 
               buttonText="Connect"
-              buttonVariant="outline"
-              buttonClassName="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+              buttonVariant="default"
+              buttonClassName="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2"
             />
           </div>
         </div>
         
-        {/* Clean Hero Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
-            Bible.fi
-          </h1>
-          <p className="text-gray-400 text-lg mb-2">
-            Biblical wisdom for DeFi
-          </p>
-          <p className="text-blue-400 text-sm">
-            Built on Base
-          </p>
+        {/* Main Cards */}
+        <div className="space-y-4">
+          {/* Portfolio Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Portfolio</h2>
+                <p className="text-gray-500 text-sm">Track your biblical DeFi investments</p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-gray-900">$0.00</div>
+                <div className="text-sm text-green-600">+0.00%</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+              <div className="text-center">
+                <div className="text-sm font-medium text-gray-900">$0.00</div>
+                <div className="text-xs text-gray-500">Staked</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm font-medium text-gray-900">$0.00</div>
+                <div className="text-xs text-gray-500">Lending</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm font-medium text-gray-900">$0.00</div>
+                <div className="text-xs text-gray-500">Tithing</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg p-4 text-left transition-colors">
+                <div className="text-blue-600 text-sm font-medium">Swap</div>
+                <div className="text-gray-500 text-xs">Exchange tokens</div>
+              </button>
+              <button className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg p-4 text-left transition-colors">
+                <div className="text-green-600 text-sm font-medium">Stake</div>
+                <div className="text-gray-500 text-xs">Earn rewards</div>
+              </button>
+              <button className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg p-4 text-left transition-colors">
+                <div className="text-purple-600 text-sm font-medium">Tithe</div>
+                <div className="text-gray-500 text-xs">Give generously</div>
+              </button>
+              <button className="bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg p-4 text-left transition-colors">
+                <div className="text-orange-600 text-sm font-medium">Learn</div>
+                <div className="text-gray-500 text-xs">Biblical wisdom</div>
+              </button>
+            </div>
+          </div>
+
+          {/* Daily Verse */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Today's Wisdom</h3>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-gray-700 text-sm mb-2">"{financialVerse.text}"</p>
+              <p className="text-gray-500 text-xs font-medium">{financialVerse.reference}</p>
+            </div>
+            <button className="w-full mt-4 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm py-2 rounded-lg transition-colors">
+              Share to Farcaster
+            </button>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+            <div className="space-y-3">
+              <div className="text-center py-8 text-gray-500">
+                <div className="text-sm">No recent activity</div>
+                <div className="text-xs">Connect your wallet to get started</div>
+              </div>
+            </div>
+          </div>
         </div>
-        
+
         {/* Mobile Setup Guide */}
-        <div className="my-12">
+        <div className="mt-8">
           <MobileSetupGuide />
         </div>
-        
-        {/* Feature Showcase */}
-        <FeatureShowcase />
-        
-        {/* Simple Wisdom Section */}
-        <div className="my-12 bg-slate-900/50 border border-slate-700 rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-white text-center mb-6">
-            Biblical Financial Principles
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
-              <h3 className="text-lg font-semibold text-blue-400 mb-2">Stewardship</h3>
-              <p className="text-gray-300 text-sm">
-                Manage resources wisely and responsibly
-              </p>
-            </div>
-            
-            <div>
-              <WisdomCard 
-                scripture={financialVerse.text}
-                reference={financialVerse.reference}
-                principle="Wise planning leads to prosperity"
-                application="Budget and invest with intention"
-                tags={[financialVerse.category]}
-              />
-            </div>
-            
-            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
-              <h3 className="text-lg font-semibold text-green-400 mb-2">Generosity</h3>
-              <p className="text-gray-300 text-sm">
-                Give generously and invest in others
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        {/* Daily Scripture and Farcaster */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-          <DailyScripture />
-          <FarcasterFrame />
-        </div>
-        
-        {/* Feature cards */}
-        <FeatureCards />
-        
-        <div className="my-12">
-          <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              Farcaster Mini App
-            </h2>
-            <p className="text-gray-300 mb-4">
-              Access Bible.fi directly within Farcaster for seamless DeFi interactions.
-            </p>
-          </div>
-        </div>
-        
-        {/* Tax Section */}
-        <TaxSection />
       </main>
       
-      {/* Clean Footer */}
-      <footer className="py-6 text-center border-t border-slate-800">
-        <p className="text-gray-500 text-sm">
-          Built on Base Chain
-        </p>
+      {/* Footer */}
+      <footer className="py-6 text-center border-t border-gray-200 bg-gray-50">
+        <p className="text-gray-400 text-xs">Built on Base Chain</p>
       </footer>
     </div>
   );
