@@ -52,7 +52,7 @@ const Index: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-pixel-purple/10 to-black">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-black">
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       
       <NavBar />
@@ -62,30 +62,27 @@ const Index: React.FC = () => {
           <div className="flex items-center gap-3">
             <FixedFarcasterConnect size="sm" />
             <RealWalletConnect 
-              buttonText="Connect Wallet"
+              buttonText="Connect"
               buttonVariant="outline"
-              buttonClassName="border-retro-cyan text-retro-cyan hover:bg-retro-cyan hover:text-black font-pixel"
+              buttonClassName="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
             />
           </div>
         </div>
         
-        {/* Retro Hero Section */}
-        <div className="text-center mb-12 relative">
-          <div className="absolute inset-0 bg-[url('/pixel-temple-bg.png')] bg-cover bg-center opacity-20" />
-          <div className="relative z-10">
-            <h1 className="font-orbitron text-6xl font-bold text-retro-cyan mb-4 text-shadow-neon">
-              BIBLE.FI
-            </h1>
-            <p className="font-pixel text-retro-green text-xl mb-2">
-              🎮 RETRO DEFI WISDOM 🎮
-            </p>
-            <p className="font-pixel text-pixel-gold text-sm">
-              MADE ON BASE CHAIN
-            </p>
-          </div>
+        {/* Clean Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-4">
+            Bible.fi
+          </h1>
+          <p className="text-gray-400 text-lg mb-2">
+            Biblical wisdom for DeFi
+          </p>
+          <p className="text-blue-400 text-sm">
+            Built on Base
+          </p>
         </div>
         
-        {/* Mobile Setup Guide for iPad users */}
+        {/* Mobile Setup Guide */}
         <div className="my-12">
           <MobileSetupGuide />
         </div>
@@ -93,17 +90,17 @@ const Index: React.FC = () => {
         {/* Feature Showcase */}
         <FeatureShowcase />
         
-        {/* Retro Wisdom Section */}
-        <div className="my-12 retro-card p-6 bg-gradient-to-r from-pixel-purple/20 to-pixel-cyan/20 border-2 border-pixel-gold">
-          <h2 className="text-2xl font-orbitron text-pixel-gold text-center mb-6 text-shadow-neon">
-            🎮 BIBLICAL FINANCIAL WISDOM 🎮
+        {/* Simple Wisdom Section */}
+        <div className="my-12 bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-white text-center mb-6">
+            Biblical Financial Principles
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="retro-card bg-black/60 p-4 border-2 border-retro-green">
-              <h3 className="text-lg font-orbitron text-retro-green mb-2">⚖️ FINANCIAL LAW</h3>
-              <p className="text-retro-cyan font-pixel text-sm">
-                Moses delivered God's law for honest finances and fair dealings
+            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+              <h3 className="text-lg font-semibold text-blue-400 mb-2">Stewardship</h3>
+              <p className="text-gray-300 text-sm">
+                Manage resources wisely and responsibly
               </p>
             </div>
             
@@ -111,16 +108,16 @@ const Index: React.FC = () => {
               <WisdomCard 
                 scripture={financialVerse.text}
                 reference={financialVerse.reference}
-                principle="Wise stewardship requires careful planning"
-                application="Create a budget that prioritizes giving and saving"
+                principle="Wise planning leads to prosperity"
+                application="Budget and invest with intention"
                 tags={[financialVerse.category]}
               />
             </div>
             
-            <div className="retro-card bg-black/60 p-4 border-2 border-retro-yellow">
-              <h3 className="text-lg font-orbitron text-retro-yellow mb-2">👑 ROYAL WISDOM</h3>
-              <p className="text-retro-cyan font-pixel text-sm">
-                King David modeled generous giving and stewardship
+            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+              <h3 className="text-lg font-semibold text-green-400 mb-2">Generosity</h3>
+              <p className="text-gray-300 text-sm">
+                Give generously and invest in others
               </p>
             </div>
           </div>
@@ -136,12 +133,12 @@ const Index: React.FC = () => {
         <FeatureCards />
         
         <div className="my-12">
-          <div className="retro-card p-6 bg-gradient-to-r from-pixel-purple/20 to-retro-green/20 border-2 border-retro-cyan">
-            <h2 className="text-2xl text-retro-cyan font-orbitron mb-4 text-shadow-neon">
-              🎮 BIBLE.FI MINI-APP 🎮
+          <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">
+              Farcaster Mini App
             </h2>
-            <p className="text-retro-green mb-4 font-pixel">
-              Built for Farcaster with retro DeFi wisdom!
+            <p className="text-gray-300 mb-4">
+              Access Bible.fi directly within Farcaster for seamless DeFi interactions.
             </p>
           </div>
         </div>
@@ -150,10 +147,10 @@ const Index: React.FC = () => {
         <TaxSection />
       </main>
       
-      {/* Retro Footer */}
-      <footer className="py-6 text-center bg-gradient-to-t from-black/80 to-transparent border-t border-pixel-gold">
-        <p className="text-pixel-gold font-pixel tracking-wider text-shadow-neon animate-pulse">
-          🎮 MADE ON BASE CHAIN 🎮
+      {/* Clean Footer */}
+      <footer className="py-6 text-center border-t border-slate-800">
+        <p className="text-gray-500 text-sm">
+          Built on Base Chain
         </p>
       </footer>
     </div>
