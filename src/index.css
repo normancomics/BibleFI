@@ -5,26 +5,26 @@
 
 @layer base {
   :root {
-    --background: 258 67% 60%;
-    --foreground: 0 0% 98%;
-    --card: 258 67% 3%;
-    --card-foreground: 0 0% 98%;
-    --popover: 258 67% 3%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217 100% 50%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 3% 11%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64%;
-    --accent: 240 3% 11%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62% 65%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3% 11%;
-    --input: 240 3% 11%;
-    --ring: 240 3% 11%;
-    --radius: 0.5rem;
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 9% 46%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+    --radius: 0.75rem;
 
     /* Custom colors */
     --scripture: 258 67% 60%;
@@ -46,8 +46,7 @@
   
   body {
     @apply bg-background text-foreground;
-    background-image: linear-gradient(135deg, rgba(155, 135, 245, 0.9) 0%, rgba(0, 82, 255, 0.8) 100%);
-    background-attachment: fixed;
+    background: hsl(var(--background));
   }
   
   /* Consistent font styling */
