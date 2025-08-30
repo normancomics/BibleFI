@@ -27,26 +27,12 @@ const MultiWalletConnector: React.FC<MultiWalletConnectorProps> = ({
     {
       id: "farcaster",
       name: "Farcaster Wallet",
-      icon: "/lovable-uploads/8afaf401-60bd-4154-a6c1-5be046578f2f.png",
-      description: "Connect using your Farcaster account wallet",
+      description: "Connect using your Farcaster account",
     },
     {
       id: "coinbase",
-      name: "Coinbase Wallet",
-      icon: "https://www.coinbase.com/img/favicon.ico",
+      name: "Coinbase Wallet", 
       description: "Connect using Coinbase Wallet",
-    },
-    {
-      id: "rainbow",
-      name: "Rainbow Wallet",
-      icon: "https://rainbow.me/favicon.png",
-      description: "Connect using Rainbow Wallet",
-    },
-    {
-      id: "walletconnect",
-      name: "WalletConnect",
-      icon: "https://walletconnect.com/favicon.ico",
-      description: "Connect using WalletConnect protocol",
     },
   ];
 
@@ -85,26 +71,19 @@ const MultiWalletConnector: React.FC<MultiWalletConnectorProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 gap-4 py-4">
+        <div className="grid grid-cols-1 gap-3 py-4">
           {wallets.map((wallet) => (
-            <Card 
-              key={wallet.id} 
-              className="cursor-pointer hover:border-scripture transition-colors"
+            <Button
+              key={wallet.id}
+              variant="outline"
+              className="h-auto p-4 justify-start hover:border-ancient-gold hover:bg-ancient-gold/10"
               onClick={() => handleWalletConnect(wallet.id)}
             >
-              <CardHeader className="py-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img src={wallet.icon} alt={wallet.name} className="w-8 h-8" />
-                    <CardTitle className="text-base">{wallet.name}</CardTitle>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </CardHeader>
-              <CardContent className="py-2">
-                <p className="text-sm text-muted-foreground">{wallet.description}</p>
-              </CardContent>
-            </Card>
+              <div className="text-left">
+                <div className="font-medium text-white">{wallet.name}</div>
+                <div className="text-sm text-white/70">{wallet.description}</div>
+              </div>
+            </Button>
           ))}
         </div>
       </DialogContent>
