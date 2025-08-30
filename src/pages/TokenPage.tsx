@@ -43,7 +43,7 @@ const TokenPage: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <TrendingUp className="h-8 w-8 text-green-600" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">1,000,000</p>
+                  <p className="text-2xl font-bold text-foreground">33,000,000</p>
                   <p className="text-sm text-muted-foreground">Total Supply</p>
                 </div>
               </div>
