@@ -5,37 +5,43 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 9% 46%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 9% 46%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 221 83% 53%;
+    /* Dark biblical theme - warm, atmospheric colors */
+    --background: 258 30% 8%;        /* Deep purple-navy background */
+    --foreground: 40 15% 88%;        /* Warm off-white text */
+    --card: 258 25% 12%;             /* Slightly lighter dark purple for cards */
+    --card-foreground: 40 10% 85%;   /* Soft warm white for card text */
+    --popover: 258 20% 15%;          /* Dark purple for popovers */
+    --popover-foreground: 40 10% 90%; /* Bright warm white for popover text */
+    --primary: 258 45% 55%;          /* Muted scripture purple */
+    --primary-foreground: 40 15% 95%; /* Very light warm white */
+    --secondary: 258 20% 18%;        /* Dark purple-gray */
+    --secondary-foreground: 41 40% 70%; /* Muted gold text */
+    --muted: 258 15% 20%;            /* Muted dark background */
+    --muted-foreground: 40 8% 65%;   /* Muted warm gray text */
+    --accent: 41 55% 45%;            /* Deeper muted gold accent */
+    --accent-foreground: 258 25% 15%; /* Dark text for gold backgrounds */
+    --destructive: 0 65% 55%;        /* Muted red */
+    --destructive-foreground: 40 15% 95%; /* Light text for destructive */
+    --border: 258 20% 25%;           /* Subtle purple-gray borders */
+    --input: 258 15% 22%;            /* Dark input backgrounds */
+    --ring: 258 45% 55%;             /* Focus ring color */
     --radius: 0.75rem;
 
-    /* Custom colors */
-    --scripture: 258 67% 60%;
-    --scripture-light: 258 67% 70%;
-    --scripture-dark: 258 40% 50%;
-    --ancient-gold: 41 89% 64%;
-    --ancient-scroll: 39 70% 90%;
-    --base-blue: 217 100% 50%;
-    --pixel-purple: 258 67% 60%;
-    --pixel-green: 120 100% 50%;
-    --pixel-yellow: 60 100% 50%;
+    /* Enhanced biblical custom colors - all HSL */
+    --scripture: 258 45% 65%;        /* Softer scripture purple */
+    --scripture-light: 258 50% 75%;  /* Light scripture purple */
+    --scripture-dark: 258 35% 45%;   /* Dark scripture purple */
+    --ancient-gold: 41 70% 55%;      /* Warm muted gold */
+    --ancient-scroll: 39 30% 25%;    /* Dark parchment background */
+    --base-blue: 217 80% 45%;        /* Muted base blue */
+    --pixel-purple: 258 45% 65%;     /* Consistent with scripture */
+    --pixel-green: 120 60% 45%;      /* Muted pixel green */
+    --pixel-yellow: 45 70% 60%;      /* Warm muted yellow */
+    
+    /* Additional atmospheric colors */
+    --temple-stone: 220 15% 25%;     /* Dark stone gray */
+    --sacred-flame: 25 90% 50%;      /* Warm orange glow */
+    --wisdom-glow: 41 80% 60%;       /* Golden wisdom light */
   }
 }
 
