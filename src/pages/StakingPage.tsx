@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import StakingPool from "@/components/StakingPool";
 import StakingTransparency from "@/components/StakingTransparency";
 import MultiWalletConnector from "@/components/wallet/MultiWalletConnector";
+import BiblicalStakingDashboard from "@/components/staking/BiblicalStakingDashboard";
+import BiblicalYieldOptimizer from "@/components/defi/BiblicalYieldOptimizer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Coins, Lock, Shield } from "lucide-react";
+import { BookOpen, Coins, Lock, Shield, TrendingUp, Zap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import StakingForm from "@/components/staking/StakingForm";
 import RiskBadge from "@/components/staking/RiskBadge";
@@ -15,6 +17,8 @@ const StakingPage: React.FC = () => {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [userBalance] = useState(5000); // Mock balance
+  const [wisdomScore] = useState(65); // Mock wisdom score
   
   const handleWalletConnect = (provider: string, address: string) => {
     setConnectedWallet(provider);
@@ -73,12 +77,19 @@ const StakingPage: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="pools">
-                <TabsList className="grid w-full grid-cols-3">
+              <Tabs defaultValue="dashboard">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                   <TabsTrigger value="pools">Staking Pools</TabsTrigger>
-                  <TabsTrigger value="details">Biblical Details</TabsTrigger>
+                  <TabsTrigger value="optimizer">Optimizer</TabsTrigger>
                   <TabsTrigger value="transparency">Transparency</TabsTrigger>
                 </TabsList>
+                <TabsContent value="dashboard" className="pt-6">
+                  <BiblicalStakingDashboard 
+                    userAddress={connectedAddress}
+                    wisdomScore={wisdomScore}
+                  />
+                </TabsContent>
                 <TabsContent value="pools" className="pt-6">
                   <div className="space-y-6">
                     <StakingPool 
@@ -115,20 +126,11 @@ const StakingPage: React.FC = () => {
                     />
                   </div>
                 </TabsContent>
-                <TabsContent value="details" className="pt-6">
-                  {showDetails ? (
-                    <StakingTransparency />
-                  ) : (
-                    <div className="p-6 bg-black/20 rounded-lg border border-scripture/20 text-center">
-                      <p className="mb-4">Learn more about how our biblical staking pools operate and the principles they follow.</p>
-                      <button 
-                        className="text-scripture underline"
-                        onClick={handleShowTransparency}
-                      >
-                        View Transparency Report
-                      </button>
-                    </div>
-                  )}
+                <TabsContent value="optimizer" className="pt-6">
+                  <BiblicalYieldOptimizer 
+                    userBalance={userBalance}
+                    wisdomScore={wisdomScore}
+                  />
                 </TabsContent>
                 <TabsContent value="transparency" className="pt-6">
                   <StakingTransparency />
