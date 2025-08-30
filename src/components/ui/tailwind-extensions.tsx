@@ -4,42 +4,42 @@ import React from "react";
 // Custom styled components that extend Tailwind functionality
 // These are primarily for animations and visual effects
 
-// Animated logo component that uses the new Bible.fi logo
+// eBoy-style pixel logo component
 export const AnimatedLogo: React.FC<{ size?: "sm" | "md" | "lg", className?: string }> = ({ 
   size = "md", 
   className = "" 
 }) => {
   const sizeClasses = {
-    sm: "h-16",
-    md: "h-24",
-    lg: "h-32"
+    sm: "text-xl",
+    md: "text-3xl",
+    lg: "text-5xl"
   };
   
   return (
-    <div className={`relative ${sizeClasses[size]} ${className}`}>
-      <div className="font-scroll text-4xl sm:text-5xl md:text-6xl font-bold text-ancient-gold">
+    <div className={`${className} eboy-card p-4 bg-eboy-yellow`}>
+      <div className={`font-pixel font-bold ${sizeClasses[size]} text-foreground uppercase tracking-wider`}>
         Bible.fi
       </div>
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine" />
     </div>
   );
 };
 
-// Glowing text component
+// eBoy-style pixel text component
 export const GlowingText: React.FC<{ 
   children: React.ReactNode, 
-  color?: "gold" | "blue" | "purple" | "white", 
+  color?: "yellow" | "green" | "pink" | "blue" | "purple", 
   className?: string
-}> = ({ children, color = "gold", className = "" }) => {
+}> = ({ children, color = "yellow", className = "" }) => {
   const colorClasses = {
-    gold: "text-ancient-gold drop-shadow-[0_0_8px_rgba(255,215,0,0.7)]",
-    blue: "text-base-blue drop-shadow-[0_0_8px_rgba(0,82,255,0.7)]",
-    purple: "text-scripture drop-shadow-[0_0_8px_rgba(155,135,245,0.7)]",
-    white: "text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]",
+    yellow: "text-eboy-yellow",
+    green: "text-eboy-green",
+    pink: "text-eboy-pink",
+    blue: "text-eboy-blue",
+    purple: "text-eboy-purple",
   };
   
   return (
-    <span className={`${colorClasses[color]} ${className}`}>
+    <span className={`${colorClasses[color]} font-pixel uppercase tracking-wider eboy-text ${className}`}>
       {children}
     </span>
   );

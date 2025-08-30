@@ -42,7 +42,7 @@ const BiblefiHero: React.FC = () => {
       >
         <div className="flex flex-col items-center justify-center">
           <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
-            <GlowingText color="gold">Bible.fi</GlowingText>
+            <GlowingText color="yellow">Bible.fi</GlowingText>
           </div>
           <div className="text-lg md:text-xl font-scroll text-ancient-gold opacity-80">
             Biblical Wisdom for Financial Stewardship

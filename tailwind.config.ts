@@ -63,33 +63,34 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Bible.Fi custom colors - Farcaster purple and Base blue
+				// eBoy-inspired bright colors
+				eboy: {
+					yellow: 'hsl(var(--eboy-yellow))',
+					green: 'hsl(var(--eboy-green))',
+					pink: 'hsl(var(--eboy-pink))',
+					blue: 'hsl(var(--eboy-blue))',
+					red: 'hsl(var(--eboy-red))',
+					orange: 'hsl(var(--eboy-orange))',
+					purple: 'hsl(var(--eboy-purple))',
+					cyan: 'hsl(var(--eboy-cyan))',
+				},
+				// Biblical theme colors - bright like eBoy
 				scripture: {
-					DEFAULT: '#9B87F5', // Farcaster purple
-					dark: '#7E69AB',    // Darker purple
-					light: '#D6BCFA',   // Light purple
+					DEFAULT: 'hsl(var(--scripture))',
+					light: 'hsl(var(--scripture-light))',
+					dark: 'hsl(var(--scripture-dark))',
 				},
 				ancient: {
-					scroll: '#FFF7C2',  // Parchment yellow
-					gold: '#FFD700',    // Gold for important elements
-					temple: '#00FF66',  // Green for temple elements
+					gold: 'hsl(var(--ancient-gold))',
+					scroll: 'hsl(var(--ancient-scroll))',
 				},
-				// Retro game colors
 				pixel: {
-					red: '#FF5555',
-					blue: '#0052FF',    // Base blue
-					green: '#55FF55',
-					yellow: '#FFFF55',
-					orange: '#FF9955',
-					pink: '#FF55FF',
-					cyan: '#00FFFF',
-					purple: '#9B87F5',  // Farcaster purple
-					black: '#000000',
-					white: '#FFFFFF',
+					purple: 'hsl(var(--pixel-purple))',
+					green: 'hsl(var(--pixel-green))',
+					yellow: 'hsl(var(--pixel-yellow))',
 				},
 				base: {
-					blue: '#0052FF', // Base chain blue
-					dark: '#003399',
+					blue: 'hsl(var(--base-blue))',
 				}
 			},
 			borderRadius: {

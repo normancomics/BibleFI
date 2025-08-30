@@ -5,43 +5,53 @@
 
 @layer base {
   :root {
-    /* Dark biblical theme - warm, atmospheric colors */
-    --background: 258 30% 8%;        /* Deep purple-navy background */
-    --foreground: 40 15% 88%;        /* Warm off-white text */
-    --card: 258 25% 12%;             /* Slightly lighter dark purple for cards */
-    --card-foreground: 40 10% 85%;   /* Soft warm white for card text */
-    --popover: 258 20% 15%;          /* Dark purple for popovers */
-    --popover-foreground: 40 10% 90%; /* Bright warm white for popover text */
-    --primary: 258 45% 55%;          /* Muted scripture purple */
-    --primary-foreground: 40 15% 95%; /* Very light warm white */
-    --secondary: 258 20% 18%;        /* Dark purple-gray */
-    --secondary-foreground: 41 40% 70%; /* Muted gold text */
-    --muted: 258 15% 20%;            /* Muted dark background */
-    --muted-foreground: 40 8% 65%;   /* Muted warm gray text */
-    --accent: 41 55% 45%;            /* Deeper muted gold accent */
-    --accent-foreground: 258 25% 15%; /* Dark text for gold backgrounds */
-    --destructive: 0 65% 55%;        /* Muted red */
-    --destructive-foreground: 40 15% 95%; /* Light text for destructive */
-    --border: 258 20% 25%;           /* Subtle purple-gray borders */
-    --input: 258 15% 22%;            /* Dark input backgrounds */
-    --ring: 258 45% 55%;             /* Focus ring color */
-    --radius: 0.75rem;
+    /* eBoy-inspired bright pixel art theme */
+    --background: 45 100% 97%;       /* Clean off-white like eBoy */
+    --foreground: 0 0% 5%;           /* Sharp black text */
+    --card: 0 0% 100%;               /* Pure white cards */
+    --card-foreground: 0 0% 5%;      /* Black text on cards */
+    --popover: 0 0% 100%;            /* White popovers */
+    --popover-foreground: 0 0% 5%;   /* Black text on popovers */
+    --primary: 162 100% 40%;         /* Bright eBoy green */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --secondary: 45 100% 50%;        /* Bright eBoy yellow */
+    --secondary-foreground: 0 0% 5%; /* Black text on yellow */
+    --muted: 0 0% 95%;               /* Light gray muted */
+    --muted-foreground: 0 0% 40%;    /* Medium gray text */
+    --accent: 320 100% 70%;          /* Bright eBoy pink/magenta */
+    --accent-foreground: 0 0% 5%;    /* Black text on accent */
+    --destructive: 0 100% 60%;       /* Bright red */
+    --destructive-foreground: 0 0% 100%; /* White text on red */
+    --border: 0 0% 85%;              /* Light gray borders */
+    --input: 0 0% 98%;               /* Very light input backgrounds */
+    --ring: 162 100% 40%;            /* Green focus ring */
+    --radius: 0px;                   /* Sharp pixel corners */
 
-    /* Enhanced biblical custom colors - all HSL */
-    --scripture: 258 45% 65%;        /* Softer scripture purple */
-    --scripture-light: 258 50% 75%;  /* Light scripture purple */
-    --scripture-dark: 258 35% 45%;   /* Dark scripture purple */
-    --ancient-gold: 41 70% 55%;      /* Warm muted gold */
-    --ancient-scroll: 39 30% 25%;    /* Dark parchment background */
-    --base-blue: 217 80% 45%;        /* Muted base blue */
-    --pixel-purple: 258 45% 65%;     /* Consistent with scripture */
-    --pixel-green: 120 60% 45%;      /* Muted pixel green */
-    --pixel-yellow: 45 70% 60%;      /* Warm muted yellow */
+    /* eBoy-inspired bright pixel colors */
+    --eboy-yellow: 45 100% 50%;      /* Signature eBoy yellow */
+    --eboy-green: 162 100% 40%;      /* Signature eBoy green */
+    --eboy-pink: 320 100% 70%;       /* Bright eBoy pink */
+    --eboy-blue: 200 100% 50%;       /* Bright eBoy blue */
+    --eboy-red: 0 100% 60%;          /* Bright eBoy red */
+    --eboy-orange: 25 100% 55%;      /* Bright eBoy orange */
+    --eboy-purple: 280 100% 65%;     /* Bright eBoy purple */
+    --eboy-cyan: 180 100% 50%;       /* Bright eBoy cyan */
     
-    /* Additional atmospheric colors */
-    --temple-stone: 220 15% 25%;     /* Dark stone gray */
-    --sacred-flame: 25 90% 50%;      /* Warm orange glow */
-    --wisdom-glow: 41 80% 60%;       /* Golden wisdom light */
+    /* Biblical pixel colors - bright like eBoy */
+    --scripture: 280 100% 65%;       /* Bright purple for scripture */
+    --scripture-light: 280 100% 80%; /* Light purple */
+    --scripture-dark: 280 100% 45%;  /* Dark purple */
+    --ancient-gold: 45 100% 50%;     /* Bright gold */
+    --ancient-scroll: 39 100% 85%;   /* Light parchment */
+    --base-blue: 200 100% 50%;       /* Bright base blue */
+    --pixel-purple: 280 100% 65%;    /* Bright pixel purple */
+    --pixel-green: 120 100% 40%;     /* Bright pixel green */
+    --pixel-yellow: 45 100% 50%;     /* Bright pixel yellow */
+    
+    /* Additional bright colors */
+    --temple-stone: 0 0% 80%;        /* Light stone gray */
+    --sacred-flame: 25 100% 55%;     /* Bright orange flame */
+    --wisdom-glow: 45 100% 60%;      /* Bright golden glow */
   }
 }
 
@@ -73,51 +83,80 @@
   .pixelated {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
   }
   
-  .text-glow {
-    text-shadow: 0 0 10px var(--scripture-light);
+  .eboy-text {
+    font-family: 'PixelFont', monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
   }
   
-  .gold-gradient-text {
-    background: linear-gradient(to bottom, #f6e05e, #b7791f);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 10px rgba(183, 121, 31, 0.5);
+  .eboy-yellow-bg {
+    background-color: hsl(var(--eboy-yellow));
+    color: hsl(var(--foreground));
   }
   
-  .drop-shadow-glow {
-    filter: drop-shadow(0 0 8px var(--scripture-light));
+  .eboy-green-bg {
+    background-color: hsl(var(--eboy-green));
+    color: hsl(var(--primary-foreground));
+  }
+  
+  .eboy-pixel-border {
+    border: 2px solid hsl(var(--foreground));
+    border-radius: 0;
+  }
+  
+  .eboy-shadow {
+    box-shadow: 4px 4px 0px hsl(var(--foreground));
+  }
+  
+  .pixel-perfect {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transform: scale(1);
   }
 }
 
 @layer components {
-  .pixel-card {
-    @apply border-2 border-ancient-gold/50 bg-black/40 shadow-lg backdrop-blur-sm;
+  .eboy-card {
+    @apply bg-card border-2 border-foreground eboy-shadow transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none;
   }
   
-  .base-button {
-    @apply bg-base-blue hover:bg-base-blue/80 text-white font-medium transition-all duration-200;
+  .eboy-button {
+    @apply bg-eboy-green text-primary-foreground border-2 border-foreground eboy-shadow font-pixel text-xs px-4 py-2 uppercase tracking-wider hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all;
   }
   
-  .warpcast-frame {
-    @apply border border-ancient-gold/50 bg-gradient-to-br from-scripture/80 to-black/40;
+  .eboy-yellow-button {
+    @apply bg-eboy-yellow text-foreground border-2 border-foreground eboy-shadow font-pixel text-xs px-4 py-2 uppercase tracking-wider hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all;
   }
   
-  /* Bible character styles */
+  .eboy-header {
+    @apply bg-eboy-yellow border-b-2 border-foreground;
+  }
+  
+  /* Bible character styles - eBoy inspired */
   .character-bubble {
-    @apply bg-black/70 border border-ancient-gold/40 p-3 rounded-lg relative;
+    @apply bg-card border-2 border-foreground p-3 relative eboy-shadow;
   }
   
   .character-bubble:after {
     content: '';
     position: absolute;
-    bottom: -10px;
+    bottom: -8px;
     left: 20px;
-    border-width: 10px 10px 0;
-    border-style: solid;
-    border-color: rgba(218, 165, 32, 0.4) transparent;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid hsl(var(--foreground));
+  }
+  
+  .pixel-sprite {
+    @apply pixelated transition-transform hover:scale-110;
   }
 }
 

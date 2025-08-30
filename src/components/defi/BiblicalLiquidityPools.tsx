@@ -157,7 +157,7 @@ const BiblicalLiquidityPools: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <GlowingText color="gold" className="text-3xl font-scroll mb-4">
+        <GlowingText color="yellow" className="text-3xl font-scroll mb-4">
           Biblical Liquidity Pools
         </GlowingText>
         <p className="text-white/80 max-w-2xl mx-auto">

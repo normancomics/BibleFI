@@ -27,19 +27,17 @@ const PixelButton: React.FC<PixelButtonProps> = ({
   const glitchClass = glitch ? "glitch-text animate-pixel-shift" : "";
   const glitchAttr = glitch ? { "data-text": typeof children === "string" ? children : "CLICK" } : {};
   
-  // Apply farcaster styling by default
-  const baseClass = "bg-purple-900 text-ancient-gold border border-ancient-gold/50 hover:bg-purple-800";
-  
-  // New Farcaster style (purple background, gold border and text)
-  const farcasterClass = "bg-purple-900 border-2 border-ancient-gold/70 hover:bg-purple-800 text-ancient-gold";
+  // eBoy-inspired button styling
+  const eboyClass = "eboy-button";
+  const eboyYellowClass = "eboy-yellow-button";
   
   let buttonClass = "";
   
-  // Determine which style to apply (default to farcaster style)
-  if (farcasterStyle || baseStyle) {
-    buttonClass = farcasterClass;
-  } else if (variant === "default") {
-    buttonClass = baseClass;
+  // Default to eBoy styling
+  if (farcasterStyle) {
+    buttonClass = eboyYellowClass; // Yellow for Farcaster
+  } else if (baseStyle || variant === "default") {
+    buttonClass = eboyClass; // Green for default
   }
   
   return (

@@ -178,7 +178,7 @@ const BiblicalWalletConnect: React.FC<BiblicalWalletConnectProps> = ({
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-center">
-                <GlowingText color="gold" className="text-2xl font-scroll">
+                <GlowingText color="yellow" className="text-2xl font-scroll">
                   Choose Your Spiritual Wallet
                 </GlowingText>
               </DialogTitle>

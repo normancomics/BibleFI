@@ -90,7 +90,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
         {showMainTitle ? (
           <div className="mb-12 animate-entrance">
             <div className="text-5xl md:text-7xl font-scroll font-bold mb-4">
-              <GlowingText color="gold">Bible.fi</GlowingText>
+              <GlowingText color="yellow">Bible.fi</GlowingText>
             </div>
             <div className="text-xl font-scroll text-ancient-gold">
               Biblical Wisdom for Financial Stewardship
@@ -99,7 +99,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
         ) : (
           <div className="mb-8 animate-pulse-glow">
             <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
-              <GlowingText color="gold">Bible.fi</GlowingText>
+              <GlowingText color="yellow">Bible.fi</GlowingText>
             </div>
           </div>
         )}

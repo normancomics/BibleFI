@@ -155,7 +155,7 @@ const DefiSwap: React.FC = () => {
     <Card className="pixel-card animate-entrance w-full sm:max-w-md mx-auto">
       <CardHeader className="bg-black/40 border-b border-ancient-gold/20">
         <CardTitle className="text-center">
-          <GlowingText color="gold" className="text-xl">Biblical DeFi</GlowingText>
+          <GlowingText color="yellow" className="text-xl">Biblical DeFi</GlowingText>
           <div className="flex items-center justify-center mt-2 text-xs">
             <div className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
             <span className="text-white/60">{isConnected ? 'Live Prices' : 'Offline'}</span>
