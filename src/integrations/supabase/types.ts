@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -166,6 +166,60 @@ export type Database = {
         }
         Relationships: []
       }
+      superfluid_streams: {
+        Row: {
+          church_id: string | null
+          created_at: string
+          end_date: string | null
+          flow_rate: string
+          id: string
+          receiver_address: string
+          start_date: string
+          status: string
+          stream_id: string
+          stream_type: string
+          token_address: string
+          token_symbol: string
+          tx_hash: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          church_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          flow_rate: string
+          id?: string
+          receiver_address: string
+          start_date?: string
+          status?: string
+          stream_id: string
+          stream_type: string
+          token_address: string
+          token_symbol: string
+          tx_hash?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          church_id?: string | null
+          created_at?: string
+          end_date?: string | null
+          flow_rate?: string
+          id?: string
+          receiver_address?: string
+          start_date?: string
+          status?: string
+          stream_id?: string
+          stream_type?: string
+          token_address?: string
+          token_symbol?: string
+          tx_hash?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wisdom_scores: {
         Row: {
           biblical_verse_id: string | null
@@ -264,19 +318,19 @@ export type Database = {
       }
       search_biblical_knowledge: {
         Args: {
-          query_embedding: string
-          match_threshold?: number
           match_count?: number
+          match_threshold?: number
+          query_embedding: string
         }
         Returns: {
-          id: string
-          verse_text: string
-          reference: string
-          category: string
-          principle: string
           application: string
+          category: string
           defi_relevance: string
+          id: string
+          principle: string
+          reference: string
           similarity: number
+          verse_text: string
         }[]
       }
       sparsevec_out: {
