@@ -8,7 +8,8 @@ import { Slider } from "@/components/ui/slider";
 import PixelButton from "@/components/PixelButton";
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/contexts/SoundContext";
-import { superfluidClient, SuperfluidToken } from "@/integrations/superfluid/client";
+import { useSuperfluid } from "@/hooks/useSuperfluid";
+import { SuperfluidToken } from "@/integrations/superfluid/realClient";
 import { ArrowRight, HelpCircle, Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
@@ -61,13 +62,22 @@ const SuperfluidTithe: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
   const { user: farcasterUser } = useFarcasterAuth();
+  const { 
+    isInitialized, 
+    isLoading: superfluidLoading, 
+    createTithingStream,
+    getAvailableTokens,
+    calculateFlowRateFromPeriod 
+  } = useSuperfluid();
 
   useEffect(() => {
-    // Fetch available Superfluid tokens
-    const tokens = superfluidClient.getAvailableTokens();
-    setAvailableTokens(tokens);
-    if (tokens.length > 0) {
-      setSelectedToken(tokens[0].symbol);
+    // Fetch available Superfluid tokens when initialized
+    if (isInitialized) {
+      const tokens = getAvailableTokens();
+      setAvailableTokens(tokens);
+      if (tokens.length > 0) {
+        setSelectedToken(tokens[0].symbol);
+      }
     }
     
     // Check authentication status
@@ -81,7 +91,7 @@ const SuperfluidTithe: React.FC = () => {
     };
     
     checkAuth();
-  }, [farcasterUser]);
+  }, [farcasterUser, isInitialized, getAvailableTokens]);
   
   const fetchUserChurches = async () => {
     try {
@@ -137,44 +147,55 @@ const SuperfluidTithe: React.FC = () => {
     playSound("select");
     
     try {
-      // Calculate the monthly equivalent for the flow rate
-      const monthlyAmount = calculateMonthlyAmount(amountNum, period);
-      
       // Get the selected church details
       const church = userChurches.find(c => c.id === selectedChurch);
       if (!church) throw new Error("Selected church not found");
       
-      // Get the token details
-      const token = superfluidClient.getToken(selectedToken);
-      if (!token) throw new Error("Selected token not found");
+      // Mock church address for demo - in production this would come from church data
+      const churchAddress = `0x${Math.random().toString(16).substr(2, 40)}`;
       
-      // In a real implementation, this would create a Superfluid stream
-      // For now, we'll generate a link to the Superfluid dashboard
-      const mockAddress = walletAddress || `0x${Math.random().toString(16).substr(2, 40)}`;
-      const churchAddress = `0x${Math.random().toString(16).substr(2, 40)}`; // Mock church address
-      
-      const flowRate = superfluidClient.calculateFlowRate(monthlyAmount);
-      const streamingUrl = superfluidClient.getStreamingUrl(
-        token.address, 
-        churchAddress, 
-        flowRate
+      // Create real Superfluid stream
+      const result = await createTithingStream(
+        churchAddress,
+        selectedToken,
+        amountNum,
+        period
       );
       
-      // Show success message
-      toast({
-        title: "Success!",
-        description: `Your recurring tithe of ${formatFlowRate(amountNum, period)} to ${church.name} has been initiated.`,
-      });
-      
-      // Open Superfluid dashboard in a new tab
-      window.open(streamingUrl, "_blank");
-      
-      playSound("success");
+      if (result.success) {
+        // Get token details for address
+        const tokenDetails = getAvailableTokens().find(t => t.symbol === selectedToken);
+        
+        // Store stream data in database
+        const { data: session } = await supabase.auth.getSession();
+        if (session?.session?.user && tokenDetails) {
+          await supabase.from('superfluid_streams').insert({
+            user_id: session.session.user.id,
+            stream_id: result.streamId || 'unknown',
+            receiver_address: churchAddress,
+            token_address: tokenDetails.address,
+            token_symbol: selectedToken,
+            flow_rate: calculateFlowRateFromPeriod(amountNum, period),
+            stream_type: 'tithe',
+            church_id: selectedChurch,
+            tx_hash: result.txHash || ''
+          });
+        }
+        
+        toast({
+          title: "Success!",
+          description: `Your recurring tithe of ${formatFlowRate(amountNum, period)} to ${church.name} has been created.`,
+        });
+        
+        playSound("success");
+      } else {
+        throw new Error(result.error || "Failed to create stream");
+      }
     } catch (error) {
       console.error("Error setting up Superfluid stream:", error);
       toast({
         title: "Error",
-        description: "There was a problem setting up your recurring tithe",
+        description: error instanceof Error ? error.message : "There was a problem setting up your recurring tithe",
         variant: "destructive"
       });
       playSound("error");
@@ -377,12 +398,12 @@ const SuperfluidTithe: React.FC = () => {
           <div className="pt-2">
             <PixelButton
               type="submit"
-              disabled={isProcessing || !selectedToken || !selectedChurch || userChurches.length === 0}
+              disabled={isProcessing || superfluidLoading || !isInitialized || !selectedToken || !selectedChurch || userChurches.length === 0}
               className="w-full font-scroll"
               farcasterStyle
             >
-              {isProcessing ? "Processing..." : "Set Up Recurring Tithe"}
-              {!isProcessing && <ArrowRight size={16} className="ml-2" />}
+              {isProcessing || superfluidLoading ? "Processing..." : !isInitialized ? "Initializing Superfluid..." : "Set Up Recurring Tithe"}
+              {!isProcessing && !superfluidLoading && isInitialized && <ArrowRight size={16} className="ml-2" />}
             </PixelButton>
           </div>
         </form>
