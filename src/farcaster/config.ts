@@ -53,8 +53,8 @@ export const APP_CONFIG = {
   },
   // Treasury configuration for $BIBLE token
   treasury: {
-    // This should be set to the actual biblefi.base.eth ENS address when deployed
-    address: '0x0000000000000000000000000000000000000000', // Placeholder - needs actual ENS resolution
+    // biblefi.base.eth ENS address on Base chain
+    address: '0x7bEda57074AA917FF0993fb329E16C2c188baF08',
     ensName: 'biblefi.base.eth'
   },
   // Integration partners
