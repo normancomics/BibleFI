@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import { useToast } from "@/hooks/use-toast";
 import { useSecurityContext } from "@/contexts/SecurityContext";
 import SecurityDashboard from "@/components/security/SecurityDashboard";
+import LiveSecurityMonitor from "@/components/security/LiveSecurityMonitor";
 import { useSound } from "@/contexts/SoundContext";
 import { 
   Shield, 
@@ -123,6 +124,7 @@ const SecurityPage: React.FC = () => {
               </TabsList>
               
               <TabsContent value="dashboard">
+                <LiveSecurityMonitor />
                 <SecurityDashboard />
               </TabsContent>
               

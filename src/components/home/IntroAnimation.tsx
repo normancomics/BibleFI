@@ -57,17 +57,17 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
           setShowMainTitle(true);
           playSound("powerup");
           
-          // Scene transition loop
+          // Scene transition loop - slowed down
           const sceneInterval = setInterval(() => {
             setCurrentSceneIndex(prev => {
               const nextIndex = prev + 1;
               if (nextIndex >= biblicalScenes.length) {
                 clearInterval(sceneInterval);
                 
-                // Complete intro after all scenes
+                // Complete intro after all scenes - extended time
                 setTimeout(() => {
                   onComplete();
-                }, 1500);
+                }, 3000);
                 return prev;
               }
               
@@ -75,11 +75,11 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
               playSound(biblicalScenes[nextIndex].sound as any);
               return nextIndex;
             });
-          }, 3000);
+          }, 5000); // Increased from 3000 to 5000ms
           
         }, 1000);
       }
-    }, 50);
+    }, 80); // Slowed down typing from 50ms to 80ms
     
     return () => clearInterval(typingInterval);
   }, [playSound, fullText, onComplete]);
