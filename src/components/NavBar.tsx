@@ -16,6 +16,7 @@ import {
   Wheat
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
+import WalletButton from '@/components/wallet/WalletButton';
 
 const NavBar: React.FC = () => {
   const location = useLocation();
@@ -75,8 +76,9 @@ const NavBar: React.FC = () => {
             ))}
           </div>
 
-          {/* Sound Toggle */}
-          <div className="flex items-center">
+          {/* Wallet & Sound Toggle */}
+          <div className="flex items-center gap-2">
+            <WalletButton variant="outline" size="sm" />
             <SoundToggle />
           </div>
         </div>

@@ -10,6 +10,7 @@ import { SecurityProvider } from "@/contexts/SecurityContext";
 import { FarcasterAuthProvider } from "@/farcaster/auth";
 import { WagmiProvider } from 'wagmi';
 import { config } from '@/config/wagmi';
+import { WalletProvider } from '@/contexts/WalletContext';
 import App from "./App";
 import "./index.css";
 import "./polyfills";
@@ -31,10 +32,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <SecurityProvider>
               <SoundProvider>
-                <FarcasterAuthProvider>
-                  <App />
-                  <Toaster />
-                </FarcasterAuthProvider>
+                <WalletProvider>
+                  <FarcasterAuthProvider>
+                    <App />
+                    <Toaster />
+                  </FarcasterAuthProvider>
+                </WalletProvider>
               </SoundProvider>
             </SecurityProvider>
           </ThemeProvider>
