@@ -2,8 +2,7 @@ import React from "react";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SimpleSwapForm from "@/components/defi/SimpleSwapForm";
-import DefiSwap from "@/components/defi/DefiSwap";
+import MultiDexAggregator from "@/components/defi/MultiDexAggregator";
 import RealPortfolioBalance from "@/components/defi/RealPortfolioBalance";
 import DefiLending from "@/components/defi/DefiLending";
 import BiblicalLiquidityPools from "@/components/defi/BiblicalLiquidityPools";
@@ -58,51 +57,9 @@ const DefiPage: React.FC = () => {
                     <TabsTrigger value="earn" className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold">Earn</TabsTrigger>
                   </TabsList>
                   <TabsContent value="swap" className="pt-6">
-                    <div className="flex flex-col md:flex-row gap-8">
-                      <div className="md:w-1/2">
-                        <SwapErrorBoundary>
-                          <SimpleSwapForm />
-                        </SwapErrorBoundary>
-                      </div>
-                      <div className="md:w-1/2">
-                        <Card className="h-full border border-scripture/20 bg-black/30">
-                          <CardHeader>
-                            <CardTitle className="text-lg">Biblical Swapping</CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <p>
-                              Our DeFi swap ensures fair exchange rates without excessive fees, 
-                              honoring the biblical principle of "just weights and measures" (Proverbs 16:11).
-                            </p>
-                            
-                            <div className="bg-black/50 p-4 rounded-lg border border-ancient-gold/30">
-                              <p className="italic text-white/80">
-                                "The LORD detests dishonest scales, but accurate weights find favor with him."
-                              </p>
-                              <p className="text-right text-sm text-ancient-gold/70 mt-2">Proverbs 11:1</p>
-                            </div>
-                            
-                            <div className="space-y-2 pt-2">
-                              <h4 className="font-medium">Features:</h4>
-                              <ul className="space-y-1 text-sm">
-                                <li className="flex items-start gap-2">
-                                  <Info className="h-4 w-4 text-ancient-gold mt-0.5" />
-                                  <span>Transparent fee structure (0.3%)</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                  <Info className="h-4 w-4 text-ancient-gold mt-0.5" />
-                                  <span>Slippage protection</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                  <Info className="h-4 w-4 text-ancient-gold mt-0.5" />
-                                  <span>Fair market rates from multiple sources</span>
-                                </li>
-                              </ul>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
+                    <SwapErrorBoundary>
+                      <MultiDexAggregator />
+                    </SwapErrorBoundary>
                   </TabsContent>
                   <TabsContent value="portfolio" className="pt-6">
                     <SwapErrorBoundary>
@@ -187,9 +144,6 @@ const DefiPage: React.FC = () => {
           </div>
         </div>
         
-        <SwapErrorBoundary>
-          <DefiSwap />
-        </SwapErrorBoundary>
       </main>
     </div>
   );
