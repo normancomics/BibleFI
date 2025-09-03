@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import PixelButton from "@/components/PixelButton";
 import { useSound } from "@/contexts/SoundContext";
-import { BookOpen, Crown, Gavel, Heart, Shield, Star } from "lucide-react";
+import { BookOpen, Crown, Gavel, Heart, Shield, Star, DollarSign, Scale, Handshake } from "lucide-react";
 
 interface BiblicalCharacter {
   id: string;
@@ -43,13 +43,57 @@ const characters: BiblicalCharacter[] = [
   {
     id: "david",
     name: "David",
-    title: "The Shepherd King",
-    wisdom: "Trust in divine providence while taking wise action",
+    title: "The Faithful Shepherd",
+    wisdom: "The Lord is my shepherd; I shall not want. He guides me to green pastures and leads me in paths of righteousness.",
     verse: "The Lord is my shepherd; I shall not want.",
     reference: "Psalm 23:1",
     icon: Star,
-    color: "text-blue-400",
-    bgColor: "bg-blue-900/20"
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-900/20"
+  },
+  {
+    id: "zacchaeus",
+    name: "Zacchaeus",
+    title: "The Reformed Tax Collector",
+    wisdom: "True wealth comes from generous giving and making amends for past wrongs",
+    verse: "Half of my goods I give to the poor, and if I have defrauded anyone, I restore fourfold.",
+    reference: "Luke 19:8",
+    icon: DollarSign,
+    color: "text-amber-400",
+    bgColor: "bg-amber-900/20"
+  },
+  {
+    id: "matthew",
+    name: "Matthew",
+    title: "The Transformed Financier",
+    wisdom: "You cannot serve both God and money - choose your master wisely",
+    verse: "No one can serve two masters. You cannot serve both God and money.",
+    reference: "Matthew 6:24",
+    icon: Scale,
+    color: "text-indigo-400",
+    bgColor: "bg-indigo-900/20"
+  },
+  {
+    id: "widow",
+    name: "The Widow",
+    title: "The Faithful Giver",
+    wisdom: "True generosity comes from the heart, not the wallet size",
+    verse: "She gave out of her poverty, all she had to live on.",
+    reference: "Mark 12:44",
+    icon: Heart,
+    color: "text-rose-400",
+    bgColor: "bg-rose-900/20"
+  },
+  {
+    id: "barnabas",
+    name: "Barnabas",
+    title: "The Generous Supporter",
+    wisdom: "Use your resources to support God's work and build His kingdom",
+    verse: "He sold a field and brought the money to support the apostles' ministry.",
+    reference: "Acts 4:37",
+    icon: Handshake,
+    color: "text-teal-400",
+    bgColor: "bg-teal-900/20"
   },
   {
     id: "moses",

@@ -9,9 +9,35 @@ export const useSuperfluid = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getProvider = () => {
+  const getProvider = async () => {
     if (typeof window !== 'undefined' && window.ethereum) {
-      return new ethers.providers.Web3Provider(window.ethereum);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const network = await provider.getNetwork();
+      
+      // Check if we're on Base chain (8453)
+      if (network.chainId !== 8453) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x2105' }], // Base chain ID in hex
+          });
+        } catch (error: any) {
+          if (error.code === 4902) {
+            // Chain not added, add Base chain
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x2105',
+                chainName: 'Base',
+                nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+                rpcUrls: ['https://mainnet.base.org'],
+                blockExplorerUrls: ['https://basescan.org']
+              }]
+            });
+          }
+        }
+      }
+      return provider;
     }
     throw new Error('No wallet provider found');
   };
@@ -21,14 +47,14 @@ export const useSuperfluid = () => {
       if (isConnected && !isInitialized) {
         try {
           setIsLoading(true);
-          const provider = getProvider();
+          const provider = await getProvider();
           const signer = provider.getSigner();
           await realSuperfluidClient.initialize(signer);
           setIsInitialized(true);
-          toast.success('Superfluid initialized successfully');
+          toast.success('Superfluid initialized on Base chain');
         } catch (error) {
           console.error('Failed to initialize Superfluid:', error);
-          toast.error('Failed to initialize Superfluid');
+          toast.error('Failed to initialize Superfluid. Please ensure you\'re connected to Base chain.');
         } finally {
           setIsLoading(false);
         }
@@ -45,7 +71,7 @@ export const useSuperfluid = () => {
     }
 
     try {
-      const provider = getProvider();
+      const provider = await getProvider();
       const signer = provider.getSigner();
 
       setIsLoading(true);
@@ -74,7 +100,7 @@ export const useSuperfluid = () => {
     }
 
     try {
-      const provider = getProvider();
+      const provider = await getProvider();
       const signer = provider.getSigner();
       setIsLoading(true);
       const result = await realSuperfluidClient.updateFlow(signer, receiver, tokenAddress, newFlowRate);
@@ -102,7 +128,7 @@ export const useSuperfluid = () => {
     }
 
     try {
-      const provider = getProvider();
+      const provider = await getProvider();
       const signer = provider.getSigner();
       setIsLoading(true);
       const result = await realSuperfluidClient.deleteFlow(signer, receiver, tokenAddress);
@@ -135,7 +161,7 @@ export const useSuperfluid = () => {
     }
 
     try {
-      const provider = getProvider();
+      const provider = await getProvider();
       const signer = provider.getSigner();
       setIsLoading(true);
       const result = await realSuperfluidClient.createTithingStream(

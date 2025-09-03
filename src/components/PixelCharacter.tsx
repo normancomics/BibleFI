@@ -78,6 +78,12 @@ const characterConfig = {
     alt: "Joseph Character",
     label: "JOSEPH"
   },
+  shepherd: {
+    src: "/pixel-shepherd-david.png",
+    sound: "powerup",
+    alt: "Shepherd David Character",
+    label: "SHEPHERD"
+  },
   "woman-well": {
     src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
     sound: "select",
