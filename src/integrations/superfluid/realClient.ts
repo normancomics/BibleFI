@@ -42,6 +42,7 @@ export class RealSuperfluidClient {
   private provider: ethers.providers.Provider | null = null;
   private readonly BASE_CHAIN_ID = 8453;
   private readonly BASE_RPC_URL = "https://mainnet.base.org";
+  private readonly BIBLE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"; // Will be updated after deployment
 
   // Real Base chain Super Tokens
   private tokens: Record<string, SuperfluidToken> = {
@@ -74,6 +75,16 @@ export class RealSuperfluidClient {
         address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb'
       },
       logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
+    },
+    'BIBLEx': {
+      name: 'Super BIBLE',
+      symbol: 'BIBLEx',
+      address: '0x0000000000000000000000000000000000000000', // Will be updated after deployment
+      underlyingToken: {
+        symbol: 'BIBLE',
+        address: this.BIBLE_TOKEN_ADDRESS
+      },
+      logoURI: '/bible-fi-preview.png'
     }
   };
 

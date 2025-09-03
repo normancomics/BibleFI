@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useSound } from "@/contexts/SoundContext";
 import { SoundType } from "@/components/SoundEffect";
 
-export type CharacterType = 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | 'paul' | 'coin' | 'abraham' | 'god' | 'joseph' | 'woman-well' | 'caesar' | 'tax-collector';
+export type CharacterType = 'jesus' | 'solomon' | 'moses' | 'david' | 'noah' | 'paul' | 'coin' | 'abraham' | 'god' | 'joseph' | 'woman-well' | 'caesar' | 'tax-collector' | 'proverbs-scholar' | 'joseph-treasurer' | 'nehemiah' | 'ezra' | 'boaz' | 'lydia';
 
 interface PixelCharacterProps {
   character: CharacterType;
@@ -95,6 +95,42 @@ const characterConfig = {
     sound: "coin",
     alt: "Tax Collector Character",
     label: "TAX COLLECTOR"
+  },
+  "proverbs-scholar": {
+    src: "/pixel-proverbs-scholar.png",
+    sound: "scroll",
+    alt: "Proverbs Scholar Character",
+    label: "WISDOM SCHOLAR"
+  },
+  "joseph-treasurer": {
+    src: "/pixel-joseph-treasurer.png",
+    sound: "coin",
+    alt: "Joseph the Treasurer Character",
+    label: "JOSEPH'S WISDOM"
+  },
+  nehemiah: {
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    sound: "powerup",
+    alt: "Nehemiah Character",
+    label: "NEHEMIAH"
+  },
+  ezra: {
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    sound: "scroll",
+    alt: "Ezra Character",
+    label: "EZRA"
+  },
+  boaz: {
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    sound: "coin",
+    alt: "Boaz Character",
+    label: "BOAZ"
+  },
+  lydia: {
+    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    sound: "success",
+    alt: "Lydia Character",
+    label: "LYDIA"
   }
 };
 
