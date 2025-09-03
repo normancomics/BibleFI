@@ -34,7 +34,7 @@ const DigitalWisdomAdvisor: React.FC = () => {
     try {
       // Search the comprehensive biblical knowledge base
       const { data: wisdomData, error } = await supabase
-        .from('comprehensive_biblical_knowledge')
+        .from('biblical_knowledge_base')
         .select('*')
         .or(`verse_text.ilike.%${question}%,category.ilike.%${question}%,principle.ilike.%${question}%,application.ilike.%${question}%`)
         .limit(5);

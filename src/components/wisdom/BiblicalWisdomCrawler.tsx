@@ -147,7 +147,7 @@ const BiblicalWisdomCrawler: React.FC = () => {
 
       // Insert comprehensive biblical knowledge
       const { data, error } = await supabase
-        .from('comprehensive_biblical_knowledge')
+        .from('biblical_knowledge_base')
         .insert(comprehensiveData)
         .select();
 
