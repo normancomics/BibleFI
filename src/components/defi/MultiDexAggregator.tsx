@@ -7,6 +7,7 @@ import { ArrowDownIcon, RefreshCw, Zap, TrendingUp, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/contexts/SoundContext";
 import { baseTokens } from "@/data/baseTokens";
+import { tokenMetadataService } from "@/services/tokenMetadataService";
 import { Badge } from "@/components/ui/badge";
 
 interface DexQuote {
