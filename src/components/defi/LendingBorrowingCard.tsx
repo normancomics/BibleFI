@@ -9,6 +9,7 @@ import { Banknote, TrendingDown, TrendingUp, AlertTriangle, BookOpen } from "luc
 import PixelButton from "@/components/PixelButton";
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/contexts/SoundContext";
+import { baseTokens } from "@/data/baseTokens";
 
 interface LendingPool {
   id: string;
@@ -103,7 +104,15 @@ const LendingBorrowingCard: React.FC<LendingBorrowingCardProps> = ({
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Banknote className="text-green-400" size={20} />
+              {baseTokens[pool.token as keyof typeof baseTokens]?.logoURI ? (
+                <img 
+                  src={baseTokens[pool.token as keyof typeof baseTokens].logoURI} 
+                  alt={pool.token}
+                  className="w-5 h-5 rounded-full"
+                />
+              ) : (
+                <Banknote className="text-green-400" size={20} />
+              )}
               {pool.token} Lending Pool
             </CardTitle>
             <CardDescription className="flex items-center gap-2 mt-1">

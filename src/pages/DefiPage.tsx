@@ -38,24 +38,24 @@ const DefiPage: React.FC = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2">
-            <Card className="border-2 border-scripture/30 bg-black/40">
-              <CardHeader>
+            <Card className="border-2 border-scripture/50 bg-black/60 backdrop-blur-sm">
+              <CardHeader className="bg-black/30 border-b border-scripture/30">
                 <CardTitle className="flex items-center gap-2">
                   <Coins className="text-ancient-gold" />
                   <span>DeFi Tools</span>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-white/70">
                   Swap, provide liquidity, earn yield, and lend while honoring biblical principles
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-black/50">
                 <Tabs defaultValue="swap">
-                  <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="swap">Swap</TabsTrigger>
-                    <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                    <TabsTrigger value="lending">Lending</TabsTrigger>
-                    <TabsTrigger value="liquidity">Liquidity</TabsTrigger>
-                    <TabsTrigger value="earn">Earn</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-5 bg-black/60 border border-scripture/30">
+                    <TabsTrigger value="swap" className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold">Swap</TabsTrigger>
+                    <TabsTrigger value="portfolio" className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold">Portfolio</TabsTrigger>
+                    <TabsTrigger value="lending" className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold">Lending</TabsTrigger>
+                    <TabsTrigger value="liquidity" className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold">Liquidity</TabsTrigger>
+                    <TabsTrigger value="earn" className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold">Earn</TabsTrigger>
                   </TabsList>
                   <TabsContent value="swap" className="pt-6">
                     <div className="flex flex-col md:flex-row gap-8">

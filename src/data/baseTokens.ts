@@ -55,7 +55,7 @@ export const baseTokens: Record<string, TokenInfo> = {
     symbol: "cbBTC",
     decimals: 8,
     address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
-    logoURI: "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png?1548822744"
+    logoURI: "https://assets.coingecko.com/coins/images/33052/small/cbBTC_icon_yellowgradient.png?1701077237"
   },
   cbETH: {
     name: "Coinbase Wrapped Ethereum",

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { Shield, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { useTokenBalance } from '@/hooks/useTokenBalance';
 import { useNativeBalance } from '@/hooks/useNativeBalance';
@@ -42,7 +42,7 @@ const RealPortfolioBalance: React.FC = () => {
     return (
       <Card className="border-scripture/30 bg-black/40">
         <CardContent className="p-6 text-center">
-          <Wallet className="h-12 w-12 text-scripture/50 mx-auto mb-4" />
+          <Shield className="h-12 w-12 text-ancient-gold/50 mx-auto mb-4" />
           <p className="text-white/60">Connect your wallet to view portfolio</p>
         </CardContent>
       </Card>
@@ -89,7 +89,7 @@ const RealPortfolioBalance: React.FC = () => {
     <Card className="border-scripture/30 bg-black/40">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
-          <Wallet className="h-5 w-5 text-ancient-gold" />
+          <Shield className="h-5 w-5 text-ancient-gold" />
           <span>Portfolio Balance</span>
         </CardTitle>
         <Button
