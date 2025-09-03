@@ -7,14 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowUpDown, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/contexts/SoundContext';
-
-const TOKENS = [
-  { symbol: 'ETH', name: 'Ethereum', logo: '💎' },
-  { symbol: 'USDC', name: 'USD Coin', logo: '💵' },
-  { symbol: 'DAI', name: 'Dai Stablecoin', logo: '🟡' },
-  { symbol: 'USDT', name: 'Tether USD', logo: '💚' },
-  { symbol: 'WETH', name: 'Wrapped ETH', logo: '🔷' }
-];
+import { baseTokens } from '@/data/baseTokens';
 
 const SimpleSwapForm: React.FC = () => {
   const [fromToken, setFromToken] = useState('ETH');
@@ -98,13 +91,19 @@ const SimpleSwapForm: React.FC = () => {
               className="flex-1"
             />
             <Select value={fromToken} onValueChange={setFromToken}>
-              <SelectTrigger className="w-24">
-                <SelectValue />
+              <SelectTrigger className="w-32">
+                <div className="flex items-center">
+                  <img src={baseTokens[fromToken]?.logoURI} alt={fromToken} className="w-5 h-5 mr-2" />
+                  <SelectValue />
+                </div>
               </SelectTrigger>
               <SelectContent>
-                {TOKENS.map(token => (
-                  <SelectItem key={token.symbol} value={token.symbol}>
-                    {token.logo} {token.symbol}
+                {Object.entries(baseTokens).map(([symbol, token]) => (
+                  <SelectItem key={symbol} value={symbol}>
+                    <div className="flex items-center">
+                      <img src={token.logoURI} alt={symbol} className="w-5 h-5 mr-2" />
+                      <span>{symbol}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -134,13 +133,19 @@ const SimpleSwapForm: React.FC = () => {
               className="flex-1 bg-black/20"
             />
             <Select value={toToken} onValueChange={setToToken}>
-              <SelectTrigger className="w-24">
-                <SelectValue />
+              <SelectTrigger className="w-32">
+                <div className="flex items-center">
+                  <img src={baseTokens[toToken]?.logoURI} alt={toToken} className="w-5 h-5 mr-2" />
+                  <SelectValue />
+                </div>
               </SelectTrigger>
               <SelectContent>
-                {TOKENS.map(token => (
-                  <SelectItem key={token.symbol} value={token.symbol}>
-                    {token.logo} {token.symbol}
+                {Object.entries(baseTokens).map(([symbol, token]) => (
+                  <SelectItem key={symbol} value={symbol}>
+                    <div className="flex items-center">
+                      <img src={token.logoURI} alt={symbol} className="w-5 h-5 mr-2" />
+                      <span>{symbol}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
