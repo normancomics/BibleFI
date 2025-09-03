@@ -13,14 +13,14 @@ export const baseTokens: Record<string, TokenInfo> = {
     symbol: "ETH",
     decimals: 18,
     address: "0x0000000000000000000000000000000000000000",
-    logoURI: "https://assets.coingecko.com/coins/images/279/small/ethereum.png?1595348880"
+    logoURI: "https://assets.coingecko.com/coins/images/279/large/ethereum.png"
   },
   USDC: {
     name: "USD Coin",
     symbol: "USDC",
     decimals: 6,
     address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    logoURI: "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png?1547042389"
+    logoURI: "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png"
   },
   DAI: {
     name: "Dai Stablecoin",

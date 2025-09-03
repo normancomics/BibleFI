@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SimpleSwapForm from "@/components/defi/SimpleSwapForm";
 import DefiSwap from "@/components/defi/DefiSwap";
-import DefiPortfolio from "@/components/defi/DefiPortfolio";
+import RealPortfolioBalance from "@/components/defi/RealPortfolioBalance";
 import DefiLending from "@/components/defi/DefiLending";
 import BiblicalLiquidityPools from "@/components/defi/BiblicalLiquidityPools";
 import BiblicalYieldFarming from "@/components/defi/BiblicalYieldFarming";
@@ -106,7 +106,7 @@ const DefiPage: React.FC = () => {
                   </TabsContent>
                   <TabsContent value="portfolio" className="pt-6">
                     <SwapErrorBoundary>
-                      <DefiPortfolio />
+                      <RealPortfolioBalance />
                     </SwapErrorBoundary>
                   </TabsContent>
                   <TabsContent value="lending" className="pt-6">
