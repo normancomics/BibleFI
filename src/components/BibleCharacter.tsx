@@ -131,18 +131,21 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
       className={`flex flex-col items-center ${className}`}
       onClick={handleClick}
     >
-      <div className={`relative ${onClick ? 'cursor-pointer' : ''}`}>
+      <div className={`relative ${onClick ? 'cursor-pointer' : ''} ${isAnimating ? 'animate-eboy-glitch' : 'animate-character-idle'}`}>
         <img 
           src={imagePath} 
           alt={characterInfo.name} 
-          className="w-16 h-16 object-contain"
+          className="w-16 h-16 object-contain pixelated pixel-sprite eboy-glow transition-all duration-200 hover:scale-110"
         />
         
         {showWisdomLevel && (
-          <div className="absolute -top-2 -right-2 bg-base-blue/90 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+          <div className="absolute -top-2 -right-2 bg-gradient-to-br from-eboy-yellow to-ancient-gold text-foreground text-xs font-bold eboy-text rounded-full w-6 h-6 flex items-center justify-center border border-foreground/20 animate-pulse">
             {characterInfo.wisdomLevel}
           </div>
         )}
+        
+        {/* Character glow effect */}
+        <div className="absolute inset-0 bg-gradient-radial from-eboy-green/20 to-transparent rounded-full blur-md animate-pulse opacity-0 hover:opacity-100 transition-opacity duration-300" />
       </div>
       
       {showName && (
@@ -150,8 +153,10 @@ const BibleCharacter: React.FC<BibleCharacterProps> = ({
       )}
       
       {message && (
-        <div className="mt-3 max-w-sm bg-black/70 border border-base-blue/50 p-2 rounded-md">
-          <p className="text-sm text-white/90">{message}</p>
+        <div className="mt-3 max-w-sm isometric-card bg-gradient-to-br from-iso-wall-light to-iso-wall-dark border-2 border-eboy-green p-3 animate-entrance">
+          <p className="text-sm text-foreground font-scroll leading-relaxed">{message}</p>
+          {/* Speech bubble pointer */}
+          <div className="absolute -top-2 left-4 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-eboy-green" />
         </div>
       )}
     </div>
