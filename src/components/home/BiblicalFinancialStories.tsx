@@ -97,11 +97,16 @@ const BiblicalFinancialStories: React.FC = () => {
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <BibleCharacter 
-                    character={story.character}
-                    showName={false}
-                    className="scale-75"
-                  />
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <img 
+                      src={`/pixel-${story.character}.png`}
+                      alt={story.character}
+                      className="w-12 h-12 pixelated"
+                      onError={(e) => {
+                        e.currentTarget.src = '/jesus-pixel.png';
+                      }}
+                    />
+                  </div>
                   <div className="text-right">
                     <Badge className="bg-ancient-gold/20 text-ancient-gold border-ancient-gold/30">
                       <Star className="h-3 w-3 mr-1" />
@@ -137,11 +142,16 @@ const BiblicalFinancialStories: React.FC = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <BibleCharacter 
-                      character={selectedStory.character}
-                      showName={false}
-                      showWisdomLevel
-                    />
+                    <div className="w-20 h-20 flex items-center justify-center">
+                      <img 
+                        src={`/pixel-${selectedStory.character}.png`}
+                        alt={selectedStory.character}
+                        className="w-16 h-16 pixelated"
+                        onError={(e) => {
+                          e.currentTarget.src = '/jesus-pixel.png';
+                        }}
+                      />
+                    </div>
                     <div>
                       <CardTitle className="text-2xl text-ancient-gold font-scroll capitalize">
                         {selectedStory.character.replace('-', ' ')}

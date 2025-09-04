@@ -139,11 +139,71 @@ const DigitalTithingForm: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USDC">USDC</SelectItem>
-                    <SelectItem value="DAI">DAI</SelectItem>
-                    <SelectItem value="ETH">ETH</SelectItem>
-                    <SelectItem value="USDT">USDT</SelectItem>
-                    <SelectItem value="WETH">WETH</SelectItem>
+                    <SelectItem value="USDC">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/logos/usdc-logo.png" 
+                          alt="USDC" 
+                          className="w-5 h-5"
+                          onError={(e) => {
+                            e.currentTarget.src = '/coin-pixel.png';
+                          }}
+                        />
+                        USDC
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="DAI">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/logos/dai-logo.png" 
+                          alt="DAI" 
+                          className="w-5 h-5"
+                          onError={(e) => {
+                            e.currentTarget.src = '/coin-pixel.png';
+                          }}
+                        />
+                        DAI
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="ETH">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/logos/eth-logo.png" 
+                          alt="ETH" 
+                          className="w-5 h-5"
+                          onError={(e) => {
+                            e.currentTarget.src = '/coin-pixel.png';
+                          }}
+                        />
+                        ETH
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="USDT">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/logos/usdt-logo.png" 
+                          alt="USDT" 
+                          className="w-5 h-5"
+                          onError={(e) => {
+                            e.currentTarget.src = '/coin-pixel.png';
+                          }}
+                        />
+                        USDT
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="WETH">
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="/logos/weth-logo.png" 
+                          alt="WETH" 
+                          className="w-5 h-5"
+                          onError={(e) => {
+                            e.currentTarget.src = '/coin-pixel.png';
+                          }}
+                        />
+                        WETH
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
