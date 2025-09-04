@@ -36,7 +36,7 @@ const SuperfluidStreamDashboard: React.FC = () => {
     {
       id: '1',
       receiver: '0x1234...5678',
-      token: 'USDCx',
+      token: 'USDC',
       flowRate: '38580246913580', // ~$100/month
       status: 'active',
       monthlyAmount: 100,
@@ -46,12 +46,22 @@ const SuperfluidStreamDashboard: React.FC = () => {
     {
       id: '2', 
       receiver: '0x5678...9012',
-      token: 'DAIx',
+      token: 'DAI',
       flowRate: '19290123456790', // ~$50/month
       status: 'active',
       monthlyAmount: 50,
       type: 'staking',
       createdAt: new Date('2024-02-01')
+    },
+    {
+      id: '3', 
+      receiver: '0x9012...3456',
+      token: 'WETH',
+      flowRate: '9645061728395', // ~$25/month
+      status: 'paused',
+      monthlyAmount: 25,
+      type: 'general',
+      createdAt: new Date('2024-03-01')
     }
   ];
 
@@ -131,6 +141,20 @@ const SuperfluidStreamDashboard: React.FC = () => {
     }
   };
 
+  const getTokenImageId = (token: string) => {
+    const tokenIds: Record<string, string> = {
+      'USDC': '6319',
+      'DAI': '9956', 
+      'USDT': '325',
+      'WETH': '2518',
+      'ETH': '279',
+      'WBTC': '7598',
+      'cbBTC': '33052',
+      'cbETH': '27008'
+    };
+    return tokenIds[token] || '279';
+  };
+
   if (!isConnected) {
     return (
       <Card className="w-full max-w-4xl mx-auto bg-card/50 border-primary/20">
@@ -200,9 +224,19 @@ const SuperfluidStreamDashboard: React.FC = () => {
                           <Badge className={getTypeColor(stream.type)}>
                             {stream.type}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            {stream.token}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <img 
+                              src={`https://assets.coingecko.com/coins/images/${getTokenImageId(stream.token)}/small/${stream.token.toLowerCase()}.png`}
+                              alt={stream.token}
+                              className="w-4 h-4 rounded-full"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/coin-pixel.png';
+                              }}
+                            />
+                            <span className="text-sm text-muted-foreground font-medium">
+                              {stream.token}
+                            </span>
+                          </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>

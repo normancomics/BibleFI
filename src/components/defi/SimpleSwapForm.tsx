@@ -91,18 +91,32 @@ const SimpleSwapForm: React.FC = () => {
               className="flex-1"
             />
             <Select value={fromToken} onValueChange={setFromToken}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32 bg-gradient-to-br from-slate-700/80 to-slate-800/80 backdrop-blur-sm border-scripture/30">
                 <div className="flex items-center">
-                  <img src={baseTokens[fromToken]?.logoURI} alt={fromToken} className="w-5 h-5 mr-2" />
+                  <img 
+                    src={baseTokens[fromToken]?.logoURI} 
+                    alt={fromToken} 
+                    className="w-5 h-5 mr-2 rounded-full"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/coin-pixel.png';
+                    }}
+                  />
                   <SelectValue />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gradient-to-br from-slate-700 to-slate-800 border-scripture/30 backdrop-blur-sm z-50">
                 {Object.entries(baseTokens).map(([symbol, token]) => (
-                  <SelectItem key={symbol} value={symbol}>
+                  <SelectItem key={symbol} value={symbol} className="hover:bg-scripture/20 focus:bg-scripture/20">
                     <div className="flex items-center">
-                      <img src={token.logoURI} alt={symbol} className="w-5 h-5 mr-2" />
-                      <span>{symbol}</span>
+                      <img 
+                        src={token.logoURI} 
+                        alt={symbol} 
+                        className="w-5 h-5 mr-2 rounded-full"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/coin-pixel.png';
+                        }}
+                      />
+                      <span className="text-white">{symbol}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -133,18 +147,32 @@ const SimpleSwapForm: React.FC = () => {
               className="flex-1 bg-black/20"
             />
             <Select value={toToken} onValueChange={setToToken}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32 bg-gradient-to-br from-slate-700/80 to-slate-800/80 backdrop-blur-sm border-scripture/30">
                 <div className="flex items-center">
-                  <img src={baseTokens[toToken]?.logoURI} alt={toToken} className="w-5 h-5 mr-2" />
+                  <img 
+                    src={baseTokens[toToken]?.logoURI} 
+                    alt={toToken} 
+                    className="w-5 h-5 mr-2 rounded-full"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/coin-pixel.png';
+                    }}
+                  />
                   <SelectValue />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gradient-to-br from-slate-700 to-slate-800 border-scripture/30 backdrop-blur-sm z-50">
                 {Object.entries(baseTokens).map(([symbol, token]) => (
-                  <SelectItem key={symbol} value={symbol}>
+                  <SelectItem key={symbol} value={symbol} className="hover:bg-scripture/20 focus:bg-scripture/20">
                     <div className="flex items-center">
-                      <img src={token.logoURI} alt={symbol} className="w-5 h-5 mr-2" />
-                      <span>{symbol}</span>
+                      <img 
+                        src={token.logoURI} 
+                        alt={symbol} 
+                        className="w-5 h-5 mr-2 rounded-full"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/coin-pixel.png';
+                        }}
+                      />
+                      <span className="text-white">{symbol}</span>
                     </div>
                   </SelectItem>
                 ))}

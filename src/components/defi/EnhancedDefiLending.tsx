@@ -287,7 +287,7 @@ const EnhancedDefiLending: React.FC = () => {
           {getFilteredPools().map((pool) => (
             <Card 
               key={pool.id}
-              className={`cursor-pointer transition-all duration-300 isometric-card ${
+              className={`cursor-pointer transition-all duration-300 isometric-card bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm ${
                 selectedPool?.id === pool.id 
                   ? 'border-ancient-gold eboy-glow' 
                   : 'border-eboy-green/30 hover:border-eboy-green/60'
@@ -306,8 +306,8 @@ const EnhancedDefiLending: React.FC = () => {
                       className="w-8 h-8 rounded-full pixelated"
                     />
                     <div>
-                      <CardTitle className="text-lg text-eboy-green">{pool.name}</CardTitle>
-                      <p className="text-sm text-white/60">{pool.protocolName}</p>
+                      <CardTitle className="text-lg text-white font-bold">{pool.name}</CardTitle>
+                      <p className="text-sm text-white/80 font-medium">{pool.protocolName}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -322,11 +322,11 @@ const EnhancedDefiLending: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-white/60">Supply APY</p>
+                    <p className="text-xs text-white/80 font-medium">Supply APY</p>
                     <p className="text-lg font-bold text-green-400">{pool.supplyAPY}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-white/60">Borrow APY</p>
+                    <p className="text-xs text-white/80 font-medium">Borrow APY</p>
                     <p className="text-lg font-bold text-red-400">{pool.borrowAPY}</p>
                   </div>
                 </div>
@@ -342,14 +342,14 @@ const EnhancedDefiLending: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="text-xs text-white/60 space-y-1">
+                <div className="text-xs text-white/80 space-y-1">
                   <div className="flex justify-between">
-                    <span>Total Supplied:</span>
-                    <span className="text-white">${pool.totalSupplied}</span>
+                    <span className="font-medium">Total Supplied:</span>
+                    <span className="text-white font-bold">${pool.totalSupplied}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Total Borrowed:</span>
-                    <span className="text-white">${pool.totalBorrowed}</span>
+                    <span className="font-medium">Total Borrowed:</span>
+                    <span className="text-white font-bold">${pool.totalBorrowed}</span>
                   </div>
                 </div>
               </CardContent>
@@ -359,7 +359,7 @@ const EnhancedDefiLending: React.FC = () => {
 
         {/* Action Panel */}
         {selectedPool && (
-          <Card className="isometric-card bg-gradient-to-br from-iso-wall-light/90 to-iso-wall-dark/90 backdrop-blur-sm animate-entrance">
+          <Card className="isometric-card bg-gradient-to-br from-slate-700/90 to-slate-800/90 backdrop-blur-sm animate-entrance">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-ancient-gold">
                 <img 
