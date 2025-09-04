@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { searchBiblicalKnowledge, getBiblicalFinancialGuidance } from "./biblicalAdvisorService";
+import { offlineBiblicalService } from "./offlineBiblicalService";
 
 interface RAGResponse {
   answer: string;
@@ -35,10 +36,31 @@ export class EnhancedBiblicalAdvisorService {
     context?: MCPContextData
   ): Promise<RAGResponse> {
     try {
-      // Step 1: Search for relevant biblical knowledge using vector similarity
-      const biblicalKnowledge = await searchBiblicalKnowledge(query);
+      // Try online biblical knowledge first
+      let biblicalKnowledge: any[] = [];
+      let useOfflineMode = false;
       
-      // Step 2: Get traditional biblical guidance
+      try {
+        biblicalKnowledge = await searchBiblicalKnowledge(query);
+        if (biblicalKnowledge.length === 0) {
+          useOfflineMode = true;
+        }
+      } catch (error) {
+        console.log("Online biblical service unavailable, using offline mode");
+        useOfflineMode = true;
+      }
+      
+      // Use offline service if online fails or returns no results
+      if (useOfflineMode) {
+        const offlineResponse = offlineBiblicalService.getBiblicalGuidance(query);
+        return {
+          answer: offlineResponse.answer + "\n\n*Note: Using offline biblical knowledge base.*",
+          relevantScriptures: offlineResponse.relevantScriptures,
+          biblicalPrinciples: offlineResponse.biblicalPrinciples
+        };
+      }
+      
+      // Proceed with online response
       const traditionalGuidance = await getBiblicalFinancialGuidance({
         query,
         context: {
@@ -47,7 +69,6 @@ export class EnhancedBiblicalAdvisorService {
         }
       });
       
-      // Step 3: Enhance with AI if we have context
       let enhancedAnswer = traditionalGuidance.answer;
       let biblicalPrinciples: string[] = [];
       
@@ -56,7 +77,6 @@ export class EnhancedBiblicalAdvisorService {
         enhancedAnswer = mcpEnhancedResponse.answer;
         biblicalPrinciples = mcpEnhancedResponse.principles;
       } else {
-        // Fallback to extracting principles from knowledge base
         biblicalPrinciples = biblicalKnowledge
           .map(item => item.principle)
           .filter(Boolean)
@@ -73,17 +93,14 @@ export class EnhancedBiblicalAdvisorService {
         biblicalPrinciples
       };
     } catch (error) {
-      console.error("Error in enhanced biblical advisor:", error);
+      console.error("Error in enhanced biblical advisor, falling back to offline:", error);
       
-      // Fallback to basic service
-      const fallbackGuidance = await getBiblicalFinancialGuidance({ query });
+      // Ultimate fallback to offline service
+      const offlineResponse = offlineBiblicalService.getBiblicalGuidance(query);
       return {
-        answer: fallbackGuidance.answer,
-        relevantScriptures: fallbackGuidance.relevantScriptures.map(scripture => ({
-          ...scripture,
-          similarity: 0.8
-        })),
-        biblicalPrinciples: ["Stewardship", "Wisdom", "Generosity"]
+        answer: offlineResponse.answer + "\n\n*Note: Using offline biblical knowledge base due to service error.*",
+        relevantScriptures: offlineResponse.relevantScriptures,
+        biblicalPrinciples: offlineResponse.biblicalPrinciples
       };
     }
   }

@@ -24,31 +24,64 @@ serve(async (req) => {
 
     console.log('Biblical advisor request:', { query, context });
 
-    // If no OpenAI API key, return fallback response
+    // Enhanced fallback response without OpenAI
     if (!openAIApiKey) {
-      console.log('No OpenAI API key configured, returning fallback response');
+      console.log('No OpenAI API key configured, returning enhanced fallback response');
       
-      const fallbackVerses = [
+      // Comprehensive offline biblical wisdom
+      const comprehensiveVerses = [
         {
-          id: 'fallback-1',
+          id: 'tithe-1',
+          reference: 'Malachi 3:10',
+          verse_text: 'Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this, says the Lord Almighty, and see if I will not throw open the floodgates of heaven and pour out so much blessing that there will not be room enough to store it.',
+          principle: 'Tithing demonstrates trust in God\'s provision and unlocks His blessings',
+          application: 'Set up automated 10% giving from your DeFi earnings to your local church'
+        },
+        {
+          id: 'stewardship-1',
           reference: 'Proverbs 21:5',
           verse_text: 'The plans of the diligent lead to profit as surely as haste leads to poverty.',
           principle: 'Diligent planning leads to financial success',
-          application: 'Create detailed financial plans and avoid hasty investment decisions'
+          application: 'Create detailed financial plans and avoid hasty investment decisions, especially in volatile DeFi markets'
         },
         {
-          id: 'fallback-2', 
-          reference: 'Luke 14:28',
-          verse_text: 'Suppose one of you wants to build a tower. Won\'t you first sit down and estimate the cost to see if you have enough money to complete it?',
-          principle: 'Count the cost before making financial commitments',
-          application: 'Always budget and plan before making large purchases or investments'
+          id: 'debt-1',
+          reference: 'Proverbs 22:7',
+          verse_text: 'The rich rule over the poor, and the borrower is slave to the lender.',
+          principle: 'Debt creates financial bondage that limits freedom',
+          application: 'Avoid excessive leverage in DeFi protocols that could lead to liquidation'
+        },
+        {
+          id: 'wisdom-1',
+          reference: 'Proverbs 13:11',
+          verse_text: 'Dishonest money dwindles away, but whoever gathers money little by little makes it grow.',
+          principle: 'Sustainable wealth comes from consistent, honest accumulation',
+          application: 'Build DeFi positions gradually through regular contributions to stable yield protocols'
         }
       ];
 
+      // Smart verse selection based on query
+      let relevantVerses = [];
+      let advice = "";
+      
+      if (query.toLowerCase().includes('tithe') || query.toLowerCase().includes('give')) {
+        relevantVerses = [comprehensiveVerses[0], comprehensiveVerses[1]];
+        advice = `Based on ${comprehensiveVerses[0].reference}: "${comprehensiveVerses[0].verse_text}"\n\nBiblical guidance on tithing: God invites us to test Him in the area of tithing. This isn't about earning His love, but about demonstrating our trust in His provision. In the DeFi space, you can set up automated tithing streams using protocols like Superfluid, ensuring your giving has priority over reinvestment. Remember, tithing should come from your gross income, including DeFi yields.`;
+      } else if (query.toLowerCase().includes('debt') || query.toLowerCase().includes('borrow')) {
+        relevantVerses = [comprehensiveVerses[2], comprehensiveVerses[1]];
+        advice = `According to ${comprehensiveVerses[2].reference}: "${comprehensiveVerses[2].verse_text}"\n\nBiblical wisdom on debt: The Bible consistently warns against the dangers of debt. In DeFi, this translates to being extremely cautious with leverage and borrowed positions. While some protocols offer attractive borrowing rates, remember that liquidation risks can quickly turn profitable positions into significant losses.`;
+      } else if (query.toLowerCase().includes('invest') || query.toLowerCase().includes('defi')) {
+        relevantVerses = [comprehensiveVerses[3], comprehensiveVerses[1]];
+        advice = `Based on ${comprehensiveVerses[3].reference}: "${comprehensiveVerses[3].verse_text}"\n\nBiblical approach to DeFi investing: God's word emphasizes gradual, steady wealth building over get-rich-quick schemes. Apply this to DeFi by using dollar-cost averaging, diversifying across multiple protocols, and focusing on sustainable yields rather than unsustainable APYs that often indicate higher risk.`;
+      } else {
+        relevantVerses = [comprehensiveVerses[1], comprehensiveVerses[3]];
+        advice = `Based on ${comprehensiveVerses[1].reference}: "${comprehensiveVerses[1].verse_text}"\n\nGeneral biblical financial wisdom: God calls us to be wise stewards of our resources. This means careful planning, patient accumulation, and avoiding hasty decisions driven by greed or fear. In your financial journey, prioritize giving, maintain emergency funds, and invest wisely for the long term.`;
+      }
+
       return new Response(JSON.stringify({
-        advice: `Based on your question about "${query}", here's biblical wisdom: Remember that God calls us to be wise stewards of our resources. Proverbs 21:5 reminds us that "the plans of the diligent lead to profit as surely as haste leads to poverty." Consider seeking wise counsel, making thoughtful decisions, and always prioritizing giving and saving in your financial planning.`,
-        relevant_verses: fallbackVerses,
-        biblical_principles: ['Diligent planning', 'Wise stewardship', 'Avoiding hasty decisions']
+        advice,
+        relevant_verses: relevantVerses,
+        biblical_principles: ['Faithful Stewardship', 'Wise Planning', 'Generous Giving', 'Avoiding Debt Bondage']
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
