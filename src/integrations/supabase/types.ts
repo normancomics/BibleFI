@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_assignments: {
+        Row: {
+          agent_id: string | null
+          assignment_type: string
+          church_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          agent_id?: string | null
+          assignment_type: string
+          church_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          agent_id?: string | null
+          assignment_type?: string
+          church_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_assignments_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "sovereign_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_assignments_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "global_churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_context_sessions: {
         Row: {
           biblical_references: string[] | null
@@ -41,6 +92,51 @@ export type Database = {
           id?: string
           session_type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      bible_verses: {
+        Row: {
+          book_name: string
+          chapter: number
+          created_at: string | null
+          defi_keywords: string[] | null
+          financial_relevance: number | null
+          id: string
+          testament: string
+          text: string
+          updated_at: string | null
+          verse: number
+          version: string
+          wisdom_category: string[] | null
+        }
+        Insert: {
+          book_name: string
+          chapter: number
+          created_at?: string | null
+          defi_keywords?: string[] | null
+          financial_relevance?: number | null
+          id?: string
+          testament: string
+          text: string
+          updated_at?: string | null
+          verse: number
+          version?: string
+          wisdom_category?: string[] | null
+        }
+        Update: {
+          book_name?: string
+          chapter?: number
+          created_at?: string | null
+          defi_keywords?: string[] | null
+          financial_relevance?: number | null
+          id?: string
+          testament?: string
+          text?: string
+          updated_at?: string | null
+          verse?: number
+          version?: string
+          wisdom_category?: string[] | null
         }
         Relationships: []
       }
@@ -118,6 +214,44 @@ export type Database = {
           },
         ]
       }
+      church_reviews: {
+        Row: {
+          church_id: string | null
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          rating: number | null
+          review_text: string | null
+          user_id: string
+        }
+        Insert: {
+          church_id?: string | null
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating?: number | null
+          review_text?: string | null
+          user_id: string
+        }
+        Update: {
+          church_id?: string | null
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          rating?: number | null
+          review_text?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "church_reviews_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "global_churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       churches: {
         Row: {
           accepts_crypto: boolean
@@ -163,6 +297,240 @@ export type Database = {
           state?: string
           verified?: boolean | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      currency_rates: {
+        Row: {
+          from_currency: string
+          id: string
+          last_updated: string | null
+          rate: number
+          source: string | null
+          to_currency: string
+        }
+        Insert: {
+          from_currency: string
+          id?: string
+          last_updated?: string | null
+          rate: number
+          source?: string | null
+          to_currency: string
+        }
+        Update: {
+          from_currency?: string
+          id?: string
+          last_updated?: string | null
+          rate?: number
+          source?: string | null
+          to_currency?: string
+        }
+        Relationships: []
+      }
+      global_churches: {
+        Row: {
+          accepts_cards: boolean | null
+          accepts_checks: boolean | null
+          accepts_crypto: boolean | null
+          accepts_fiat: boolean | null
+          accepts_wire_transfer: boolean | null
+          address: string | null
+          assistance_contact: string | null
+          assistance_hours: string | null
+          assistance_languages: string[] | null
+          city: string
+          coordinates: unknown | null
+          country: string
+          created_at: string | null
+          created_by: string | null
+          crypto_address: string | null
+          crypto_networks: string[] | null
+          denomination: string | null
+          email: string | null
+          fiat_currencies: string[] | null
+          has_tech_assistance: boolean | null
+          id: string
+          last_updated_by: string | null
+          name: string
+          pastor_name: string | null
+          phone: string | null
+          postal_code: string | null
+          rating: number | null
+          review_count: number | null
+          search_vector: unknown | null
+          state_province: string | null
+          updated_at: string | null
+          verification_date: string | null
+          verified: boolean | null
+          verified_by: string | null
+          website: string | null
+        }
+        Insert: {
+          accepts_cards?: boolean | null
+          accepts_checks?: boolean | null
+          accepts_crypto?: boolean | null
+          accepts_fiat?: boolean | null
+          accepts_wire_transfer?: boolean | null
+          address?: string | null
+          assistance_contact?: string | null
+          assistance_hours?: string | null
+          assistance_languages?: string[] | null
+          city: string
+          coordinates?: unknown | null
+          country: string
+          created_at?: string | null
+          created_by?: string | null
+          crypto_address?: string | null
+          crypto_networks?: string[] | null
+          denomination?: string | null
+          email?: string | null
+          fiat_currencies?: string[] | null
+          has_tech_assistance?: boolean | null
+          id?: string
+          last_updated_by?: string | null
+          name: string
+          pastor_name?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          rating?: number | null
+          review_count?: number | null
+          search_vector?: unknown | null
+          state_province?: string | null
+          updated_at?: string | null
+          verification_date?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+          website?: string | null
+        }
+        Update: {
+          accepts_cards?: boolean | null
+          accepts_checks?: boolean | null
+          accepts_crypto?: boolean | null
+          accepts_fiat?: boolean | null
+          accepts_wire_transfer?: boolean | null
+          address?: string | null
+          assistance_contact?: string | null
+          assistance_hours?: string | null
+          assistance_languages?: string[] | null
+          city?: string
+          coordinates?: unknown | null
+          country?: string
+          created_at?: string | null
+          created_by?: string | null
+          crypto_address?: string | null
+          crypto_networks?: string[] | null
+          denomination?: string | null
+          email?: string | null
+          fiat_currencies?: string[] | null
+          has_tech_assistance?: boolean | null
+          id?: string
+          last_updated_by?: string | null
+          name?: string
+          pastor_name?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          rating?: number | null
+          review_count?: number | null
+          search_vector?: unknown | null
+          state_province?: string | null
+          updated_at?: string | null
+          verification_date?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          country: string
+          created_at: string | null
+          currency: string
+          details: Json
+          id: string
+          is_default: boolean | null
+          method_name: string
+          method_type: string
+          updated_at: string | null
+          user_id: string
+          verified: boolean | null
+        }
+        Insert: {
+          country: string
+          created_at?: string | null
+          currency: string
+          details: Json
+          id?: string
+          is_default?: boolean | null
+          method_name: string
+          method_type: string
+          updated_at?: string | null
+          user_id: string
+          verified?: boolean | null
+        }
+        Update: {
+          country?: string
+          created_at?: string | null
+          currency?: string
+          details?: Json
+          id?: string
+          is_default?: boolean | null
+          method_name?: string
+          method_type?: string
+          updated_at?: string | null
+          user_id?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      sovereign_agents: {
+        Row: {
+          active: boolean | null
+          availability_hours: string | null
+          created_at: string | null
+          email: string
+          id: string
+          languages: string[] | null
+          name: string
+          phone: string | null
+          rating: number | null
+          review_count: number | null
+          service_areas: string[] | null
+          specialties: string[] | null
+          updated_at: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          active?: boolean | null
+          availability_hours?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          languages?: string[] | null
+          name: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          active?: boolean | null
+          availability_hours?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          languages?: string[] | null
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          updated_at?: string | null
+          verified?: boolean | null
         }
         Relationships: []
       }
@@ -331,6 +699,22 @@ export type Database = {
           reference: string
           similarity: number
           verse_text: string
+        }[]
+      }
+      search_biblical_wisdom: {
+        Args: {
+          limit_count?: number
+          min_financial_relevance?: number
+          search_term?: string
+          wisdom_categories?: string[]
+        }
+        Returns: {
+          defi_keywords: string[]
+          financial_relevance: number
+          id: string
+          reference: string
+          text: string
+          wisdom_category: string[]
         }[]
       }
       sparsevec_out: {
