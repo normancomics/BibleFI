@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { SoundProvider } from "@/contexts/SoundContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import Index from "./pages/Index";
+import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import DefiPage from "./pages/DefiPage";
 import StakingPage from "./pages/StakingPage";
@@ -34,7 +35,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/defi" element={<DefiPage />} />
               <Route path="/staking" element={<StakingPage />} />
