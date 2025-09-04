@@ -4,59 +4,61 @@
 
 @layer base {
   :root {
-    /* eBoy-inspired bright pixel art theme */
-    --background: 45 100% 97%;       /* Clean off-white like eBoy */
-    --foreground: 0 0% 5%;           /* Sharp black text */
-    --card: 0 0% 100%;               /* Pure white cards */
-    --card-foreground: 0 0% 5%;      /* Black text on cards */
-    --popover: 0 0% 100%;            /* White popovers */
-    --popover-foreground: 0 0% 5%;   /* Black text on popovers */
-    --primary: 162 100% 40%;         /* Bright eBoy green */
-    --primary-foreground: 0 0% 100%; /* White text on primary */
-    --secondary: 45 100% 50%;        /* Bright eBoy yellow */
-    --secondary-foreground: 0 0% 5%; /* Black text on yellow */
-    --muted: 0 0% 95%;               /* Light gray muted */
-    --muted-foreground: 0 0% 40%;    /* Medium gray text */
-    --accent: 320 100% 70%;          /* Bright eBoy pink/magenta */
-    --accent-foreground: 0 0% 5%;    /* Black text on accent */
-    --destructive: 0 100% 60%;       /* Bright red */
+    /* Dark theme with better contrast for readability */
+    --background: 220 27% 8%;         /* Dark navy background */
+    --foreground: 0 0% 98%;           /* Near-white text for contrast */
+    --card: 220 27% 12%;              /* Slightly lighter dark cards */
+    --card-foreground: 0 0% 95%;      /* Light text on dark cards */
+    --popover: 220 27% 15%;           /* Dark popovers */
+    --popover-foreground: 0 0% 95%;   /* Light text on popovers */
+    --primary: 280 100% 65%;          /* Bright purple primary */
+    --primary-foreground: 0 0% 100%;  /* White text on primary */
+    --secondary: 45 100% 55%;         /* Bright gold secondary */
+    --secondary-foreground: 0 0% 8%;  /* Dark text on bright secondary */
+    --muted: 220 27% 18%;             /* Muted dark areas */
+    --muted-foreground: 0 0% 70%;     /* Light gray muted text */
+    --accent: 320 100% 70%;           /* Bright accent color */
+    --accent-foreground: 0 0% 8%;     /* Dark text on bright accent */
+    --destructive: 0 100% 60%;        /* Bright red */
     --destructive-foreground: 0 0% 100%; /* White text on red */
-    --border: 0 0% 85%;              /* Light gray borders */
-    --input: 0 0% 98%;               /* Very light input backgrounds */
-    --ring: 162 100% 40%;            /* Green focus ring */
-    --radius: 0px;                   /* Sharp pixel corners */
+    --border: 0 0% 25%;               /* Visible borders */
+    --input: 220 27% 15%;             /* Dark input backgrounds */
+    --ring: 280 100% 65%;             /* Purple focus ring */
+    --radius: 0px;                    /* Sharp pixel corners */
 
-    /* eBoy-inspired bright pixel colors */
-    --eboy-yellow: 45 100% 50%;      /* Signature eBoy yellow */
-    --eboy-green: 162 100% 40%;      /* Signature eBoy green */
-    --eboy-pink: 320 100% 70%;       /* Bright eBoy pink */
-    --eboy-blue: 200 100% 50%;       /* Bright eBoy blue */
-    --eboy-red: 0 100% 60%;          /* Bright eBoy red */
-    --eboy-orange: 25 100% 55%;      /* Bright eBoy orange */
-    --eboy-purple: 280 100% 65%;     /* Bright eBoy purple */
-    --eboy-cyan: 180 100% 50%;       /* Bright eBoy cyan */
+    /* Improved biblical colors with better contrast */
+    --scripture: 280 100% 65%;        /* Bright purple for scripture */
+    --scripture-light: 280 100% 80%;  /* Light purple */
+    --scripture-dark: 280 100% 45%;   /* Dark purple */
+    --ancient-gold: 45 100% 55%;      /* Bright readable gold */
+    --ancient-scroll: 45 85% 85%;     /* Light parchment with good contrast */
+    --base-blue: 200 100% 55%;        /* Bright base blue */
     
-    /* Biblical pixel colors - bright like eBoy */
-    --scripture: 280 100% 65%;       /* Bright purple for scripture */
-    --scripture-light: 280 100% 80%; /* Light purple */
-    --scripture-dark: 280 100% 45%;  /* Dark purple */
-    --ancient-gold: 45 100% 50%;     /* Bright gold */
-    --ancient-scroll: 39 100% 85%;   /* Light parchment */
-    --base-blue: 200 100% 50%;       /* Bright base blue */
-    --pixel-purple: 280 100% 65%;    /* Bright pixel purple */
-    --pixel-green: 120 100% 40%;     /* Bright pixel green */
-    --pixel-yellow: 45 100% 50%;     /* Bright pixel yellow */
+    /* eBoy-inspired bright colors with good contrast */
+    --eboy-yellow: 45 100% 55%;       /* Brighter yellow for better visibility */
+    --eboy-green: 162 100% 45%;       /* Slightly darker green for better contrast */
+    --eboy-pink: 320 100% 70%;        /* Bright pink */
+    --eboy-blue: 200 100% 55%;        /* Bright blue */
+    --eboy-red: 0 100% 60%;           /* Bright red */
+    --eboy-orange: 25 100% 55%;       /* Bright orange */
+    --eboy-purple: 280 100% 65%;      /* Bright purple */
+    --eboy-cyan: 180 100% 50%;        /* Bright cyan */
     
-    /* Additional bright colors */
-    --temple-stone: 0 0% 80%;        /* Light stone gray */
-    --sacred-flame: 25 100% 55%;     /* Bright orange flame */
-    --wisdom-glow: 45 100% 60%;      /* Bright golden glow */
+    /* Pixel art colors */
+    --pixel-purple: 280 100% 65%;     /* Bright pixel purple */
+    --pixel-green: 120 100% 45%;      /* Slightly darker for better contrast */
+    --pixel-yellow: 45 100% 55%;      /* Brighter yellow */
+    --pixel-sky: 200 100% 75%;        /* Bright pixel sky */
     
-    /* eBoy-style isometric colors */
-    --iso-wall-light: 0 0% 90%;     /* Light isometric walls */
-    --iso-wall-dark: 0 0% 70%;      /* Dark isometric walls */
-    --iso-shadow: 0 0% 50%;          /* Isometric shadows */
-    --pixel-sky: 200 100% 85%;       /* Bright pixel sky */
+    /* Functional colors */
+    --temple-stone: 0 0% 75%;         /* Light stone with good contrast */
+    --sacred-flame: 25 100% 55%;      /* Bright orange flame */
+    --wisdom-glow: 45 100% 60%;       /* Bright golden glow */
+    
+    /* Isometric colors with better contrast */
+    --iso-wall-light: 0 0% 85%;      /* Light isometric walls */
+    --iso-wall-dark: 0 0% 65%;       /* Dark isometric walls */
+    --iso-shadow: 0 0% 45%;           /* Isometric shadows */
   }
 }
 

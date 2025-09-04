@@ -36,13 +36,13 @@ const NavBar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="bg-black/80 backdrop-blur-md border-b border-ancient-gold/20 sticky top-0 z-50">
+    <nav className="bg-background/95 backdrop-blur-md border-b border-ancient-gold/30 sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-ancient-gold rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold text-sm">B</span>
+              <span className="text-background font-bold text-sm">B</span>
             </div>
             <span className="font-scroll text-ancient-gold text-xl hidden sm:block">
               Bible.fi
@@ -59,15 +59,15 @@ const NavBar: React.FC = () => {
                   className={`
                     flex items-center gap-1 whitespace-nowrap
                     ${isActive(item.path) 
-                      ? 'bg-ancient-gold text-black hover:bg-ancient-gold/90' 
-                      : 'text-white/80 hover:text-ancient-gold hover:bg-ancient-gold/10'
+                      ? 'bg-ancient-gold text-background hover:bg-ancient-gold/90' 
+                      : 'text-foreground/80 hover:text-ancient-gold hover:bg-ancient-gold/10'
                     }
                   `}
                 >
                   <item.icon className="h-4 w-4" />
                   <span className="hidden sm:inline">{item.label}</span>
                   {item.badge && (
-                    <Badge variant="secondary" className="ml-1 text-xs bg-scripture text-white">
+                    <Badge variant="secondary" className="ml-1 text-xs bg-scripture text-primary-foreground">
                       {item.badge}
                     </Badge>
                   )}

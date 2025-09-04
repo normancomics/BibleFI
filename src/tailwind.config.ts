@@ -63,33 +63,45 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Bible.Fi custom colors - Farcaster purple and Base blue
+				// Bible.Fi custom colors - All HSL format to match index.css
 				scripture: {
-					DEFAULT: '#9B87F5', // Farcaster purple
-					dark: '#7E69AB',    // Darker purple
-					light: '#D6BCFA',   // Light purple
+					DEFAULT: 'hsl(var(--scripture))', // Use CSS variable
+					dark: 'hsl(var(--scripture-dark))',
+					light: 'hsl(var(--scripture-light))',
 				},
 				ancient: {
-					scroll: '#FFF7C2',  // Parchment yellow
-					gold: '#FFD700',    // Gold for important elements
-					temple: '#00FF66',  // Green for temple elements
+					scroll: 'hsl(var(--ancient-scroll))',
+					gold: 'hsl(var(--ancient-gold))',
+					temple: 'hsl(var(--pixel-green))',
 				},
-				// Retro game colors
+				// Retro game colors - HSL format
 				pixel: {
-					red: '#FF5555',
-					blue: '#0052FF',    // Base blue
-					green: '#55FF55',
-					yellow: '#FFFF55',
-					orange: '#FF9955',
-					pink: '#FF55FF',
-					cyan: '#00FFFF',
-					purple: '#9B87F5',  // Farcaster purple
-					black: '#000000',
-					white: '#FFFFFF',
+					red: 'hsl(0 100% 65%)',
+					blue: 'hsl(var(--base-blue))',
+					green: 'hsl(var(--pixel-green))',
+					yellow: 'hsl(var(--pixel-yellow))',
+					orange: 'hsl(25 100% 55%)',
+					pink: 'hsl(320 100% 70%)',
+					cyan: 'hsl(180 100% 50%)',
+					purple: 'hsl(var(--scripture))',
+					black: 'hsl(0 0% 0%)',
+					white: 'hsl(0 0% 100%)',
+					sky: 'hsl(var(--pixel-sky))',
 				},
 				base: {
-					blue: '#0052FF', // Base chain blue
-					dark: '#003399',
+					blue: 'hsl(var(--base-blue))',
+					dark: 'hsl(200 100% 30%)',
+				},
+				// eBoy inspired colors from index.css
+				eboy: {
+					yellow: 'hsl(var(--eboy-yellow))',
+					green: 'hsl(var(--eboy-green))',
+					pink: 'hsl(var(--eboy-pink))',
+					blue: 'hsl(var(--eboy-blue))',
+					red: 'hsl(var(--eboy-red))',
+					orange: 'hsl(var(--eboy-orange))',
+					purple: 'hsl(var(--eboy-purple))',
+					cyan: 'hsl(var(--eboy-cyan))',
 				}
 			},
 			borderRadius: {
