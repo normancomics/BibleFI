@@ -41,9 +41,17 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   }, [connector]);
 
   const connectWallet = () => {
+    // Try to find available connectors in order of preference
     const coinbaseConnector = connectors.find(c => c.name === 'Coinbase Wallet');
+    const walletConnectConnector = connectors.find(c => c.name === 'WalletConnect');
+    const injectedConnector = connectors.find(c => c.name === 'Browser Wallet');
+    
     if (coinbaseConnector) {
       connect({ connector: coinbaseConnector });
+    } else if (walletConnectConnector) {
+      connect({ connector: walletConnectConnector });
+    } else if (injectedConnector) {
+      connect({ connector: injectedConnector });
     } else if (connectors.length > 0) {
       connect({ connector: connectors[0] });
     }

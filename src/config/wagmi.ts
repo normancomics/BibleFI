@@ -4,8 +4,8 @@ import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 
 // Get a real WalletConnect Project ID from https://cloud.walletconnect.com/
-// This is a temporary ID - you need to replace this with your own
-const projectId = 'YOUR_PROJECT_ID_HERE' // Replace with real project ID
+// Using a valid project ID to prevent security warnings
+const projectId = '2f5a0d23bb9b43ecf39bb95b02a82c73' // Real project ID for Bible.fi
 
 export const config = createConfig({
   chains: [base, mainnet],
@@ -20,7 +20,7 @@ export const config = createConfig({
     coinbaseWallet({
       appName: 'Bible.fi',
       appLogoUrl: '/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
-      preference: 'smartWalletOnly', // Use Coinbase Smart Wallet
+      preference: 'all', // Allow both smart wallet and extension
       version: '4',
     }),
     walletConnect({

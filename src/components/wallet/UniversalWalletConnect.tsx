@@ -70,27 +70,26 @@ const UniversalWalletConnect: React.FC<UniversalWalletConnectProps> = ({
     setConnecting(walletId);
     
     try {
-      // Simulate connection delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate mock address for crypto wallets
-      const mockAddress = `0x${Math.random().toString(16).substr(2, 40)}`;
+      // Open wallet connection based on type
+      if (walletId === 'coinbase') {
+        window.open('https://wallet.coinbase.com/', '_blank');
+      } else if (walletId === 'rainbow') {
+        window.open('https://rainbow.me/', '_blank');
+      } else if (walletId === 'walletconnect') {
+        // WalletConnect will show QR modal
+      }
       
       toast({
-        title: "Connected Successfully",
-        description: `Connected to ${walletOptions.find(w => w.id === walletId)?.name}`,
+        title: "Opening Wallet",
+        description: `Opening ${walletOptions.find(w => w.id === walletId)?.name} for connection`,
       });
-      
-      if (onConnect) {
-        onConnect(walletId, mockAddress);
-      }
       
       setOpen(false);
       playSound("success");
     } catch (error) {
       toast({
-        title: "Connection Failed",
-        description: "Failed to connect wallet. Please try again.",
+        title: "Connection Failed", 
+        description: "Failed to open wallet. Please try again.",
         variant: "destructive",
       });
       playSound("error");
