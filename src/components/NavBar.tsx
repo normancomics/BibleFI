@@ -40,11 +40,11 @@ const NavBar: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-ancient-gold rounded-lg flex items-center justify-center">
-              <span className="text-background font-bold text-sm">B</span>
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-md flex items-center justify-center shadow-lg group-hover:shadow-yellow-400/25 transition-all duration-300">
+              <span className="text-black font-bold text-sm font-mono">₿</span>
             </div>
-            <span className="font-scroll text-ancient-gold text-xl hidden sm:block">
+            <span className="font-mono text-yellow-400 text-xl font-bold hidden sm:block tracking-tight">
               Bible.fi
             </span>
           </Link>

@@ -69,12 +69,13 @@ const ModernBiblefiHero: React.FC = () => {
           >
             <h1 className="text-6xl md:text-8xl font-bold mb-4 relative">
               <span 
-                className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent"
+                className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent pixel-font"
                 style={{ 
-                  fontFamily: "'Orbitron', 'Cinzel', serif",
+                  fontFamily: "'Orbitron', 'Monaco', 'Courier New', monospace",
                   fontWeight: 900,
-                  letterSpacing: '-0.02em',
-                  textShadow: isHovered ? '0 0 30px rgba(255, 215, 0, 0.5)' : 'none',
+                  letterSpacing: '0.05em',
+                  textShadow: isHovered ? '0 0 30px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.3)' : '0 0 20px rgba(255, 215, 0, 0.2)',
+                  filter: 'contrast(1.2)',
                 }}
               >
                 Bible.fi

@@ -382,3 +382,11 @@
 .font-modern-biblical {
   font-family: 'Orbitron', 'Cinzel', 'Roboto', sans-serif;
 }
+
+.pixel-font {
+  font-family: 'JetBrains Mono', 'Monaco', 'Courier New', monospace;
+  font-weight: 900;
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
