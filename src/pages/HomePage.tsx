@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
-import HomeHeader from "@/components/home/HomeHeader";
+import ModernBiblefiHero from "@/components/home/ModernBiblefiHero";
 import FeatureCards from "@/components/home/FeatureCards";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
 import TaxSection from "@/components/home/TaxSection";
@@ -48,34 +48,8 @@ const HomePage: React.FC = () => {
       
       <main className="relative">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-[url('/pixel-temple-bg.png')] bg-cover bg-center opacity-10" />
-          <div className="relative z-10 text-center max-w-4xl mx-auto">
-            <HomeHeader />
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={handleGetStarted}
-                size="lg"
-                className="bg-gradient-to-r from-ancient-gold to-yellow-600 hover:from-yellow-600 hover:to-ancient-gold text-black font-bold px-8 py-4 text-lg"
-              >
-                Enter Bible.fi
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-ancient-gold text-ancient-gold hover:bg-ancient-gold hover:text-black px-8 py-4 text-lg"
-                onClick={() => {
-                  playSound("select");
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Learn More
-                <BookOpen className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-            <SoundActivationButton />
-          </div>
+        <section>
+          <ModernBiblefiHero />
         </section>
 
         {/* Stats Section */}
