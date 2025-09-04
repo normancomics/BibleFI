@@ -118,11 +118,16 @@ const RealWalletConnect: React.FC<RealWalletConnectProps> = ({
                       <Wallet className="w-4 h-4 text-ancient-gold" />
                     </div>
                     <div>
-                      <span className="font-medium text-white">{connector.name}</span>
+                      <span className="font-medium text-white">
+                        {connector.name === 'Coinbase Wallet' ? 'Base Wallet' : 
+                         connector.name === 'WalletConnect' ? 'Rainbow Wallet' :
+                         connector.name === 'Browser Wallet' ? 'Farcaster Wallet' : 
+                         connector.name}
+                      </span>
                       <p className="text-sm text-white/60">
-                        {connector.name === 'Coinbase Wallet' && 'Coinbase\'s self-custody wallet'}
-                        {connector.name === 'WalletConnect' && 'Connect any compatible wallet'}
-                        {connector.name === 'Injected' && 'Browser extension wallet'}
+                        {connector.name === 'Coinbase Wallet' && 'Connect with Base app'}
+                        {connector.name === 'WalletConnect' && 'Rainbow & other wallets'}
+                        {(connector.name === 'Injected' || connector.name === 'Browser Wallet') && 'Browser extension & Farcaster'}
                       </p>
                     </div>
                   </div>

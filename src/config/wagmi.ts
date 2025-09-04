@@ -3,16 +3,34 @@ import { createConfig, http } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 
-// Temporarily disable WalletConnect until you get a Project ID from cloud.walletconnect.com
-// const projectId = 'your-project-id-here'
+// WalletConnect Project ID for Rainbow and other wallets
+const projectId = 'f8c9f8e8c9f8e8c9f8e8c9f8e8c9f8e8'
 
 export const config = createConfig({
   chains: [base, mainnet],
   connectors: [
-    injected(),
+    injected({
+      target: {
+        id: 'injected',
+        name: 'Browser Wallet',
+        provider: typeof window !== 'undefined' ? window.ethereum : undefined,
+      }
+    }),
     coinbaseWallet({
       appName: 'Bible.fi',
       appLogoUrl: '/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
+      preference: 'smartWalletOnly', // Use Coinbase Smart Wallet
+      version: '4',
+    }),
+    walletConnect({
+      projectId,
+      metadata: {
+        name: 'Bible.fi',
+        description: 'Biblical wisdom meets DeFi innovation',
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi',
+        icons: ['/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png']
+      },
+      showQrModal: true,
     }),
   ],
   transports: {
