@@ -3,8 +3,9 @@ import { createConfig, http } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 
-// WalletConnect Project ID for Rainbow and other wallets
-const projectId = 'f8c9f8e8c9f8e8c9f8e8c9f8e8c9f8e8'
+// Get a real WalletConnect Project ID from https://cloud.walletconnect.com/
+// This is a temporary ID - you need to replace this with your own
+const projectId = 'YOUR_PROJECT_ID_HERE' // Replace with real project ID
 
 export const config = createConfig({
   chains: [base, mainnet],

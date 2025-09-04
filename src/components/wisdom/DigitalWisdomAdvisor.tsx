@@ -153,7 +153,7 @@ In the context of DeFi and cryptocurrency earnings, this principle remains uncha
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-purple-900/20 to-black/40 border-ancient-gold/30">
+      <Card className="bg-gradient-to-br from-purple-900/40 to-black/60 border-ancient-gold/50 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-ancient-gold">
             <BookOpen size={24} />

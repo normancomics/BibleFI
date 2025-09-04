@@ -179,7 +179,7 @@ const BiblicalWisdomCrawler: React.FC = () => {
   };
 
   return (
-    <Card className="bg-black/40 border-ancient-gold/30">
+    <Card className="bg-black/60 border-ancient-gold/50 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-ancient-gold">
           <Database size={24} />

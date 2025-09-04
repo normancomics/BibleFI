@@ -19,43 +19,43 @@ interface PixelCharacterProps {
 
 const characterConfig = {
   god: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-jesus.png",
     sound: "powerup",
     alt: "God Character",
     label: "GOD"
   },
   jesus: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-jesus.png",
     sound: "powerup",
     alt: "Jesus Character",
     label: "JESUS"
   },
   solomon: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-solomon.png",
     sound: "coin",
     alt: "Solomon Character",
     label: "SOLOMON"
   },
   moses: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-moses.png",
     sound: "scroll",
     alt: "Moses Character",
     label: "MOSES"
   },
   david: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-david.png",
     sound: "select",
     alt: "King David Character",
     label: "KING DAVID"
   },
   noah: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-noah.png",
     sound: "click",
     alt: "Noah Character",
     label: "NOAH"
   },
   paul: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-paul.png",
     sound: "success",
     alt: "Paul Character",
     label: "PAUL"
@@ -67,13 +67,13 @@ const characterConfig = {
     label: "COIN"
   },
   abraham: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-david.png",
     sound: "scroll",
     alt: "Abraham Character",
     label: "ABRAHAM"
   },
   joseph: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-joseph-treasurer.png",
     sound: "powerup",
     alt: "Joseph Character",
     label: "JOSEPH"
@@ -85,19 +85,19 @@ const characterConfig = {
     label: "SHEPHERD"
   },
   "woman-well": {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-paul.png",
     sound: "select",
     alt: "Woman at the Well Character",
     label: "WOMAN AT WELL"
   },
   caesar: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-david.png",
     sound: "coin",
     alt: "Caesar Character",
     label: "CAESAR"
   },
   "tax-collector": {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-paul.png",
     sound: "coin",
     alt: "Tax Collector Character",
     label: "TAX COLLECTOR"
@@ -115,25 +115,25 @@ const characterConfig = {
     label: "JOSEPH'S WISDOM"
   },
   nehemiah: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-moses.png",
     sound: "powerup",
     alt: "Nehemiah Character",
     label: "NEHEMIAH"
   },
   ezra: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-proverbs-scholar.png",
     sound: "scroll",
     alt: "Ezra Character",
     label: "EZRA"
   },
   boaz: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-solomon.png",
     sound: "coin",
     alt: "Boaz Character",
     label: "BOAZ"
   },
   lydia: {
-    src: "/lovable-uploads/450f0ecf-de96-4379-b399-2eeb41f04db9.png",
+    src: "/pixel-paul.png",
     sound: "success",
     alt: "Lydia Character",
     label: "LYDIA"
@@ -224,7 +224,7 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
         {/* Character name label - updated to match Base Chain style */}
         {(isHovered || arcadeStyle) && (
           <div className={`absolute ${arcadeStyle ? 'top-[-20px]' : 'bottom-[-20px]'} left-0 right-0 text-center`}>
-            <span className="bg-black/70 text-base-blue px-2 py-1 text-xs rounded font-pixel">
+            <span className="bg-black/90 text-ancient-gold px-2 py-1 text-xs rounded font-pixel border border-ancient-gold/50">
               {characterLabel}
             </span>
           </div>
@@ -233,8 +233,8 @@ const PixelCharacter: React.FC<PixelCharacterProps> = ({
       
       {/* Character message/wisdom - updated to match Base Chain style */}
       {message && (
-        <div className={`mt-2 ${arcadeStyle ? 'bg-black/70 border border-base-blue p-2 rounded' : ''}`}>
-          <p className="text-sm text-center font-pixel text-white">
+        <div className={`mt-2 ${arcadeStyle ? 'bg-black/90 border border-ancient-gold/50 p-2 rounded' : ''}`}>
+          <p className="text-sm text-center font-pixel text-white drop-shadow-lg">
             {message}
           </p>
         </div>

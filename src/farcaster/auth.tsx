@@ -36,11 +36,11 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
   const [status, setStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
 
   const config = {
-    domain: FARCASTER_CONFIG.domain,
-    siweUri: FARCASTER_CONFIG.siweUri,
-    rpcUrl: FARCASTER_CONFIG.rpcUrl,
-    relay: FARCASTER_CONFIG.relay,
-    version: FARCASTER_CONFIG.version,
+    domain: typeof window !== 'undefined' ? window.location.hostname : 'bible.fi',
+    siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://bible.fi/api/auth/callback',
+    rpcUrl: 'https://mainnet.base.org',
+    relay: 'https://relay.farcaster.xyz',
+    version: 'vNext',
   };
 
   // Create a ref for SignIn button
