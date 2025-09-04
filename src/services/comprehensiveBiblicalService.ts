@@ -102,13 +102,84 @@ class ComprehensiveBiblicalService {
   }
 
   /**
-   * Search by text content
+   * Search by text content with intelligent topic detection
    */
   async searchByText(searchTerm: string): Promise<BiblicalWisdomResult[]> {
+    const normalizedQuery = searchTerm.toLowerCase();
+    
+    // Detect key topics and return comprehensive results
+    if (this.isTithingQuery(normalizedQuery)) {
+      return this.getComprehensiveTithingWisdom();
+    }
+    
+    if (this.isDebtQuery(normalizedQuery)) {
+      return this.getComprehensiveDebtWisdom();
+    }
+    
+    if (this.isWealthQuery(normalizedQuery)) {
+      return this.getComprehensiveWealthWisdom();
+    }
+    
+    if (this.isGivingQuery(normalizedQuery)) {
+      return this.getComprehensiveGivingWisdom();
+    }
+    
+    // Default search
     return this.searchBiblicalWisdom({
       search_term: searchTerm,
       min_financial_relevance: 1,
       limit_count: 20
+    });
+  }
+
+  /**
+   * Get comprehensive tithing wisdom - all major tithing scriptures
+   */
+  async getComprehensiveTithingWisdom(): Promise<BiblicalWisdomResult[]> {
+    const results = await this.searchBiblicalWisdom({
+      wisdom_categories: ['tithing', 'firstfruits', 'giving', 'offering'],
+      min_financial_relevance: 1,
+      limit_count: 50
+    });
+    
+    // If we don't have comprehensive results from DB, provide essential tithing verses
+    if (results.length < 5) {
+      return this.getEssentialTithingVerses();
+    }
+    
+    return results;
+  }
+
+  /**
+   * Get comprehensive debt wisdom
+   */
+  async getComprehensiveDebtWisdom(): Promise<BiblicalWisdomResult[]> {
+    return this.searchBiblicalWisdom({
+      wisdom_categories: ['debt', 'borrowing', 'lending', 'financial bondage'],
+      min_financial_relevance: 1,
+      limit_count: 30
+    });
+  }
+
+  /**
+   * Get comprehensive wealth wisdom
+   */
+  async getComprehensiveWealthWisdom(): Promise<BiblicalWisdomResult[]> {
+    return this.searchBiblicalWisdom({
+      wisdom_categories: ['wealth', 'riches', 'prosperity', 'contentment'],
+      min_financial_relevance: 1,
+      limit_count: 30
+    });
+  }
+
+  /**
+   * Get comprehensive giving wisdom
+   */
+  async getComprehensiveGivingWisdom(): Promise<BiblicalWisdomResult[]> {
+    return this.searchBiblicalWisdom({
+      wisdom_categories: ['giving', 'generosity', 'charity', 'helping others'],
+      min_financial_relevance: 1,
+      limit_count: 30
     });
   }
 
@@ -219,6 +290,77 @@ class ComprehensiveBiblicalService {
       console.error('Error in addBiblicalVerse:', error);
       return false;
     }
+  }
+
+  /**
+   * Query detection helpers
+   */
+  private isTithingQuery(query: string): boolean {
+    const tithingKeywords = ['tithe', 'tithing', 'tenth', '10%', 'ten percent', 'firstfruits', 'storehouse'];
+    return tithingKeywords.some(keyword => query.includes(keyword));
+  }
+
+  private isDebtQuery(query: string): boolean {
+    const debtKeywords = ['debt', 'borrow', 'loan', 'owe', 'owing', 'financial bondage'];
+    return debtKeywords.some(keyword => query.includes(keyword));
+  }
+
+  private isWealthQuery(query: string): boolean {
+    const wealthKeywords = ['wealth', 'rich', 'riches', 'money', 'prosperity', 'financial blessing'];
+    return wealthKeywords.some(keyword => query.includes(keyword));
+  }
+
+  private isGivingQuery(query: string): boolean {
+    const givingKeywords = ['giving', 'generosity', 'donate', 'charity', 'help others', 'alms'];
+    return givingKeywords.some(keyword => query.includes(keyword));
+  }
+
+  /**
+   * Essential tithing verses when database is insufficient
+   */
+  private getEssentialTithingVerses(): BiblicalWisdomResult[] {
+    return [
+      {
+        id: 'malachi-3-10',
+        reference: 'Malachi 3:10',
+        text: 'Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this," says the Lord Almighty, "and see if I will not throw open the floodgates of heaven and pour out so much blessing that there will not be room enough to store it.',
+        financial_relevance: 10,
+        wisdom_category: ['tithing', 'testing God', 'blessing'],
+        defi_keywords: ['tithe', 'storehouse', 'blessing']
+      },
+      {
+        id: 'leviticus-27-30',
+        reference: 'Leviticus 27:30',
+        text: 'A tithe of everything from the land, whether grain from the soil or fruit from the trees, belongs to the Lord; it is holy to the Lord.',
+        financial_relevance: 10,
+        wisdom_category: ['tithing', 'holiness', 'belonging to God'],
+        defi_keywords: ['tithe', 'holy', 'belongs to Lord']
+      },
+      {
+        id: 'proverbs-3-9-10',
+        reference: 'Proverbs 3:9-10',
+        text: 'Honor the Lord with your wealth, with the firstfruits of all your crops; then your barns will be filled to overflowing, and your vats will brim over with new wine.',
+        financial_relevance: 10,
+        wisdom_category: ['firstfruits', 'honoring God', 'blessing'],
+        defi_keywords: ['wealth', 'firstfruits', 'overflow']
+      },
+      {
+        id: '2-corinthians-9-7',
+        reference: '2 Corinthians 9:7',
+        text: 'Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.',
+        financial_relevance: 9,
+        wisdom_category: ['cheerful giving', 'heart attitude'],
+        defi_keywords: ['giving', 'cheerful', 'decided']
+      },
+      {
+        id: 'matthew-23-23',
+        reference: 'Matthew 23:23',
+        text: 'Woe to you, teachers of the law and Pharisees, you hypocrites! You give a tenth of your spices—mint, dill and cumin. But you have neglected the more important matters of the law—justice, mercy and faithfulness. You should have practiced the latter, without neglecting the former.',
+        financial_relevance: 9,
+        wisdom_category: ['tithing', 'justice', 'mercy', 'faithfulness'],
+        defi_keywords: ['tenth', 'justice', 'mercy']
+      }
+    ];
   }
 
   /**

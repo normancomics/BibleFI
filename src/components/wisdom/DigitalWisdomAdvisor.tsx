@@ -32,17 +32,22 @@ const DigitalWisdomAdvisor: React.FC = () => {
     playSound('select');
 
     try {
-      // Search the comprehensive biblical knowledge base
+      // Use comprehensive biblical service for intelligent search
+      const { comprehensiveBiblicalService } = await import('@/services/comprehensiveBiblicalService');
+      const wisdomResults = await comprehensiveBiblicalService.searchByText(question);
+
+      // Also search biblical knowledge base as fallback
       const { data: wisdomData, error } = await supabase
         .from('biblical_knowledge_base')
         .select('*')
         .or(`verse_text.ilike.%${question}%,category.ilike.%${question}%,principle.ilike.%${question}%,application.ilike.%${question}%`)
-        .limit(5);
+        .limit(10);
 
-      if (error) throw error;
+      if (error) console.warn('Biblical knowledge base search error:', error);
 
-      // Generate comprehensive response
-      const wisdomResponse = await generateWisdomResponse(question, wisdomData || []);
+      // Combine both sources for comprehensive response
+      const combinedData = [...wisdomResults, ...(wisdomData || [])];
+      const wisdomResponse = await generateWisdomResponse(question, combinedData);
       setResponse(wisdomResponse);
       playSound('success');
       
@@ -80,7 +85,18 @@ const DigitalWisdomAdvisor: React.FC = () => {
 
   const generateWisdomResponse = async (query: string, biblicalData: any[]): Promise<WisdomResponse> => {
     // Enhanced response generation based on comprehensive biblical data
-    const relevantVerses = biblicalData.slice(0, 3);
+    // Prioritize comprehensive tithing responses
+    const queryLower = query.toLowerCase();
+    const isTithingQuery = queryLower.includes('tithe') || queryLower.includes('tithing') || queryLower.includes('tenth') || queryLower.includes('10%');
+    
+    let relevantVerses = biblicalData;
+    
+    // For tithing queries, show more verses and prioritize key ones
+    if (isTithingQuery) {
+      relevantVerses = biblicalData.slice(0, 8); // Show up to 8 verses for tithing
+    } else {
+      relevantVerses = biblicalData.slice(0, 4); // Show up to 4 for other topics
+    }
     
     let answer = "";
     let practicalSteps: string[] = [];
