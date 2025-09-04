@@ -11,10 +11,15 @@ import MobileSetupGuide from "@/components/setup/MobileSetupGuide";
 import PortfolioSummary from "@/components/home/PortfolioSummary";
 import ActionButtons from "@/components/home/ActionButtons";
 import RecentActivity from "@/components/home/RecentActivity";
+import BiblicalFinancialStories from "@/components/home/BiblicalFinancialStories";
+import SoundSystemManager from "@/components/enhanced/SoundSystemManager";
+import { Button } from "@/components/ui/button";
+import { Users, BookOpen } from "lucide-react";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
   const [showIntro, setShowIntro] = useState(true);
+  const [showCharacters, setShowCharacters] = useState(false);
   
   // Mock portfolio data - in real app this would come from wallet/DeFi protocols
   const portfolioData = {
@@ -61,7 +66,22 @@ const Index: React.FC = () => {
     setShowIntro(false);
     setUserInteracted(true);
   };
-  
+
+  // Show character stories if user wants them
+  if (showCharacters) {
+    return (
+      <SoundSystemManager>
+        <BiblicalFinancialStories />
+        <Button 
+          onClick={() => setShowCharacters(false)}
+          className="fixed top-4 left-4 z-50 bg-black/70 border border-eboy-green hover:bg-eboy-green/20"
+        >
+          ← Back to Home
+        </Button>
+      </SoundSystemManager>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
@@ -101,6 +121,27 @@ const Index: React.FC = () => {
               <button className="w-full mt-4 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm py-2 rounded-lg transition-colors">
                 Share to Farcaster
               </button>
+            </CardContent>
+          </Card>
+
+          {/* Biblical Characters Button */}
+          <Card className="bg-card border border-border shadow-sm">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Biblical Financial Wisdom
+              </h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                Learn from the Tax Collector's humility, the Woman at the Well's spiritual priorities, 
+                and the Parable of the Talents. Discover timeless financial principles from biblical characters.
+              </p>
+              <Button 
+                onClick={() => setShowCharacters(true)}
+                className="w-full bg-gradient-to-r from-ancient-gold to-yellow-600 hover:from-yellow-600 hover:to-ancient-gold text-black font-medium"
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Explore Character Stories
+              </Button>
             </CardContent>
           </Card>
 
