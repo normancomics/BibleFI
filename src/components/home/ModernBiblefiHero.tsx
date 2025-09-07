@@ -87,6 +87,40 @@ const ModernBiblefiHero: React.FC = () => {
               </span>
             </h1>
             
+            {/* Bible icon underneath */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="mb-4"
+            >
+              <div className="relative mx-auto w-16 h-12">
+                {/* Open Bible */}
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-100 to-white rounded-t-lg border-2 border-blue-200 shadow-lg">
+                  {/* Left page */}
+                  <div className="absolute left-0 top-0 w-1/2 h-full bg-gradient-to-r from-white to-blue-50 rounded-tl-lg border-r border-blue-200">
+                    <div className="p-1 space-y-0.5">
+                      <div className="h-0.5 bg-blue-300/60 rounded w-3/4"></div>
+                      <div className="h-0.5 bg-blue-300/40 rounded w-full"></div>
+                      <div className="h-0.5 bg-blue-300/40 rounded w-5/6"></div>
+                      <div className="h-0.5 bg-blue-300/60 rounded w-4/5"></div>
+                    </div>
+                  </div>
+                  {/* Right page */}
+                  <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-white to-blue-50 rounded-tr-lg">
+                    <div className="p-1 space-y-0.5">
+                      <div className="h-0.5 bg-blue-300/60 rounded w-3/4 ml-auto"></div>
+                      <div className="h-0.5 bg-blue-300/40 rounded w-full"></div>
+                      <div className="h-0.5 bg-blue-300/40 rounded w-5/6 ml-auto"></div>
+                      <div className="h-0.5 bg-blue-300/60 rounded w-4/5 ml-auto"></div>
+                    </div>
+                  </div>
+                  {/* Center crease */}
+                  <div className="absolute left-1/2 top-0 w-0.5 h-full bg-blue-300/30 transform -translate-x-0.5"></div>
+                </div>
+              </div>
+            </motion.div>
+            
             {/* Base.eth address */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
