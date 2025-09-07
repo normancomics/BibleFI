@@ -69,18 +69,14 @@ const ModernBiblefiHero: React.FC = () => {
           >
             <h1 className="text-6xl md:text-8xl font-bold mb-4 relative">
               <span 
-                className="pixel-font pixelated"
+                className="font-orbitron"
                 style={{ 
-                  fontFamily: "'Courier New', 'Monaco', monospace",
                   fontWeight: 900,
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.05em',
                   color: '#4A1A5C',
                   textShadow: isHovered 
-                    ? '2px 0px 0px #FF8C00, -2px 0px 0px #FF8C00, 0px 2px 0px #FF8C00, 0px -2px 0px #FF8C00, 2px 2px 0px #FF8C00, -2px -2px 0px #FF8C00, 2px -2px 0px #FF8C00, -2px 2px 0px #FF8C00, 0 0 20px rgba(255, 140, 0, 0.8)'
-                    : '2px 0px 0px #FF8C00, -2px 0px 0px #FF8C00, 0px 2px 0px #FF8C00, 0px -2px 0px #FF8C00, 2px 2px 0px #FF8C00, -2px -2px 0px #FF8C00, 2px -2px 0px #FF8C00, -2px 2px 0px #FF8C00',
-                  filter: 'contrast(1.5)',
-                  imageRendering: 'pixelated',
-                  WebkitFontSmoothing: 'none',
+                    ? '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00, 0 0 15px rgba(255, 140, 0, 0.6)'
+                    : '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00',
                 }}
               >
                 Bible.Fi

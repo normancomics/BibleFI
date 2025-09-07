@@ -143,7 +143,9 @@ export default {
 				'float': 'float 3s ease-in-out infinite',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
 			},
-			fontFamily: {
+      fontFamily: {
+        'orbitron': ['Orbitron', 'monospace'],
+        'space-mono': ['Space Mono', 'monospace'],
 				pixel: ['VT323', 'monospace'],
 				scroll: ['Cinzel', 'Playfair Display', 'serif'],
 				game: ['"Press Start 2P"', 'cursive']
