@@ -41,10 +41,19 @@ const NavBar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-md flex items-center justify-center shadow-lg group-hover:shadow-yellow-400/25 transition-all duration-300">
+            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-md flex items-center justify-center shadow-lg group-hover:shadow-yellow-400/50 transition-all duration-300">
               <span className="text-black font-bold text-sm font-mono">₿</span>
             </div>
-            <span className="font-mono text-yellow-400 text-xl font-bold hidden sm:block tracking-tight">
+            <span 
+              className="font-mono text-xl font-bold hidden sm:block tracking-tight pixel-font"
+              style={{
+                background: 'linear-gradient(45deg, #FFD700, #FFA500)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 0 10px rgba(255, 215, 0, 0.3), 1px 1px 0px #8B0000, -1px -1px 0px #8B0000',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+              }}
+            >
               Bible.fi
             </span>
           </Link>

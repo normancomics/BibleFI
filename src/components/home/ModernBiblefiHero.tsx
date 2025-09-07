@@ -69,13 +69,18 @@ const ModernBiblefiHero: React.FC = () => {
           >
             <h1 className="text-6xl md:text-8xl font-bold mb-4 relative">
               <span 
-                className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 bg-clip-text text-transparent pixel-font"
+                className="pixel-font"
                 style={{ 
                   fontFamily: "'Orbitron', 'Monaco', 'Courier New', monospace",
                   fontWeight: 900,
                   letterSpacing: '0.05em',
-                  textShadow: isHovered ? '0 0 30px rgba(255, 215, 0, 0.6), 0 0 60px rgba(255, 215, 0, 0.3)' : '0 0 20px rgba(255, 215, 0, 0.2)',
-                  filter: 'contrast(1.2)',
+                  background: 'linear-gradient(45deg, #FFD700, #FFA500, #FF8C00)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: isHovered 
+                    ? '0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 165, 0, 0.6), 0 0 60px rgba(255, 140, 0, 0.4), 2px 2px 0px #8B0000, -2px -2px 0px #8B0000, 2px -2px 0px #8B0000, -2px 2px 0px #8B0000'
+                    : '0 0 15px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 165, 0, 0.3), 2px 2px 0px #8B0000, -2px -2px 0px #8B0000, 2px -2px 0px #8B0000, -2px 2px 0px #8B0000',
+                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))',
                 }}
               >
                 Bible.fi
