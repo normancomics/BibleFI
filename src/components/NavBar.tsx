@@ -41,20 +41,20 @@ const NavBar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-md flex items-center justify-center shadow-lg group-hover:shadow-yellow-400/50 transition-all duration-300">
-              <span className="text-black font-bold text-sm font-mono">₿</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-purple-800 rounded-sm flex items-center justify-center shadow-lg group-hover:shadow-orange-500/50 transition-all duration-300 pixelated">
+              <span className="text-white font-bold text-sm font-mono">₿</span>
             </div>
             <span 
-              className="font-mono text-xl font-bold hidden sm:block tracking-tight pixel-font"
+              className="font-mono text-sm font-bold hidden sm:block tracking-wider pixel-font pixelated"
               style={{
-                background: 'linear-gradient(45deg, #FFD700, #FFA500)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 10px rgba(255, 215, 0, 0.3), 1px 1px 0px #8B0000, -1px -1px 0px #8B0000',
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                fontFamily: "'Courier New', 'Monaco', monospace",
+                color: '#4A1A5C',
+                textShadow: '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00',
+                imageRendering: 'pixelated',
+                WebkitFontSmoothing: 'none',
               }}
             >
-              Bible.fi
+              Bible.Fi
             </span>
           </Link>
 
