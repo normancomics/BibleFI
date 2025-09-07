@@ -75,8 +75,8 @@ const ModernBiblefiHero: React.FC = () => {
                   letterSpacing: '0.05em',
                   color: '#4A1A5C',
                   textShadow: isHovered 
-                    ? '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00, 0 0 15px rgba(255, 140, 0, 0.6)'
-                    : '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00',
+                    ? '3px 0px 0px #FF8C00, -3px 0px 0px #FF8C00, 0px 3px 0px #FF8C00, 0px -3px 0px #FF8C00, 3px 3px 0px #FF8C00, -3px -3px 0px #FF8C00, 3px -3px 0px #FF8C00, -3px 3px 0px #FF8C00, 2px 0px 0px #FF8C00, -2px 0px 0px #FF8C00, 0px 2px 0px #FF8C00, 0px -2px 0px #FF8C00, 2px 2px 0px #FF8C00, -2px -2px 0px #FF8C00, 2px -2px 0px #FF8C00, -2px 2px 0px #FF8C00, 4px 0px 0px #FF8C00, -4px 0px 0px #FF8C00, 0px 4px 0px #FF8C00, 0px -4px 0px #FF8C00, 0 0 20px rgba(255, 140, 0, 0.8)'
+                    : '3px 0px 0px #FF8C00, -3px 0px 0px #FF8C00, 0px 3px 0px #FF8C00, 0px -3px 0px #FF8C00, 3px 3px 0px #FF8C00, -3px -3px 0px #FF8C00, 3px -3px 0px #FF8C00, -3px 3px 0px #FF8C00, 2px 0px 0px #FF8C00, -2px 0px 0px #FF8C00, 0px 2px 0px #FF8C00, 0px -2px 0px #FF8C00, 2px 2px 0px #FF8C00, -2px -2px 0px #FF8C00, 2px -2px 0px #FF8C00, -2px 2px 0px #FF8C00, 4px 0px 0px #FF8C00, -4px 0px 0px #FF8C00, 0px 4px 0px #FF8C00, 0px -4px 0px #FF8C00',
                 }}
               >
                 Bible.Fi
