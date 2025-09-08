@@ -115,23 +115,24 @@ const ModernBiblefiHero: React.FC = () => {
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <h1 className="text-6xl md:text-8xl font-bold mb-4 relative">
-              <span 
-                className="font-orbitron"
-                style={{ 
-                  fontWeight: 900,
-                  letterSpacing: '0.05em',
-                  color: '#4A1A5C',
-                  textShadow: isHovered 
-                    ? '3px 0px 0px #FF8C00, -3px 0px 0px #FF8C00, 0px 3px 0px #FF8C00, 0px -3px 0px #FF8C00, 3px 3px 0px #FF8C00, -3px -3px 0px #FF8C00, 3px -3px 0px #FF8C00, -3px 3px 0px #FF8C00, 2px 0px 0px #FF8C00, -2px 0px 0px #FF8C00, 0px 2px 0px #FF8C00, 0px -2px 0px #FF8C00, 2px 2px 0px #FF8C00, -2px -2px 0px #FF8C00, 2px -2px 0px #FF8C00, -2px 2px 0px #FF8C00, 4px 0px 0px #FF8C00, -4px 0px 0px #FF8C00, 0px 4px 0px #FF8C00, 0px -4px 0px #FF8C00, 0 0 20px rgba(255, 140, 0, 0.8)'
-                    : '3px 0px 0px #FF8C00, -3px 0px 0px #FF8C00, 0px 3px 0px #FF8C00, 0px -3px 0px #FF8C00, 3px 3px 0px #FF8C00, -3px -3px 0px #FF8C00, 3px -3px 0px #FF8C00, -3px 3px 0px #FF8C00, 2px 0px 0px #FF8C00, -2px 0px 0px #FF8C00, 0px 2px 0px #FF8C00, 0px -2px 0px #FF8C00, 2px 2px 0px #FF8C00, -2px -2px 0px #FF8C00, 2px -2px 0px #FF8C00, -2px 2px 0px #FF8C00, 4px 0px 0px #FF8C00, -4px 0px 0px #FF8C00, 0px 4px 0px #FF8C00, 0px -4px 0px #FF8C00',
+            <motion.div
+              className="relative inline-block"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <img 
+                src="/bible-fi-text-pixel.png" 
+                alt="Bible.Fi" 
+                className="pixelated w-full max-w-md md:max-w-lg mx-auto"
+                style={{
+                  filter: isHovered 
+                    ? 'brightness(1.1) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))'
+                    : 'brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))'
                 }}
-              >
-                Bible.Fi
-              </span>
-            </h1>
+              />
+            </motion.div>
             
-            {/* Animated Glowing Bible Icon */}
+            {/* Animated Pixel Bible Icon */}
             <motion.div
               initial={{ opacity: 0, y: 10, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -139,7 +140,7 @@ const ModernBiblefiHero: React.FC = () => {
               className="mb-6 relative"
             >
               <motion.div
-                className="relative mx-auto w-20 h-20"
+                className="relative mx-auto w-24 h-24"
                 animate={{ 
                   scale: [1, 1.05, 1],
                   rotate: [0, 1, -1, 0]
@@ -155,11 +156,11 @@ const ModernBiblefiHero: React.FC = () => {
                   className="absolute inset-0 rounded-full"
                   style={{
                     background: 'radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 140, 0, 0.2) 50%, transparent 70%)',
-                    filter: 'blur(8px)'
+                    filter: 'blur(12px)'
                   }}
                   animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.3, 0.6, 0.3]
+                    scale: [1, 1.3, 1],
+                    opacity: [0.3, 0.7, 0.3]
                   }}
                   transition={{
                     duration: 3,
@@ -168,20 +169,20 @@ const ModernBiblefiHero: React.FC = () => {
                   }}
                 />
                 
-                {/* Bible icon */}
+                {/* Bible icon from your graphics */}
                 <motion.img
-                  src="/glowing-bible-icon.png"
-                  alt="Glowing Bible"
+                  src="/bible-icon-pixel-clear.png"
+                  alt="Pixel Bible"
                   className="relative z-10 w-full h-full object-contain pixelated"
                   animate={{
                     filter: [
                       'brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
-                      'brightness(1.1) drop-shadow(0 0 15px rgba(255, 215, 0, 0.8))',
+                      'brightness(1.2) drop-shadow(0 0 20px rgba(255, 215, 0, 0.9))',
                       'brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))'
                     ]
                   }}
                   transition={{
-                    duration: 2,
+                    duration: 2.5,
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
@@ -194,31 +195,31 @@ const ModernBiblefiHero: React.FC = () => {
                     rotate: [0, 360]
                   }}
                   transition={{
-                    duration: 20,
+                    duration: 25,
                     repeat: Infinity,
                     ease: "linear"
                   }}
                 >
-                  {[...Array(8)].map((_, i) => (
+                  {[...Array(6)].map((_, i) => (
                     <motion.div
                       key={i}
-                      className="absolute w-1 bg-gradient-to-t from-transparent via-yellow-400/30 to-transparent"
+                      className="absolute w-0.5 bg-gradient-to-t from-transparent via-yellow-400/20 to-transparent"
                       style={{
-                        height: '60px',
+                        height: '80px',
                         left: '50%',
-                        top: '-30px',
-                        transformOrigin: '50% 60px',
-                        transform: `translateX(-50%) rotate(${i * 45}deg)`
+                        top: '-40px',
+                        transformOrigin: '50% 80px',
+                        transform: `translateX(-50%) rotate(${i * 60}deg)`
                       }}
                       animate={{
-                        opacity: [0.2, 0.6, 0.2],
-                        scaleY: [0.8, 1.2, 0.8]
+                        opacity: [0.1, 0.4, 0.1],
+                        scaleY: [0.5, 1.5, 0.5]
                       }}
                       transition={{
-                        duration: 3,
+                        duration: 4,
                         repeat: Infinity,
                         ease: "easeInOut",
-                        delay: i * 0.2
+                        delay: i * 0.3
                       }}
                     />
                   ))}

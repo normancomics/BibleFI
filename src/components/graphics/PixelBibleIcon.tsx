@@ -55,9 +55,9 @@ const PixelBibleIcon: React.FC<PixelBibleIconProps> = ({
             />
           )}
           
-          {/* Bible icon */}
+          {/* Bible icon matching your graphics */}
           <motion.img
-            src="/glowing-bible-icon.png"
+            src="/bible-icon-pixel-clear.png"
             alt="Glowing Bible"
             className="relative z-10 w-full h-full object-contain pixelated"
             animate={glowing ? {
@@ -117,7 +117,7 @@ const PixelBibleIcon: React.FC<PixelBibleIconProps> = ({
       
       {!animated && (
         <img
-          src="/glowing-bible-icon.png"
+          src="/bible-icon-pixel-clear.png"
           alt="Bible"
           className={`w-full h-full object-contain pixelated ${glowing ? 'bible-glow' : ''}`}
         />
