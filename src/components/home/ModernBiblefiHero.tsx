@@ -54,7 +54,7 @@ const ModernBiblefiHero: React.FC = () => {
       <div className="absolute inset-0 opacity-20">
         <motion.div
           className="absolute top-10 left-10 w-32 h-20 bg-contain bg-no-repeat"
-          style={{ backgroundImage: "url('/pixel-clouds.png')" }}
+          style={{ backgroundImage: "url('/pixel-clouds-exact.png')" }}
           animate={{ 
             x: [0, 20, 0],
             y: [0, -10, 0],
@@ -68,7 +68,7 @@ const ModernBiblefiHero: React.FC = () => {
         />
         <motion.div
           className="absolute top-20 right-20 w-40 h-24 bg-contain bg-no-repeat"
-          style={{ backgroundImage: "url('/pixel-clouds.png')" }}
+          style={{ backgroundImage: "url('/pixel-clouds-exact.png')" }}
           animate={{ 
             x: [0, -15, 0],
             y: [0, 8, 0],
@@ -83,7 +83,7 @@ const ModernBiblefiHero: React.FC = () => {
         />
         <motion.div
           className="absolute bottom-32 left-1/4 w-28 h-16 bg-contain bg-no-repeat"
-          style={{ backgroundImage: "url('/pixel-clouds.png')" }}
+          style={{ backgroundImage: "url('/pixel-clouds-exact.png')" }}
           animate={{ 
             x: [0, 25, 0],
             y: [0, -12, 0],
@@ -121,8 +121,8 @@ const ModernBiblefiHero: React.FC = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <img 
-                src="/bible-fi-text-pixel.png" 
-                alt="Bible.Fi" 
+                src="/bible-fi-text-exact.png" 
+                alt="Bible.Fi"
                 className="pixelated w-full max-w-md md:max-w-lg mx-auto"
                 style={{
                   filter: isHovered 
@@ -169,9 +169,9 @@ const ModernBiblefiHero: React.FC = () => {
                   }}
                 />
                 
-                {/* Bible icon from your graphics */}
+                {/* Bible icon exact replica from your graphics */}
                 <motion.img
-                  src="/bible-icon-pixel-clear.png"
+                  src="/bible-book-exact.png"
                   alt="Pixel Bible"
                   className="relative z-10 w-full h-full object-contain pixelated"
                   animate={{
