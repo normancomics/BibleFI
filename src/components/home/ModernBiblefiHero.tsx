@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Copy, ExternalLink, TrendingUp, Shield, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -46,9 +46,57 @@ const ModernBiblefiHero: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-8">
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-950/30 to-black" />
+      
+      {/* Animated clouds background */}
+      <div className="absolute inset-0 opacity-20">
+        <motion.div
+          className="absolute top-10 left-10 w-32 h-20 bg-contain bg-no-repeat"
+          style={{ backgroundImage: "url('/pixel-clouds.png')" }}
+          animate={{ 
+            x: [0, 20, 0],
+            y: [0, -10, 0],
+            opacity: [0.2, 0.4, 0.2]
+          }}
+          transition={{ 
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute top-20 right-20 w-40 h-24 bg-contain bg-no-repeat"
+          style={{ backgroundImage: "url('/pixel-clouds.png')" }}
+          animate={{ 
+            x: [0, -15, 0],
+            y: [0, 8, 0],
+            opacity: [0.15, 0.35, 0.15]
+          }}
+          transition={{ 
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+        <motion.div
+          className="absolute bottom-32 left-1/4 w-28 h-16 bg-contain bg-no-repeat"
+          style={{ backgroundImage: "url('/pixel-clouds.png')" }}
+          animate={{ 
+            x: [0, 25, 0],
+            y: [0, -12, 0],
+            opacity: [0.1, 0.3, 0.1]
+          }}
+          transition={{ 
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 4
+          }}
+        />
+      </div>
       
       {/* Main content */}
       <motion.div 
@@ -83,38 +131,99 @@ const ModernBiblefiHero: React.FC = () => {
               </span>
             </h1>
             
-            {/* Bible icon underneath */}
+            {/* Animated Glowing Bible Icon */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="mb-4"
+              initial={{ opacity: 0, y: 10, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="mb-6 relative"
             >
-              <div className="relative mx-auto w-16 h-12">
-                {/* Open Bible */}
-                <div className="absolute inset-0 bg-gradient-to-b from-blue-100 to-white rounded-t-lg border-2 border-blue-200 shadow-lg">
-                  {/* Left page */}
-                  <div className="absolute left-0 top-0 w-1/2 h-full bg-gradient-to-r from-white to-blue-50 rounded-tl-lg border-r border-blue-200">
-                    <div className="p-1 space-y-0.5">
-                      <div className="h-0.5 bg-blue-300/60 rounded w-3/4"></div>
-                      <div className="h-0.5 bg-blue-300/40 rounded w-full"></div>
-                      <div className="h-0.5 bg-blue-300/40 rounded w-5/6"></div>
-                      <div className="h-0.5 bg-blue-300/60 rounded w-4/5"></div>
-                    </div>
-                  </div>
-                  {/* Right page */}
-                  <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-white to-blue-50 rounded-tr-lg">
-                    <div className="p-1 space-y-0.5">
-                      <div className="h-0.5 bg-blue-300/60 rounded w-3/4 ml-auto"></div>
-                      <div className="h-0.5 bg-blue-300/40 rounded w-full"></div>
-                      <div className="h-0.5 bg-blue-300/40 rounded w-5/6 ml-auto"></div>
-                      <div className="h-0.5 bg-blue-300/60 rounded w-4/5 ml-auto"></div>
-                    </div>
-                  </div>
-                  {/* Center crease */}
-                  <div className="absolute left-1/2 top-0 w-0.5 h-full bg-blue-300/30 transform -translate-x-0.5"></div>
-                </div>
-              </div>
+              <motion.div
+                className="relative mx-auto w-20 h-20"
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 1, -1, 0]
+                }}
+                transition={{ 
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                {/* Glowing effect background */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, rgba(255, 140, 0, 0.2) 50%, transparent 70%)',
+                    filter: 'blur(8px)'
+                  }}
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0.6, 0.3]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                
+                {/* Bible icon */}
+                <motion.img
+                  src="/glowing-bible-icon.png"
+                  alt="Glowing Bible"
+                  className="relative z-10 w-full h-full object-contain pixelated"
+                  animate={{
+                    filter: [
+                      'brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))',
+                      'brightness(1.1) drop-shadow(0 0 15px rgba(255, 215, 0, 0.8))',
+                      'brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6))'
+                    ]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                
+                {/* Light rays emanating from Bible */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    rotate: [0, 360]
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                >
+                  {[...Array(8)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-1 bg-gradient-to-t from-transparent via-yellow-400/30 to-transparent"
+                      style={{
+                        height: '60px',
+                        left: '50%',
+                        top: '-30px',
+                        transformOrigin: '50% 60px',
+                        transform: `translateX(-50%) rotate(${i * 45}deg)`
+                      }}
+                      animate={{
+                        opacity: [0.2, 0.6, 0.2],
+                        scaleY: [0.8, 1.2, 0.8]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: i * 0.2
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              </motion.div>
             </motion.div>
             
             {/* Base.eth address */}

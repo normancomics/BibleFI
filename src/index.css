@@ -316,9 +316,38 @@
   }
 }
 
+/* Glowing Bible animation effects */
+@keyframes bibleGlow {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 20px rgba(255, 215, 0, 0.9));
+  }
+}
+
+@keyframes cloudFloat {
+  0%, 100% {
+    transform: translateY(0px);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 0.4;
+  }
+}
+
 /* Apply animations */
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+.bible-glow {
+  animation: bibleGlow 3s ease-in-out infinite;
+}
+
+.cloud-float {
+  animation: cloudFloat 8s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
