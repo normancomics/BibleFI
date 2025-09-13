@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import NavBar from "@/components/NavBar";
-import ModernBiblefiHero from "@/components/home/ModernBiblefiHero";
+import BiblefiHero from "@/components/home/BiblefiHero";
 import FeatureCards from "@/components/home/FeatureCards";
 import FeatureShowcase from "@/components/home/FeatureShowcase";
 import TaxSection from "@/components/home/TaxSection";
@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
       <main className="relative">
         {/* Hero Section */}
         <section>
-          <ModernBiblefiHero />
+          <BiblefiHero />
         </section>
 
         {/* Stats Section */}
