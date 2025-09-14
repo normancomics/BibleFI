@@ -13,7 +13,8 @@ import {
   Coins,
   Calculator,
   Settings,
-  Wheat
+  Wheat,
+  Palette
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
@@ -31,6 +32,7 @@ const NavBar: React.FC = () => {
     { path: '/wisdom', label: 'Wisdom', icon: BookOpen },
     { path: '/taxes', label: 'Taxes', icon: Calculator },
     { path: '/security', label: 'Security', icon: Shield },
+    { path: '/branding', label: 'Brand Kit', icon: Palette },
   ];
 
   const isActive = (path: string) => location.pathname === path;

@@ -21,6 +21,7 @@ import TokenPage from "./pages/TokenPage";
 import AdminPage from "./pages/AdminPage";
 import DeploymentPage from "./pages/DeploymentPage";
 import BiblicalDefiPage from "./pages/BiblicalDefiPage";
+import BrandingPage from "./pages/BrandingPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/deployment" element={<DeploymentPage />} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
+              <Route path="/branding" element={<BrandingPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
