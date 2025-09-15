@@ -30,6 +30,7 @@ const NavBar: React.FC = () => {
     { path: '/tithe', label: 'Tithe', icon: Heart },
     { path: '/wisdom', label: 'Wisdom', icon: BookOpen },
     { path: '/taxes', label: 'Taxes', icon: Calculator },
+    { path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' },
     { path: '/security', label: 'Security', icon: Shield },
   ];
 
@@ -41,8 +42,13 @@ const NavBar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-purple-800 rounded-sm flex items-center justify-center shadow-lg group-hover:shadow-orange-500/50 transition-all duration-300 pixelated">
-              <span className="text-white font-bold text-sm font-mono">₿</span>
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img 
+                src="/pixel-solomon.png" 
+                alt="Bible.Fi Solomon" 
+                className="w-8 h-8 pixelated group-hover:scale-110 transition-transform duration-300"
+                style={{ imageRendering: 'pixelated' }}
+              />
             </div>
             <span 
               className="font-mono text-sm font-bold hidden sm:block tracking-wider pixel-font pixelated"
