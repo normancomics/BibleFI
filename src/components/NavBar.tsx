@@ -13,8 +13,7 @@ import {
   Coins,
   Calculator,
   Settings,
-  Wheat,
-  Palette
+  Wheat
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
@@ -32,7 +31,6 @@ const NavBar: React.FC = () => {
     { path: '/wisdom', label: 'Wisdom', icon: BookOpen },
     { path: '/taxes', label: 'Taxes', icon: Calculator },
     { path: '/security', label: 'Security', icon: Shield },
-    { path: '/branding', label: 'Brand Kit', icon: Palette },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -41,21 +39,23 @@ const NavBar: React.FC = () => {
     <nav className="bg-background/95 backdrop-blur-md border-b border-ancient-gold/30 sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <img
-              src="/glowing-bible-icon.png"
-              alt="Bible.fi pixel bible logo"
-              className="h-8 w-8 pixelated bible-glow"
-              loading="eager"
-              decoding="async"
-            />
-            <img
-              src="/bible-fi-text-exact.png"
-              alt="Bible.fi brand text logo"
-              className="h-5 hidden sm:block pixelated"
-              loading="eager"
-              decoding="async"
-            />
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-purple-800 rounded-sm flex items-center justify-center shadow-lg group-hover:shadow-orange-500/50 transition-all duration-300 pixelated">
+              <span className="text-white font-bold text-sm font-mono">₿</span>
+            </div>
+            <span 
+              className="font-mono text-sm font-bold hidden sm:block tracking-wider pixel-font pixelated"
+              style={{
+                fontFamily: "'Courier New', 'Monaco', monospace",
+                color: '#4A1A5C',
+                textShadow: '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00',
+                imageRendering: 'pixelated',
+                WebkitFontSmoothing: 'none',
+              }}
+            >
+              Bible.Fi
+            </span>
           </Link>
 
           {/* Navigation Links */}
