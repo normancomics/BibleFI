@@ -50,16 +50,7 @@ const NavBar: React.FC = () => {
                 style={{ imageRendering: 'pixelated' }}
               />
             </div>
-            <span 
-              className="font-mono text-sm font-bold hidden sm:block tracking-wider pixel-font pixelated"
-              style={{
-                fontFamily: "'Courier New', 'Monaco', monospace",
-                color: '#4A1A5C',
-                textShadow: '1px 0px 0px #FF8C00, -1px 0px 0px #FF8C00, 0px 1px 0px #FF8C00, 0px -1px 0px #FF8C00, 1px 1px 0px #FF8C00, -1px -1px 0px #FF8C00, 1px -1px 0px #FF8C00, -1px 1px 0px #FF8C00',
-                imageRendering: 'pixelated',
-                WebkitFontSmoothing: 'none',
-              }}
-            >
+            <span className="font-mono text-lg font-bold hidden sm:block tracking-wider text-ancient-gold hover:text-scripture transition-colors duration-300">
               Bible.Fi
             </span>
           </Link>
