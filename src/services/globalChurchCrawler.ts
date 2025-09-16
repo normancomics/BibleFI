@@ -293,8 +293,10 @@ export class GlobalChurchCrawlerService {
       return (data || []).map(church => ({ 
         ...church, 
         source: 'database',
-        coordinates: church.coordinates || undefined
-      }));
+        coordinates: church.coordinates ? 
+          { lat: (church.coordinates as any)[0], lng: (church.coordinates as any)[1] } : 
+          null
+      })) as GlobalChurchData[];
     } catch (error) {
       console.error('Error searching churches by location:', error);
       return [];
@@ -313,8 +315,10 @@ export class GlobalChurchCrawlerService {
       return (data || []).map(church => ({ 
         ...church, 
         source: 'database',
-        coordinates: church.coordinates || undefined
-      }));
+        coordinates: church.coordinates ? 
+          { lat: (church.coordinates as any)[0], lng: (church.coordinates as any)[1] } : 
+          null
+      })) as GlobalChurchData[];
     } catch (error) {
       console.error('Error getting crypto-enabled churches:', error);
       return [];
