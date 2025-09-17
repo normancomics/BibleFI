@@ -137,7 +137,7 @@ const ChurchPaymentProcessorDashboard: React.FC = () => {
       playSound('success');
       toast({
         title: "Global Church Crawl Complete",
-        description: `Added ${stats.totalChurches} churches from ${stats.countriesFound} countries`,
+        description: `Added ${stats.totalChurches} churches from ${stats.countriesCount} countries`,
       });
     } catch (error) {
       playSound('error');
@@ -369,9 +369,9 @@ const ChurchPaymentProcessorDashboard: React.FC = () => {
                   <h4 className="font-semibold">Last Crawl Results:</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                     <div>Churches Added: {churchStats.totalChurches}</div>
-                    <div>Countries: {churchStats.countriesFound}</div>
-                    <div>Denominations: {churchStats.denominationsFound}</div>
-                    <div>Crypto Enabled: {churchStats.cryptoEnabledChurches}</div>
+                    <div>Countries: {churchStats.countriesCount}</div>
+                    <div>Verified: {churchStats.verified}</div>
+                    <div>Crypto Enabled: {churchStats.cryptoEnabled}</div>
                   </div>
                 </div>
               )}

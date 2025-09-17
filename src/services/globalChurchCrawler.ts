@@ -34,10 +34,10 @@ export interface GlobalChurchData {
 
 export interface ChurchCrawlerStats {
   totalChurches: number;
-  countriesFound: number;
-  denominationsFound: number;
-  cryptoEnabledChurches: number;
-  sourcesUsed: number;
+  cryptoEnabled: number;
+  verified: number;
+  countriesCount: number;
+  lastUpdate: string;
 }
 
 export class GlobalChurchCrawlerService {
@@ -127,10 +127,10 @@ export class GlobalChurchCrawlerService {
     
     const stats: ChurchCrawlerStats = {
       totalChurches: 0,
-      countriesFound: 0,
-      denominationsFound: 0,
-      cryptoEnabledChurches: 0,
-      sourcesUsed: 0
+      cryptoEnabled: 0,
+      verified: 0,
+      countriesCount: 0,
+      lastUpdate: new Date().toISOString()
     };
 
     try {
@@ -175,18 +175,17 @@ export class GlobalChurchCrawlerService {
         } else {
           stats.totalChurches++;
           if (church.accepts_crypto) {
-            stats.cryptoEnabledChurches++;
+            stats.cryptoEnabled++;
+          }
+          if (church.verified) {
+            stats.verified++;
           }
         }
       }
 
       // Calculate stats
       const countries = new Set(mockChurches.map(c => c.country));
-      const denominations = new Set(mockChurches.map(c => c.denomination).filter(Boolean));
-      
-      stats.countriesFound = countries.size;
-      stats.denominationsFound = denominations.size;
-      stats.sourcesUsed = 3; // Mock data, Google Places, Church databases
+      stats.countriesCount = countries.size;
 
       console.log('Global church crawl completed successfully!');
       return stats;
