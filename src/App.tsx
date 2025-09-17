@@ -22,6 +22,7 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import DeploymentPage from "./pages/DeploymentPage";
 import BiblicalDefiPage from "./pages/BiblicalDefiPage";
 import LiveDataPage from "./pages/LiveDataPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -49,7 +50,8 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/deployment" element={<DeploymentPage />} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
-              <Route path="/live-data" element={<LiveDataPage />} />
+        <Route path="/live-data" element={<LiveDataPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

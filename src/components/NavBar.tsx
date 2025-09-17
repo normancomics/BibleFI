@@ -31,6 +31,7 @@ const NavBar: React.FC = () => {
     { path: '/wisdom', label: 'Wisdom', icon: BookOpen },
     { path: '/taxes', label: 'Taxes', icon: Calculator },
     { path: '/live-data', label: 'Live Data', icon: TrendingUp, badge: 'LIVE' },
+    { path: '/analytics', label: 'Analytics', icon: Shield, badge: 'AI' },
     { path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' },
     { path: '/security', label: 'Security', icon: Shield },
   ];
