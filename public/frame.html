@@ -1,188 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Bible.fi - Farcaster Frame</title>
+  <title>Bible.fi</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <!-- Biblical Fonts from Google Fonts -->
+  <!-- Pixel Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
   
-  <!-- Basic Open Graph meta tags -->
-  <meta property="og:title" content="Bible.fi - Biblical Financial Wisdom" />
-  <meta property="og:description" content="Learn biblical principles for your financial journey on Base Chain." />
-  <meta property="og:image" content="https://biblefi.base.eth/api/generate-image?type=default" />
+  <!-- Open Graph meta tags -->
+  <meta property="og:title" content="Bible.fi" />
+  <meta property="og:description" content="Biblical wisdom for DeFi on Base Chain" />
+  <meta property="og:image" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/bible-fi-app-preview.png" />
   
   <!-- Farcaster Frame meta tags -->
   <meta property="fc:frame" content="vNext" />
-  <meta property="fc:frame:image" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" />
+  <meta property="fc:frame:image" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/bible-fi-app-preview.png" />
   <meta property="fc:frame:image:aspect_ratio" content="1.91:1" />
-  <meta property="fc:frame:button:1" content="Biblical Wisdom" />
+  <meta property="fc:frame:button:1" content="🏛️ Enter DApp" />
   <meta property="fc:frame:button:1:action" content="link" />
-  <meta property="fc:frame:button:1:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/wisdom" />
-  <meta property="fc:frame:button:2" content="DeFi Swaps" />
+  <meta property="fc:frame:button:1:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com" />
+  <meta property="fc:frame:button:2" content="📖 Wisdom" />
   <meta property="fc:frame:button:2:action" content="link" />
-  <meta property="fc:frame:button:2:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/defi" />
-  <meta property="fc:frame:button:3" content="Digital Tithing" />
+  <meta property="fc:frame:button:2:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/wisdom" />
+  <meta property="fc:frame:button:3" content="🚀 DeFi" />
   <meta property="fc:frame:button:3:action" content="link" />
-  <meta property="fc:frame:button:3:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/tithe" />
-  <meta property="fc:frame:button:4" content="Open Bible.fi" />
+  <meta property="fc:frame:button:3:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/defi" />
+  <meta property="fc:frame:button:4" content="⛪ Tithe" />
   <meta property="fc:frame:button:4:action" content="link" />
-  <meta property="fc:frame:button:4:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com" />
+  <meta property="fc:frame:button:4:target" content="https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/tithe" />
   
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-      color: #fff;
-      font-family: 'Cinzel', 'Playfair Display', system-ui, -apple-system, sans-serif;
+      background: hsl(220, 27%, 8%);
+      color: hsl(0, 0%, 98%);
+      font-family: 'JetBrains Mono', monospace;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
     
     .container {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 16px;
       text-align: center;
-      background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.1) 100%);
+      background: linear-gradient(135deg, hsl(220, 27%, 8%) 0%, hsl(220, 27%, 12%) 100%);
+    }
+    
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 0 8px hsl(45, 100%, 55%));
     }
     
     .title {
-      font-size: 48px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #FFD700;
-      text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-      font-family: 'Cinzel', serif;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: hsl(45, 100%, 55%);
+      text-shadow: 2px 2px 0px hsl(0, 0%, 0%);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
     
     .subtitle {
-      font-size: 18px;
+      font-size: 12px;
       opacity: 0.8;
-      margin-bottom: 20px;
-      font-family: 'Playfair Display', serif;
+      margin-bottom: 24px;
+      color: hsl(280, 100%, 65%);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     
-    .card {
-      background: rgba(139, 92, 246, 0.3);
-      border: 2px solid rgba(255, 215, 0, 0.3);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
-      max-width: 500px;
-      backdrop-filter: blur(10px);
+    .features {
+      background: hsl(220, 27%, 12%);
+      border: 2px solid hsl(280, 100%, 65%);
+      padding: 16px;
+      margin: 16px 0;
+      max-width: 400px;
+      box-shadow: 4px 4px 0px hsl(0, 0%, 0%);
+    }
+    
+    .feature-list {
+      font-size: 10px;
+      line-height: 1.6;
+      text-align: left;
+      color: hsl(0, 0%, 95%);
+      font-weight: 700;
     }
     
     .footer {
-      font-size: 12px;
-      opacity: 0.6;
-      font-family: 'Cinzel', serif;
-      margin-top: 20px;
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
     }
     
     .base-logo {
-      width: 24px;
-      height: 24px;
-      margin-left: 8px;
-      vertical-align: middle;
+      width: 16px;
+      height: 16px;
+      image-rendering: pixelated;
     }
     
-    .frame-info {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 15px;
-      border-radius: 8px;
-      margin: 15px 0;
-      border: 1px solid rgba(255, 215, 0, 0.2);
-    }
-    
-    .status-badge {
+    .status {
+      background: hsl(162, 100%, 45%);
+      color: hsl(0, 0%, 0%);
+      padding: 4px 8px;
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 8px;
       display: inline-block;
-      background: #10B981;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div>
-      <div class="title">Bible.fi</div>
-      <p class="subtitle">Biblical wisdom for your financial journey</p>
-      
-      <div class="card">
-        <div class="frame-info">
-          <h3 style="margin: 0 0 10px; color: #FFD700;">🏛️ DeFi Features</h3>
-          <p style="margin: 0; font-size: 14px;">• Stake & Farm with $BIBLE token<br/>
-          • Digital tithing to churches<br/>
-          • Biblical financial education<br/>
-          • ZK privacy protection</p>
-          
-          <div class="status-badge">✅ Frame Endpoints Active</div>
-        </div>
-        
-        <p style="margin: 10px 0; font-size: 14px; color: #FFD700;">
-          Built on Base Chain for the Farcaster community
-        </p>
+    <img src="/bible-fi-brand-logo-v2.png" alt="Bible.fi" class="logo">
+    
+    <div class="title">Bible.fi</div>
+    <p class="subtitle">Biblical DeFi on Base</p>
+    
+    <div class="features">
+      <div class="feature-list">
+        → STAKE $BIBLE TOKEN<br/>
+        → DIGITAL TITHING<br/>
+        → BIBLICAL WISDOM<br/>
+        → BASE CHAIN DEFI
       </div>
       
-      <div class="footer">
-        <p>Made with ❤️ on Base Chain 
-          <img src="/lovable-uploads/922260ef-cba9-4437-9d77-07bcba6560aa.png" alt="Base" class="base-logo">
-        </p>
-        <p style="font-size: 10px; margin-top: 5px;">
-          Interactive frame powered by biblefi.base.eth
-        </p>
-      </div>
+      <div class="status">FRAME ACTIVE</div>
+    </div>
+    
+    <div class="footer">
+      <span>BUILT ON BASE</span>
+      <img src="/lovable-uploads/922260ef-cba9-4437-9d77-07bcba6560aa.png" alt="Base" class="base-logo">
     </div>
   </div>
   
   <script>
-    // Enhanced Farcaster detection and frame interaction
+    // Farcaster frame detection and interaction
     document.addEventListener('DOMContentLoaded', function() {
-      const isFarcasterClient = navigator.userAgent.includes('Farcaster') || 
-                               window.location.href.includes('warpcast.com') ||
-                               window.parent !== window; // Detect iframe
+      const userAgent = navigator.userAgent;
+      const isWarpcast = userAgent.includes('Warpcast') || userAgent.includes('Farcaster');
+      const isFrame = window.parent !== window;
       
-      if (isFarcasterClient) {
-        console.log('Detected Farcaster client - frame is active!');
-        
-        // Add frame interaction logging
-        window.addEventListener('message', function(event) {
-          console.log('Frame received message:', event.data);
-        });
+      if (isWarpcast || isFrame) {
+        console.log('🚀 Bible.fi Frame loaded in Farcaster client');
+        document.querySelector('.status').textContent = 'LIVE IN FARCASTER';
+        document.querySelector('.status').style.background = 'hsl(162, 100%, 45%)';
       } else {
-        console.log('Not in Farcaster client - showing preview mode');
+        console.log('📖 Bible.fi Frame preview mode');
+        document.querySelector('.status').textContent = 'PREVIEW MODE';
+        document.querySelector('.status').style.background = 'hsl(45, 100%, 55%)';
       }
       
-      // Log frame metadata for debugging
-      const frameMetaTags = document.querySelectorAll('meta[property^="fc:frame"]');
-      console.log('Frame meta tags:', Array.from(frameMetaTags).map(tag => ({
-        property: tag.getAttribute('property'),
-        content: tag.getAttribute('content')
-      })));
-      
-      // Test endpoint connectivity - Updated to use custom domain
-      fetch('https://biblefi.base.eth/api/generate-image?type=default')
-        .then(response => {
-          console.log('Image endpoint status:', response.status);
-          if (response.ok) {
-            document.querySelector('.status-badge').textContent = '✅ All Endpoints Active';
-          }
-        })
-        .catch(error => {
-          console.error('Endpoint test failed:', error);
-          const badge = document.querySelector('.status-badge');
-          badge.textContent = '⚠️ Check Domain Status';
-          badge.style.background = '#F59E0B';
-        });
+      // Log frame configuration
+      console.log('Frame buttons configured:', [
+        '🏛️ Enter DApp',
+        '📖 Wisdom', 
+        '🚀 DeFi',
+        '⛪ Tithe'
+      ]);
     });
   </script>
 </body>
