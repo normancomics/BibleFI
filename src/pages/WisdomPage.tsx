@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WisdomCard from "@/components/wisdom/WisdomCard";
 import FinancialPrinciple from "@/components/wisdom/FinancialPrinciple";
 import ScriptureFilter from "@/components/wisdom/ScriptureFilter";
+import { Link } from "react-router-dom";
 import DigitalWisdomAdvisor from "@/components/wisdom/DigitalWisdomAdvisor";
 import BiblicalWisdomCrawler from "@/components/wisdom/BiblicalWisdomCrawler";
 import CommunityDiscussion from "@/components/community/CommunityDiscussion";
@@ -61,6 +62,9 @@ const WisdomPage: React.FC = () => {
             Get comprehensive biblical guidance for your financial questions. Ask about tithing, stewardship, DeFi strategies, and more. 
             Our AI-powered system searches through extensive biblical financial wisdom to provide scripture-based answers.
           </p>
+          <Link to="/comprehensive-wisdom" className="inline-block mt-4 px-6 py-2 bg-ancient-gold text-royal-purple rounded-lg hover:bg-ancient-gold/80 transition-colors">
+            Access Complete Biblical Financial Database →
+          </Link>
         </div>
         
         <Tabs defaultValue="digital-wisdom" value={activeTab} onValueChange={handleTabChange} className="mb-12">
