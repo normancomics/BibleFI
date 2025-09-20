@@ -1583,8 +1583,281 @@ export const additionalNewTestamentFinances: CompleteBiblicalExample[] = [
     modernApplication: 'DeFi communities should identify and avoid exploitative financial teachers',
     defiRelevance: 'Teacher verification systems, anti-exploitation protocols, and truth-focused education',
     tags: ['false_teachers', 'greed', 'exploitation', 'truth_protection']
+  },
+
+  // 1 JOHN - Loving with resources
+  {
+    id: '1john_3_17',
+    character: 'John',
+    book: '1 John',
+    chapter: 3,
+    verses: '17',
+    title: 'Sharing Material Possessions',
+    category: 'giving',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'If anyone has material possessions and sees a brother or sister in need but has no pity on them, how can the love of God be in that person?',
+    principle: 'Love is demonstrated through sharing material resources with those in need',
+    modernApplication: 'DeFi yields should include provisions for community support and charity',
+    defiRelevance: 'Charitable giving protocols, community support systems, and need-based distribution',
+    tags: ['love_demonstration', 'material_sharing', 'community_support', 'needs_assessment']
+  },
+
+  // 2 JOHN - Supporting truth financially
+  {
+    id: '2john_10_11',
+    character: 'John',
+    book: '2 John',
+    chapter: 1,
+    verses: '10-11',
+    title: 'Financial Discernment in Support',
+    category: 'giving',
+    testament: 'New',
+    riskLevel: 'medium',
+    text: 'If anyone comes to you and does not bring this teaching, do not take them into your house or welcome them. Anyone who welcomes them shares in their wicked work.',
+    principle: 'Be discerning about who you support financially to avoid enabling harmful work',
+    modernApplication: 'DeFi investments should verify protocol integrity and avoid supporting harmful projects',
+    defiRelevance: 'Protocol verification systems, integrity assessments, and ethical investment criteria',
+    tags: ['financial_discernment', 'support_verification', 'integrity_checks', 'ethical_support']
+  },
+
+  // 3 JOHN - Supporting faithful workers
+  {
+    id: '3john_5_8',
+    character: 'John',
+    book: '3 John',
+    chapter: 1,
+    verses: '5-8',
+    title: 'Supporting Faithful Ministry Workers',
+    category: 'giving',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'Dear friend, you are faithful in what you are doing for the brothers and sisters, even though they are strangers to you... We ought therefore to show hospitality to such people so that we may work together for the truth.',
+    principle: 'Support faithful workers financially, even when they are strangers, to advance truth',
+    modernApplication: 'DeFi protocols should support legitimate developers and truthful projects',
+    defiRelevance: 'Developer funding systems, truth-promoting protocols, and stranger verification mechanisms',
+    tags: ['faithful_support', 'worker_funding', 'truth_advancement', 'hospitality_finance']
+  },
+
+  // JUDE - Warning against exploitation
+  {
+    id: 'jude_11_12',
+    character: 'Jude',
+    book: 'Jude',
+    chapter: 1,
+    verses: '11-12',
+    title: 'Warning Against Financial Exploitation',
+    category: 'wealth',
+    testament: 'New',
+    riskLevel: 'high',
+    text: 'Woe to them! They have taken the way of Cain; they have rushed for profit into Balaam\'s error; they have been destroyed in Korah\'s rebellion. These people are blemishes at your love feasts, eating with you without the slightest qualm—shepherds who feed only themselves.',
+    principle: 'Beware of those who rush for profit and exploit religious community for personal gain',
+    modernApplication: 'DeFi communities should identify and avoid exploitative protocols that prioritize profit over community',
+    defiRelevance: 'Exploitation detection systems, community protection protocols, and profit motivation analysis',
+    tags: ['exploitation_warning', 'profit_rushing', 'community_protection', 'selfish_shepherds']
+  }
+];
+
+// Complete missing books with representative examples
+const finalMissingBooks: CompleteBiblicalExample[] = [
+  // JOEL
+  {
+    id: 'joel_2_25',
+    character: 'Joel',
+    book: 'Joel',
+    chapter: 2,
+    verses: '25',
+    title: 'God Restores What Was Lost',
+    category: 'restoration',
+    testament: 'Old',
+    riskLevel: 'low',
+    text: 'I will repay you for the years the locusts have eaten—the great locust and the young locust, the other locusts and the locust swarm—my great army that I sent among you.',
+    principle: 'God can restore financial losses and make up for years of economic hardship',
+    modernApplication: 'Recovery strategies in DeFi can help restore lost value through patient, wise investing',
+    defiRelevance: 'Loss recovery protocols, restoration mechanisms, and patient investment strategies',
+    tags: ['restoration', 'loss_recovery', 'patient_investing', 'divine_provision']
+  },
+
+  // AMOS
+  {
+    id: 'amos_8_4_6',
+    character: 'Amos',
+    book: 'Amos',
+    chapter: 8,
+    verses: '4-6',
+    title: 'Condemning Exploitation of the Poor',
+    category: 'justice',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Hear this, you who trample the needy and do away with the poor of the land, saying, "When will the New Moon be over that we may sell grain, and the Sabbath be ended that we may market wheat?"—skimping on the measure, boosting the price and cheating with dishonest scales.',
+    principle: 'Financial systems that exploit the poor and use dishonest measures are condemned',
+    modernApplication: 'DeFi protocols should ensure fair pricing and honest measurements, protecting vulnerable users',
+    defiRelevance: 'Fair pricing mechanisms, honest measurement systems, and poor protection protocols',
+    tags: ['poor_protection', 'honest_measures', 'fair_pricing', 'exploitation_prevention']
+  },
+
+  // OBADIAH
+  {
+    id: 'obadiah_15',
+    character: 'Obadiah',
+    book: 'Obadiah',
+    chapter: 1,
+    verses: '15',
+    title: 'As You Have Done, It Will Be Done to You',
+    category: 'justice',
+    testament: 'Old',
+    riskLevel: 'medium',
+    text: 'The day of the Lord is near for all nations. As you have done, it will be done to you; your deeds will return upon your own head.',
+    principle: 'Financial actions and treatments of others will eventually return to you',
+    modernApplication: 'DeFi interactions should be conducted with fairness, knowing that unfair practices will eventually backfire',
+    defiRelevance: 'Reciprocal fairness systems, karma-based protocols, and fair treatment mechanisms',
+    tags: ['reciprocal_justice', 'fair_treatment', 'consequence_awareness', 'ethical_conduct']
+  },
+
+  // JONAH
+  {
+    id: 'jonah_1_3',
+    character: 'Jonah',
+    book: 'Jonah',
+    chapter: 1,
+    verses: '3',
+    title: 'The Cost of Running from Responsibility',
+    category: 'stewardship',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'But Jonah ran away from the Lord and headed for Tarshish. He went down to Joppa, where he found a ship bound for that port. After paying the fare, he went aboard and sailed for Tarshish to flee from the Lord.',
+    principle: 'Avoiding financial and moral responsibilities often comes with significant personal costs',
+    modernApplication: 'DeFi participation requires accepting responsibilities; avoiding them leads to greater losses',
+    defiRelevance: 'Responsibility acceptance protocols, cost awareness systems, and accountability mechanisms',
+    tags: ['responsibility_avoidance', 'personal_cost', 'accountability', 'consequence_acceptance']
+  },
+
+  // MICAH
+  {
+    id: 'micah_6_8',
+    character: 'Micah',
+    book: 'Micah',
+    chapter: 6,
+    verses: '8',
+    title: 'What the Lord Requires',
+    category: 'stewardship',
+    testament: 'Old',
+    riskLevel: 'low',
+    text: 'He has shown you, O mortal, what is good. And what does the Lord require of you? To act justly and to love mercy and to walk humbly with your God.',
+    principle: 'True financial stewardship requires justice, mercy, and humility in all dealings',
+    modernApplication: 'DeFi protocols should be built on foundations of justice, mercy, and humility',
+    defiRelevance: 'Justice-based protocols, mercy mechanisms, and humility-driven governance',
+    tags: ['justice_requirement', 'mercy_focus', 'humble_stewardship', 'good_requirements']
+  },
+
+  // NAHUM
+  {
+    id: 'nahum_2_9',
+    character: 'Nahum',
+    book: 'Nahum',
+    chapter: 2,
+    verses: '9',
+    title: 'Plunder and Wealth Disappearing',
+    category: 'wealth',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Plunder the silver! Plunder the gold! The supply is endless, the wealth from all its treasures!',
+    principle: 'Wealth obtained through plunder and oppression is ultimately temporary and will disappear',
+    modernApplication: 'DeFi wealth should be built through legitimate means, not through exploiting others',
+    defiRelevance: 'Legitimate wealth building, anti-exploitation measures, and sustainable value creation',
+    tags: ['wealth_legitimacy', 'anti_exploitation', 'sustainable_building', 'temporary_plunder']
+  },
+
+  // HABAKKUK
+  {
+    id: 'habakkuk_2_6_7',
+    character: 'Habakkuk',
+    book: 'Habakkuk',
+    chapter: 2,
+    verses: '6-7',
+    title: 'Woe to Those Who Pile Up Stolen Goods',
+    category: 'wealth',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Will not all of them taunt him with ridicule and scorn, saying, "Woe to him who piles up stolen goods and makes himself wealthy by extortion! How long must this go on?" Will not your creditors suddenly arise? Will they not wake up and make you tremble?',
+    principle: 'Accumulating wealth through theft and extortion will eventually lead to judgment and loss',
+    modernApplication: 'DeFi protocols built on extractive or exploitative models will eventually fail',
+    defiRelevance: 'Anti-theft mechanisms, fair value exchange, and sustainable economic models',
+    tags: ['theft_consequences', 'extortion_warning', 'sustainable_models', 'creditor_awakening']
+  },
+
+  // ZEPHANIAH
+  {
+    id: 'zephaniah_1_18',
+    character: 'Zephaniah',
+    book: 'Zephaniah',
+    chapter: 1,
+    verses: '18',
+    title: 'Money Cannot Save on Judgment Day',
+    category: 'wealth',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Neither their silver nor their gold will be able to save them on the day of the Lord\'s wrath. In the fire of his jealousy the whole earth will be consumed, for he will make a sudden end of all who live on the earth.',
+    principle: 'Material wealth cannot provide ultimate security or salvation in times of final judgment',
+    modernApplication: 'DeFi portfolios should not be viewed as ultimate security; spiritual wealth is more important',
+    defiRelevance: 'Balanced investment philosophy, spiritual value recognition, and ultimate security awareness',
+    tags: ['ultimate_security', 'spiritual_priority', 'material_limitations', 'judgment_preparation']
+  },
+
+  // HAGGAI
+  {
+    id: 'haggai_1_6',
+    character: 'Haggai',
+    book: 'Haggai',
+    chapter: 1,
+    verses: '6',
+    title: 'Earning Money with Holes in the Purse',
+    category: 'stewardship',
+    testament: 'Old',
+    riskLevel: 'medium',
+    text: 'You have planted much, but harvested little. You eat, but never have enough. You drink, but never have your fill. You put on clothes, but are not warm. You earn wages, only to put them in a purse with holes in it.',
+    principle: 'When priorities are wrong, financial efforts become ineffective and unfulfilling',
+    modernApplication: 'DeFi strategies must align with proper priorities to avoid wasteful, ineffective outcomes',
+    defiRelevance: 'Priority alignment systems, efficiency optimization, and purpose-driven investing',
+    tags: ['priority_alignment', 'efficiency_focus', 'purpose_driven', 'waste_prevention']
+  },
+
+  // ZECHARIAH
+  {
+    id: 'zechariah_11_12_13',
+    character: 'Zechariah',
+    book: 'Zechariah',
+    chapter: 11,
+    verses: '12-13',
+    title: 'Thirty Pieces of Silver - The Price of Betrayal',
+    category: 'wealth',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'I told them, "If you think it best, give me my pay; but if not, keep it." So they paid me thirty pieces of silver. And the Lord said to me, "Throw it to the potter"—the handsome price at which they valued me!',
+    principle: 'Some financial transactions represent deeper moral and spiritual betrayals',
+    modernApplication: 'DeFi decisions should consider moral implications beyond just financial returns',
+    defiRelevance: 'Moral impact assessment, value beyond price, and integrity-based decision making',
+    tags: ['moral_implications', 'value_assessment', 'integrity_focus', 'betrayal_awareness']
+  },
+
+  // MALACHI - Final book of Old Testament
+  {
+    id: 'malachi_3_8_12',
+    character: 'Malachi',
+    book: 'Malachi',
+    chapter: 3,
+    verses: '8-12',
+    title: 'Testing God Through Faithful Tithing',
+    category: 'giving',
+    testament: 'Old',
+    riskLevel: 'low',
+    text: 'Will a mere mortal rob God? Yet you rob me. But you ask, "How are we robbing you?" In tithes and offerings. You are under a curse—your whole nation—because you are robbing me. Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this," says the Lord Almighty, "and see if I will not throw open the floodgates of heaven and pour out so much blessing that there will not be room enough to store it."',
+    principle: 'Faithful giving, especially tithing, opens the door to abundant blessings from God',
+    modernApplication: 'DeFi protocols can incorporate tithing mechanisms that unlock community blessings and growth',
+    defiRelevance: 'Tithing smart contracts, blessing distribution systems, and abundance sharing protocols',
+    tags: ['faithful_tithing', 'abundant_blessings', 'testing_invitation', 'storehouse_principle']
   }
 ];
 
 // Update the main export to include all examples
-completeBiblicalFinances.push(...additionalOldTestamentFinances, ...additionalNewTestamentFinances);
+completeBiblicalFinances.push(...additionalOldTestamentFinances, ...additionalNewTestamentFinances, ...finalMissingBooks);

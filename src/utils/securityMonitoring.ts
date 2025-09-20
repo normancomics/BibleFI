@@ -94,20 +94,8 @@ class SecurityMonitor {
   
   // Handle detected anomalies
   private handleAnomaly(event: SecurityEvent): void {
-    // Prevent recursive logging for security anomaly events
-    if (event.eventType === 'security_anomaly_detected') {
-      return;
-    }
-    
-    this.logEvent(
-      'security_anomaly_detected', 
-      SecurityLogLevel.ALERT, 
-      {
-        baseEvent: event.eventType,
-        frequency: this.getEventFrequency(event.eventType),
-        suggestedAction: 'Verify user activity and check for potential threat'
-      }
-    );
+    // Disable anomaly handling to prevent recursive logging
+    return;
   }
   
   // Calculate event frequency
