@@ -94,6 +94,11 @@ class SecurityMonitor {
   
   // Handle detected anomalies
   private handleAnomaly(event: SecurityEvent): void {
+    // Prevent recursive logging for security anomaly events
+    if (event.eventType === 'security_anomaly_detected') {
+      return;
+    }
+    
     this.logEvent(
       'security_anomaly_detected', 
       SecurityLogLevel.ALERT, 

@@ -498,8 +498,14 @@ export class TamperDetection {
     };
     
     console.error = function(...args) {
-      securityMonitor.logEvent('console_error', SecurityLogLevel.WARNING, {
-        error: args[0]?.toString().substring(0, 100)
+      // Prevent recursive logging for console errors
+      const message = args[0]?.toString();
+      if (!message || message.includes('security_anomaly_detected')) {
+        return originalError.apply(console, args);
+      }
+      
+      securityMonitor.logEvent('console_error', SecurityLogLevel.INFO, {
+        message: message.substring(0, 100)
       });
       return originalError.apply(console, args);
     };

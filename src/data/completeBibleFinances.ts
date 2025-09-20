@@ -1,17 +1,22 @@
 export interface CompleteBiblicalExample {
   id: string;
-  reference: string;
+  reference?: string;
   text: string;
-  category: "wealth" | "giving" | "work" | "stewardship" | "taxes" | "debt" | "contentment" | "generosity" | "planning" | "investing" | "business" | "contracts" | "inheritance" | "property" | "farming" | "trading" | "banking" | "partnerships" | "justice" | "wages" | "poverty" | "budgeting" | "saving" | "borrowing" | "lending" | "interest" | "profit" | "loss" | "fraud" | "honesty" | "corruption" | "sharing" | "greed" | "wisdom";
+  category: "wealth" | "giving" | "work" | "stewardship" | "taxes" | "debt" | "contentment" | "generosity" | "planning" | "investing" | "business" | "contracts" | "inheritance" | "property" | "farming" | "trading" | "banking" | "partnerships" | "justice" | "wages" | "poverty" | "budgeting" | "saving" | "borrowing" | "lending" | "interest" | "profit" | "loss" | "fraud" | "honesty" | "corruption" | "sharing" | "greed" | "wisdom" | "investment" | "wealth_warning" | "integrity" | "divine_provision" | "economic_system" | "economic_collapse" | "work_ethic" | "eternal_perspective" | "end_times_economics" | "debt_management" | "false_teaching" | "taxation" | "partnership" | "ministry_support" | "business_planning";
   character?: string;
   story?: string;
   principle: string;
-  application: string;
+  application?: string;
   defiRelevance: string;
-  modernParallel: string;
+  modernParallel?: string;
+  modernApplication?: string;
   book: string;
+  chapter?: number;
+  verses?: string;
+  title?: string;
   testament: "Old" | "New";
-  financialKeywords: string[];
+  financialKeywords?: string[];
+  tags?: string[];
   riskLevel?: "low" | "medium" | "high";
   timePeriod?: string;
 }
@@ -1288,3 +1293,298 @@ export const getAllBooks = () => {
   });
   return Array.from(books);
 };
+
+// Add remaining Old Testament books for comprehensive coverage
+export const additionalOldTestamentFinances: CompleteBiblicalExample[] = [
+  // JEREMIAH - Economic judgment and restoration
+  {
+    id: 'jer_32_6_15',
+    character: 'Jeremiah',
+    book: 'Jeremiah',
+    chapter: 32,
+    verses: '6-15',
+    title: 'Jeremiah Buys Field During Siege',
+    category: 'investing',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'And Jeremiah said, "The word of the Lord came to me: Hanamel son of Shallum your uncle is going to come to you and say, \'Buy my field at Anathoth, because as nearest relative it is your right and duty to buy it.\'" Then, just as the Lord had said, my cousin Hanamel came to me in the courtyard of the guard and said, "Buy my field at Anathoth in the territory of Benjamin. Since it is your right to redeem it and possess it, buy it for yourself." I knew that this was the word of the Lord; so I bought the field at Anathoth from my cousin Hanamel and weighed out for him seventeen shekels of silver.',
+    principle: 'Sometimes God calls us to make investments that seem foolish by worldly standards',
+    modernApplication: 'Faith-based investing in DeFi projects that align with biblical values',
+    defiRelevance: 'Value-based investing, redemption protocols, and faith-driven financial decisions',
+    tags: ['investment', 'faith', 'redemption', 'property_rights']
+  },
+  
+  // EZEKIEL - Economic restoration prophecies
+  {
+    id: 'ezek_28_4_5',
+    character: 'King of Tyre',
+    book: 'Ezekiel',
+    chapter: 28,
+    verses: '4-5',
+    title: 'Wealth Through Wisdom and Pride',
+    category: 'wealth',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'By your wisdom and understanding you have gained wealth for yourself and amassed gold and silver in your treasuries. By your great skill in trading you have increased your wealth, and because of your wealth your heart has become proud.',
+    principle: 'Wealth gained through skill can lead to dangerous pride',
+    modernApplication: 'DeFi success should be balanced with humility and community focus',
+    defiRelevance: 'Automated humility checks, community-first protocols, and pride prevention mechanisms',
+    tags: ['trading_skill', 'wealth_accumulation', 'pride_warning', 'humility']
+  },
+  
+  // DANIEL - Integrity in government finance
+  {
+    id: 'dan_6_1_4',
+    character: 'Daniel',
+    book: 'Daniel',
+    chapter: 6,
+    verses: '1-4',
+    title: 'Daniel\'s Financial Integrity',
+    category: 'honesty',
+    testament: 'Old',
+    riskLevel: 'low',
+    text: 'It pleased Darius to appoint 120 satraps to rule throughout the kingdom, with three administrators over them, one of whom was Daniel. The satraps were made accountable to them so that the king might not suffer loss. Now Daniel so distinguished himself among the administrators and the satraps by his exceptional qualities that the king planned to set him over the whole kingdom. At this, the administrators and the satraps tried to find grounds for charges against Daniel in his conduct of government affairs, but they were unable to do so. They could find no corruption in him, because he was trustworthy and neither corrupt nor negligent.',
+    principle: 'Financial integrity creates unshakeable reputation and divine protection',
+    modernApplication: 'DeFi protocols should prioritize transparency and accountability',
+    defiRelevance: 'Transparent governance, accountable fund management, and integrity-based systems',
+    tags: ['financial_integrity', 'accountability', 'trustworthiness', 'transparency']
+  },
+  
+  // HOSEA - Economic metaphors for spiritual relationships
+  {
+    id: 'hos_2_8_9',
+    character: 'God',
+    book: 'Hosea',
+    chapter: 2,
+    verses: '8-9',
+    title: 'God as Provider of All Wealth',
+    category: 'stewardship',
+    testament: 'Old',
+    riskLevel: 'low',
+    text: 'She has not acknowledged that I was the one who gave her the grain, the new wine and oil, who lavished on her the silver and gold—which they used for Baal. Therefore I will take away my grain when it ripens, and my new wine when it is ready. I will take back my wool and my linen, intended to cover her nakedness.',
+    principle: 'All wealth ultimately comes from God and can be withdrawn if misused',
+    modernApplication: 'DeFi wealth should be used for godly purposes and acknowledged as divine blessing',
+    defiRelevance: 'Grateful wealth management, divine acknowledgment protocols, and stewardship accountability',
+    tags: ['divine_provision', 'acknowledgment', 'stewardship', 'wealth_source']
+  }
+];
+
+// Add remaining New Testament books for comprehensive coverage
+export const additionalNewTestamentFinances: CompleteBiblicalExample[] = [
+  // REVELATION - Economic themes in end times
+  {
+    id: 'rev_3_17_18',
+    character: 'Jesus',
+    book: 'Revelation',
+    chapter: 3,
+    verses: '17-18',
+    title: 'Laodicea\'s False Wealth',
+    category: 'wealth',
+    testament: 'New',
+    riskLevel: 'high',
+    text: 'You say, "I am rich; I have acquired wealth and do not need a thing." But you do not realize that you are wretched, pitiful, poor, blind and naked. I counsel you to buy from me gold refined in the fire, so you can become truly rich; and white clothes to wear, so you can cover your shameful nakedness; and salve to put on your eyes, so you can see.',
+    principle: 'Material wealth without spiritual wealth is actually spiritual poverty',
+    modernApplication: 'DeFi wealth accumulation should be balanced with spiritual growth',
+    defiRelevance: 'Spiritual value protocols, holistic wealth measures, and soul-enriching mechanisms',
+    tags: ['false_wealth', 'spiritual_poverty', 'true_riches', 'self_deception']
+  },
+  
+  {
+    id: 'rev_13_16_17',
+    character: 'Beast',
+    book: 'Revelation',
+    chapter: 13,
+    verses: '16-17',
+    title: 'Economic Control System',
+    category: 'business',
+    testament: 'New',
+    riskLevel: 'high',
+    text: 'It also forced all people, great and small, rich and poor, free and slave, to receive a mark on their right hands or on their foreheads, so that they could not buy or sell unless they had the mark, which is the name of the beast or the number of its name.',
+    principle: 'Beware of economic systems that require compromise of faith',
+    modernApplication: 'DeFi systems should preserve individual freedom and biblical values',
+    defiRelevance: 'Decentralized systems, freedom-preserving protocols, and anti-censorship mechanisms',
+    tags: ['economic_control', 'freedom', 'mark_system', 'buying_selling']
+  },
+  
+  {
+    id: 'rev_18_11_19',
+    character: 'Merchants',
+    book: 'Revelation',
+    chapter: 18,
+    verses: '11-19',
+    title: 'Fall of Babylon\'s Commerce',
+    category: 'business',
+    testament: 'New',
+    riskLevel: 'high',
+    text: 'The merchants of the earth will weep and mourn over her because no one buys their cargoes anymore—cargoes of gold, silver, precious stones and pearls; fine linen, purple, silk and scarlet cloth; every sort of citron wood, and articles of every kind made of ivory, costly wood, bronze, iron and marble; cargoes of cinnamon and spice, of incense, myrrh and frankincense, of wine and olive oil, of fine flour and wheat; cattle and sheep; horses and carriages; and human beings sold as slaves... In one hour such great wealth has been brought to ruin!',
+    principle: 'Worldly economic systems built on greed and exploitation will ultimately collapse',
+    modernApplication: 'DeFi systems should be built on sustainable, ethical foundations',
+    defiRelevance: 'Sustainable protocols, ethical trading systems, and collapse-resistant designs',
+    tags: ['economic_collapse', 'luxury_goods', 'sudden_ruin', 'worldly_wealth']
+  },
+  
+  // GALATIANS - Freedom and support
+  {
+    id: 'gal_6_6_10',
+    character: 'Paul',
+    book: 'Galatians',
+    chapter: 6,
+    verses: '6-10',
+    title: 'Sowing and Reaping in Giving',
+    category: 'giving',
+    testament: 'New',
+    riskLevel: 'medium',
+    text: 'Nevertheless, the one who receives instruction in the word should share all good things with their instructor. Do not be deceived: God cannot be mocked. A man reaps what he sows. Whoever sows to please their flesh, from the flesh will reap destruction; whoever sows to please the Spirit, from the Spirit will reap eternal life. Let us not become weary in doing good, for at the proper time we will reap a harvest if we do not give up. Therefore, as we have opportunity, let us do good to all people, especially to those who belong to the family of believers.',
+    principle: 'Financial giving and generosity follow spiritual laws of sowing and reaping',
+    modernApplication: 'DeFi giving protocols should enable systematic support for teachers and community',
+    defiRelevance: 'Teacher support DAOs, community benefit protocols, and spiritual investment systems',
+    tags: ['sowing_reaping', 'teacher_support', 'spiritual_investment', 'community_care']
+  },
+  
+  // EPHESIANS - Stewardship principles
+  {
+    id: 'eph_4_28',
+    character: 'Paul',
+    book: 'Ephesians',
+    chapter: 4,
+    verses: '28',
+    title: 'Work to Give to Others',
+    category: 'work',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'Anyone who has been stealing must steal no longer, but must work, doing something useful with their own hands, that they may have something to share with those in need.',
+    principle: 'Work should be productive and enable generous sharing with those in need',
+    modernApplication: 'DeFi work and staking should generate returns that can be shared charitably',
+    defiRelevance: 'Productive staking, charitable sharing protocols, and community support systems',
+    tags: ['honest_work', 'productivity', 'sharing', 'meeting_needs']
+  },
+  
+  // COLOSSIANS - Eternal perspective
+  {
+    id: 'col_3_1_4',
+    character: 'Paul',
+    book: 'Colossians',
+    chapter: 3,
+    verses: '1-4',
+    title: 'Heavenly vs. Earthly Focus',
+    category: 'wisdom',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'Since, then, you have been raised with Christ, set your hearts on things above, where Christ is, seated at the right hand of God. Set your minds on things above, not on earthly things. For you died, and your life is now hidden with Christ in God. When Christ, who is your life, appears, then you also will appear with him in glory.',
+    principle: 'Financial focus should be on eternal rather than temporary earthly gains',
+    modernApplication: 'DeFi strategies should prioritize eternal value over short-term profits',
+    defiRelevance: 'Eternal value protocols, long-term thinking, and kingdom-focused investments',
+    tags: ['eternal_perspective', 'heavenly_focus', 'long_term_thinking', 'spiritual_priorities']
+  },
+  
+  // 1 THESSALONIANS - Work ethic
+  {
+    id: '1thes_4_11_12',
+    character: 'Paul',
+    book: '1 Thessalonians',
+    chapter: 4,
+    verses: '11-12',
+    title: 'Quiet Work and Self-Sufficiency',
+    category: 'work',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'And to make it your ambition to lead a quiet life: You should mind your own business and work with your hands, just as we told you, so that your daily life may win the respect of outsiders and so that you will not be dependent on anybody.',
+    principle: 'Honest work leads to independence and respect from others',
+    modernApplication: 'DeFi participation should enable financial independence and community respect',
+    defiRelevance: 'Self-sufficiency protocols, honest yield generation, and reputation systems',
+    tags: ['quiet_work', 'self_sufficiency', 'respect', 'independence']
+  },
+  
+  // 2 THESSALONIANS - Work or don't eat
+  {
+    id: '2thes_3_10_12',
+    character: 'Paul',
+    book: '2 Thessalonians',
+    chapter: 3,
+    verses: '10-12',
+    title: 'Work Requirement for Support',
+    category: 'work',
+    testament: 'New',
+    riskLevel: 'medium',
+    text: 'For even when we were with you, we gave you this rule: "The one who is unwilling to work shall not eat." We hear that some among you are idle and disruptive. They are not busy; they are busybodies. Such people we command and urge in the Lord Jesus Christ to settle down and earn the food they eat.',
+    principle: 'Financial support should be linked to productive contribution',
+    modernApplication: 'DeFi protocols should reward active participation and contribution',
+    defiRelevance: 'Work-to-earn protocols, contribution-based rewards, and anti-freeloading mechanisms',
+    tags: ['work_requirement', 'productivity', 'contribution', 'earned_support']
+  },
+  
+  // 2 TIMOTHY - Contentment and godliness
+  {
+    id: '2tim_3_1_5',
+    character: 'Paul',
+    book: '2 Timothy',
+    chapter: 3,
+    verses: '1-5',
+    title: 'Love of Money in Last Days',
+    category: 'greed',
+    testament: 'New',
+    riskLevel: 'high',
+    text: 'But mark this: There will be terrible times in the last days. People will be lovers of themselves, lovers of money, boastful, proud, abusive, disobedient to their parents, ungrateful, unholy, without love, unforgiving, slanderous, without self-control, brutal, not lovers of the good, treacherous, rash, conceited, lovers of pleasure rather than lovers of God—having a form of godliness but denying its power. Have nothing to do with such people.',
+    principle: 'End times will be characterized by love of money and selfish materialism',
+    modernApplication: 'DeFi communities should emphasize love of God over love of money',
+    defiRelevance: 'God-loving protocols, anti-materialism measures, and community character focus',
+    tags: ['love_of_money', 'end_times', 'materialism', 'godliness_vs_greed']
+  },
+  
+  // TITUS - Good works and productivity
+  {
+    id: 'tit_3_14',
+    character: 'Paul',
+    book: 'Titus',
+    chapter: 3,
+    verses: '14',
+    title: 'Learning Productive Work',
+    category: 'work',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'Our people must learn to devote themselves to doing what is good, in order to provide for urgent needs and not live unproductive lives.',
+    principle: 'Christians should learn productive skills to meet urgent community needs',
+    modernApplication: 'DeFi skills should be developed to serve urgent community needs',
+    defiRelevance: 'Skill development protocols, urgent needs funding, and productive community systems',
+    tags: ['productive_work', 'good_deeds', 'urgent_needs', 'community_service']
+  },
+  
+  // PHILEMON - Debt and reconciliation
+  {
+    id: 'philem_17_19',
+    character: 'Paul',
+    book: 'Philemon',
+    chapter: 1,
+    verses: '17-19',
+    title: 'Debt Assumption and Reconciliation',
+    category: 'debt',
+    testament: 'New',
+    riskLevel: 'medium',
+    text: 'So if you consider me a partner, welcome him as you would welcome me. If he has done you any wrong or owes you anything, charge it to me. I, Paul, am writing this with my own hand. I will pay it back—not to mention that you owe me your very self.',
+    principle: 'Taking on another\'s debt can facilitate reconciliation and restoration',
+    modernApplication: 'DeFi protocols can include debt assumption and reconciliation mechanisms',
+    defiRelevance: 'Debt transfer protocols, reconciliation systems, and restoration mechanisms',
+    tags: ['debt_assumption', 'reconciliation', 'restoration', 'partnership']
+  },
+  
+  // 2 PETER - False prosperity teachers
+  {
+    id: '2pet_2_1_3',
+    character: 'Peter',
+    book: '2 Peter',
+    chapter: 2,
+    verses: '1-3',
+    title: 'False Teachers and Greed',
+    category: 'greed',
+    testament: 'New',
+    riskLevel: 'high',
+    text: 'But there were also false prophets among the people, just as there will be false teachers among you. They will secretly introduce destructive heresies, even denying the sovereign Lord who bought them—bringing swift destruction on themselves. Many will follow their depraved conduct and will bring the way of truth into disrepute. In their greed these teachers will exploit you with fabricated stories. Their condemnation has long been hanging over them, and their destruction has not been sleeping.',
+    principle: 'Beware of false teachers who exploit people financially through greed',
+    modernApplication: 'DeFi communities should identify and avoid exploitative financial teachers',
+    defiRelevance: 'Teacher verification systems, anti-exploitation protocols, and truth-focused education',
+    tags: ['false_teachers', 'greed', 'exploitation', 'truth_protection']
+  }
+];
+
+// Update the main export to include all examples
+completeBiblicalFinances.push(...additionalOldTestamentFinances, ...additionalNewTestamentFinances);
