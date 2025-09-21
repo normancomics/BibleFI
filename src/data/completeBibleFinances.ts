@@ -2,7 +2,7 @@ export interface CompleteBiblicalExample {
   id: string;
   reference?: string;
   text: string;
-  category: "wealth" | "giving" | "work" | "stewardship" | "taxes" | "debt" | "contentment" | "generosity" | "planning" | "investing" | "business" | "contracts" | "inheritance" | "property" | "farming" | "trading" | "banking" | "partnerships" | "justice" | "wages" | "poverty" | "budgeting" | "saving" | "borrowing" | "lending" | "interest" | "profit" | "loss" | "fraud" | "honesty" | "corruption" | "sharing" | "greed" | "wisdom" | "investment" | "wealth_warning" | "integrity" | "divine_provision" | "economic_system" | "economic_collapse" | "work_ethic" | "eternal_perspective" | "end_times_economics" | "debt_management" | "false_teaching" | "taxation" | "partnership" | "ministry_support" | "business_planning";
+  category: "wealth" | "giving" | "work" | "stewardship" | "taxes" | "debt" | "contentment" | "generosity" | "planning" | "investing" | "business" | "contracts" | "inheritance" | "property" | "farming" | "trading" | "banking" | "partnerships" | "justice" | "wages" | "poverty" | "budgeting" | "saving" | "borrowing" | "lending" | "interest" | "profit" | "loss" | "fraud" | "honesty" | "corruption" | "sharing" | "greed" | "wisdom" | "investment" | "wealth_warning" | "integrity" | "divine_provision" | "economic_system" | "economic_collapse" | "work_ethic" | "eternal_perspective" | "end_times_economics" | "debt_management" | "false_teaching" | "taxation" | "partnership" | "ministry_support" | "business_planning" | "restoration" | "reconciliation" | "forgiveness" | "redemption";
   character?: string;
   story?: string;
   principle: string;
