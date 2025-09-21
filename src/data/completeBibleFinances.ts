@@ -1859,5 +1859,267 @@ const finalMissingBooks: CompleteBiblicalExample[] = [
   }
 ];
 
+// ADDITIONAL NEW TESTAMENT BOOKS - COMPREHENSIVE EXPANSION
+const comprehensiveNewTestamentFinances: CompleteBiblicalExample[] = [
+  // MARK - Additional Examples
+  {
+    id: 'mark_12_41_44',
+    character: 'Widow',
+    book: 'Mark',
+    chapter: 12,
+    verses: '41-44',
+    title: 'The Widow\'s Mite - Sacrificial Giving',
+    category: 'giving',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'Jesus sat down opposite the place where the offerings were put and watched the crowd putting their money into the temple treasury. Many rich people threw in large amounts. But a poor widow came and put in two very small copper coins, worth only a few cents. Calling his disciples to him, Jesus said, "Truly I tell you, this poor widow has put more into the treasury than all the others. They all gave out of their wealth; but she, out of her poverty, put in everything—all she had to live on."',
+    principle: 'The value of giving is measured not by amount but by sacrifice and heart condition',
+    modernApplication: 'DeFi giving protocols should recognize proportional sacrifice, not just absolute amounts',
+    defiRelevance: 'Proportional giving mechanisms, sacrifice recognition, and heart-based contribution systems',
+    tags: ['sacrificial_giving', 'proportional_value', 'heart_condition', 'widow_wisdom']
+  },
+
+  // LUKE - Additional Examples
+  {
+    id: 'luke_16_1_9',
+    character: 'Shrewd Manager',
+    book: 'Luke',
+    chapter: 16,
+    verses: '1-9',
+    title: 'The Shrewd Manager - Strategic Financial Wisdom',
+    category: 'business',
+    testament: 'New',
+    riskLevel: 'medium',
+    text: 'Jesus told his disciples: "There was a rich man whose manager was accused of wasting his possessions. So he called him in and asked him, \'What is this I hear about you? Give an account of your management, because you cannot be manager any longer.\' The manager said to himself, \'What shall I do now? My master is taking away my job. I\'m not strong enough to dig, and I\'m ashamed to beg—I know what I\'ll do so that, when I lose my job here, people will welcome me into their houses.\'"',
+    principle: 'Strategic thinking and relationship building are essential for long-term financial security',
+    modernApplication: 'DeFi strategies should include relationship building and strategic positioning for future opportunities',
+    defiRelevance: 'Strategic relationship protocols, future opportunity positioning, and community building systems',
+    tags: ['strategic_thinking', 'relationship_building', 'future_planning', 'shrewd_wisdom']
+  },
+
+  {
+    id: 'luke_14_28_30',
+    character: 'Jesus',
+    book: 'Luke',
+    chapter: 14,
+    verses: '28-30',
+    title: 'Counting the Cost Before Building',
+    category: 'planning',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'Suppose one of you wants to build a tower. Won\'t you first sit down and estimate the cost to see if you have enough money to complete it? For if you lay the foundation and are not able to finish it, everyone who sees it will ridicule you, saying, "This person began to build and wasn\'t able to finish."',
+    principle: 'Careful planning and cost estimation are essential before beginning any financial project',
+    modernApplication: 'DeFi investments require thorough analysis and sufficient resources before commitment',
+    defiRelevance: 'Cost estimation protocols, resource planning systems, and completion guarantee mechanisms',
+    tags: ['careful_planning', 'cost_estimation', 'resource_assessment', 'completion_focus']
+  },
+
+  // JOHN - Additional Examples
+  {
+    id: 'john_6_5_13',
+    character: 'Philip and Andrew',
+    book: 'John',
+    chapter: 6,
+    verses: '5-13',
+    title: 'Feeding Five Thousand - Resource Multiplication',
+    category: 'divine_provision',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'When Jesus looked up and saw a great crowd coming toward him, he said to Philip, "Where shall we buy bread for these people to eat?" He asked this only to test him, for he already had in mind what he was going to do. Philip answered him, "It would take more than half a year\'s wages to buy enough bread for each one to have a bite!" Another of his disciples, Andrew, Simon Peter\'s brother, spoke up, "Here is a boy with five small barley loaves and two small fish, but how far will they go among so many?"',
+    principle: 'God can multiply small resources into abundant provision when offered in faith',
+    modernApplication: 'DeFi yield strategies can multiply small investments through compound mechanisms and divine favor',
+    defiRelevance: 'Compound yield protocols, resource multiplication systems, and faith-based investment strategies',
+    tags: ['resource_multiplication', 'divine_provision', 'compound_growth', 'faith_investment']
+  },
+
+  // ACTS - Additional Examples
+  {
+    id: 'acts_16_14_15',
+    character: 'Lydia',
+    book: 'Acts',
+    chapter: 16,
+    verses: '14-15',
+    title: 'Lydia the Purple Cloth Dealer - Business and Faith',
+    category: 'business',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'One of those listening was a woman from the city of Thyatira named Lydia, a dealer in purple cloth. She was a worshiper of God. The Lord opened her heart to respond to Paul\'s message. When she and the members of her household were baptized, she invited us to her home. "If you consider me a believer in the Lord," she said, "come and stay at my house." And she persuaded us.',
+    principle: 'Successful business and authentic faith can work together to advance God\'s kingdom',
+    modernApplication: 'DeFi businesses can integrate faith-based principles and support ministry through profits',
+    defiRelevance: 'Faith-integrated business models, ministry support systems, and kingdom-focused commerce',
+    tags: ['business_faith_integration', 'ministry_support', 'kingdom_commerce', 'successful_entrepreneurship']
+  },
+
+  {
+    id: 'acts_20_33_35',
+    character: 'Paul',
+    book: 'Acts',
+    chapter: 20,
+    verses: '33-35',
+    title: 'Working to Support the Weak',
+    category: 'work',
+    testament: 'New',
+    riskLevel: 'low',
+    text: 'I have not coveted anyone\'s silver or gold or clothing. You yourselves know that these hands of mine have supplied my own needs and the needs of my companions. In everything I did, I showed you that by this kind of hard work we must help the weak, remembering the words the Lord Jesus himself said: "It is more blessed to give than to receive."',
+    principle: 'Work should provide not only for personal needs but also for helping others in need',
+    modernApplication: 'DeFi earnings should include allocation for supporting those who are financially weak',
+    defiRelevance: 'Charitable giving protocols, weak support systems, and blessed giving mechanisms',
+    tags: ['work_ethics', 'helping_weak', 'blessed_giving', 'self_sufficiency']
+  }
+];
+
+// MINOR PROPHETS - COMPREHENSIVE EXPANSION
+const minorProphetsFinances: CompleteBiblicalExample[] = [
+  // HOSEA
+  {
+    id: 'hosea_2_8_9',
+    character: 'Hosea',
+    book: 'Hosea',
+    chapter: 2,
+    verses: '8-9',
+    title: 'God\'s Provision Acknowledged',
+    category: 'divine_provision',
+    testament: 'Old',
+    riskLevel: 'medium',
+    text: 'She has not acknowledged that I was the one who gave her the grain, the new wine and oil, who lavished on her the silver and gold—which they used for Baal. Therefore I will take away my grain when it ripens, and my new wine when it is ready.',
+    principle: 'All financial blessings ultimately come from God and should be acknowledged and used properly',
+    modernApplication: 'DeFi profits should be recognized as divine blessings and used according to godly principles',
+    defiRelevance: 'Blessing acknowledgment protocols, proper use systems, and divine source recognition',
+    tags: ['divine_source', 'blessing_acknowledgment', 'proper_use', 'gratitude_practices']
+  },
+
+  // JOEL
+  {
+    id: 'joel_2_24_26',
+    character: 'Joel',
+    book: 'Joel',
+    chapter: 2,
+    verses: '24-26',
+    title: 'Restoration After Economic Devastation',
+    category: 'restoration',
+    testament: 'Old',
+    riskLevel: 'low',
+    text: 'The threshing floors will be filled with grain; the vats will overflow with new wine and oil. I will repay you for the years the locusts have eaten—the great locust and the young locust, the other locusts and the locust swarm—my great army that I sent among you. You will have plenty to eat, until you are full, and you will praise the name of the Lord your God, who has worked wonders for you.',
+    principle: 'God promises to restore what has been lost through disasters and provide abundance again',
+    modernApplication: 'DeFi recovery protocols can help restore wealth lost through market crashes or exploits',
+    defiRelevance: 'Recovery mechanisms, restoration protocols, and abundance recovery systems',
+    tags: ['financial_restoration', 'abundance_recovery', 'divine_repayment', 'wonder_working']
+  },
+
+  // AMOS
+  {
+    id: 'amos_8_4_6',
+    character: 'Amos',
+    book: 'Amos',
+    chapter: 8,
+    verses: '4-6',
+    title: 'Economic Oppression Condemned',
+    category: 'justice',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Hear this, you who trample the needy and do away with the poor of the land, saying, "When will the New Moon be over that we may sell grain, and the Sabbath be ended that we may market wheat?"—skimping on the measure, boosting the price and cheating with dishonest scales, buying the poor with silver and the needy for a pair of sandals, selling even the sweepings with the wheat.',
+    principle: 'Economic systems that exploit the poor and use dishonest practices are condemned by God',
+    modernApplication: 'DeFi protocols must be designed to be fair and not exploit vulnerable users',
+    defiRelevance: 'Fair trading systems, exploitation prevention, and honest measurement protocols',
+    tags: ['economic_justice', 'honest_trading', 'poor_protection', 'fair_systems']
+  },
+
+  // OBADIAH
+  {
+    id: 'obadiah_1_3_4',
+    character: 'Obadiah',
+    book: 'Obadiah',
+    chapter: 1,
+    verses: '3-4',
+    title: 'Pride in Wealth Leads to Downfall',
+    category: 'wealth_warning',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'The pride of your heart has deceived you, you who live in the clefts of the rocks and make your home on the heights, you who say to yourself, "Who can bring me down to the ground?" Though you soar like the eagle and make your nest among the stars, from there I will bring you down," declares the Lord.',
+    principle: 'Pride in financial security and wealth can lead to spiritual and material downfall',
+    modernApplication: 'DeFi success should be accompanied by humility and recognition of God\'s sovereignty',
+    defiRelevance: 'Humility protocols, pride prevention systems, and sovereignty recognition mechanisms',
+    tags: ['pride_warning', 'wealth_humility', 'downfall_prevention', 'divine_sovereignty']
+  },
+
+  // JONAH
+  {
+    id: 'jonah_1_3',
+    character: 'Jonah',
+    book: 'Jonah',
+    chapter: 1,
+    verses: '3',
+    title: 'Paying Your Own Way in Disobedience',
+    category: 'stewardship',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'But Jonah ran away from the Lord and headed for Tarshish. He went down to Joppa, where he found a ship bound for that port. After paying the fare, he went aboard and sailed for Tarshish to flee from the Lord.',
+    principle: 'Financial resources should not be used to fund disobedience or running from God\'s will',
+    modernApplication: 'DeFi investments should align with God\'s will and not fund activities contrary to His purposes',
+    defiRelevance: 'Purpose alignment systems, obedience-based investing, and divine will integration',
+    tags: ['obedience_alignment', 'purpose_driven', 'divine_will', 'resource_stewardship']
+  },
+
+  // MICAH
+  {
+    id: 'micah_6_10_11',
+    character: 'Micah',
+    book: 'Micah',
+    chapter: 6,
+    verses: '10-11',
+    title: 'Dishonest Wealth Condemned',
+    category: 'honesty',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Am I still to forget your ill-gotten treasures, you wicked house, and the short ephah, which is accursed? Shall I acquit someone with dishonest scales, with a bag of false weights?',
+    principle: 'Wealth gained through dishonest means is cursed and condemned by God',
+    modernApplication: 'DeFi protocols must maintain honesty and transparency in all transactions and measurements',
+    defiRelevance: 'Honest measurement systems, transparent protocols, and curse prevention mechanisms',
+    tags: ['honest_wealth', 'transparent_systems', 'curse_prevention', 'measurement_accuracy']
+  },
+
+  // NAHUM
+  {
+    id: 'nahum_2_9',
+    character: 'Nahum',
+    book: 'Nahum',
+    chapter: 2,
+    verses: '9',
+    title: 'Plunder of Accumulated Wealth',
+    category: 'wealth_warning',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Plunder the silver! Plunder the gold! The supply is endless, the wealth from all its treasures!',
+    principle: 'Accumulated wealth through oppression and violence will ultimately be plundered and lost',
+    modernApplication: 'DeFi wealth should be built through righteous means to ensure long-term security',
+    defiRelevance: 'Righteous wealth building, security through righteousness, and sustainable prosperity',
+    tags: ['righteous_wealth', 'security_through_righteousness', 'sustainable_prosperity', 'violence_avoidance']
+  },
+
+  // HABAKKUK
+  {
+    id: 'habakkuk_2_6_7',
+    character: 'Habakkuk',
+    book: 'Habakkuk',
+    chapter: 2,
+    verses: '6-7',
+    title: 'Woe to Excessive Debt and Plunder',
+    category: 'debt',
+    testament: 'Old',
+    riskLevel: 'high',
+    text: 'Will not all of them taunt him with ridicule and scorn, saying, "Woe to him who piles up stolen goods and makes himself wealthy by extortion! How long must this go on?" Will not your creditors suddenly arise? Will they not wake up and make you tremble? Then you will become their prey.',
+    principle: 'Wealth built on debt, extortion, and stolen goods will ultimately lead to becoming prey to creditors',
+    modernApplication: 'DeFi strategies should avoid excessive leverage and exploitative practices that could lead to liquidation',
+    defiRelevance: 'Leverage management, exploitation prevention, and creditor protection protocols',
+    tags: ['debt_warning', 'leverage_management', 'exploitation_prevention', 'creditor_awareness']
+  }
+];
+
 // Update the main export to include all examples
-completeBiblicalFinances.push(...additionalOldTestamentFinances, ...additionalNewTestamentFinances, ...finalMissingBooks);
+completeBiblicalFinances.push(
+  ...additionalOldTestamentFinances, 
+  ...additionalNewTestamentFinances, 
+  ...finalMissingBooks,
+  ...comprehensiveNewTestamentFinances,
+  ...minorProphetsFinances
+);
