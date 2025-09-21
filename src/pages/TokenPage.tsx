@@ -1,25 +1,35 @@
 import React from 'react';
+import NavBar from '@/components/NavBar';
 import BibleTokenDashboard from '@/components/token/BibleTokenDashboard';
 import LaunchStrategy from '@/components/token/LaunchStrategy';
+import TokenDeploymentWizard from '@/components/token/TokenDeploymentWizard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const TokenPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <Tabs defaultValue="dashboard" className="space-y-6">
-        <TabsList className="grid grid-cols-2 w-full max-w-md">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="launch">Launch Strategy</TabsTrigger>
-        </TabsList>
+    <div className="min-h-screen bg-background">
+      <NavBar />
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        <Tabs defaultValue="wizard" className="space-y-6">
+          <TabsList className="grid grid-cols-3 w-full max-w-lg">
+            <TabsTrigger value="wizard">Deploy</TabsTrigger>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="strategy">Strategy</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="dashboard">
-          <BibleTokenDashboard />
-        </TabsContent>
-        
-        <TabsContent value="launch">
-          <LaunchStrategy />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="wizard">
+            <TokenDeploymentWizard />
+          </TabsContent>
+
+          <TabsContent value="dashboard">
+            <BibleTokenDashboard />
+          </TabsContent>
+          
+          <TabsContent value="strategy">
+            <LaunchStrategy />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

@@ -9,6 +9,8 @@ import { SoundProvider } from "@/contexts/SoundContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
+import EnhancedWisdomPage from "./pages/EnhancedWisdomPage";
+import WalletPage from "./pages/WalletPage";
 import AboutPage from "./pages/AboutPage";
 import DefiPage from "./pages/DefiPage";
 import StakingPage from "./pages/StakingPage";
@@ -44,6 +46,8 @@ const App = () => (
               <Route path="/farming" element={<FarmingPage />} />
               <Route path="/tithe" element={<TithePage />} />
               <Route path="/wisdom" element={<WisdomPage />} />
+              <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
               <Route path="/taxes" element={<TaxesPage />} />
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/token" element={<TokenPage />} />

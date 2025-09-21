@@ -10,6 +10,7 @@ import RealWalletConnect from "@/components/wallet/RealWalletConnect";
 import MobileSetupGuide from "@/components/setup/MobileSetupGuide";
 import PortfolioSummary from "@/components/home/PortfolioSummary";
 import ActionButtons from "@/components/home/ActionButtons";
+import LaunchStatusBanner from "@/components/home/LaunchStatusBanner";
 import RecentActivity from "@/components/home/RecentActivity";
 import BiblicalFinancialStories from "@/components/home/BiblicalFinancialStories";
 import SoundSystemManager from "@/components/enhanced/SoundSystemManager";
@@ -105,6 +106,9 @@ const Index: React.FC = () => {
           </div>
         </div>
         
+        {/* Launch Status Banner */}
+        <LaunchStatusBanner />
+
         {/* Main Cards */}
         <div className="space-y-4">
           <PortfolioSummary {...portfolioData} />
