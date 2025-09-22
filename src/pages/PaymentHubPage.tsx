@@ -1,6 +1,7 @@
 import React from 'react';
 import NavBar from '@/components/NavBar';
 import ComprehensivePaymentHub from '@/components/payment/ComprehensivePaymentHub';
+import CostOptimizedPaymentHub from '@/components/payment/CostOptimizedPaymentHub';
 
 const PaymentHubPage: React.FC = () => {
   return (
@@ -18,7 +19,7 @@ const PaymentHubPage: React.FC = () => {
           </p>
         </div>
 
-        <ComprehensivePaymentHub />
+        <CostOptimizedPaymentHub />
       </main>
     </div>
   );
