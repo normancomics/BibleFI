@@ -6,6 +6,8 @@ import TokenDeploymentWizard from '@/components/token/TokenDeploymentWizard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const TokenPage: React.FC = () => {
+  console.log('TokenPage component rendering...');
+  
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
