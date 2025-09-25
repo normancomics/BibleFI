@@ -7,10 +7,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SoundProvider } from "@/contexts/SoundContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
-import { FarcasterAuthProvider } from "@/farcaster/auth";
 import { WagmiProvider } from 'wagmi';
 import { config } from '@/config/wagmi';
 import { WalletProvider } from '@/contexts/WalletContext';
+import '@farcaster/auth-kit/styles.css';
+import { AuthKitProvider } from '@farcaster/auth-kit';
 import App from "./App";
 import "./index.css";
 import "./polyfills";
@@ -24,25 +25,31 @@ const queryClient = new QueryClient({
   },
 });
 
+const authKitConfig = {
+  rpcUrl: 'https://base.rpc.subquery.network/public',
+  domain: typeof window !== 'undefined' ? window.location.hostname : 'biblefi.base.eth',
+  siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://biblefi.base.eth/api/auth/callback',
+};
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <SecurityProvider>
-              <SoundProvider>
-                <WalletProvider>
-                  <FarcasterAuthProvider>
+    <AuthKitProvider config={authKitConfig}>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+              <SecurityProvider>
+                <SoundProvider>
+                  <WalletProvider>
                     <App />
                     <Toaster />
-                  </FarcasterAuthProvider>
-                </WalletProvider>
-              </SoundProvider>
-            </SecurityProvider>
-          </ThemeProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </WagmiProvider>
+                  </WalletProvider>
+                </SoundProvider>
+              </SecurityProvider>
+            </ThemeProvider>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </AuthKitProvider>
   </React.StrictMode>
 );

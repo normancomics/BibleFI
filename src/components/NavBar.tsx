@@ -26,7 +26,7 @@ const NavBar: React.FC = () => {
     { path: '/defi', label: 'DeFi', icon: TrendingUp },
     { path: '/staking', label: 'Staking', icon: Coins },
     { path: '/farming', label: 'Farming', icon: Wheat },
-    { path: '/token', label: '$BIBLE', icon: Coins, badge: 'NEW' },
+    { path: '/token', label: '$BIBLEFI', icon: Coins, badge: 'NEW' },
     { path: '/tithe', label: 'Tithe', icon: Heart },
     { path: '/wisdom', label: 'Wisdom', icon: BookOpen },
     { path: '/taxes', label: 'Taxes', icon: Calculator },

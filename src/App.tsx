@@ -30,6 +30,7 @@ import LiveDataPage from "./pages/LiveDataPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import BiblicalStrategiesPage from "./pages/BiblicalStrategiesPage";
 import QuantumSecurityPage from "./pages/QuantumSecurityPage";
+import SystemCheckPage from "./pages/SystemCheckPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
               <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
               <Route path="/quantum-security" element={<QuantumSecurityPage />} />
+              <Route path="/system-check" element={<SystemCheckPage />} />
         <Route path="/live-data" element={<LiveDataPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="*" element={<NotFound />} />

@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Wallet, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import PixelButton from '@/components/PixelButton';
-import { useRealTimeData } from '@/hooks/useRealTimeData';
+import useRealTimeData from '@/hooks/useRealTimeData';
 
 const ProductionWalletConnect: React.FC = () => {
   const { address, isConnected } = useAccount();
