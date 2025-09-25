@@ -17,13 +17,17 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      buffer: 'buffer',
+      process: 'process/browser',
+      util: 'util',
     },
   },
-  // Add this section to provide polyfills for Node.js modules
   define: {
     global: 'globalThis',
+    'process.env': {},
   },
   optimizeDeps: {
+    include: ['buffer', 'process'],
     esbuildOptions: {
       define: {
         global: 'globalThis'

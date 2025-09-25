@@ -14,6 +14,7 @@ import LaunchStatusBanner from "@/components/home/LaunchStatusBanner";
 import RecentActivity from "@/components/home/RecentActivity";
 import BiblicalFinancialStories from "@/components/home/BiblicalFinancialStories";
 import SoundSystemManager from "@/components/enhanced/SoundSystemManager";
+import EnhancedPixelLanding from "@/components/home/EnhancedPixelLanding";
 import { Button } from "@/components/ui/button";
 import { Users, BookOpen } from "lucide-react";
 
@@ -21,6 +22,7 @@ const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
   const [showIntro, setShowIntro] = useState(true);
   const [showCharacters, setShowCharacters] = useState(false);
+  const [showEnhancedLanding, setShowEnhancedLanding] = useState(true);
   
   // Mock portfolio data - in real app this would come from wallet/DeFi protocols
   const portfolioData = {
@@ -83,11 +85,34 @@ const Index: React.FC = () => {
     );
   }
 
+  // Show enhanced pixel landing by default
+  if (showEnhancedLanding && !showIntro) {
+    return (
+      <SoundSystemManager>
+        <EnhancedPixelLanding />
+        <Button 
+          onClick={() => setShowEnhancedLanding(false)}
+          className="fixed top-4 right-4 z-50 bg-black/70 border border-ancient-gold hover:bg-ancient-gold/20 text-ancient-gold"
+        >
+          Classic View →
+        </Button>
+      </SoundSystemManager>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
       
       <NavBar />
+      
+      {/* Toggle to enhanced view */}
+      <Button 
+        onClick={() => setShowEnhancedLanding(true)}
+        className="fixed top-4 right-4 z-50 bg-ancient-gold/20 border border-ancient-gold hover:bg-ancient-gold/30 text-ancient-gold"
+      >
+        ← Pixel View
+      </Button>
       
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header with Connect */}
