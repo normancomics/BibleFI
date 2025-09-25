@@ -7,6 +7,7 @@ import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SoundProvider } from "@/contexts/SoundContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
+import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
 import EnhancedWisdomPage from "./pages/EnhancedWisdomPage";
@@ -35,8 +36,9 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <SecurityProvider>
-        <SoundProvider>
+        <SecurityProvider>
+          <EnhancedSecurityProvider>
+            <SoundProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -64,8 +66,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
-        </SoundProvider>
-      </SecurityProvider>
+            </SoundProvider>
+          </EnhancedSecurityProvider>
+        </SecurityProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

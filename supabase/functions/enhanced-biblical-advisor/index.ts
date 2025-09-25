@@ -22,15 +22,43 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { query, context } = await req.json();
+    const body = await req.json();
+    const { query, context } = body;
 
-    console.log('Enhanced Biblical Advisor Request:', { query, hasContext: !!context });
+    // Input validation and sanitization
+    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+      throw new Error('Invalid query provided');
+    }
 
-    // Search for relevant biblical knowledge
+    if (query.length > 1000) {
+      throw new Error('Query too long. Maximum 1000 characters allowed');
+    }
+
+    // Check for malicious content
+    const dangerousPatterns = /<script|javascript:|data:|vbscript:|onload|onerror/i;
+    if (dangerousPatterns.test(query)) {
+      console.warn('Malicious content detected in query:', query);
+      throw new Error('Invalid content detected');
+    }
+
+    const sanitizedQuery = query.trim().slice(0, 1000);
+    console.log('Enhanced Biblical Advisor Request:', { 
+      queryLength: sanitizedQuery.length, 
+      hasContext: !!context,
+      userAgent: req.headers.get('user-agent')?.slice(0, 100)
+    });
+
+    // Search for relevant biblical knowledge with parameterized query
+    const searchTerms = sanitizedQuery
+      .split(' ')
+      .filter(term => term.length > 2 && !/[<>\"'&]/.test(term))
+      .slice(0, 10) // Limit search terms
+      .join(' | ');
+
     const { data: biblicalKnowledge, error: searchError } = await supabase
       .from('biblical_knowledge_base')
       .select('*')
-      .textSearch('verse_text', query.split(' ').join(' | '))
+      .textSearch('verse_text', searchTerms || 'wisdom')
       .limit(5);
 
     if (searchError) {
@@ -56,8 +84,8 @@ Context about the user: ${context ? JSON.stringify(context) : 'No specific conte
 Available biblical knowledge: ${biblicalKnowledge ? JSON.stringify(biblicalKnowledge.slice(0, 3)) : 'No specific verses found'}
 
 Format your response as JSON with these fields:
-- answer: Your main biblical financial advice
-- scripture: Relevant Bible verse reference
+- answer: Your main biblical financial advice (max 200 words)
+- scripture: Relevant Bible verse reference  
 - verseText: The actual verse text
 - practicalSteps: Array of 2-3 practical steps they can take
 - wisdomScore: A number 1-100 based on how wise their query shows they are
@@ -76,7 +104,7 @@ Format your response as JSON with these fields:
           messages: [
             {
               role: 'user',
-              content: `${systemPrompt}\n\nUser Question: ${query}`
+              content: `${systemPrompt}\n\nUser Question: ${sanitizedQuery}`
             }
           ]
         })

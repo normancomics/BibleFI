@@ -8,6 +8,8 @@ import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, Dol
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '@/contexts/SoundContext';
 import { toast } from '@/components/ui/use-toast';
+import { validateInput, UserInputSchemas, apiRateLimiter } from '@/utils/inputValidation';
+import { useSecurityContext } from '@/contexts/EnhancedSecurityContext';
 
 interface Token {
   symbol: string;
@@ -32,6 +34,7 @@ interface SwapQuote {
 
 const BiblicalDeFiSwap: React.FC = () => {
   const { playSound } = useSound();
+  const { validateTransaction, checkContentSecurity } = useSecurityContext();
   const [fromToken, setFromToken] = useState<Token | null>(null);
   const [toToken, setToToken] = useState<Token | null>(null);
   const [fromAmount, setFromAmount] = useState('');
@@ -100,6 +103,33 @@ const BiblicalDeFiSwap: React.FC = () => {
       return;
     }
 
+    // Validate swap inputs
+    const validation = validateInput(UserInputSchemas.swapInputs, {
+      fromAmount,
+      fromToken: fromToken.symbol,
+      toToken: toToken.symbol,
+      slippage
+    });
+
+    if (!validation.success) {
+      toast({
+        title: "Invalid Input",
+        description: validation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Rate limiting check
+    if (!apiRateLimiter.canMakeCall('swap-quote', 5, 30000)) {
+      toast({
+        title: "Rate Limited",
+        description: "Please wait before requesting another quote",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     playSound('click');
 
@@ -127,7 +157,24 @@ const BiblicalDeFiSwap: React.FC = () => {
   };
 
   const executeSwap = async () => {
-    if (!quote) return;
+    if (!quote || !fromToken || !toToken) return;
+
+    // Validate transaction before execution
+    const swapTransaction = {
+      amount: fromAmount,
+      fromToken: fromToken.symbol,
+      toToken: toToken.symbol,
+      to: toToken.address
+    };
+
+    if (!validateTransaction(swapTransaction)) {
+      toast({
+        title: "Transaction Blocked",
+        description: "Security validation failed. Transaction blocked for your protection.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsSwapping(true);
     playSound('powerup');

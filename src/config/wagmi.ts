@@ -3,10 +3,8 @@ import { createConfig, http } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 
-// Free WalletConnect Project ID - no cost for usage
-const projectId = process.env.NODE_ENV === 'production' 
-  ? '2f5a0d23bb9b43ecf39bb95b02a82c73' 
-  : 'demo' // Demo mode for development
+// Updated WalletConnect Project ID for Bible.fi production
+const projectId = '2f0f97a31e2243c89db717c84c2e7ee6' // Bible.fi official project ID
 
 export const config = createConfig({
   chains: [base, mainnet],
@@ -19,20 +17,29 @@ export const config = createConfig({
       }
     }),
     coinbaseWallet({
-      appName: 'Bible.fi',
-      appLogoUrl: '/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
-      preference: 'all', // Allow both smart wallet and extension
+      appName: 'Bible.fi - Biblical DeFi',
+      appLogoUrl: '/bible-fi-brand-logo-v2.png',
+      preference: 'all',
       version: '4',
     }),
     walletConnect({
       projectId,
       metadata: {
         name: 'Bible.fi',
-        description: 'Biblical wisdom meets DeFi innovation',
-        url: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi',
-        icons: ['/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png']
+        description: 'Biblical wisdom meets DeFi innovation on Base chain',
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://biblefi.base.eth',
+        icons: ['/bible-fi-brand-logo-v2.png'],
+        verifyUrl: 'https://verify.walletconnect.com'
       },
       showQrModal: true,
+      qrModalOptions: {
+        themeMode: 'dark',
+        themeVariables: {
+          '--wcm-accent-color': '#FFD700',
+          '--wcm-background-color': '#0A0A0A',
+          '--wcm-z-index': '1000'
+        }
+      }
     }),
   ],
   transports: {
