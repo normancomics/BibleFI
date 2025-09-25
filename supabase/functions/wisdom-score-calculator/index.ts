@@ -109,8 +109,9 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error calculating wisdom score:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const err = error as any;
+    console.error('Error calculating wisdom score:', err);
+    return new Response(JSON.stringify({ error: err?.message || 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -60,8 +60,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error generating embeddings:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const err = error as any;
+    console.error('Error generating embeddings:', err);
+    return new Response(JSON.stringify({ error: err?.message || 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -300,6 +300,60 @@ export type Database = {
         }
         Relationships: []
       }
+      comprehensive_biblical_texts: {
+        Row: {
+          aramaic_text: string | null
+          book: string
+          chapter: number
+          created_at: string | null
+          embedding: string | null
+          financial_keywords: string[] | null
+          financial_relevance: number | null
+          greek_text: string | null
+          hebrew_text: string | null
+          id: string
+          kjv_text: string
+          original_words: Json | null
+          strong_numbers: string[] | null
+          updated_at: string | null
+          verse: number
+        }
+        Insert: {
+          aramaic_text?: string | null
+          book: string
+          chapter: number
+          created_at?: string | null
+          embedding?: string | null
+          financial_keywords?: string[] | null
+          financial_relevance?: number | null
+          greek_text?: string | null
+          hebrew_text?: string | null
+          id?: string
+          kjv_text: string
+          original_words?: Json | null
+          strong_numbers?: string[] | null
+          updated_at?: string | null
+          verse: number
+        }
+        Update: {
+          aramaic_text?: string | null
+          book?: string
+          chapter?: number
+          created_at?: string | null
+          embedding?: string | null
+          financial_keywords?: string[] | null
+          financial_relevance?: number | null
+          greek_text?: string | null
+          hebrew_text?: string | null
+          id?: string
+          kjv_text?: string
+          original_words?: Json | null
+          strong_numbers?: string[] | null
+          updated_at?: string | null
+          verse?: number
+        }
+        Relationships: []
+      }
       currency_rates: {
         Row: {
           from_currency: string
@@ -441,6 +495,39 @@ export type Database = {
         }
         Relationships: []
       }
+      mcp_biblical_sessions: {
+        Row: {
+          biblical_references: string[] | null
+          context_type: string
+          created_at: string | null
+          id: string
+          query: string
+          response: string
+          session_data: Json
+          user_id: string | null
+        }
+        Insert: {
+          biblical_references?: string[] | null
+          context_type: string
+          created_at?: string | null
+          id?: string
+          query: string
+          response: string
+          session_data?: Json
+          user_id?: string | null
+        }
+        Update: {
+          biblical_references?: string[] | null
+          context_type?: string
+          created_at?: string | null
+          id?: string
+          query?: string
+          response?: string
+          session_data?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           country: string
@@ -531,6 +618,45 @@ export type Database = {
           specialties?: string[] | null
           updated_at?: string | null
           verified?: boolean | null
+        }
+        Relationships: []
+      }
+      strongs_concordance: {
+        Row: {
+          created_at: string | null
+          definition: string
+          id: string
+          language: string
+          original_word: string
+          part_of_speech: string | null
+          pronunciation: string | null
+          root_word: string | null
+          strong_number: string
+          transliteration: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          definition: string
+          id?: string
+          language: string
+          original_word: string
+          part_of_speech?: string | null
+          pronunciation?: string | null
+          root_word?: string | null
+          strong_number: string
+          transliteration?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          definition?: string
+          id?: string
+          language?: string
+          original_word?: string
+          part_of_speech?: string | null
+          pronunciation?: string | null
+          root_word?: string | null
+          strong_number?: string
+          transliteration?: string | null
         }
         Relationships: []
       }
@@ -715,6 +841,28 @@ export type Database = {
           reference: string
           text: string
           wisdom_category: string[]
+        }[]
+      }
+      search_comprehensive_biblical_knowledge: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          aramaic_text: string
+          book: string
+          chapter: number
+          financial_keywords: string[]
+          financial_relevance: number
+          greek_text: string
+          hebrew_text: string
+          id: string
+          kjv_text: string
+          original_words: Json
+          similarity: number
+          strong_numbers: string[]
+          verse: number
         }[]
       }
       sparsevec_out: {

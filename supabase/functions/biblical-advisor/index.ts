@@ -159,9 +159,10 @@ User Context: ${JSON.stringify(context || {})}`
     });
 
   } catch (error) {
-    console.error('Error in biblical advisor:', error);
+    const err = error as any;
+    console.error('Error in biblical advisor:', err);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: err?.message || 'Unknown error',
       advice: "I'm currently experiencing technical difficulties. Please remember Proverbs 3:5-6: 'Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.' Seek wise counsel and make decisions based on biblical principles.",
       relevant_verses: [],
       biblical_principles: ['Trust in the LORD', 'Seek wise counsel']

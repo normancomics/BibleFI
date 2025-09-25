@@ -22,13 +22,10 @@ serve(async (req) => {
     // Generate SVG image based on type
     const svg = generateSVGImage(type, { verse, reference, fid });
     
-    // Convert SVG to PNG using canvas (for better compatibility)
-    const pngBuffer = await svgToPng(svg);
-    
-    return new Response(pngBuffer, {
+    return new Response(svg, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'image/png',
+        'Content-Type': 'image/svg+xml; charset=utf-8',
         'Cache-Control': 'public, max-age=3600',
       },
     });
@@ -37,12 +34,11 @@ serve(async (req) => {
     
     // Return a fallback image
     const fallbackSvg = generateFallbackImage();
-    const fallbackPng = await svgToPng(fallbackSvg);
     
-    return new Response(fallbackPng, {
+    return new Response(fallbackSvg, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'image/png',
+        'Content-Type': 'image/svg+xml; charset=utf-8',
       },
     });
   }

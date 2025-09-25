@@ -229,21 +229,21 @@ export class ComprehensiveBiblicalCrawler {
     try {
       const { error } = await supabase
         .from('comprehensive_biblical_texts')
-        .insert([{
-          book: verse.book,
-          chapter: verse.chapter,
-          verse: verse.verse,
-          kjv_text: verse.kjv_text,
-          hebrew_text: verse.hebrew_text,
-          greek_text: verse.greek_text,
-          aramaic_text: verse.aramaic_text,
-          strong_numbers: verse.strong_numbers,
-          original_words: verse.original_words,
-          financial_keywords: verse.financial_keywords,
-          financial_relevance_score: verse.financial_relevance_score,
-          topic_categories: verse.topic_categories,
-          created_at: new Date().toISOString()
-        }]);
+        .insert([
+          {
+            book: verse.book,
+            chapter: verse.chapter,
+            verse: verse.verse,
+            kjv_text: verse.kjv_text,
+            hebrew_text: verse.hebrew_text ?? null,
+            greek_text: verse.greek_text ?? null,
+            aramaic_text: verse.aramaic_text ?? null,
+            strong_numbers: verse.strong_numbers ?? null,
+            original_words: verse.original_words ?? null,
+            financial_keywords: verse.financial_keywords ?? null,
+            financial_relevance: verse.financial_relevance_score ?? 0,
+          },
+        ]);
 
       if (error) {
         console.error('Error storing verse:', error);
