@@ -3,7 +3,7 @@
 export const FARCASTER_CONFIG = {
   domain: typeof window !== 'undefined' ? window.location.hostname : 'biblefi.base.eth',
   siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://biblefi.base.eth/api/auth/callback',
-  rpcUrl: 'https://mainnet.base.org',
+  rpcUrl: 'https://base.rpc.subquery.network/public',
   relay: 'https://relay.farcaster.xyz',
   version: 'vNext',
   
@@ -47,7 +47,7 @@ export const APP_CONFIG = {
   baseChain: {
     chainId: 8453,
     name: 'Base',
-    rpcUrl: 'https://mainnet.base.org',
+    rpcUrl: 'https://base.rpc.subquery.network/public',
     explorerUrl: 'https://basescan.org',
     iconUrl: '/lovable-uploads/922260ef-cba9-4437-9d77-07bcba6560aa.png'
   },

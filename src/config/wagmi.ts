@@ -36,7 +36,15 @@ export const config = createConfig({
     }),
   ],
   transports: {
-    [base.id]: http('https://mainnet.base.org'),
-    [mainnet.id]: http(),
+    [base.id]: http('https://base.rpc.subquery.network/public', {
+      batch: true,
+      retryCount: 3,
+      retryDelay: 1000,
+    }),
+    [mainnet.id]: http('https://1rpc.io/eth', {
+      batch: true,
+      retryCount: 3,
+      retryDelay: 1000,
+    }),
   },
 })
