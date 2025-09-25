@@ -28,6 +28,8 @@ import DeploymentPage from "./pages/DeploymentPage";
 import BiblicalDefiPage from "./pages/BiblicalDefiPage";
 import LiveDataPage from "./pages/LiveDataPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import BiblicalStrategiesPage from "./pages/BiblicalStrategiesPage";
+import QuantumSecurityPage from "./pages/QuantumSecurityPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -61,6 +63,8 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/deployment" element={<DeploymentPage />} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
+              <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
+              <Route path="/quantum-security" element={<QuantumSecurityPage />} />
         <Route path="/live-data" element={<LiveDataPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="*" element={<NotFound />} />
