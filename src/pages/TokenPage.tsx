@@ -15,20 +15,45 @@ const TokenPage: React.FC = () => {
         {/* Hero Section */}
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-4xl font-bold text-ancient-gold">
-            💰 $BIBLE Token Center
+            💰 $BIBLEFI Token Center
           </h1>
           <p className="text-white/80 max-w-2xl mx-auto">
-            Deploy, manage, and trade the $BIBLE token. Biblical wisdom meets tokenomics on Base chain.
+            Deploy, manage, and trade the $BIBLEFI token. Biblical wisdom meets tokenomics on Base chain.
           </p>
         </div>
 
         <Tabs defaultValue="launch" className="space-y-6">
-          <TabsList className="grid grid-cols-5 w-full max-w-3xl mx-auto">
-            <TabsTrigger value="launch">Launch Now</TabsTrigger>
-            <TabsTrigger value="defi">DeFi Hub</TabsTrigger>
-            <TabsTrigger value="deploy">Deploy</TabsTrigger>
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="strategy">Strategy</TabsTrigger>
+          <TabsList className="grid grid-cols-5 w-full max-w-3xl mx-auto bg-scripture/40 border border-ancient-gold/30 p-1">
+            <TabsTrigger 
+              value="launch" 
+              className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold text-white hover:text-ancient-gold"
+            >
+              🚀 Launch Now
+            </TabsTrigger>
+            <TabsTrigger 
+              value="defi"
+              className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold text-white hover:text-ancient-gold"
+            >
+              💰 DeFi Hub
+            </TabsTrigger>
+            <TabsTrigger 
+              value="deploy"
+              className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold text-white hover:text-ancient-gold"
+            >
+              🛠️ Deploy
+            </TabsTrigger>
+            <TabsTrigger 
+              value="dashboard"
+              className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold text-white hover:text-ancient-gold"
+            >
+              📊 Dashboard
+            </TabsTrigger>
+            <TabsTrigger 
+              value="strategy"
+              className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold text-white hover:text-ancient-gold"
+            >
+              📈 Strategy
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="launch">
