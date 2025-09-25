@@ -3,6 +3,7 @@ import NavBar from '@/components/NavBar';
 import BibleTokenDashboard from '@/components/token/BibleTokenDashboard';
 import LaunchStrategy from '@/components/token/LaunchStrategy';
 import TokenDeploymentWizard from '@/components/token/TokenDeploymentWizard';
+import EarlyTokenLaunch from '@/components/token/EarlyTokenLaunch';
 import ProductionDefiHub from '@/components/defi/ProductionDefiHub';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -21,13 +22,18 @@ const TokenPage: React.FC = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="defi" className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
+        <Tabs defaultValue="launch" className="space-y-6">
+          <TabsList className="grid grid-cols-5 w-full max-w-3xl mx-auto">
+            <TabsTrigger value="launch">Launch Now</TabsTrigger>
             <TabsTrigger value="defi">DeFi Hub</TabsTrigger>
             <TabsTrigger value="deploy">Deploy</TabsTrigger>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="strategy">Strategy</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="launch">
+            <EarlyTokenLaunch />
+          </TabsContent>
 
           <TabsContent value="defi">
             <ProductionDefiHub />

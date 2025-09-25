@@ -96,6 +96,7 @@ const ProductionWalletConnect: React.FC = () => {
           <div className="space-y-3">
             {connectors.map((connector) => {
               const isReady = connector.name !== 'WalletConnect' || typeof window !== 'undefined';
+              const isFarcasterWallet = connector.name === 'WalletConnect';
               
               return (
                 <PixelButton
@@ -105,12 +106,12 @@ const ProductionWalletConnect: React.FC = () => {
                   className="w-full bg-ancient-gold/20 border border-ancient-gold text-ancient-gold hover:bg-ancient-gold/30"
                 >
                   {connector.name === 'Coinbase Wallet' && '🟦'}
-                  {connector.name === 'WalletConnect' && '🔗'}
+                  {connector.name === 'WalletConnect' && '🟣'}
                   {connector.name === 'Browser Wallet' && '🌐'}
                   {' '}
                   {connector.name}
-                  {connector.name === 'Coinbase Wallet' && (
-                    <Badge className="ml-2 bg-blue-900 text-blue-200">Recommended</Badge>
+                  {isFarcasterWallet && (
+                    <Badge className="ml-2 bg-purple-900 text-purple-200">Recommended</Badge>
                   )}
                 </PixelButton>
               );
