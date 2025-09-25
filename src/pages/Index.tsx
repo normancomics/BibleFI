@@ -17,12 +17,13 @@ import SoundSystemManager from "@/components/enhanced/SoundSystemManager";
 import EnhancedPixelLanding from "@/components/home/EnhancedPixelLanding";
 import { Button } from "@/components/ui/button";
 import { Users, BookOpen, TrendingUp, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
   const [showIntro, setShowIntro] = useState(true);
   const [showCharacters, setShowCharacters] = useState(false);
-  const [showEnhancedLanding, setShowEnhancedLanding] = useState(true);
+  const [showEnhancedLanding, setShowEnhancedLanding] = useState(false);
   
   // Mock portfolio data - in real app this would come from wallet/DeFi protocols
   const portfolioData = {
@@ -150,12 +151,11 @@ const Index: React.FC = () => {
                 <p className="text-muted-foreground text-sm mb-4">
                   Swap tokens with biblical wisdom guidance and best price aggregation
                 </p>
-                <Button 
-                  className="w-full bg-eboy-green hover:bg-eboy-green/90 text-black"
-                  onClick={() => window.location.href = '/defi'}
-                >
-                  Start Swapping
-                </Button>
+                <Link to="/defi">
+                  <Button className="w-full bg-eboy-green hover:bg-eboy-green/90 text-black">
+                    Start Swapping
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -168,12 +168,11 @@ const Index: React.FC = () => {
                 <p className="text-muted-foreground text-sm mb-4">
                   Earn rewards through biblical stewardship principles
                 </p>
-                <Button 
-                  className="w-full bg-ancient-gold hover:bg-ancient-gold/90 text-black"
-                  onClick={() => window.location.href = '/staking'}
-                >
-                  View Pools
-                </Button>
+                <Link to="/staking">
+                  <Button className="w-full bg-ancient-gold hover:bg-ancient-gold/90 text-black">
+                    View Pools
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>
