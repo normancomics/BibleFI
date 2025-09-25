@@ -16,7 +16,7 @@ import BiblicalFinancialStories from "@/components/home/BiblicalFinancialStories
 import SoundSystemManager from "@/components/enhanced/SoundSystemManager";
 import EnhancedPixelLanding from "@/components/home/EnhancedPixelLanding";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen } from "lucide-react";
+import { Users, BookOpen, TrendingUp, Shield } from "lucide-react";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -138,6 +138,45 @@ const Index: React.FC = () => {
         <div className="space-y-4">
           <PortfolioSummary {...portfolioData} />
           <ActionButtons />
+
+          {/* Enhanced DeFi Features Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-card border border-border shadow-sm">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-eboy-green" />
+                  DeFi Swaps
+                </h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Swap tokens with biblical wisdom guidance and best price aggregation
+                </p>
+                <Button 
+                  className="w-full bg-eboy-green hover:bg-eboy-green/90 text-black"
+                  onClick={() => window.location.href = '/defi'}
+                >
+                  Start Swapping
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border border-border shadow-sm">
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold text-card-foreground mb-3 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-ancient-gold" />
+                  Yield Staking
+                </h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Earn rewards through biblical stewardship principles
+                </p>
+                <Button 
+                  className="w-full bg-ancient-gold hover:bg-ancient-gold/90 text-black"
+                  onClick={() => window.location.href = '/staking'}
+                >
+                  View Pools
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Daily Verse */}
           <Card className="bg-card border border-border shadow-sm">

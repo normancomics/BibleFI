@@ -13,9 +13,11 @@ import EnhancedWisdomPage from "./pages/EnhancedWisdomPage";
 import WalletPage from "./pages/WalletPage";
 import AboutPage from "./pages/AboutPage";
 import DefiPage from "./pages/DefiPage";
+import EnhancedDefiPage from "./pages/EnhancedDefiPage";
 import StakingPage from "./pages/StakingPage";
 import FarmingPage from "./pages/FarmingPage";
 import TithePage from "./pages/TithePage";
+import EnhancedTithePage from "./pages/EnhancedTithePage";
 import WisdomPage from "./pages/WisdomPage";
 import TaxesPage from "./pages/TaxesPage";
 import SecurityPage from "./pages/SecurityPage";
@@ -39,12 +41,15 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/defi" element={<DefiPage />} />
+              <Route path="/defi" element={<EnhancedDefiPage />} />
+              <Route path="/defi-classic" element={<DefiPage />} />
               <Route path="/staking" element={<StakingPage />} />
               <Route path="/farming" element={<FarmingPage />} />
-              <Route path="/tithe" element={<TithePage />} />
+              <Route path="/tithe" element={<EnhancedTithePage />} />
+              <Route path="/tithe-classic" element={<TithePage />} />
               <Route path="/wisdom" element={<WisdomPage />} />
               <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
               <Route path="/wallet" element={<WalletPage />} />

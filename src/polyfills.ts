@@ -1,24 +1,24 @@
 
 import { Buffer } from 'buffer';
-import process from 'process/browser';
 
-// Make Buffer and process available globally
+// Make Buffer available globally
 (globalThis as any).Buffer = Buffer;
-(globalThis as any).process = process;
+
+// Create a minimal process polyfill
+const processPolyfill = {
+  env: {},
+  browser: true,
+  version: '',
+  versions: {},
+  nextTick: (fn: Function) => setTimeout(fn, 0),
+  cwd: () => '/',
+  platform: 'browser'
+};
+
+(globalThis as any).process = processPolyfill;
 
 // Also add to window for compatibility
 if (typeof window !== 'undefined') {
   (window as any).Buffer = Buffer;
-  (window as any).process = process;
-}
-
-// Define the global types for TypeScript
-declare global {
-  interface Window {
-    Buffer: typeof Buffer;
-    process: typeof process;
-  }
-  
-  var Buffer: typeof Buffer;
-  var process: typeof process;
+  (window as any).process = processPolyfill;
 }
