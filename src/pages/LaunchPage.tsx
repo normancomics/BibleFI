@@ -2,9 +2,12 @@ import React from 'react';
 import NavBar from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import FrameDeploymentValidator from '@/components/deployment/FrameDeploymentValidator';
-import OptimizedWalletConnect from '@/components/wallet/OptimizedWalletConnect';
+import LaunchReadinessCenter from '@/components/deployment/LaunchReadinessCenter';
+import ProductionFarcasterFrame from '@/components/farcaster/ProductionFarcasterFrame';
+import ProductionWalletConnect from '@/components/wallet/ProductionWalletConnect';
 import PixelButton from '@/components/PixelButton';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, Clock, AlertTriangle, Rocket, Globe, Zap } from 'lucide-react';
 import { getCurrentDomainConfig } from '@/config/domains';
 
@@ -77,136 +80,152 @@ const LaunchPage: React.FC = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center items-center gap-3 mb-4">
             <Rocket className="h-8 w-8 text-ancient-gold" />
-            <h1 className="text-4xl font-bold text-ancient-gold">Launch Readiness</h1>
+            <h1 className="text-4xl font-bold text-ancient-gold">🚀 Launch Control Center</h1>
           </div>
           <p className="text-white/80 max-w-2xl mx-auto">
-            Critical launch components for Bible.fi mini-app on Farcaster
+            Complete deployment dashboard for Bible.fi - from readiness checks to Farcaster frame deployment
           </p>
         </div>
 
-        {/* Current Domain Status */}
-        <Card className="bg-scripture/20 border border-ancient-gold">
-          <CardHeader>
-            <CardTitle className="text-ancient-gold flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Current Configuration
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-ancient-gold/80 text-sm">Current Domain:</label>
-                <code className="block text-white bg-black/40 p-2 rounded text-sm">
-                  {'current' in domainConfig ? domainConfig.current : window.location.hostname}
-                </code>
-              </div>
-              <div>
-                <label className="text-ancient-gold/80 text-sm">Frame URL:</label>
-                <code className="block text-white bg-black/40 p-2 rounded text-sm break-all">
-                  {domainConfig.frame}
-                </code>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="readiness" className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
+            <TabsTrigger value="readiness">Readiness</TabsTrigger>
+            <TabsTrigger value="farcaster">Farcaster</TabsTrigger>
+            <TabsTrigger value="wallet">Wallet Test</TabsTrigger>
+            <TabsTrigger value="deployment">Deploy</TabsTrigger>
+          </TabsList>
 
-        {/* Launch Steps */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-ancient-gold">Launch Checklist</h2>
-            
-            {launchSteps.map((step) => (
-              <Card key={step.id} className="bg-scripture/20 border border-ancient-gold/20">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    {getStatusIcon(step.status)}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-white font-medium">{step.title}</h3>
-                        {getStatusBadge(step.status)}
-                      </div>
-                      <p className="text-ancient-gold/80 text-sm">{step.description}</p>
+          <TabsContent value="readiness">
+            <LaunchReadinessCenter />
+          </TabsContent>
+
+          <TabsContent value="farcaster">
+            <ProductionFarcasterFrame />
+          </TabsContent>
+
+          <TabsContent value="wallet">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-ancient-gold text-center">Wallet Integration Test</h2>
+              <ProductionWalletConnect />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="deployment">
+            <div className="space-y-6">{/* ... keep existing code */}
+
+              {/* Current Domain Status */}
+              <Card className="bg-scripture/20 border border-ancient-gold">
+                <CardHeader>
+                  <CardTitle className="text-ancient-gold flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Current Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-ancient-gold/80 text-sm">Current Domain:</label>
+                      <code className="block text-white bg-black/40 p-2 rounded text-sm">
+                        {'current' in domainConfig ? domainConfig.current : window.location.hostname}
+                      </code>
+                    </div>
+                    <div>
+                      <label className="text-ancient-gold/80 text-sm">Frame URL:</label>
+                      <code className="block text-white bg-black/40 p-2 rounded text-sm break-all">
+                        {domainConfig.frame}
+                      </code>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
 
-          {/* Action Panel */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-ancient-gold">Actions</h2>
-            
-            {/* Frame Validation */}
-            <FrameDeploymentValidator />
-            
-            {/* Wallet Testing */}
-            <Card className="bg-scripture/20 border border-ancient-gold">
-              <CardHeader>
-                <CardTitle className="text-ancient-gold flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Wallet Integration Test
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <OptimizedWalletConnect />
-              </CardContent>
-            </Card>
-
-            {/* RPC Status */}
-            <Card className="bg-scripture/20 border border-ancient-gold">
-              <CardHeader>
-                <CardTitle className="text-ancient-gold">Base RPC Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white">Primary RPC:</span>
-                    <Badge className="bg-green-900 text-green-200">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
-                  </div>
-                  <code className="block text-ancient-gold text-xs bg-black/40 p-2 rounded">
-                    https://base.rpc.subquery.network/public
-                  </code>
-                  <p className="text-ancient-gold/60 text-xs">
-                    Optimized for 0.063s latency with fallback endpoints
-                  </p>
+              {/* Launch Steps */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-ancient-gold">Launch Checklist</h2>
+                  
+                  {launchSteps.map((step) => (
+                    <Card key={step.id} className="bg-scripture/20 border border-ancient-gold/20">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          {getStatusIcon(step.status)}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-white font-medium">{step.title}</h3>
+                              {getStatusBadge(step.status)}
+                            </div>
+                            <p className="text-ancient-gold/80 text-sm">{step.description}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Deployment Guide */}
-            <Card className="bg-scripture/20 border border-ancient-gold">
-              <CardHeader>
-                <CardTitle className="text-ancient-gold">Deployment Options</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <PixelButton 
-                  className="w-full bg-purple-900 text-ancient-gold border border-ancient-gold/50"
-                  onClick={() => window.open('/deploy-github-pages.md', '_blank')}
-                >
-                  📖 GitHub Pages Guide
-                </PixelButton>
-                
-                <PixelButton 
-                  className="w-full bg-black/40 text-ancient-gold border border-ancient-gold/50"
-                  onClick={() => window.open('https://base.org/names', '_blank')}
-                >
-                  🌐 Get .base.eth Domain
-                </PixelButton>
-                
-                <PixelButton 
-                  className="w-full bg-purple-800 text-ancient-gold border border-ancient-gold/50"
-                  onClick={() => window.open('https://warpcast.com/~/developers/frames', '_blank')}
-                >
-                  🔧 Warpcast Frame Validator
-                </PixelButton>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                {/* Action Panel */}
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-ancient-gold">Actions</h2>
+                  
+                  {/* Frame Validation */}
+                  <FrameDeploymentValidator />
+                  
+                  {/* RPC Status */}
+                  <Card className="bg-scripture/20 border border-ancient-gold">
+                    <CardHeader>
+                      <CardTitle className="text-ancient-gold">Base RPC Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-white">Primary RPC:</span>
+                          <Badge className="bg-green-900 text-green-200">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Active
+                          </Badge>
+                        </div>
+                        <code className="block text-ancient-gold text-xs bg-black/40 p-2 rounded">
+                          https://base.rpc.subquery.network/public
+                        </code>
+                        <p className="text-ancient-gold/60 text-xs">
+                          Optimized for 0.063s latency with fallback endpoints
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Deployment Guide */}
+                  <Card className="bg-scripture/20 border border-ancient-gold">
+                    <CardHeader>
+                      <CardTitle className="text-ancient-gold">Deployment Options</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <PixelButton 
+                        className="w-full bg-purple-900 text-ancient-gold border border-ancient-gold/50"
+                        onClick={() => window.open('/deploy-github-pages.md', '_blank')}
+                      >
+                        📖 GitHub Pages Guide
+                      </PixelButton>
+                      
+                      <PixelButton 
+                        className="w-full bg-black/40 text-ancient-gold border border-ancient-gold/50"
+                        onClick={() => window.open('https://base.org/names', '_blank')}
+                      >
+                        🌐 Get .base.eth Domain
+                      </PixelButton>
+                      
+                      <PixelButton 
+                        className="w-full bg-purple-800 text-ancient-gold border border-ancient-gold/50"
+                        onClick={() => window.open('https://warpcast.com/~/developers/frames', '_blank')}
+                      >
+                        🔧 Warpcast Frame Validator
+                      </PixelButton>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Technical Specifications */}
         <Card className="bg-scripture/20 border border-ancient-gold">
