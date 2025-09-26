@@ -102,27 +102,29 @@ const FixedFarcasterConnect: React.FC<FixedFarcasterConnectProps> = ({
         onSuccess={() => {
           playSound('success');
           setIsConnecting(false);
+          toast({
+            title: "Farcaster Connected",
+            description: "Successfully connected to Farcaster!",
+          });
         }}
         onError={(error) => {
           console.error('Farcaster sign in error:', error);
           toast({
             title: "Connection Failed",
-            description: "Failed to connect to Farcaster",
+            description: "Failed to connect to Farcaster. Please try again.",
             variant: "destructive",
           });
           playSound('error');
           setIsConnecting(false);
         }}
+        onSignOut={() => {
+          setIsConnecting(false);
+          toast({
+            title: "Disconnected",
+            description: "Farcaster disconnected successfully",
+          });
+        }}
       />
-      <div style={{ display: 'none' }}>
-        <PixelButton 
-          onClick={handleSignIn}
-          className={`bg-purple-900 border-2 border-ancient-gold/70 hover:bg-purple-800 flex items-center text-ancient-gold ${sizeClasses[size]}`}
-        >
-          <LogIn size={16} className="mr-2" />
-          Connect Farcaster
-        </PixelButton>
-      </div>
     </div>
   );
 };

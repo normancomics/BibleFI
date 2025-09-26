@@ -36,9 +36,9 @@ export const FarcasterAuthProvider: React.FC<{ children: ReactNode }> = ({ child
   const [status, setStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
 
   const config = {
-    domain: typeof window !== 'undefined' ? window.location.hostname : 'bible.fi',
-    siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://bible.fi/api/auth/callback',
-    rpcUrl: 'https://mainnet.base.org',
+    domain: typeof window !== 'undefined' ? window.location.hostname : 'fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com',
+    siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/api/auth/callback',
+    rpcUrl: 'https://base.rpc.subquery.network/public',
     relay: 'https://relay.farcaster.xyz',
     version: 'vNext',
   };

@@ -27,8 +27,10 @@ const queryClient = new QueryClient({
 
 const authKitConfig = {
   rpcUrl: 'https://base.rpc.subquery.network/public',
-  domain: typeof window !== 'undefined' ? window.location.hostname : 'biblefi.base.eth',
-  siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://biblefi.base.eth/api/auth/callback',
+  domain: typeof window !== 'undefined' ? window.location.hostname : 'fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com',
+  siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovableproject.com/api/auth/callback',
+  relay: 'https://relay.farcaster.xyz',
+  version: 'vNext',
 };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
