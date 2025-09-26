@@ -26,12 +26,14 @@
     --ring: 280 100% 65%;             /* Purple focus ring */
     --radius: 0px;                    /* Sharp pixel corners */
 
-    /* Improved biblical colors with better contrast */
-    --scripture: 280 100% 65%;        /* Bright purple for scripture */
+    /* Enhanced biblical colors matching main logo */
+    --scripture: 280 80% 65%;         /* Deep purple matching logo */
     --scripture-light: 280 100% 80%;  /* Light purple */
-    --scripture-dark: 280 100% 45%;   /* Dark purple */
-    --ancient-gold: 45 100% 55%;      /* Bright readable gold */
+    --scripture-dark: 280 80% 20%;    /* Dark purple like logo background */
+    --ancient-gold: 45 100% 65%;      /* Bright gold matching logo text */
     --ancient-scroll: 45 85% 85%;     /* Light parchment with good contrast */
+    --purple-deep: 260 80% 20%;       /* Logo background purple */
+    --golden-bright: 45 100% 75%;     /* Logo text gold */
     --base-blue: 200 100% 55%;        /* Bright base blue */
     
     /* eBoy-inspired bright colors with good contrast */

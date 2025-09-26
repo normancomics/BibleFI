@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import bibleFiLogo from '@/assets/bible-fi-logo-reference.png';
+import bibleFiLogo from '@/assets/bible-fi-main-logo.png';
 import { 
   Home, 
   BookOpen, 
@@ -49,7 +49,7 @@ const NavBar: React.FC = () => {
               <img 
                 src={bibleFiLogo}
                 alt="Bible.Fi Logo" 
-                className="w-10 h-10 rounded-lg group-hover:scale-110 transition-transform duration-300 shadow-lg"
+                className="w-10 h-10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-purple-500/50"
               />
             </div>
             <span className="font-mono text-lg font-bold hidden sm:block tracking-wider text-ancient-gold hover:text-scripture transition-colors duration-300">
