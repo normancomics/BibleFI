@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Shield, CheckCircle, AlertTriangle, Globe, FileText, Building2, Scale, Coins } from 'lucide-react';
 import { LegalFooter } from '@/components/legal/LegalFooter';
+import { BusinessStructure } from '@/components/legal/BusinessStructure';
 
 export const CompliancePage: React.FC = () => {
   return (
@@ -22,26 +23,104 @@ export const CompliancePage: React.FC = () => {
 
         {/* Main Content */}
         <div className="space-y-8">
-          {/* Business Structure */}
+          <BusinessStructure />
+          
+          {/* Compliance Monitoring */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Corporate Structure
+                <Shield className="h-5 w-5" />
+                Real-Time Compliance Monitoring
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-3">Bible.fi Holdings LLC (Wyoming)</h4>
-                <div className="space-y-2 text-sm text-muted-foreground ml-4">
-                  <div>├── Bible.fi Operations LLC (Series A)</div>
-                  <div>├── Bible.fi IP Holdings LLC (Series B)</div>
-                  <div>└── Bible.fi Treasury LLC (Series C)</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-semibold text-green-700 dark:text-green-300">AML Monitoring</h4>
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    Continuous transaction monitoring for suspicious activity patterns
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-3">
-                  Series LLC structure provides liability protection and operational flexibility 
-                  while maintaining unified governance under Biblical principles.
+                <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-semibold text-blue-700 dark:text-blue-300">KYC Verification</h4>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                    Identity verification for transactions above regulatory thresholds
+                  </p>
+                </div>
+                <div className="bg-purple-50 dark:bg-purple-950 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <h4 className="font-semibold text-purple-700 dark:text-purple-300">Jurisdiction Checks</h4>
+                  <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">
+                    Automated geo-blocking for restricted territories
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Regulatory Framework */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Regulatory Compliance Framework</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-primary">Federal Compliance</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• FinCEN Money Service Business (MSB) registration</li>
+                    <li>• Bank Secrecy Act (BSA) compliance</li>
+                    <li>• Anti-Money Laundering (AML) programs</li>
+                    <li>• Suspicious Activity Report (SAR) filing</li>
+                    <li>• OFAC sanctions screening</li>
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-primary">State Compliance</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Money Transmitter License (MTL) where required</li>
+                    <li>• State-specific disclosure requirements</li>
+                    <li>• Consumer protection compliance</li>
+                    <li>• Regulatory reporting and audits</li>
+                    <li>• Data protection and privacy laws</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Token Compliance */}
+          <Card>
+            <CardHeader>
+              <CardTitle>$BIBLEFI Token Compliance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">Utility Token Classification</h4>
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  $BIBLEFI has been structured as a utility token to avoid securities classification under the Howey Test:
                 </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h5 className="font-medium text-green-600 dark:text-green-400">Utility Functions</h5>
+                  <ul className="text-sm space-y-1 text-muted-foreground">
+                    <li>• Platform governance voting rights</li>
+                    <li>• Access to premium Biblical content</li>
+                    <li>• Staking rewards and yield farming</li>
+                    <li>• Transaction fee discounts</li>
+                    <li>• Community features and benefits</li>
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <h5 className="font-medium text-blue-600 dark:text-blue-400">Securities Avoidance</h5>
+                  <ul className="text-sm space-y-1 text-muted-foreground">
+                    <li>• No investment promises or guarantees</li>
+                    <li>• No passive income expectations</li>
+                    <li>• Functional utility from day one</li>
+                    <li>• Decentralized governance structure</li>
+                    <li>• Clear utility-focused messaging</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>

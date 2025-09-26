@@ -13,6 +13,7 @@ import HomePage from "./pages/HomePage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { CompliancePage } from "./pages/CompliancePage";
+import { TaxCompliancePage } from "./pages/TaxCompliancePage";
 import EnhancedWisdomPage from "./pages/EnhancedWisdomPage";
 import WalletPage from "./pages/WalletPage";
 import AboutPage from "./pages/AboutPage";
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/compliance" element={<CompliancePage />} />
+              <Route path="/tax-compliance" element={<TaxCompliancePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
