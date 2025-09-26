@@ -76,6 +76,11 @@ const FixedFarcasterConnect: React.FC<FixedFarcasterConnectProps> = ({
             <div>
               <p className="text-sm font-medium text-ancient-gold truncate max-w-[100px]">{profile.displayName || profile.username}</p>
               <p className="text-xs text-white/60">FID: {profile.fid}</p>
+              {profile.custody && (
+                <p className="text-xs text-ancient-gold/70 truncate max-w-[120px]" title={profile.custody}>
+                  {profile.custody.slice(0, 6)}...{profile.custody.slice(-4)}
+                </p>
+              )}
             </div>
           </div>
           <PixelButton 

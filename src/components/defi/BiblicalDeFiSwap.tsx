@@ -10,6 +10,7 @@ import { useSound } from '@/contexts/SoundContext';
 import { toast } from '@/components/ui/use-toast';
 import { validateInput, UserInputSchemas, apiRateLimiter } from '@/utils/inputValidation';
 import { useSecurityContext } from '@/contexts/EnhancedSecurityContext';
+import EnhancedBiblicalTrading from '@/components/wisdom/EnhancedBiblicalTrading';
 
 interface Token {
   symbol: string;
@@ -42,6 +43,7 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState('1.0');
+  const [biblicalAnalysis, setBiblicalAnalysis] = useState(null);
 
   // Base chain tokens
   const baseTokens: Token[] = [
@@ -454,6 +456,17 @@ const BiblicalDeFiSwap: React.FC = () => {
           </AnimatePresence>
         </CardContent>
       </Card>
+
+      {/* Enhanced Biblical Analysis */}
+      {fromToken && toToken && fromAmount && (
+        <EnhancedBiblicalTrading
+          fromToken={fromToken.symbol}
+          toToken={toToken.symbol}
+          amount={fromAmount}
+          priceImpact={parseFloat(quote?.priceImpact || '0')}
+          onAnalysisChange={setBiblicalAnalysis}
+        />
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">
