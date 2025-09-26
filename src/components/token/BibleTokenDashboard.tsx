@@ -20,7 +20,7 @@ const BibleTokenDashboard: React.FC = () => {
     playSound('coin');
     toast({
       title: "Wisdom Rewards Claimed! 🏆",
-      description: `${availableRewards} $BIBLE tokens added to your wallet`,
+      description: `${availableRewards} $BIBLEFI tokens added to your wallet`,
     });
     setBibleBalance(prev => prev + availableRewards);
     setAvailableRewards(0);
@@ -53,7 +53,7 @@ const BibleTokenDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Coins className="text-ancient-gold" />
-              $BIBLE Token Dashboard
+              $BIBLEFI Token Dashboard
             </CardTitle>
             <Button
               variant="outline"
@@ -72,7 +72,7 @@ const BibleTokenDashboard: React.FC = () => {
               <div className="text-2xl font-bold text-ancient-gold">
                 {isPrivacyMode ? '***' : bibleBalance.toLocaleString()}
               </div>
-              <div className="text-sm text-white/60">$BIBLE Balance</div>
+              <div className="text-sm text-white/60">$BIBLEFI Balance</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-400">
@@ -140,7 +140,7 @@ const BibleTokenDashboard: React.FC = () => {
             <div className="bg-green-500/10 p-4 rounded-lg border border-green-500/30">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium">Available Rewards</span>
-                <span className="text-green-400 font-bold">{availableRewards} $BIBLE</span>
+                <span className="text-green-400 font-bold">{availableRewards} $BIBLEFI</span>
               </div>
               <Button 
                 onClick={handleClaimRewards}

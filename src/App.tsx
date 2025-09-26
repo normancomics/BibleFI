@@ -24,6 +24,7 @@ import TaxesPage from "./pages/TaxesPage";
 import SecurityPage from "./pages/SecurityPage";
 import TokenPage from "./pages/TokenPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import ChurchesPage from "./pages/ChurchesPage";
 import DeploymentPage from "./pages/DeploymentPage";
 import BiblicalDefiPage from "./pages/BiblicalDefiPage";
 import LiveDataPage from "./pages/LiveDataPage";
@@ -67,8 +68,9 @@ const App = () => (
               <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
               <Route path="/quantum-security" element={<QuantumSecurityPage />} />
               <Route path="/system-check" element={<SystemCheckPage />} />
-        <Route path="/live-data" element={<LiveDataPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/churches" element={<ChurchesPage />} />
+              <Route path="/live-data" element={<LiveDataPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

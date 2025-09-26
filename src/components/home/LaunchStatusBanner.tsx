@@ -34,7 +34,7 @@ const LaunchStatusBanner: React.FC = () => {
     playSound('powerup');
     toast({
       title: "Ready for Launch! 🚀",
-      description: "$BIBLE token deployment is 75% complete",
+      description: "$BIBLEFI token deployment is 75% complete",
     });
   };
 
@@ -55,7 +55,7 @@ const LaunchStatusBanner: React.FC = () => {
               <Rocket className="h-6 w-6 text-ancient-gold" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-ancient-gold">$BIBLE Token Launch</h3>
+              <h3 className="text-lg font-bold text-ancient-gold">$BIBLEFI Token Launch</h3>
               <p className="text-sm text-muted-foreground">Biblical DeFi ready for Base mainnet</p>
             </div>
           </div>
@@ -115,7 +115,7 @@ const LaunchStatusBanner: React.FC = () => {
             >
               <Link to="/token">
                 <Coins className="mr-2 h-4 w-4" />
-                Deploy $BIBLE
+                Deploy $BIBLEFI
               </Link>
             </Button>
             <Button 
