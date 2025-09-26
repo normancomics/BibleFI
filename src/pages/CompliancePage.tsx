@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Shield, CheckCircle, AlertTriangle, Globe, FileText } from 'lucide-react';
+import { Users, Shield, CheckCircle, AlertTriangle, Globe, FileText, Building2, Scale, Coins } from 'lucide-react';
 import { LegalFooter } from '@/components/legal/LegalFooter';
 
 export const CompliancePage: React.FC = () => {
@@ -22,24 +22,65 @@ export const CompliancePage: React.FC = () => {
 
         {/* Main Content */}
         <div className="space-y-8">
+          {/* Business Structure */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Corporate Structure
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-3">Bible.fi Holdings LLC (Wyoming)</h4>
+                <div className="space-y-2 text-sm text-muted-foreground ml-4">
+                  <div>├── Bible.fi Operations LLC (Series A)</div>
+                  <div>├── Bible.fi IP Holdings LLC (Series B)</div>
+                  <div>└── Bible.fi Treasury LLC (Series C)</div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Series LLC structure provides liability protection and operational flexibility 
+                  while maintaining unified governance under Biblical principles.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Compliance Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Compliance Framework
+                Regulatory Framework
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p>
-                Bible.fi operates within a comprehensive compliance framework designed to meet 
-                regulatory requirements while serving our global community of users.
-              </p>
               <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-lg">
                 <p className="text-sm text-green-600 dark:text-green-400">
                   <strong>Biblical Foundation:</strong> "Let everyone be subject to the governing authorities, 
-                  for there is no authority except that which God has established." - Romans 13:1
+                  for there is no authority except that which God has established." - Romans 13:1. 
+                  Bible.fi implements proactive compliance protocols demonstrating good stewardship.
                 </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Enhanced Compliance:</h4>
+                  <ul className="text-sm space-y-1 text-muted-foreground">
+                    <li>• Proactive FinCEN compliance</li>
+                    <li>• State-by-state MSB analysis</li>
+                    <li>• SEC no-action letter consideration</li>
+                    <li>• Wyoming Utility Token Exemption</li>
+                  </ul>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Risk Management:</h4>
+                  <ul className="text-sm space-y-1 text-muted-foreground">
+                    <li>• Crypto Crime Insurance ($10M)</li>
+                    <li>• Smart Contract Coverage</li>
+                    <li>• Multi-sig treasury (3/5)</li>
+                    <li>• Emergency pause mechanisms</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>

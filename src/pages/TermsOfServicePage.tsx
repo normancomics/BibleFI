@@ -32,9 +32,16 @@ export const TermsOfServicePage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                By accessing or using Bible.fi ("the Service"), you agree to be bound by these Terms of Service 
-                and our Privacy Policy. If you do not agree to these terms, you may not use the Service.
+                By accessing or using Bible.fi ("the Service"), you covenant before God and agree to be bound by 
+                these Terms of Service and our Privacy Policy. If you do not agree to these terms, you may not use the Service.
               </p>
+              <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg">
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  <strong>Biblical Foundation:</strong> "Where no counsel is, the people fall: but in the multitude 
+                  of counsellors there is safety." - Proverbs 11:14 (KJV). This platform operates on Biblical principles. 
+                  Users agree to engage with integrity, honesty, and good stewardship.
+                </p>
+              </div>
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm">
                   <strong>Express Consent Required:</strong> By checking the agreement box during registration, 
@@ -96,11 +103,16 @@ export const TermsOfServicePage: React.FC = () => {
                 </p>
               </div>
               <div className="space-y-2">
-                <p><strong>© 2024 Bible.fi. All rights reserved.</strong></p>
-                <p>Bible.fi™, Biblefi.xyz™, and $BIBLEFI™ are trademarks.</p>
+                <p><strong>© 2025 Bible.fi Holdings LLC. All rights reserved.</strong></p>
+                <p>Bible.fi™, Biblefi.xyz™, Biblical DeFi™, and $BIBLEFI™ are trademarks of Bible.fi Holdings LLC.</p>
+                <p>
+                  Protected materials include: smart contract architecture, algorithmic implementations, 
+                  Biblical principle → DeFi mechanism mapping, tithing algorithms, wisdom scoring methodology, 
+                  and faith-based yield optimization formulas.
+                </p>
                 <p>
                   Users may not reproduce, distribute, modify, or create derivative works without 
-                  explicit written permission.
+                  explicit written permission from Bible.fi Holdings LLC.
                 </p>
               </div>
             </CardContent>
@@ -159,10 +171,14 @@ export const TermsOfServicePage: React.FC = () => {
                   <li>• Community participation benefits</li>
                 </ul>
               </div>
-              <p className="text-sm text-muted-foreground">
-                <strong>Not Investment Advice:</strong> $BIBLEFI tokens are not securities and should not be 
-                considered investment instruments. No guarantees are made regarding token value or returns.
-              </p>
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  <strong>UTILITY TOKEN DISCLAIMER:</strong> $BIBLEFI tokens are utility tokens providing platform 
+                  access and governance rights. They are NOT investments, securities, or promises of profit. 
+                  Token value may fluctuate. Past wisdom does not guarantee future understanding. NOT FDIC insured. 
+                  You may lose funds. Seek financial and Godly-spiritual counsel (Proverbs 11:14).
+                </p>
+              </div>
             </CardContent>
           </Card>
 

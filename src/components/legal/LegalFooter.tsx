@@ -11,11 +11,11 @@ export const LegalFooter: React.FC = () => {
         {/* Copyright and Trademark Section */}
         <div className="text-center mb-6 space-y-2">
           <div className="text-sm text-muted-foreground">
-            © {currentYear} Bible.fi™. All rights reserved.
+            © {currentYear} Bible.fi Holdings LLC. All rights reserved.
           </div>
           <div className="text-xs text-muted-foreground">
-            Bible.fi™, Biblefi.xyz™, and $BIBLEFI™ are trademarks. 
-            Built on Base Chain with Biblical principles.
+            Bible.fi™, Biblefi.xyz™, Biblical DeFi™, and $BIBLEFI™ are trademarks of Bible.fi Holdings LLC. 
+            Built on Base Chain with Biblical principles. USPTO Applications Pending.
           </div>
         </div>
 
@@ -24,10 +24,11 @@ export const LegalFooter: React.FC = () => {
           <div className="flex items-start gap-3">
             <Shield className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="text-xs text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">Intellectual Property Protection:</strong> This work, including all smart contracts, 
-              interfaces, token architecture, and associated materials, is protected under U.S. and international 
-              copyright laws. The unique synthesis of Biblical principles with DeFi protocols constitutes a 
-              proprietary methodology and trade secret. Unauthorized use, reproduction, or distribution is prohibited.
+              <strong className="text-foreground">Intellectual Property Protection:</strong> This work, including smart contract 
+              architecture, algorithmic implementations, Biblical principle → DeFi mechanism mapping, tithing algorithms, 
+              wisdom scoring methodology, and faith-based yield optimization formulas, is protected under U.S. and 
+              international copyright laws. The unique synthesis of Biblical principles with DeFi protocols constitutes 
+              a proprietary methodology and trade secret. Unauthorized copying, modification, or distribution is strictly prohibited.
             </div>
           </div>
         </div>

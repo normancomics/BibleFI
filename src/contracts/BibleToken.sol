@@ -8,17 +8,18 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
- * @title BibleToken ($BIBLEFI)
- * @dev ZK-enhanced token with automatic wisdom rewards distribution
- * Built for Bible.fi - Biblical DeFi on Base Chain
+ * @title Bible.fi Smart Contract - BibleToken ($BIBLEFI)
+ * @notice Copyright (c) 2025 Bible.fi Holdings LLC. All Rights Reserved.
+ * @dev Proprietary Biblical-DeFi Synthesis Protocol™
+ * This contract implements trade secret methodologies protected under law.
+ * Unauthorized copying, modification, or distribution is strictly prohibited.
  * 
- * INTELLECTUAL PROPERTY NOTICE:
- * © 2024 Bible.fi. All rights reserved.
- * Bible.fi™, Biblefi.xyz™, and $BIBLEFI™ are trademarks.
- * This smart contract architecture and its unique synthesis of Biblical 
- * principles with DeFi protocols constitutes proprietary methodology 
- * and trade secret protected under U.S. and international copyright laws.
- * Unauthorized use, reproduction, or distribution is prohibited.
+ * UTILITY TOKEN DISCLAIMER: $BIBLEFI tokens are utility tokens providing platform 
+ * access and governance rights. They are NOT investments, securities, or promises 
+ * of profit. Token value may fluctuate. Past wisdom does not guarantee future understanding.
+ * 
+ * PROTECTED MATERIALS: Biblical principle → DeFi mechanism mapping, tithing algorithms,
+ * wisdom scoring methodology, and faith-based yield optimization formulas.
  */
 contract BibleToken is ERC20, Ownable, ReentrancyGuard {
     
