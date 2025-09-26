@@ -8,9 +8,17 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
- * @title BibleToken ($BIBLE)
+ * @title BibleToken ($BIBLEFI)
  * @dev ZK-enhanced token with automatic wisdom rewards distribution
  * Built for Bible.fi - Biblical DeFi on Base Chain
+ * 
+ * INTELLECTUAL PROPERTY NOTICE:
+ * © 2024 Bible.fi. All rights reserved.
+ * Bible.fi™, Biblefi.xyz™, and $BIBLEFI™ are trademarks.
+ * This smart contract architecture and its unique synthesis of Biblical 
+ * principles with DeFi protocols constitutes proprietary methodology 
+ * and trade secret protected under U.S. and international copyright laws.
+ * Unauthorized use, reproduction, or distribution is prohibited.
  */
 contract BibleToken is ERC20, Ownable, ReentrancyGuard {
     
@@ -47,7 +55,7 @@ contract BibleToken is ERC20, Ownable, ReentrancyGuard {
     constructor(
         address _biblefiTreasury,
         address _wisdomRewardsPool
-    ) ERC20("Bible Token", "BIBLE") {
+    ) ERC20("Bible.fi Token", "BIBLEFI") {
         BIBLE_FI_TREASURY = _biblefiTreasury;
         wisdomRewardsPool = _wisdomRewardsPool;
         

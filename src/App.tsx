@@ -10,6 +10,9 @@ import { SecurityProvider } from "@/contexts/SecurityContext";
 import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
+import { TermsOfServicePage } from "./pages/TermsOfServicePage";
+import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
+import { CompliancePage } from "./pages/CompliancePage";
 import EnhancedWisdomPage from "./pages/EnhancedWisdomPage";
 import WalletPage from "./pages/WalletPage";
 import AboutPage from "./pages/AboutPage";
@@ -71,6 +74,9 @@ const App = () => (
               <Route path="/churches" element={<ChurchesPage />} />
               <Route path="/live-data" element={<LiveDataPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/compliance" element={<CompliancePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

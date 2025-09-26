@@ -18,6 +18,7 @@ import EnhancedPixelLanding from "@/components/home/EnhancedPixelLanding";
 import { Button } from "@/components/ui/button";
 import { Users, BookOpen, TrendingUp, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { LegalFooter } from "@/components/legal/LegalFooter";
 
 const Index: React.FC = () => {
   const { setUserInteracted } = useSound();
@@ -221,10 +222,8 @@ const Index: React.FC = () => {
         </div>
       </main>
       
-      {/* Footer */}
-      <footer className="py-6 text-center border-t border-border bg-muted/30">
-        <p className="text-muted-foreground text-xs">Built on Base Chain</p>
-      </footer>
+      {/* Legal Footer */}
+      <LegalFooter />
     </div>
   );
 };
