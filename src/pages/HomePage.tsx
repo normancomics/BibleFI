@@ -145,6 +145,31 @@ const HomePage: React.FC = () => {
         {/* Footer */}
         <footer className="py-8 px-4 border-t border-ancient-gold/20">
           <div className="container mx-auto text-center">
+            {/* Developer's Note */}
+            <div className="mb-6 p-4 bg-scripture/10 border border-ancient-gold/20 rounded-lg max-w-3xl mx-auto">
+              <h3 className="text-lg font-scroll text-ancient-gold mb-2 flex items-center justify-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Developer's Note
+              </h3>
+              <p className="text-white/80 text-sm leading-relaxed">
+                This dapp is based entirely on scriptural wisdom found within the <strong className="text-ancient-gold">ONLY book on planet earth which is truly alive</strong>, The Holy Bible. 
+                Every principle, strategy, and feature has been carefully crafted to honor God and align with biblical teachings on stewardship and financial wisdom.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3 border-ancient-gold/50 text-ancient-gold hover:bg-ancient-gold hover:text-black"
+                onClick={() => {
+                  playSound("select");
+                  window.open("https://www.bible.com/app", "_blank");
+                }}
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Read the Holy Bible
+                <ExternalLink className="ml-1 h-3 w-3" />
+              </Button>
+            </div>
+
             <p className="text-white/60 text-sm">
               Built with faith on Base Chain • Powered by Biblical Wisdom
             </p>
