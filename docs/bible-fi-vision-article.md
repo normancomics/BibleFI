@@ -6,13 +6,13 @@
 
 ## The Genesis: A Vision Born from Scripture
 
-In the beginning was the Word, and now that Word is being written in code. Bible.fi represents the first comprehensive faith-based decentralized finance platform, built on Base Chain and integrated with Farcaster, where biblical financial principles meet modern DeFi innovation.
+In the beginning was the Word, and now that Word is being written in code. Bible.fi represents the first comprehensive faith-based decentralized finance platform, built on Base Chain and integrated with Farcaster, where Biblical financial principles meet modern DeFi innovation.
 
-Our mission is simple yet revolutionary: to create a financial ecosystem where believers can apply timeless biblical wisdom to modern investment strategies, tithe seamlessly through real-time streams, and build generational wealth according to scriptural principles.
+Our mission is simple yet revolutionary: to create a financial ecosystem where believers can apply timeless Biblical wisdom to modern investment strategies, tithe seamlessly through real-time streams, and build generational wealth according to scriptural principles.
 
 ## The Problem: Faith Meets Finance in the Digital Age
 
-Despite representing 28.8% of the global population (2.3 billion people), Christians have been largely underserved in the DeFi space. While other faith communities have dedicated financial protocols (Haqq/$ISLM for Muslims, various Buddhist tokens), the Christian community lacked a purpose-built platform that aligns with biblical values.
+Despite representing 28.8% of the global population (2.3 billion people), Christians have been largely underserved in the DeFi space. While other faith communities have dedicated financial protocols (Haqq/$ISLM for Muslims, various Buddhist tokens), the Christian community lacked a purpose-built platform that aligns with Biblical values.
 
 Consider these staggering statistics:
 - Annual U.S. church giving exceeds $50 billion
@@ -32,7 +32,7 @@ Using Superfluid's streaming protocol, believers can set up continuous tithing f
 *"Each one must give as he has decided in his heart, not reluctantly or under compulsion, for God loves a cheerful giver." - 2 Corinthians 9:7*
 
 **2. Biblical Wisdom-Guided DeFi**
-Our AI-powered biblical advisor analyzes over 2,000 Scripture references to money, wealth, and stewardship, providing personalized financial guidance that aligns with biblical principles. Users earn "wisdom scores" for applying scriptural teachings to their investment decisions.
+Our AI-powered Biblical advisor analyzes over 2,000 Scripture references to money, wealth, and stewardship, providing personalized financial guidance that aligns with Biblical principles. Users earn "wisdom scores" for applying scriptural teachings to their investment decisions.
 
 **3. Faith-Based Yield Strategies**
 - **Parable of the Talents Farming**: Multi-token yield strategies inspired by Jesus's teaching on faithful stewardship
@@ -49,7 +49,7 @@ Built as a mini-app directly within Farcaster, Bible.fi enables believers to sha
 **Frontend Stack:**
 - React 18 with TypeScript for type safety
 - Vite for lightning-fast development
-- Tailwind CSS with custom biblical theming
+- Tailwind CSS with custom Biblical theming
 - Framer Motion for smooth animations
 - Pixel art characters and retro sound effects
 
@@ -112,12 +112,12 @@ Through our wisdom engine, users learn:
 - Biblical financial principles
 - DeFi fundamentals through scriptural lens
 - Risk management strategies
-- Long-term wealth building according to biblical values
+- Long-term wealth building according to Biblical values
 
 ### Community Building
 Our Farcaster integration enables:
 - Sharing financial testimonies
-- Community-driven biblical discussions
+- Community-driven Biblical discussions
 - Collective wisdom sharing
 - Prayer requests for financial guidance
 
@@ -131,7 +131,7 @@ Our Farcaster integration enables:
 
 ### Competitive Landscape
 While faith-based fintech exists (Steward, FaithFi), no platform combines:
-- DeFi protocols with biblical wisdom
+- DeFi protocols with Biblical wisdom
 - Real-time streaming donations
 - Social integration through Farcaster
 - Comprehensive yield strategies
@@ -155,7 +155,7 @@ While faith-based fintech exists (Steward, FaithFi), no platform combines:
 
 ### Phase 3: Scale (Q2 2026)
 - Cross-chain compatibility
-- Advanced AI biblical advisor
+- Advanced AI Biblical advisor
 - Institutional church onboarding
 - Global expansion
 - Community governance
@@ -173,7 +173,7 @@ While faith-based fintech exists (Steward, FaithFi), no platform combines:
 The $BIBLE token serves as:
 - **Governance**: Community voting on platform development
 - **Staking Rewards**: Enhanced yields for long-term holders
-- **Wisdom Rewards**: Earned through biblical financial education
+- **Wisdom Rewards**: Earned through Biblical financial education
 - **Access Token**: Premium features and advanced strategies
 
 ### Distribution
@@ -199,7 +199,7 @@ The $BIBLE token serves as:
 
 ## The Vision: Transforming Generational Wealth
 
-Bible.fi isn't just another DeFi protocol—it's a movement to transform how believers interact with money according to biblical principles. We envision a future where:
+Bible.fi isn't just another DeFi protocol—it's a movement to transform how believers interact with money according to Biblical principles. We envision a future where:
 
 - **Every church** can seamlessly receive and manage crypto donations
 - **Every believer** has access to wisdom-guided financial tools
@@ -227,22 +227,22 @@ Everything we build is rooted in Scripture:
 
 ## Conclusion: Faith, Finance, and the Future
 
-Bible.fi represents more than technological innovation—it's a testament to what's possible when ancient wisdom meets modern tools. We're not just building a DeFi platform; we're creating a financial ecosystem that honors God, serves His people, and advances His kingdom.
+Bible.fi represents more than technological innovation—it's a testament to what's possible when timeless ancient Biblical wisdom meets modern blockchain and artificial intelligence tools. We're not just building a DeFi platform; we're creating a financial ecosystem that honors God, serves His people, and advances His kingdom.
 
-The early church held all things in common. Today, through blockchain technology and biblical wisdom, we can create new models of Christian financial stewardship that span the globe, transcend denominational boundaries, and build generational wealth according to God's design.
+The early church held all things in common. Today, through blockchain technology and Biblical wisdom, we can create new models of Christian financial stewardship that span the globe, transcend denominational boundaries, and help users build generational wealth according to God's design.
 
 Join us as we write the next chapter in the story of faith and finance. The harvest is plentiful, and the laborers are ready.
 
 ---
 
-*Bible.fi is currently in development with a planned launch in Q1 2026. For updates, partnerships, or media inquiries, connect with us on Farcaster @biblefi or visit our documentation at docs.bible.fi*
+*Bible.fi is currently in development with a planned launch in Q1 2026, and beta testing in Q4 of 2025. For updates, partnerships, or media inquiries, connect w/ our dev on Farcaster: @normancomics.eth or follow our socials: https://x.com/Bibledotfi or visit our documentation at docs.bible.fi*
 
 **Built on Base Chain | Powered by Biblical Wisdom | Secured by Faith**
 
 ---
 
 ### About the Author
-The Bible.fi team combines deep biblical scholarship with cutting-edge blockchain development expertise. Our mission is to serve the global Christian community through innovative financial technologies that honor scriptural principles while delivering exceptional user experiences.
+The Bible.fi team combines deep Biblical scholarship with cutting-edge blockchain development technology. Our mission is to serve the global Christian community through innovative financial technologies that honor scriptural principles while delivering exceptional user experiences and keeping Jesus Christ at the center of everything we do.
 
 ---
 
