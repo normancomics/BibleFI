@@ -27,6 +27,7 @@ import WisdomPage from "./pages/WisdomPage";
 import TaxesPage from "./pages/TaxesPage";
 import SecurityPage from "./pages/SecurityPage";
 import TokenPage from "./pages/TokenPage";
+import WisdomTokenPage from "./pages/WisdomTokenPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import ChurchesPage from "./pages/ChurchesPage";
 import DeploymentPage from "./pages/DeploymentPage";
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="/taxes" element={<TaxesPage />} />
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/token" element={<TokenPage />} />
+              <Route path="/wisdom-token" element={<WisdomTokenPage />} />
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/deployment" element={<DeploymentPage />} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />

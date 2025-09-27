@@ -36,6 +36,12 @@
     --golden-bright: 45 100% 75%;     /* Logo text gold */
     --base-blue: 200 100% 55%;        /* Bright base blue */
     
+    /* Logo glow effects */
+    --logo-glow-base: 0 0 10px hsl(var(--base-blue)), 0 0 20px hsl(var(--base-blue) / 0.5);
+    --logo-glow-farcaster: 0 0 10px hsl(280 100% 65%), 0 0 20px hsl(280 100% 65% / 0.5);
+    --logo-glow-biblefi: 0 0 15px hsl(var(--ancient-gold)), 0 0 30px hsl(var(--ancient-gold) / 0.7);
+    --logo-glow-token: 0 0 8px currentColor, 0 0 16px currentColor;
+    
     /* eBoy-inspired bright colors with good contrast */
     --eboy-yellow: 45 100% 55%;       /* Brighter yellow for better visibility */
     --eboy-green: 162 100% 45%;       /* Slightly darker green for better contrast */
@@ -199,6 +205,30 @@
       0 0 10px hsl(var(--eboy-yellow)),
       0 0 20px hsl(var(--eboy-yellow) / 0.5),
       0 0 40px hsl(var(--eboy-yellow) / 0.3);
+  }
+  
+  /* Logo hover effects */
+  .logo-hover-base:hover {
+    box-shadow: var(--logo-glow-base);
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+  }
+  
+  .logo-hover-farcaster:hover {
+    box-shadow: var(--logo-glow-farcaster);
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+  }
+  
+  .logo-hover-token:hover {
+    box-shadow: var(--logo-glow-token);
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+  }
+  
+  .biblefi-glow {
+    box-shadow: var(--logo-glow-biblefi);
+    animation: pulse-glow 3s ease-in-out infinite;
   }
 }
 
