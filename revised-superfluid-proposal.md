@@ -23,7 +23,7 @@ Conservative Year 1 Projections:
 - 25+ verified churches onboarded
 - $5M+ streaming transaction volume
 
-Grant Request: $50,000 in SUP tokens for development, security audits, and church onboarding.
+Grant Request: $100,000 in SUP tokens for development, security audits, and church onboarding.
 ```
 
 ---
@@ -219,22 +219,22 @@ app.post("/start-stream", async (req, res) => {
 
 ## Grant Request & Budget
 
-**Total Request:** $50,000 in SUP tokens
+**Total Request:** $100,000 in SUP tokens
 
 ```
 Budget Breakdown:
 ┌─────────────────────┬──────────┬─────┐
 │ Category            │ Amount   │ %   │
 ├─────────────────────┼──────────┼─────┤
-│ Security Audit      │ $25,000  │ 50% │
-│ Development         │ $15,000  │ 30% │
-│ Church Onboarding   │ $7,500   │ 15% │
-│ Marketing/Content   │ $2,500   │ 5%  │
+│ Security Audit      │ $50,000  │ 50% │
+│ Development         │ $30,000  │ 30% │
+│ Church Onboarding   │ $15,000  │ 15% │
+│ Marketing/Content   │ $5,000   │ 5%  │
 └─────────────────────┴──────────┴─────┘
 
 ROI for Superfluid:
-- User acquisition cost: $20 per user vs industry $50-100
-- Projected protocol fees: $25K+ from streaming volume
+- User acquisition cost: $40 per user vs industry $50-100
+- Projected protocol fees: $50K+ from streaming volume
 - Market expansion into $50B+ faith sector
 ```
 
