@@ -89,28 +89,6 @@ const FarmingPage: React.FC = () => {
       ]
     },
     {
-      id: "abundant-harvest",
-      name: "Abundant Harvest Strategy",
-      apy: "21% APY",
-      riskLevel: "high" as const,
-      description: "A higher-yield strategy focusing on emerging Base Chain protocols with strong fundamentals.",
-      asset1: { symbol: "ETH" },
-      asset2: { symbol: "BASE" },
-      platform: "DeFi Kingdom",
-      platformUrl: "https://defikingdoms.com",
-      biblicalPrinciple: {
-        verse: "Still other seed fell on good soil, where it produced a crop—a hundred, sixty or thirty times what was sown.",
-        reference: "Matthew 13:8",
-        principle: "Strategic planting in the right conditions can yield exceptional returns, but requires knowledge and discernment."
-      },
-      requirements: [
-        "Minimum 0.25 ETH or equivalent",
-        "Weekly rebalancing recommended",
-        "Higher volatility expected",
-        "Auto-compound option"
-      ]
-    },
-    {
       id: "first-fruits-offering",
       name: "First Fruits Offering",
       apy: "10% APY",
