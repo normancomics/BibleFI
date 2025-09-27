@@ -1,14 +1,13 @@
+```
 # Superfluid Governance Proposal: Bible.fi Integration for Biblical Tithing Streams on Base Chain
 
-```
 Proposal ID: [To be assigned]
-Author: Bible.fi Team  
-ENS: biblefi.eth / biblefi.base.eth
+Author: Bible.fi Team
+ENS: biblefi.eth / biblefi.base.eth  
 Contract: 0x7beda57074aa917ff0993fb329e16c2c188baf08
 Date: September 27, 2025
 Status: Draft for Community Review
 Demo: https://preview--biblefi.lovable.app/
-```
 
 ---
 
@@ -16,15 +15,16 @@ Demo: https://preview--biblefi.lovable.app/
 
 Bible.fi proposes integrating Superfluid's streaming protocol into our faith-based DeFi platform on Base Chain. This integration enables real-time tithing streams to churches globally using Superfluid's CFA (Continuous Flow Agreement) and creates the first major faith-tech use case for programmable money streams.
 
-**Key Innovation:** Biblical-Wisdom-Synthesis Protocol (BWSP) that adjusts streaming rates based on user engagement with Biblical financial principles, creating a unique "faith + DeFi" experience.
+Key Innovation: Biblical-Wisdom-Synthesis Protocol (BWSP) that adjusts streaming rates based on user engagement with Biblical financial principles, creating a unique "faith + DeFi" experience.
 
-**Conservative Year 1 Projections:**
-- 2,500+ new Superfluid users  
-- $1M+ TVL through tithing streams
+Conservative Year 1 Projections:
+- 2,500+ new Superfluid users
+- $1M+ TVL through tithing streams  
 - 25+ verified churches onboarded
 - $5M+ streaming transaction volume
 
-**Grant Request:** $50,000 in SUP tokens for development, security audits, and church onboarding.
+Grant Request: $50,000 in SUP tokens for development, security audits, and church onboarding.
+```
 
 ---
 
