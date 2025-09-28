@@ -142,7 +142,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Additional security measures
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Disable right-click in production for additional protection
+      // Simple security without postMessage that causes DataCloneError
       if (process.env.NODE_ENV === 'production') {
         const handleContextMenu = (e: MouseEvent) => {
           e.preventDefault();
