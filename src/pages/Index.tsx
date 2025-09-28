@@ -108,13 +108,6 @@ const Index: React.FC = () => {
       
       <NavBar />
       
-      {/* Toggle to enhanced view */}
-      <Button 
-        onClick={() => setShowEnhancedLanding(true)}
-        className="fixed top-4 right-4 z-50 bg-ancient-gold/20 border border-ancient-gold hover:bg-ancient-gold/30 text-ancient-gold"
-      >
-        ← Pixel View
-      </Button>
       
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header with Connect */}
