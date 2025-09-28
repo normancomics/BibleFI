@@ -139,7 +139,7 @@ const ComprehensiveBiblicalAdvisor: React.FC<ComprehensiveBiblicalAdvisorProps> 
                 <PixelCharacter 
                   character="solomon" 
                   size="lg"
-                  animated={true}
+                  animate={true}
                 />
                 <div className="flex-1 space-y-4">
                   <Textarea
