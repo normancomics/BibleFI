@@ -1,11 +1,9 @@
 
 // Configuration for Farcaster integration
 export const FARCASTER_CONFIG = {
-  domain: typeof window !== 'undefined' ? window.location.hostname : 'biblefi.base.eth',
-  siweUri: typeof window !== 'undefined' ? `${window.location.origin}/api/auth/callback` : 'https://biblefi.base.eth/api/auth/callback',
-  rpcUrl: 'https://base.rpc.subquery.network/public',
-  relay: 'https://relay.farcaster.xyz',
-  version: 'vNext',
+  domain: typeof window !== 'undefined' ? window.location.hostname : 'id-preview--fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovable.app',
+  siweUri: typeof window !== 'undefined' ? window.location.origin : 'https://id-preview--fa7c5ef0-7079-46e3-a705-c9b6e519b067.lovable.app',
+  rpcUrl: 'https://mainnet.base.org',
   
   // For Farcaster Mini-App (Frames)
   frameConfig: {
