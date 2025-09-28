@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useFarcasterAuth } from './auth';
-import PixelButton from '@/components/PixelButton';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, LogIn } from 'lucide-react';
@@ -49,51 +49,51 @@ const FarcasterConnect: React.FC<FarcasterConnectProps> = ({
   
   if (status === 'connecting') {
     return (
-      <Card className={`bg-black/40 border border-purple-500/40 ${className}`}>
-        <CardContent className="p-3 flex items-center justify-center">
-          <div className="animate-pulse text-sm text-white/70">
-            Connecting to Farcaster...
-          </div>
-        </CardContent>
-      </Card>
+      <Button 
+        disabled
+        className={`bg-gradient-to-r from-purple-600 to-blue-600 border-0 text-white ${sizeClasses[size]} ${className}`}
+      >
+        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+        Connecting...
+      </Button>
     );
   }
   
   if (user) {
     return (
-      <Card className={`bg-black/40 border border-ancient-gold/40 hover:border-ancient-gold/60 transition-colors ${className}`}>
-        <CardContent className="p-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Avatar className="h-8 w-8 mr-2 bg-black/40">
-              <AvatarImage src={user.pfp} alt={user.displayName || user.username} />
-              <AvatarFallback>{(user.displayName || user.username).substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium text-ancient-gold truncate max-w-[100px]">{user.displayName || user.username}</p>
-              <p className="text-xs text-white/60">FID: {user.fid}</p>
-            </div>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6 bg-black/40">
+            <AvatarImage src={user.pfp} alt={user.displayName || user.username} />
+            <AvatarFallback className="text-xs">{(user.displayName || user.username).substring(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div className="text-sm text-ancient-gold">
+            {(user.displayName || user.username).length > 8 
+              ? `${(user.displayName || user.username).substring(0, 8)}...` 
+              : user.displayName || user.username
+            }
           </div>
-          <PixelButton 
-            size="sm" 
-            variant="ghost" 
-            onClick={handleConnect}
-            className="text-ancient-gold"
-          >
-            <LogOut size={16} />
-          </PixelButton>
-        </CardContent>
-      </Card>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleConnect}
+          className="border-ancient-gold text-ancient-gold hover:bg-ancient-gold hover:text-black"
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </div>
     );
   }
   
   return (
-    <PixelButton 
+    <Button 
       onClick={handleConnect} 
-      className={`bg-purple-900 border-2 border-ancient-gold/70 hover:bg-purple-800 flex items-center text-ancient-gold ${sizeClasses[size]} ${className}`}
+      className={`bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border-0 text-white ${sizeClasses[size]} ${className}`}
     >
       <LogIn size={16} className="mr-2" />
       Connect Farcaster
-    </PixelButton>
+    </Button>
   );
 };
 
