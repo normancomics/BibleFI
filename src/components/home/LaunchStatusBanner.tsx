@@ -51,9 +51,6 @@ const LaunchStatusBanner: React.FC = () => {
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-ancient-gold/20 rounded-lg">
-              <Rocket className="h-6 w-6 text-ancient-gold" />
-            </div>
             <div>
               <h3 className="text-lg font-bold text-ancient-gold">$BIBLEFI Token Launch</h3>
               <p className="text-sm text-muted-foreground">Biblical DeFi ready for Base mainnet</p>

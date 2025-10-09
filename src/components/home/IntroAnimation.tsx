@@ -92,7 +92,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
             <div className="text-5xl md:text-7xl font-scroll font-bold mb-4">
               <GlowingText color="yellow">Bible.fi</GlowingText>
             </div>
-            <div className="text-xl font-scroll text-ancient-gold">
+            <div className="text-xl font-scroll font-bold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
               Biblical Wisdom for Financial Stewardship
             </div>
           </div>
@@ -106,11 +106,11 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
         
         <div className="border-2 border-ancient-gold/50 p-6 bg-purple-900/30 min-h-[120px] flex items-center justify-center">
           {showMainTitle ? (
-            <p className="text-xl font-scroll text-white animate-fade-in">
+            <p className="text-xl font-scroll font-bold text-white animate-fade-in" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
               {biblicalScenes[currentSceneIndex]?.text}
             </p>
           ) : (
-            <p className="text-xl font-scroll text-white">
+            <p className="text-xl font-scroll font-bold text-white" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
               {typedText}
               <span className="animate-pulse">|</span>
             </p>
@@ -120,7 +120,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
         {showMainTitle && (
           <div className="mt-8">
             <div className="mt-4">
-              <p className="text-sm text-ancient-gold font-scroll">Loading Biblical Wisdom...</p>
+              <p className="text-sm text-ancient-gold font-scroll font-bold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>Loading Biblical Wisdom...</p>
             </div>
           </div>
         )}
