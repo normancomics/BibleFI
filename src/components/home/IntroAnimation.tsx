@@ -110,7 +110,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
               {biblicalScenes[currentSceneIndex]?.text}
             </p>
           ) : (
-            <p className="text-xl font-scroll font-bold text-white" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
+            <p className="text-xl font-scroll font-extrabold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)', WebkitTextStroke: '0.5px rgba(212, 175, 55, 0.3)' }}>
               {typedText}
               <span className="animate-pulse">|</span>
             </p>
