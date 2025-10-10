@@ -140,6 +140,66 @@ export type Database = {
         }
         Relationships: []
       }
+      biblical_financial_crossref: {
+        Row: {
+          biblical_term: string
+          biblical_verse_id: string | null
+          created_at: string | null
+          defi_concept: string | null
+          defi_protocol_id: string | null
+          embedding: string | null
+          explanation: string | null
+          financial_term: string
+          id: string
+          practical_application: string | null
+          relationship_type: string | null
+          risk_consideration: string | null
+        }
+        Insert: {
+          biblical_term: string
+          biblical_verse_id?: string | null
+          created_at?: string | null
+          defi_concept?: string | null
+          defi_protocol_id?: string | null
+          embedding?: string | null
+          explanation?: string | null
+          financial_term: string
+          id?: string
+          practical_application?: string | null
+          relationship_type?: string | null
+          risk_consideration?: string | null
+        }
+        Update: {
+          biblical_term?: string
+          biblical_verse_id?: string | null
+          created_at?: string | null
+          defi_concept?: string | null
+          defi_protocol_id?: string | null
+          embedding?: string | null
+          explanation?: string | null
+          financial_term?: string
+          id?: string
+          practical_application?: string | null
+          relationship_type?: string | null
+          risk_consideration?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biblical_financial_crossref_biblical_verse_id_fkey"
+            columns: ["biblical_verse_id"]
+            isOneToOne: false
+            referencedRelation: "biblical_knowledge_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "biblical_financial_crossref_defi_protocol_id_fkey"
+            columns: ["defi_protocol_id"]
+            isOneToOne: false
+            referencedRelation: "defi_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       biblical_knowledge_base: {
         Row: {
           application: string | null
@@ -182,6 +242,66 @@ export type Database = {
         }
         Relationships: []
       }
+      biblical_original_texts: {
+        Row: {
+          aramaic_text: string | null
+          book: string
+          chapter: number
+          created_at: string | null
+          defi_keywords: string[] | null
+          embedding: string | null
+          financial_keywords: string[] | null
+          financial_relevance: number | null
+          greek_text: string | null
+          hebrew_text: string | null
+          id: string
+          kjv_text: string
+          morphology: Json | null
+          original_words: Json | null
+          strong_numbers: string[] | null
+          updated_at: string | null
+          verse: number
+        }
+        Insert: {
+          aramaic_text?: string | null
+          book: string
+          chapter: number
+          created_at?: string | null
+          defi_keywords?: string[] | null
+          embedding?: string | null
+          financial_keywords?: string[] | null
+          financial_relevance?: number | null
+          greek_text?: string | null
+          hebrew_text?: string | null
+          id?: string
+          kjv_text: string
+          morphology?: Json | null
+          original_words?: Json | null
+          strong_numbers?: string[] | null
+          updated_at?: string | null
+          verse: number
+        }
+        Update: {
+          aramaic_text?: string | null
+          book?: string
+          chapter?: number
+          created_at?: string | null
+          defi_keywords?: string[] | null
+          embedding?: string | null
+          financial_keywords?: string[] | null
+          financial_relevance?: number | null
+          greek_text?: string | null
+          hebrew_text?: string | null
+          id?: string
+          kjv_text?: string
+          morphology?: Json | null
+          original_words?: Json | null
+          strong_numbers?: string[] | null
+          updated_at?: string | null
+          verse?: number
+        }
+        Relationships: []
+      }
       church_memberships: {
         Row: {
           church_id: string
@@ -210,6 +330,101 @@ export type Database = {
             columns: ["church_id"]
             isOneToOne: false
             referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      church_payment_processors: {
+        Row: {
+          auto_convert: boolean | null
+          church_id: string | null
+          compliance_verified: boolean | null
+          compliance_verified_date: string | null
+          conversion_to_fiat: boolean | null
+          created_at: string | null
+          id: string
+          it_department_hours: string | null
+          main_contact_email: string | null
+          main_contact_name: string | null
+          main_contact_phone: string | null
+          onboarding_date: string | null
+          onboarding_status: string | null
+          processor_name: string | null
+          processor_type: string
+          supported_currencies: string[] | null
+          supported_networks: string[] | null
+          tax_documentation_url: string | null
+          tax_exempt_status: string | null
+          tax_id: string | null
+          tech_contact_email: string | null
+          tech_contact_name: string | null
+          tech_contact_phone: string | null
+          training_completed: boolean | null
+          updated_at: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          auto_convert?: boolean | null
+          church_id?: string | null
+          compliance_verified?: boolean | null
+          compliance_verified_date?: string | null
+          conversion_to_fiat?: boolean | null
+          created_at?: string | null
+          id?: string
+          it_department_hours?: string | null
+          main_contact_email?: string | null
+          main_contact_name?: string | null
+          main_contact_phone?: string | null
+          onboarding_date?: string | null
+          onboarding_status?: string | null
+          processor_name?: string | null
+          processor_type: string
+          supported_currencies?: string[] | null
+          supported_networks?: string[] | null
+          tax_documentation_url?: string | null
+          tax_exempt_status?: string | null
+          tax_id?: string | null
+          tech_contact_email?: string | null
+          tech_contact_name?: string | null
+          tech_contact_phone?: string | null
+          training_completed?: boolean | null
+          updated_at?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          auto_convert?: boolean | null
+          church_id?: string | null
+          compliance_verified?: boolean | null
+          compliance_verified_date?: string | null
+          conversion_to_fiat?: boolean | null
+          created_at?: string | null
+          id?: string
+          it_department_hours?: string | null
+          main_contact_email?: string | null
+          main_contact_name?: string | null
+          main_contact_phone?: string | null
+          onboarding_date?: string | null
+          onboarding_status?: string | null
+          processor_name?: string | null
+          processor_type?: string
+          supported_currencies?: string[] | null
+          supported_networks?: string[] | null
+          tax_documentation_url?: string | null
+          tax_exempt_status?: string | null
+          tax_id?: string | null
+          tech_contact_email?: string | null
+          tech_contact_name?: string | null
+          tech_contact_phone?: string | null
+          training_completed?: boolean | null
+          updated_at?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "church_payment_processors_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "global_churches"
             referencedColumns: ["id"]
           },
         ]
@@ -381,6 +596,142 @@ export type Database = {
         }
         Relationships: []
       }
+      defi_knowledge_base: {
+        Row: {
+          apy: number | null
+          arbitrage_opportunities: Json | null
+          biblical_principle_id: string | null
+          chain: string | null
+          code_examples: Json | null
+          created_at: string | null
+          description: string | null
+          documentation_url: string | null
+          embedding: string | null
+          flash_loan_compatible: boolean | null
+          id: string
+          protocol_name: string
+          protocol_type: string
+          risk_level: string | null
+          security_audit_url: string | null
+          smart_contract_address: string | null
+          strategy_details: Json | null
+          tvl: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          apy?: number | null
+          arbitrage_opportunities?: Json | null
+          biblical_principle_id?: string | null
+          chain?: string | null
+          code_examples?: Json | null
+          created_at?: string | null
+          description?: string | null
+          documentation_url?: string | null
+          embedding?: string | null
+          flash_loan_compatible?: boolean | null
+          id?: string
+          protocol_name: string
+          protocol_type: string
+          risk_level?: string | null
+          security_audit_url?: string | null
+          smart_contract_address?: string | null
+          strategy_details?: Json | null
+          tvl?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          apy?: number | null
+          arbitrage_opportunities?: Json | null
+          biblical_principle_id?: string | null
+          chain?: string | null
+          code_examples?: Json | null
+          created_at?: string | null
+          description?: string | null
+          documentation_url?: string | null
+          embedding?: string | null
+          flash_loan_compatible?: boolean | null
+          id?: string
+          protocol_name?: string
+          protocol_type?: string
+          risk_level?: string | null
+          security_audit_url?: string | null
+          smart_contract_address?: string | null
+          strategy_details?: Json | null
+          tvl?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "defi_knowledge_base_biblical_principle_id_fkey"
+            columns: ["biblical_principle_id"]
+            isOneToOne: false
+            referencedRelation: "biblical_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flash_loan_strategies: {
+        Row: {
+          biblical_wisdom_link: string | null
+          code_template: string | null
+          complexity_level: string | null
+          created_at: string | null
+          description: string | null
+          execution_steps: Json | null
+          expected_profit_range: string | null
+          gas_cost_estimate: number | null
+          id: string
+          min_capital_required: number | null
+          protocols_involved: string[] | null
+          risk_assessment: string | null
+          strategy_name: string
+          success_rate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          biblical_wisdom_link?: string | null
+          code_template?: string | null
+          complexity_level?: string | null
+          created_at?: string | null
+          description?: string | null
+          execution_steps?: Json | null
+          expected_profit_range?: string | null
+          gas_cost_estimate?: number | null
+          id?: string
+          min_capital_required?: number | null
+          protocols_involved?: string[] | null
+          risk_assessment?: string | null
+          strategy_name: string
+          success_rate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          biblical_wisdom_link?: string | null
+          code_template?: string | null
+          complexity_level?: string | null
+          created_at?: string | null
+          description?: string | null
+          execution_steps?: Json | null
+          expected_profit_range?: string | null
+          gas_cost_estimate?: number | null
+          id?: string
+          min_capital_required?: number | null
+          protocols_involved?: string[] | null
+          risk_assessment?: string | null
+          strategy_name?: string
+          success_rate?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flash_loan_strategies_biblical_wisdom_link_fkey"
+            columns: ["biblical_wisdom_link"]
+            isOneToOne: false
+            referencedRelation: "biblical_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       global_churches: {
         Row: {
           accepts_cards: boolean | null
@@ -494,6 +845,59 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      mcp_ai_knowledge_graph: {
+        Row: {
+          biblical_references: string[] | null
+          church_recommendations: string[] | null
+          confidence_score: number | null
+          created_at: string | null
+          defi_protocols: string[] | null
+          flash_loan_strategies: string[] | null
+          id: string
+          query_text: string
+          risk_assessment: Json | null
+          session_id: string | null
+          tax_implications: Json | null
+          wisdom_score: number | null
+        }
+        Insert: {
+          biblical_references?: string[] | null
+          church_recommendations?: string[] | null
+          confidence_score?: number | null
+          created_at?: string | null
+          defi_protocols?: string[] | null
+          flash_loan_strategies?: string[] | null
+          id?: string
+          query_text: string
+          risk_assessment?: Json | null
+          session_id?: string | null
+          tax_implications?: Json | null
+          wisdom_score?: number | null
+        }
+        Update: {
+          biblical_references?: string[] | null
+          church_recommendations?: string[] | null
+          confidence_score?: number | null
+          created_at?: string | null
+          defi_protocols?: string[] | null
+          flash_loan_strategies?: string[] | null
+          id?: string
+          query_text?: string
+          risk_assessment?: Json | null
+          session_id?: string | null
+          tax_implications?: Json | null
+          wisdom_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcp_ai_knowledge_graph_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "mcp_biblical_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mcp_biblical_sessions: {
         Row: {
@@ -711,6 +1115,57 @@ export type Database = {
           tx_hash?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      tax_compliance_records: {
+        Row: {
+          churches: Json | null
+          created_at: string | null
+          crypto_donations: Json | null
+          documentation_generated: boolean | null
+          fiat_donations: Json | null
+          form_1099_generated: boolean | null
+          id: string
+          receipt_urls: string[] | null
+          tax_deduction_eligible: number | null
+          tax_year: number
+          total_offerings: number | null
+          total_tithes: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          churches?: Json | null
+          created_at?: string | null
+          crypto_donations?: Json | null
+          documentation_generated?: boolean | null
+          fiat_donations?: Json | null
+          form_1099_generated?: boolean | null
+          id?: string
+          receipt_urls?: string[] | null
+          tax_deduction_eligible?: number | null
+          tax_year: number
+          total_offerings?: number | null
+          total_tithes?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          churches?: Json | null
+          created_at?: string | null
+          crypto_donations?: Json | null
+          documentation_generated?: boolean | null
+          fiat_donations?: Json | null
+          form_1099_generated?: boolean | null
+          id?: string
+          receipt_urls?: string[] | null
+          tax_deduction_eligible?: number | null
+          tax_year?: number
+          total_offerings?: number | null
+          total_tithes?: number | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
