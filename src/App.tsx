@@ -37,6 +37,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import BiblicalStrategiesPage from "./pages/BiblicalStrategiesPage";
 import QuantumSecurityPage from "./pages/QuantumSecurityPage";
 import SystemCheckPage from "./pages/SystemCheckPage";
+import DataCrawlerPage from "./pages/DataCrawlerPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/churches" element={<ChurchesPage />} />
               <Route path="/live-data" element={<LiveDataPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/data-crawler" element={<DataCrawlerPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/compliance" element={<CompliancePage />} />
