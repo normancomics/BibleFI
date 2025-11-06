@@ -2,8 +2,9 @@ import React from 'react';
 import NavBar from '@/components/NavBar';
 import BiblicalFinanceCrawler from '@/components/admin/BiblicalFinanceCrawler';
 import GlobalChurchCrawler from '@/components/admin/GlobalChurchCrawler';
+import ComprehensiveCrawlerDashboard from '@/components/admin/ComprehensiveCrawlerDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Database, Church } from 'lucide-react';
+import { Database, Church, Network } from 'lucide-react';
 
 const DataCrawlerPage: React.FC = () => {
   return (
@@ -22,8 +23,12 @@ const DataCrawlerPage: React.FC = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="biblical" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+        <Tabs defaultValue="rag-agi" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-3xl mx-auto mb-8">
+            <TabsTrigger value="rag-agi" className="flex items-center gap-2">
+              <Network className="w-4 h-4" />
+              RAG-AGI Pipeline
+            </TabsTrigger>
             <TabsTrigger value="biblical" className="flex items-center gap-2">
               <Database className="w-4 h-4" />
               Biblical Finance
@@ -33,6 +38,10 @@ const DataCrawlerPage: React.FC = () => {
               Global Churches
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="rag-agi" className="space-y-6">
+            <ComprehensiveCrawlerDashboard />
+          </TabsContent>
 
           <TabsContent value="biblical" className="space-y-6">
             <BiblicalFinanceCrawler />
