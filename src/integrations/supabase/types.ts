@@ -744,7 +744,7 @@ export type Database = {
           assistance_hours: string | null
           assistance_languages: string[] | null
           city: string
-          coordinates: unknown | null
+          coordinates: unknown
           country: string
           created_at: string | null
           created_by: string | null
@@ -762,7 +762,7 @@ export type Database = {
           postal_code: string | null
           rating: number | null
           review_count: number | null
-          search_vector: unknown | null
+          search_vector: unknown
           state_province: string | null
           updated_at: string | null
           verification_date: string | null
@@ -781,7 +781,7 @@ export type Database = {
           assistance_hours?: string | null
           assistance_languages?: string[] | null
           city: string
-          coordinates?: unknown | null
+          coordinates?: unknown
           country: string
           created_at?: string | null
           created_by?: string | null
@@ -799,7 +799,7 @@ export type Database = {
           postal_code?: string | null
           rating?: number | null
           review_count?: number | null
-          search_vector?: unknown | null
+          search_vector?: unknown
           state_province?: string | null
           updated_at?: string | null
           verification_date?: string | null
@@ -818,7 +818,7 @@ export type Database = {
           assistance_hours?: string | null
           assistance_languages?: string[] | null
           city?: string
-          coordinates?: unknown | null
+          coordinates?: unknown
           country?: string
           created_at?: string | null
           created_by?: string | null
@@ -836,7 +836,7 @@ export type Database = {
           postal_code?: string | null
           rating?: number | null
           review_count?: number | null
-          search_vector?: unknown | null
+          search_vector?: unknown
           state_province?: string | null
           updated_at?: string | null
           verification_date?: string | null
@@ -1209,62 +1209,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      binary_quantize: {
-        Args: { "": string } | { "": unknown }
-        Returns: unknown
-      }
-      halfvec_avg: {
-        Args: { "": number[] }
-        Returns: unknown
-      }
-      halfvec_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      halfvec_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      halfvec_typmod_in: {
-        Args: { "": unknown[] }
-        Returns: number
-      }
-      hnsw_bit_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      hnsw_halfvec_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      hnsw_sparsevec_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      hnswhandler: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ivfflat_bit_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ivfflat_halfvec_support: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      ivfflathandler: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      l2_norm: {
-        Args: { "": unknown } | { "": unknown }
-        Returns: number
-      }
-      l2_normalize: {
-        Args: { "": string } | { "": unknown } | { "": unknown }
-        Returns: unknown
-      }
       search_biblical_knowledge: {
         Args: {
           match_count?: number
@@ -1280,22 +1224,6 @@ export type Database = {
           reference: string
           similarity: number
           verse_text: string
-        }[]
-      }
-      search_biblical_wisdom: {
-        Args: {
-          limit_count?: number
-          min_financial_relevance?: number
-          search_term?: string
-          wisdom_categories?: string[]
-        }
-        Returns: {
-          defi_keywords: string[]
-          financial_relevance: number
-          id: string
-          reference: string
-          text: string
-          wisdom_category: string[]
         }[]
       }
       search_comprehensive_biblical_knowledge: {
@@ -1319,42 +1247,6 @@ export type Database = {
           strong_numbers: string[]
           verse: number
         }[]
-      }
-      sparsevec_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      sparsevec_send: {
-        Args: { "": unknown }
-        Returns: string
-      }
-      sparsevec_typmod_in: {
-        Args: { "": unknown[] }
-        Returns: number
-      }
-      vector_avg: {
-        Args: { "": number[] }
-        Returns: string
-      }
-      vector_dims: {
-        Args: { "": string } | { "": unknown }
-        Returns: number
-      }
-      vector_norm: {
-        Args: { "": string }
-        Returns: number
-      }
-      vector_out: {
-        Args: { "": string }
-        Returns: unknown
-      }
-      vector_send: {
-        Args: { "": string }
-        Returns: string
-      }
-      vector_typmod_in: {
-        Args: { "": unknown[] }
-        Returns: number
       }
     }
     Enums: {
