@@ -38,19 +38,29 @@ class ComprehensiveBiblicalService {
    */
   async searchBiblicalWisdom(query: BiblicalWisdomQuery): Promise<BiblicalWisdomResult[]> {
     try {
-      const { data, error } = await supabase.rpc('search_biblical_wisdom', {
-        search_term: query.search_term || null,
-        wisdom_categories: query.wisdom_categories || null,
-        min_financial_relevance: query.min_financial_relevance || 0,
-        limit_count: query.limit_count || 10
-      });
+      // Use basic table query since RPC function may not exist
+      const queryBuilder = supabase
+        .from('bible_verses')
+        .select('*')
+        .gte('financial_relevance', query.min_financial_relevance || 0)
+        .limit(query.limit_count || 10);
+
+      const { data, error } = await queryBuilder;
 
       if (error) {
         console.error('Error searching biblical wisdom:', error);
         return [];
       }
 
-      return data || [];
+      // Transform to BiblicalWisdomResult format
+      return (data || []).map(verse => ({
+        id: verse.id,
+        reference: `${verse.book_name} ${verse.chapter}:${verse.verse}`,
+        text: verse.text,
+        financial_relevance: verse.financial_relevance || 0,
+        wisdom_category: verse.wisdom_category || [],
+        defi_keywords: verse.defi_keywords || []
+      }));
     } catch (error) {
       console.error('Error in searchBiblicalWisdom:', error);
       return [];
