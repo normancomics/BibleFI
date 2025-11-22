@@ -61,7 +61,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
-    "ethers": "^5.7.2",
+    "ethers": "^5.8.0",
     "framer-motion": "^12.10.5",
     "graphql": "^16.11.0",
     "input-otp": "^1.2.4",
