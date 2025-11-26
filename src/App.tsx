@@ -40,6 +40,7 @@ import SystemCheckPage from "./pages/SystemCheckPage";
 import DataCrawlerPage from "./pages/DataCrawlerPage";
 import LaunchActionPlanPage from "./pages/LaunchActionPlanPage";
 import NotFound from "./pages/NotFound";
+import ZKMonitorPage from "./pages/ZKMonitorPage";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -85,6 +86,7 @@ const App = () => (
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/compliance" element={<CompliancePage />} />
               <Route path="/tax-compliance" element={<TaxCompliancePage />} />
+              <Route path="/zk-monitor" element={<ZKMonitorPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
