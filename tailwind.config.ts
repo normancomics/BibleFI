@@ -80,6 +80,8 @@ export default {
 					light: 'hsl(var(--scripture-light))',
 					dark: 'hsl(var(--scripture-dark))',
 				},
+				'ancient-gold': 'hsl(var(--ancient-gold))',
+				'ancient-scroll': 'hsl(var(--ancient-scroll))',
 				ancient: {
 					gold: 'hsl(var(--ancient-gold))',
 					scroll: 'hsl(var(--ancient-scroll))',
@@ -89,6 +91,14 @@ export default {
 					green: 'hsl(var(--pixel-green))',
 					yellow: 'hsl(var(--pixel-yellow))',
 				},
+				'eboy-green': 'hsl(var(--eboy-green))',
+				'eboy-yellow': 'hsl(var(--eboy-yellow))',
+				'eboy-pink': 'hsl(var(--eboy-pink))',
+				'eboy-blue': 'hsl(var(--eboy-blue))',
+				'eboy-red': 'hsl(var(--eboy-red))',
+				'eboy-orange': 'hsl(var(--eboy-orange))',
+				'eboy-purple': 'hsl(var(--eboy-purple))',
+				'eboy-cyan': 'hsl(var(--eboy-cyan))',
 				base: {
 					blue: 'hsl(var(--base-blue))',
 				}
