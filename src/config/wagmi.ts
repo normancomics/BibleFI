@@ -27,8 +27,12 @@ export const config = createConfig({
       metadata: {
         name: 'Bible.fi',
         description: 'Biblical wisdom meets DeFi innovation on Base chain',
-        url: typeof window !== 'undefined' ? window.location.origin : 'https://biblefi.base.eth',
-        icons: ['/bible-fi-brand-logo-v2.png'],
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi',
+        icons: [
+          typeof window !== 'undefined' 
+            ? `${window.location.origin}/bible-fi-brand-logo-v2.png`
+            : 'https://bible.fi/bible-fi-brand-logo-v2.png'
+        ],
         verifyUrl: 'https://verify.walletconnect.com'
       },
       showQrModal: true,
