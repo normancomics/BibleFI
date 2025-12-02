@@ -1,17 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import NavBar from '@/components/NavBar';
 import SoundSystemManager from '@/components/enhanced/SoundSystemManager';
 import DailyScripture from '@/components/home/DailyScripture';
-import AutomatedTithingCalculator from '@/components/tithe/AutomatedTithingCalculator';
-import LiveChurchSearch from '@/components/tithe/LiveChurchSearch';
+import ComprehensiveTithingHub from '@/components/tithe/ComprehensiveTithingHub';
+import { USChurchSeederService } from '@/services/usChurchSeeder';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Search, BookOpen, TrendingUp } from 'lucide-react';
+import { Heart, BookOpen, TrendingUp, Database, RefreshCw, Church } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [churchCount, setChurchCount] = useState<number>(0);
+  const [isSeeding, setIsSeeding] = useState(false);
+
+  useEffect(() => {
+    // Check church count on load
+    USChurchSeederService.getChurchCount().then(setChurchCount);
+  }, []);
+
+  const handleSeedChurches = async () => {
+    setIsSeeding(true);
+    try {
+      const result = await USChurchSeederService.seedUSChurches();
+      toast({
+        title: "Churches Added!",
+        description: `Added ${result.added} churches to the database (${result.errors} errors)`,
+      });
+      const newCount = await USChurchSeederService.getChurchCount();
+      setChurchCount(newCount);
+    } catch (error) {
+      toast({ title: "Error seeding churches", variant: "destructive" });
+    } finally {
+      setIsSeeding(false);
+    }
+  };
 
   return (
     <SoundSystemManager>
@@ -23,7 +50,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="text-center mb-8"
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-4 font-scroll">
               <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent">
@@ -33,9 +60,22 @@ const Index = () => {
             <p className="text-xl text-white/80 mb-2">
               Biblical DeFi: Tithing First, Prosperity Through Obedience
             </p>
-            <p className="text-sm text-green-400 italic">
-              "Bring ye all the tithes into the storehouse" — Malachi 3:10 (KJV)
-            </p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <Badge variant="secondary" className="bg-green-500/20 text-green-400">
+                <Church className="w-3 h-3 mr-1" />
+                {churchCount} Churches in Database
+              </Badge>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleSeedChurches}
+                disabled={isSeeding}
+                className="text-xs"
+              >
+                <Database className="w-3 h-3 mr-1" />
+                {isSeeding ? <><RefreshCw className="w-3 h-3 mr-1 animate-spin" />Adding...</> : 'Add US Churches'}
+              </Button>
+            </div>
           </motion.div>
 
           {/* Daily Scripture - Top Priority */}
@@ -48,46 +88,21 @@ const Index = () => {
             <DailyScripture />
           </motion.div>
 
-          {/* Tithing Calculator - Core Feature */}
+          {/* Comprehensive Tithing Hub - Core Feature */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="mb-8"
           >
-            <AutomatedTithingCalculator />
-          </motion.div>
-
-          {/* Church Search Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-8"
-          >
-            <Card className="bg-royal-purple/30 border-ancient-gold/50">
-              <CardContent className="p-6">
-                <div className="text-center mb-6">
-                  <Search className="w-12 h-12 text-ancient-gold mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-ancient-gold mb-2">
-                    Find Your Church
-                  </h2>
-                  <p className="text-white/70">
-                    Search our global database of Christian churches accepting cryptocurrency donations
-                  </p>
-                </div>
-                <LiveChurchSearch onChurchSelect={(church) => {
-                  console.log('Selected church:', church);
-                }} />
-              </CardContent>
-            </Card>
+            <ComprehensiveTithingHub />
           </motion.div>
 
           {/* Quick Actions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.3 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
             <Button
@@ -116,7 +131,7 @@ const Index = () => {
             >
               <div className="flex flex-col items-center gap-2">
                 <Heart className="w-8 h-8" />
-                <span className="text-sm">Digital Tithing</span>
+                <span className="text-sm">Full Tithing Interface</span>
               </div>
             </Button>
           </motion.div>
