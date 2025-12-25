@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Heart, Search, MapPin, Globe, Phone, Mail, CreditCard, Zap, Plus,
   Bitcoin, DollarSign, Banknote, Building, CheckCircle, AlertCircle,
-  Wallet, ArrowRight, BookOpen, Star
+  Wallet, ArrowRight, BookOpen, Star, Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
@@ -16,6 +16,8 @@ import { parseUnits } from 'viem';
 import { base } from 'wagmi/chains';
 import { supabase } from '@/integrations/supabase/client';
 import { useSuperfluid } from '@/hooks/useSuperfluid';
+import { GooglePlacesChurchSearch } from './GooglePlacesChurchSearch';
+import { GooglePlacesChurch } from '@/services/googlePlacesChurchService';
 
 // USDC contract on Base
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
@@ -61,7 +63,7 @@ const ComprehensiveTithingHub: React.FC = () => {
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const [activeTab, setActiveTab] = useState('search');
+  const [activeTab, setActiveTab] = useState('live');
   const [searchQuery, setSearchQuery] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [stateFilter, setStateFilter] = useState('');
@@ -251,12 +253,40 @@ const ComprehensiveTithingHub: React.FC = () => {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 bg-background/50">
-          <TabsTrigger value="search"><Search className="w-4 h-4 mr-2" />Find Church</TabsTrigger>
+        <TabsList className="grid grid-cols-5 bg-background/50">
+          <TabsTrigger value="live"><Sparkles className="w-4 h-4 mr-2" />Live Search</TabsTrigger>
+          <TabsTrigger value="search"><Search className="w-4 h-4 mr-2" />Database</TabsTrigger>
           <TabsTrigger value="tithe" disabled={!selectedChurch}><Heart className="w-4 h-4 mr-2" />Tithe</TabsTrigger>
           <TabsTrigger value="add"><Plus className="w-4 h-4 mr-2" />Add Church</TabsTrigger>
           <TabsTrigger value="history"><Zap className="w-4 h-4 mr-2" />History</TabsTrigger>
         </TabsList>
+
+        {/* Live Google Places Search Tab */}
+        <TabsContent value="live" className="space-y-4">
+          <GooglePlacesChurchSearch 
+            onChurchSelect={(church: GooglePlacesChurch) => {
+              // Convert Google Places result to our Church format
+              setSelectedChurch({
+                id: church.id,
+                name: church.name,
+                address: church.address,
+                city: church.city,
+                state_province: church.state,
+                country: church.country,
+                website: church.website,
+                phone: church.phone,
+                accepts_crypto: false,
+                accepts_fiat: true,
+                accepts_cards: true,
+                accepts_checks: true,
+                verified: church.verified,
+                rating: church.rating,
+              });
+              setActiveTab('tithe');
+              toast({ title: `Selected ${church.name}` });
+            }}
+          />
+        </TabsContent>
 
         {/* Search Tab */}
         <TabsContent value="search" className="space-y-4">
