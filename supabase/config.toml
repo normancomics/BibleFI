@@ -1,6 +1,9 @@
 
 project_id = "ojiipppypzigjnjblbzn"
 
+[functions.church-search]
+verify_jwt = false
+
 [functions.farcaster-api]
 verify_jwt = false
 
