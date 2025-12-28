@@ -7,19 +7,14 @@ const corsHeaders = {
 };
 
 interface PlaceResult {
-  place_id: string;
-  name: string;
-  formatted_address: string;
-  geometry?: {
-    location: {
-      lat: number;
-      lng: number;
-    };
-  };
+  id: string;
+  displayName?: { text: string };
+  formattedAddress?: string;
+  location?: { latitude: number; longitude: number };
   rating?: number;
-  user_ratings_total?: number;
-  formatted_phone_number?: string;
-  website?: string;
+  userRatingCount?: number;
+  nationalPhoneNumber?: string;
+  websiteUri?: string;
   types?: string[];
 }
 
@@ -44,12 +39,10 @@ serve(async (req) => {
     // Build search query - always include "church" to filter results
     const searchQuery = query ? `${query} church` : 'christian church';
     
-    // Use Text Search API for more flexible searching
-    let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&type=church&key=${googleApiKey}`;
-    
-    // Add location bias if provided
+    // Get location coordinates if provided
+    let locationBias = {};
     if (location) {
-      // First geocode the location to get coordinates
+      // First geocode the location to get coordinates using Geocoding API
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${googleApiKey}`;
       console.log('Geocoding location:', location);
       
@@ -58,47 +51,70 @@ serve(async (req) => {
       
       if (geocodeData.results && geocodeData.results.length > 0) {
         const { lat, lng } = geocodeData.results[0].geometry.location;
-        url += `&location=${lat},${lng}&radius=${radius}`;
         console.log('Location coordinates:', { lat, lng });
+        locationBias = {
+          circle: {
+            center: { latitude: lat, longitude: lng },
+            radius: radius
+          }
+        };
       }
     }
 
-    console.log('Fetching from Google Places API...');
-    const response = await fetch(url);
+    // Use the new Places API (New) - Text Search
+    const url = 'https://places.googleapis.com/v1/places:searchText';
+    
+    const requestBody = {
+      textQuery: searchQuery,
+      includedType: 'church',
+      maxResultCount: 20,
+      ...(Object.keys(locationBias).length > 0 && { locationBias })
+    };
+
+    console.log('Fetching from Google Places API (New)...');
+    console.log('Request body:', JSON.stringify(requestBody));
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': googleApiKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.nationalPhoneNumber,places.websiteUri,places.types'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
     const data = await response.json();
     
-    console.log('Google Places API response status:', data.status);
-    console.log('Number of results:', data.results?.length || 0);
+    console.log('Google Places API response status:', response.status);
+    console.log('Number of results:', data.places?.length || 0);
 
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      console.error('Google Places API error:', data.status, data.error_message);
-      throw new Error(`Google Places API error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+    if (!response.ok) {
+      console.error('Google Places API error:', data.error?.message || 'Unknown error');
+      throw new Error(`Google Places API error: ${data.error?.message || 'Unknown error'}`);
     }
 
     // Transform results to our format
-    const churches = (data.results || []).map((place: PlaceResult) => ({
-      id: place.place_id,
-      name: place.name,
-      address: place.formatted_address,
-      city: extractCity(place.formatted_address),
-      state: extractState(place.formatted_address),
-      country: extractCountry(place.formatted_address),
-      latitude: place.geometry?.location?.lat,
-      longitude: place.geometry?.location?.lng,
+    const churches = (data.places || []).map((place: PlaceResult) => ({
+      id: place.id,
+      name: place.displayName?.text || 'Unknown Church',
+      address: place.formattedAddress || '',
+      city: extractCity(place.formattedAddress || ''),
+      state: extractState(place.formattedAddress || ''),
+      country: extractCountry(place.formattedAddress || ''),
+      latitude: place.location?.latitude,
+      longitude: place.location?.longitude,
       rating: place.rating,
-      reviewCount: place.user_ratings_total,
-      phone: place.formatted_phone_number,
-      website: place.website,
-      source: 'google_places',
+      reviewCount: place.userRatingCount,
+      phone: place.nationalPhoneNumber,
+      website: place.websiteUri,
+      source: 'google_places_new',
       verified: true,
     }));
 
     console.log('Returning', churches.length, 'churches');
 
-    return new Response(JSON.stringify({ 
-      churches,
-      nextPageToken: data.next_page_token 
-    }), {
+    return new Response(JSON.stringify({ churches }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
