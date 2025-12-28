@@ -63,8 +63,8 @@ const App = () => (
               <Route path="/defi-classic" element={<DefiPage />} />
               <Route path="/staking" element={<StakingPage />} />
               <Route path="/farming" element={<FarmingPage />} />
-              <Route path="/tithe" element={<EnhancedTithePage />} />
-              <Route path="/tithe-classic" element={<TithePage />} />
+              <Route path="/tithe" element={<TithePage />} />
+              <Route path="/tithe-enhanced" element={<EnhancedTithePage />} />
               <Route path="/wisdom" element={<WisdomPage />} />
               <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
               <Route path="/wallet" element={<WalletPage />} />
