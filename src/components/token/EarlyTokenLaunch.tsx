@@ -26,14 +26,29 @@ interface TokenLaunchData {
   deployPlatform: 'clanker' | 'streme' | 'manual';
 }
 
+type ActiveToken = 'BIBLEFI' | 'WISDOM';
+
 const EarlyTokenLaunch: React.FC = () => {
-  const [tokenData, setTokenData] = useState<TokenLaunchData>({
+  const [activeToken, setActiveToken] = useState<ActiveToken>('BIBLEFI');
+  
+  const [biblefiData, setBiblefiData] = useState<TokenLaunchData>({
     name: 'BibleFi',
     symbol: 'BIBLEFI',
-    description: 'Biblical wisdom meets DeFi on Base chain. Empowering faithful finance.',
+    description: 'Biblical wisdom meets DeFi on Base chain. Governance, staking & faithful finance.',
     initialSupply: '1000000000',
     deployPlatform: 'clanker'
   });
+
+  const [wisdomData, setWisdomData] = useState<TokenLaunchData>({
+    name: 'Wisdom Token',
+    symbol: 'WISDOM',
+    description: 'Earned through Biblical financial education and faithful stewardship. Rewards wisdom.',
+    initialSupply: '100000000',
+    deployPlatform: 'clanker'
+  });
+
+  const tokenData = activeToken === 'BIBLEFI' ? biblefiData : wisdomData;
+  const setTokenData = activeToken === 'BIBLEFI' ? setBiblefiData : setWisdomData;
 
   const [isLaunching, setIsLaunching] = useState(false);
   const [launchStep, setLaunchStep] = useState(0);
@@ -125,18 +140,33 @@ const EarlyTokenLaunch: React.FC = () => {
   };
 
   const generateClankerCast = () => {
-    return `@clanker deploy token
+    if (activeToken === 'BIBLEFI') {
+      return `@clanker deploy token
 
 Name: ${tokenData.name}
 Symbol: ${tokenData.symbol}
 Description: ${tokenData.description}
 
 🙏 Biblical wisdom meets DeFi
-⛪ Empowering faithful finance
-🏗️ Built on Base chain
+⛪ Governance & staking on Base
+🏗️ Built for faithful stewards
 📖 "The plans of the diligent lead to profit" - Proverbs 21:5
 
 #BibleFi #DeFi #Base #Faith`;
+    } else {
+      return `@clanker deploy token
+
+Name: ${tokenData.name}
+Symbol: ${tokenData.symbol}
+Description: ${tokenData.description}
+
+📖 Earned through Biblical wisdom
+🎓 Rewards faithful stewardship
+⛪ Learn & earn on Base chain
+📜 "Wisdom is more precious than rubies" - Proverbs 8:11
+
+#WISDOM #BibleFi #Base #Faith`;
+    }
   };
 
   const copyClankerCast = async () => {
@@ -156,21 +186,83 @@ Description: ${tokenData.description}
       {/* Header */}
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold text-ancient-gold">
-          🚀 Early $BIBLEFI Token Launch Strategy
+          🚀 Token Launch Center
         </h2>
         <p className="text-white/80 max-w-3xl mx-auto">
-          Launch your token early to build community and fund development. 
-          Smart move for Farcaster projects - early believers get rewarded!
+          Launch $BIBLEFI (governance) and $WISDOM (rewards) tokens on Base chain via Farcaster.
         </p>
+      </div>
+
+      {/* Token Selector */}
+      <div className="flex justify-center gap-4">
+        <Button
+          onClick={() => setActiveToken('BIBLEFI')}
+          className={`px-6 py-3 ${activeToken === 'BIBLEFI' 
+            ? 'bg-ancient-gold text-black font-bold' 
+            : 'bg-ancient-gold/20 text-ancient-gold border border-ancient-gold/50'}`}
+        >
+          💰 $BIBLEFI (Governance)
+        </Button>
+        <Button
+          onClick={() => setActiveToken('WISDOM')}
+          className={`px-6 py-3 ${activeToken === 'WISDOM' 
+            ? 'bg-purple-600 text-white font-bold' 
+            : 'bg-purple-900/20 text-purple-300 border border-purple-500/50'}`}
+        >
+          📖 $WISDOM (Rewards)
+        </Button>
+      </div>
+
+      {/* Token Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className={`border ${activeToken === 'BIBLEFI' ? 'border-ancient-gold bg-ancient-gold/10' : 'border-ancient-gold/30 bg-scripture/20'}`}>
+          <CardHeader>
+            <CardTitle className="text-ancient-gold flex items-center gap-2">
+              💰 $BIBLEFI Token
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-white/80">
+            <p><strong>Purpose:</strong> Governance, staking, premium access</p>
+            <p><strong>Supply:</strong> 1 Billion tokens</p>
+            <p><strong>Distribution:</strong></p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>40% Community rewards</li>
+              <li>25% Development fund</li>
+              <li>20% Church partnership fund</li>
+              <li>10% Team (4-year vesting)</li>
+              <li>5% Advisors</li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className={`border ${activeToken === 'WISDOM' ? 'border-purple-500 bg-purple-900/20' : 'border-purple-500/30 bg-scripture/20'}`}>
+          <CardHeader>
+            <CardTitle className="text-purple-300 flex items-center gap-2">
+              📖 $WISDOM Token
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-white/80">
+            <p><strong>Purpose:</strong> Education rewards, stewardship incentives</p>
+            <p><strong>Supply:</strong> 100 Million tokens</p>
+            <p><strong>Earned By:</strong></p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>Weekly tithing consistency</li>
+              <li>Biblical finance lessons completed</li>
+              <li>Community wisdom sharing</li>
+              <li>Referral rewards</li>
+              <li>Staking $BIBLEFI</li>
+            </ul>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Why Launch Early */}
       <Alert className="border-green-500/50 bg-green-900/20">
         <TrendingUp className="h-4 w-4 text-green-400" />
         <AlertDescription className="text-green-300">
-          <strong>Smart Strategy:</strong> Early token launch creates community investment, 
-          provides development funding, and leverages Farcaster's social token ecosystem. 
-          Many successful projects launch tokens before full feature completion.
+          <strong>Launching ${activeToken}:</strong> {activeToken === 'BIBLEFI' 
+            ? 'Governance token for community investment, voting rights, and staking rewards.' 
+            : 'Reward token for Biblical education and faithful stewardship - earned, not bought.'}
         </AlertDescription>
       </Alert>
 
@@ -383,9 +475,11 @@ Description: ${tokenData.description}
         <PixelButton
           onClick={handleLaunch}
           disabled={isLaunching}
-          className="bg-ancient-gold/20 border border-ancient-gold text-ancient-gold hover:bg-ancient-gold/30"
+          className={activeToken === 'BIBLEFI' 
+            ? "bg-ancient-gold/20 border border-ancient-gold text-ancient-gold hover:bg-ancient-gold/30"
+            : "bg-purple-900/20 border border-purple-500 text-purple-300 hover:bg-purple-900/40"}
         >
-          {isLaunching ? '🚀 Launching...' : '🚀 Launch $BIBLEFI'}
+          {isLaunching ? '🚀 Launching...' : `🚀 Launch $${activeToken}`}
         </PixelButton>
 
         <PixelButton
