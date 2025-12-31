@@ -3,9 +3,9 @@ import NavBar from '@/components/NavBar';
 import SoundSystemManager from '@/components/enhanced/SoundSystemManager';
 import DailyScripture from '@/components/home/DailyScripture';
 import ComprehensiveTithingHub from '@/components/tithe/ComprehensiveTithingHub';
+import IntroAnimation from '@/components/home/IntroAnimation';
 import { USChurchSeederService } from '@/services/usChurchSeeder';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Heart, BookOpen, TrendingUp, Database, RefreshCw, Church } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ const Index = () => {
   const { toast } = useToast();
   const [churchCount, setChurchCount] = useState<number>(0);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
     // Check church count on load
@@ -39,6 +40,11 @@ const Index = () => {
       setIsSeeding(false);
     }
   };
+
+  // Show intro animation first
+  if (showIntro) {
+    return <IntroAnimation onComplete={() => setShowIntro(false)} />;
+  }
 
   return (
     <SoundSystemManager>
