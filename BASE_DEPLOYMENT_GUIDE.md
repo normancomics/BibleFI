@@ -18,15 +18,15 @@ This guide walks through deploying Bible.fi to Base mainnet with full contract v
 
 ## Step 1: Contract Deployment to Base Mainnet
 
-### Deploy BibleToken Contract
+### Deploy BibleFi Token Contract
 ```solidity
-// src/contracts/BibleToken.sol
-contract BibleToken is ERC20, Ownable {
+// src/contracts/BibleFi Token.sol
+contract BibleFi Token is ERC20, Ownable {
     uint256 public constant TOTAL_SUPPLY = 1_000_000_000 * 10**18; // 1B tokens
     uint256 public constant TREASURY_FEE = 10; // 10% fee
     address public treasuryAddress;
     
-    constructor(address _treasury) ERC20("Bible Token", "BIBLE") {
+    constructor(address _treasury) ERC20("BibleFi Token", "BIBLEFI") {
         treasuryAddress = _treasury;
         _mint(msg.sender, TOTAL_SUPPLY);
     }
@@ -55,9 +55,9 @@ npx hardhat verify --network base CONTRACT_ADDRESS "CONSTRUCTOR_ARGS"
 ```
 
 ### Expected Contract Addresses (after deployment)
-- **BibleToken**: `0x...` (will be generated)
-- **WisdomRewardsPool**: `0x...` (will be generated)
-- **Treasury**: `biblefi.base.eth` (ENS resolved)
+- **BibleFi Token**: `0x...` (will be generated)
+- **Wisdom Rewards Pool**: `0x...` (will be generated)
+- **Treasury**: `BibleFi.base.eth` (ENS resolved)
 
 ## Step 2: Frontend Production Deployment
 
@@ -68,8 +68,8 @@ npx hardhat verify --network base CONTRACT_ADDRESS "CONSTRUCTOR_ARGS"
 
 # 2. Configure custom domain
 # Project Settings -> Domains -> Connect Domain
-# Domain: bible.fi
-# Subdomain: app.bible.fi (optional)
+# Domain: BibleFi.xyz
+# Subdomain: app.BibleFi.xyz (optional)
 ```
 
 ### Environment Configuration
@@ -78,8 +78,8 @@ npx hardhat verify --network base CONTRACT_ADDRESS "CONSTRUCTOR_ARGS"
 export const DEPLOYMENT_CONFIG = {
   environment: {
     isProduction: true,
-    domain: 'bible.fi',
-    baseUrl: 'https://bible.fi',
+    domain: 'BibleFi.xyz',
+    baseUrl: 'https://BibleFi.xyz',
   },
   
   endpoints: {
@@ -89,8 +89,8 @@ export const DEPLOYMENT_CONFIG = {
   },
   
   contracts: {
-    bibleToken: '0x...', // Update after deployment
-    wisdomRewards: '0x...', // Update after deployment
+    BibleFi Token: '0x...', // Update after deployment
+    Wisdom Rewards: '0x...', // Update after deployment
     treasury: 'biblefi.base.eth',
   }
 };
@@ -146,8 +146,8 @@ const stakeResult = await stakeTokens(amount, duration);
 <!-- public/frame.html - Production frame -->
 <meta property="fc:frame" content="vNext" />
 <meta property="fc:frame:image" content="https://bible.fi/bible-fi-preview.png" />
-<meta property="fc:frame:button:1" content="Open Bible.fi" />
-<meta property="fc:frame:post_url" content="https://bible.fi/api/frame" />
+<meta property="fc:frame:button:1" content="Open BibleFi.xyz" />
+<meta property="fc:frame:post_url" content="https://biblefi.xyz/api/frame" />
 ```
 
 ### Test Farcaster Integration
@@ -261,10 +261,10 @@ trackUserActivity('tithe_sent', { church, amount, method });
 ## Support & Resources
 
 ### Technical Support
-- **Documentation**: https://docs.bible.fi
-- **Discord**: Bible.fi Community Server
+- **Documentation**: https://docs.biblefi.xyz
+- **Discord**: BibleFi Community Server
 - **GitHub**: Repository with full source code
-- **Email**: support@bible.fi
+- **Email**: BibleFi@tutamail.com
 
 ### Base Chain Resources
 - **BaseScan**: https://basescan.org
