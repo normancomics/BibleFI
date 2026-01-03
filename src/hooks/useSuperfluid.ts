@@ -22,15 +22,17 @@ export interface StreamStats {
   wisdomScore: number;
 }
 
+const initialStats: StreamStats = {
+  activeStreams: 0,
+  totalMonthlyFlow: 0,
+  wisdomScore: 0
+};
+
 export const useSuperfluid = () => {
   const { address, isConnected } = useAccount();
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [streamStats, setStreamStats] = useState<StreamStats>({
-    activeStreams: 0,
-    totalMonthlyFlow: 0,
-    wisdomScore: 0
-  });
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [streamStats, setStreamStats] = useState<StreamStats>(initialStats);
 
   /**
    * Get Web3 provider and ensure Base chain
