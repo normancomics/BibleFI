@@ -16,6 +16,7 @@ import { parseUnits } from 'viem';
 import { base } from 'wagmi/chains';
 import { supabase } from '@/integrations/supabase/client';
 import { useSuperfluid } from '@/hooks/useSuperfluid';
+import { useTitheRewards } from '@/hooks/useTitheRewards';
 import { GooglePlacesChurchSearch } from './GooglePlacesChurchSearch';
 import { GooglePlacesChurch } from '@/services/googlePlacesChurchService';
 
@@ -60,6 +61,7 @@ const ComprehensiveTithingHub: React.FC = () => {
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
   const { createTithingStream, isInitialized: superfluidReady } = useSuperfluid();
+  const { awardTithePoints, awardStreamCreated, checkFirstTithe, currentScore, currentLevel } = useTitheRewards();
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
@@ -182,6 +184,9 @@ const ComprehensiveTithingHub: React.FC = () => {
         streamFrequency
       );
       
+      // Award wisdom points for setting up streaming tithe
+      awardStreamCreated(selectedChurch.name, parseFloat(titheAmount));
+      
       toast({
         title: "Streaming Tithe Created",
         description: `${streamFrequency} tithe of $${titheAmount} to ${selectedChurch.name}`,
@@ -223,7 +228,9 @@ const ComprehensiveTithingHub: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && titheAmount) {
+      const isFirst = checkFirstTithe();
+      awardTithePoints(parseFloat(titheAmount), 'direct', isFirst);
       toast({
         title: "Tithe Complete!",
         description: "Your offering has been received. God bless you!",
