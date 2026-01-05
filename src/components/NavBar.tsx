@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
+import WisdomScoreNavbar from '@/components/ui/WisdomScoreNavbar';
 
 const NavBar: React.FC = () => {
   const location = useLocation();
@@ -86,8 +87,9 @@ const NavBar: React.FC = () => {
             ))}
           </div>
 
-          {/* Wallet & Sound Toggle */}
+          {/* Wisdom Score, Wallet & Sound Toggle */}
           <div className="flex items-center gap-2">
+            <WisdomScoreNavbar />
             <WalletButton variant="outline" size="sm" />
             <SoundToggle />
           </div>
