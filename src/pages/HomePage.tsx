@@ -13,12 +13,14 @@ import {
 } from 'lucide-react';
 import ProductionWalletConnect from '@/components/wallet/ProductionWalletConnect';
 import StreamlinedDefiHub from '@/components/defi/StreamlinedDefiHub';
+import NavBar from '@/components/NavBar';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      <NavBar />
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Hero Section */}
         <div className="text-center space-y-4">

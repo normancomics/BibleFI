@@ -3,12 +3,14 @@ import ComprehensiveBiblicalAdvisor from '@/components/wisdom/ComprehensiveBibli
 import WisdomProgressionSystem from '@/components/wisdom/WisdomProgressionSystem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Trophy } from 'lucide-react';
+import NavBar from '@/components/NavBar';
 
 const WisdomPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-800">
+      <NavBar />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-foreground mb-6 flex items-center gap-3">
           <BookOpen className="w-8 h-8 text-primary" />
           Biblical Wisdom Center
         </h1>
