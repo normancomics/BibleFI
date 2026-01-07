@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { Pool } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,14 +14,17 @@ interface ChurchResult {
   city: string;
   state: string;
   country: string;
-  latitude?: number;
-  longitude?: number;
-  rating?: number;
-  reviewCount?: number;
-  phone?: string;
-  website?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  rating?: number | null;
+  reviewCount?: number | null;
+  phone?: string | null;
+  website?: string | null;
   source: string;
   verified: boolean;
+  acceptsCrypto?: boolean;
+  cryptoNetworks?: string[];
+  denomination?: string | null;
 }
 
 serve(async (req) => {
@@ -31,95 +34,115 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
-    console.log('Initializing Supabase client...');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('Starting church search...');
     
     const { query, location, radius = 50000 } = await req.json();
-    
     console.log('Search request:', { query, location, radius });
 
     const allChurches: ChurchResult[] = [];
 
-    // STEP 1: Search database first
-    console.log('Searching database...');
-    try {
-      let dbQuery = supabase.from('global_churches').select('*');
-      
-      // Parse location for city/state filtering
-      let city = '';
-      let state = '';
-      if (location) {
-        const locationParts = location.split(',').map((p: string) => p.trim());
-        if (locationParts.length >= 2) {
-          city = locationParts[0];
-          state = locationParts[1];
-        } else if (locationParts.length === 1) {
-          city = locationParts[0];
-        }
-      }
-      
-      // Build query conditions
-      const conditions: string[] = [];
-      
-      if (query) {
-        conditions.push(`name.ilike.%${query}%`);
-        conditions.push(`denomination.ilike.%${query}%`);
-      }
-      
-      if (city) {
-        conditions.push(`city.ilike.%${city}%`);
-      }
-      
-      if (state) {
-        conditions.push(`state_province.ilike.%${state}%`);
-      }
-      
-      // Apply OR conditions if we have any filters
-      if (conditions.length > 0) {
-        dbQuery = dbQuery.or(conditions.join(','));
-      }
-      
-      const { data, error } = await dbQuery
-        .order('verified', { ascending: false })
-        .order('rating', { ascending: false, nullsFirst: false })
-        .limit(50);
-      
-      if (error) {
-        console.error('Database query error:', error);
-      } else if (data && data.length > 0) {
-        console.log('Found', data.length, 'churches in database');
+    // STEP 1: Search database using direct PostgreSQL connection
+    if (databaseUrl) {
+      console.log('Searching database via direct PostgreSQL...');
+      try {
+        const pool = new Pool(databaseUrl, 1);
+        const connection = await pool.connect();
         
-        for (const church of data) {
-          allChurches.push({
-            id: church.id,
-            name: church.name,
-            address: church.address || `${church.city}, ${church.state_province || ''}, ${church.country}`.trim(),
-            city: church.city,
-            state: church.state_province || '',
-            country: church.country,
-            latitude: null,
-            longitude: null,
-            rating: church.rating,
-            reviewCount: church.review_count,
-            phone: church.phone,
-            website: church.website,
-            source: 'database',
-            verified: church.verified || false,
-          });
+        try {
+          // Parse location for filtering
+          let searchCity = '';
+          let searchState = '';
+          if (location) {
+            const locationParts = location.split(',').map((p: string) => p.trim());
+            if (locationParts.length >= 2) {
+              searchCity = locationParts[0];
+              searchState = locationParts[1];
+            } else if (locationParts.length === 1) {
+              searchCity = locationParts[0];
+            }
+          }
+          
+          // Build WHERE conditions
+          const conditions: string[] = [];
+          const params: string[] = [];
+          let paramIndex = 1;
+          
+          if (query) {
+            conditions.push(`(name ILIKE $${paramIndex} OR denomination ILIKE $${paramIndex})`);
+            params.push(`%${query}%`);
+            paramIndex++;
+          }
+          
+          if (searchCity) {
+            conditions.push(`(city ILIKE $${paramIndex} OR state_province ILIKE $${paramIndex} OR country ILIKE $${paramIndex})`);
+            params.push(`%${searchCity}%`);
+            paramIndex++;
+          }
+          
+          if (searchState && searchState !== searchCity) {
+            conditions.push(`state_province ILIKE $${paramIndex}`);
+            params.push(`%${searchState}%`);
+            paramIndex++;
+          }
+          
+          let sql = `
+            SELECT 
+              id, name, address, city, state_province, country,
+              rating, review_count, phone, website, 
+              verified, accepts_crypto, crypto_networks, denomination
+            FROM global_churches
+          `;
+          
+          if (conditions.length > 0) {
+            sql += ` WHERE ${conditions.join(' OR ')}`;
+          }
+          
+          sql += ` ORDER BY verified DESC NULLS LAST, rating DESC NULLS LAST LIMIT 50`;
+          
+          console.log('SQL:', sql);
+          console.log('Params:', params);
+          
+          const result = await connection.queryObject(sql, params);
+          console.log('Found', result.rows.length, 'churches in database');
+          
+          for (const row of result.rows as Record<string, unknown>[]) {
+            allChurches.push({
+              id: row.id as string,
+              name: row.name as string,
+              address: (row.address as string) || `${row.city}, ${row.state_province || ''}, ${row.country}`.trim(),
+              city: row.city as string,
+              state: (row.state_province as string) || '',
+              country: row.country as string,
+              latitude: null,
+              longitude: null,
+              rating: row.rating as number | null,
+              reviewCount: row.review_count as number | null,
+              phone: row.phone as string | null,
+              website: row.website as string | null,
+              source: 'database',
+              verified: (row.verified as boolean) || false,
+              acceptsCrypto: (row.accepts_crypto as boolean) || false,
+              cryptoNetworks: (row.crypto_networks as string[]) || [],
+              denomination: row.denomination as string | null,
+            });
+          }
+        } finally {
+          connection.release();
         }
-      } else {
-        console.log('No churches found in database matching criteria');
+        
+        await pool.end();
+      } catch (dbError) {
+        console.error('Database search error:', dbError);
       }
-    } catch (dbError) {
-      console.error('Database search error:', dbError);
+    } else {
+      console.log('No database URL configured');
     }
 
-    // STEP 2: Try Google Places API if key is available
-    if (googleApiKey) {
+    // STEP 2: Try Google Places API if key is available and we need more results
+    if (googleApiKey && allChurches.length < 5) {
       console.log('Attempting Google Places API search...');
       try {
         const searchQuery = query ? `${query} church` : 'christian church';
@@ -172,7 +195,7 @@ serve(async (req) => {
           console.log('Google API returned', data.places?.length || 0, 'results');
           
           for (const place of (data.places || [])) {
-            // Check for duplicates
+            // Check for duplicates by name
             const isDuplicate = allChurches.some(c => 
               c.name.toLowerCase() === (place.displayName?.text || '').toLowerCase()
             );
@@ -193,18 +216,17 @@ serve(async (req) => {
                 website: place.websiteUri,
                 source: 'google_places',
                 verified: true,
+                acceptsCrypto: false,
               });
             }
           }
         } else {
           const errorData = await response.json();
-          console.log('Google API error (falling back to database):', errorData.error?.message || 'Unknown error');
+          console.log('Google API error:', errorData.error?.message || 'Unknown error');
         }
       } catch (apiError) {
         console.log('Google API request failed:', apiError);
       }
-    } else {
-      console.log('No Google API key configured, using database only');
     }
 
     console.log('Returning', allChurches.length, 'total churches');
