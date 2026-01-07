@@ -36,9 +36,7 @@ serve(async (req) => {
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
     console.log('Initializing Supabase client...');
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      db: { schema: 'api' }
-    });
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     const { query, location, radius = 50000 } = await req.json();
     
