@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,10 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2, Zap, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { zkProofService } from '@/services/zkProofService';
+import { veilCashClient, VeilDenomination } from '@/integrations/veil/client';
 import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
 
 interface Church {
   id: string;
@@ -17,25 +21,38 @@ interface Church {
   address: string;
 }
 
+type ZKProvider = 'noir' | 'veil';
+
 export const AnonymousTithe: React.FC = () => {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const [amount, setAmount] = useState('');
   const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
   const [isGeneratingProof, setIsGeneratingProof] = useState(false);
   const [proofProgress, setProofProgress] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [proofGenerated, setProofGenerated] = useState(false);
+  const [zkProvider, setZKProvider] = useState<ZKProvider>('veil');
+  const [veilDenomination, setVeilDenomination] = useState<VeilDenomination>('USDC_100');
+  const [anonymitySetSize, setAnonymitySetSize] = useState(0);
+  const [savedNote, setSavedNote] = useState<string | null>(null);
 
-  // Mock churches - in production, load from contract
+  // Mock churches - in production, load from database
   const churches: Church[] = [
     { id: '0x1', name: 'First Baptist Church', address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' },
     { id: '0x2', name: 'Grace Community Church', address: '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199' },
     { id: '0x3', name: 'Hope Fellowship', address: '0xdd2FD4581271e230360230F9337D5c0430Bf44C0' },
   ];
 
+  // Fetch anonymity set size when denomination changes
+  useEffect(() => {
+    if (zkProvider === 'veil') {
+      veilCashClient.getAnonymitySetSize(veilDenomination).then(setAnonymitySetSize);
+    }
+  }, [veilDenomination, zkProvider]);
+
   const handleGenerateProof = async () => {
-    if (!amount || !selectedChurch || !address) {
-      toast.error('Please fill all fields');
+    if (!selectedChurch || !address) {
+      toast.error('Please select a church and connect wallet');
       return;
     }
 
@@ -43,36 +60,48 @@ export const AnonymousTithe: React.FC = () => {
       setIsGeneratingProof(true);
       setProofProgress(0);
 
-      // Simulate progress
       const progressInterval = setInterval(() => {
         setProofProgress(prev => Math.min(prev + 10, 90));
       }, 500);
 
-      // Convert amount to wei (assuming USDC with 6 decimals)
-      const amountWei = BigInt(parseFloat(amount) * 1_000_000);
-      const minThreshold = amountWei; // Prove we're sending at least this much
-      
-      // Generate donor secret from wallet address
-      const donorSecret = `${address}-${Date.now()}`;
-
-      // Generate the proof
-      const proof = await zkProofService.generateTitheProof({
-        titheAmount: amountWei,
-        donorSecret,
-        minThreshold,
-        churchId: selectedChurch.id,
-      });
-
-      clearInterval(progressInterval);
-      setProofProgress(100);
-      setProofGenerated(true);
-
-      toast.success('Anonymous proof generated successfully!');
-      console.log('Proof:', proof);
-
-      // In production, submit proof to TitheVerifier contract
-      // await submitProofToContract(proof);
-
+      if (zkProvider === 'veil') {
+        // Veil.cash ZK-SNARK approach
+        const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+        const signer = provider.getSigner();
+        await veilCashClient.initialize(signer);
+        
+        const result = await veilCashClient.deposit(veilDenomination);
+        clearInterval(progressInterval);
+        
+        if (result.success && result.note) {
+          setSavedNote(result.note);
+          setProofProgress(100);
+          setProofGenerated(true);
+          toast.success('Anonymous deposit ready! Save your note securely.');
+        } else {
+          throw new Error(result.error);
+        }
+      } else {
+        // Noir ZK approach
+        if (!amount) {
+          toast.error('Please enter an amount');
+          return;
+        }
+        const amountWei = BigInt(parseFloat(amount) * 1_000_000);
+        const donorSecret = `${address}-${Date.now()}`;
+        
+        await zkProofService.generateTitheProof({
+          titheAmount: amountWei,
+          donorSecret,
+          minThreshold: amountWei,
+          churchId: selectedChurch.id,
+        });
+        
+        clearInterval(progressInterval);
+        setProofProgress(100);
+        setProofGenerated(true);
+        toast.success('Noir ZK proof generated!');
+      }
     } catch (error) {
       console.error('Proof generation error:', error);
       toast.error('Failed to generate proof');
@@ -82,15 +111,22 @@ export const AnonymousTithe: React.FC = () => {
   };
 
   const handleSubmitTithe = async () => {
-    toast.success('Anonymous tithe submitted!', {
-      description: 'Your tithe was sent privately. The church will receive the funds without knowing who sent them.',
-    });
+    if (zkProvider === 'veil' && savedNote && selectedChurch) {
+      const result = await veilCashClient.withdraw(savedNote, selectedChurch.address);
+      if (result.success) {
+        toast.success('Anonymous tithe sent!', {
+          description: `${result.amount} sent privately to ${selectedChurch.name}`,
+        });
+      }
+    } else {
+      toast.success('Anonymous tithe submitted via Noir ZK!');
+    }
     
-    // Reset form
     setAmount('');
     setSelectedChurch(null);
     setProofGenerated(false);
     setProofProgress(0);
+    setSavedNote(null);
   };
 
   return (

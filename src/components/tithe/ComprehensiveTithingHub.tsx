@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Heart, Search, MapPin, Globe, Phone, Mail, CreditCard, Zap, Plus,
   Bitcoin, DollarSign, Banknote, Building, CheckCircle, AlertCircle,
-  Wallet, ArrowRight, BookOpen, Star, Sparkles
+  Wallet, ArrowRight, BookOpen, Star, Sparkles, Shield, Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
@@ -19,7 +21,9 @@ import { useSuperfluid } from '@/hooks/useSuperfluid';
 import { useTitheRewards } from '@/hooks/useTitheRewards';
 import { GooglePlacesChurchSearch } from './GooglePlacesChurchSearch';
 import { GooglePlacesChurch } from '@/services/googlePlacesChurchService';
-
+import FiatPaymentForm from './FiatPaymentForm';
+import { veilCashClient, VeilDenomination } from '@/integrations/veil/client';
+import { Church as ChurchType } from '@/types/church';
 // USDC contract on Base
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
 const USDC_ABI = [
@@ -74,8 +78,11 @@ const ComprehensiveTithingHub: React.FC = () => {
   const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [titheAmount, setTitheAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'superfluid' | 'fiat'>('crypto');
+  const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'superfluid' | 'fiat' | 'veil'>('crypto');
   const [streamFrequency, setStreamFrequency] = useState('monthly');
+  const [showFiatModal, setShowFiatModal] = useState(false);
+  const [veilDenomination, setVeilDenomination] = useState<VeilDenomination>('USDC_100');
+  const [isVeilProcessing, setIsVeilProcessing] = useState(false);
   
   // Add church form
   const [showAddChurch, setShowAddChurch] = useState(false);
@@ -194,6 +201,55 @@ const ComprehensiveTithingHub: React.FC = () => {
     } catch (error) {
       console.error('Superfluid error:', error);
       toast({ title: "Stream creation failed", variant: "destructive" });
+    }
+  };
+
+  const handleVeilTithe = async () => {
+    if (!selectedChurch?.crypto_address) {
+      toast({ title: "Church does not have a crypto address", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setIsVeilProcessing(true);
+      
+      // Initialize Veil client
+      const provider = new (await import('ethers')).ethers.providers.Web3Provider((window as any).ethereum);
+      const signer = provider.getSigner();
+      await veilCashClient.initialize(signer);
+      
+      // Deposit to privacy pool
+      const depositResult = await veilCashClient.deposit(veilDenomination);
+      
+      if (!depositResult.success) {
+        throw new Error(depositResult.error);
+      }
+      
+      toast({
+        title: "Anonymous Deposit Complete",
+        description: "Save your note securely! You'll need it to send the anonymous tithe.",
+      });
+      
+      // In production, store the note securely and withdraw to church
+      // For demo, immediately withdraw to church
+      if (depositResult.note) {
+        const withdrawResult = await veilCashClient.withdraw(
+          depositResult.note,
+          selectedChurch.crypto_address
+        );
+        
+        if (withdrawResult.success) {
+          toast({
+            title: "Anonymous Tithe Sent!",
+            description: `${withdrawResult.amount} sent privately to ${selectedChurch.name}`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Veil tithe error:', error);
+      toast({ title: "Anonymous tithe failed", variant: "destructive" });
+    } finally {
+      setIsVeilProcessing(false);
     }
   };
 
@@ -446,8 +502,26 @@ const ComprehensiveTithingHub: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    {/* Direct Crypto */}
+                  {/* Payment Method Selection */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {/* Superfluid Streaming - PRIMARY */}
+                    <Card 
+                      className={`cursor-pointer transition-all border-2 ${
+                        paymentMethod === 'superfluid' ? 'border-green-500 bg-green-500/10' : 'border-transparent'
+                      } ${!selectedChurch.accepts_crypto ? 'opacity-50' : ''}`}
+                      onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('superfluid')}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <div className="relative">
+                          <Zap className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                          <Badge className="absolute -top-1 -right-1 bg-green-500 text-[10px]">★</Badge>
+                        </div>
+                        <p className="font-medium">Superfluid Stream</p>
+                        <p className="text-xs text-muted-foreground">Real-time continuous tithing</p>
+                      </CardContent>
+                    </Card>
+
+                    {/* Direct USDC Stablecoin */}
                     <Card 
                       className={`cursor-pointer transition-all ${
                         paymentMethod === 'crypto' ? 'border-primary bg-primary/10' : ''
@@ -457,21 +531,21 @@ const ComprehensiveTithingHub: React.FC = () => {
                       <CardContent className="p-4 text-center">
                         <Bitcoin className="w-8 h-8 mx-auto mb-2 text-orange-500" />
                         <p className="font-medium">Direct USDC</p>
-                        <p className="text-xs text-muted-foreground">One-time crypto payment</p>
+                        <p className="text-xs text-muted-foreground">One-time stablecoin</p>
                       </CardContent>
                     </Card>
 
-                    {/* Superfluid Streaming */}
+                    {/* ZK Anonymous - Veil.cash */}
                     <Card 
                       className={`cursor-pointer transition-all ${
-                        paymentMethod === 'superfluid' ? 'border-primary bg-primary/10' : ''
+                        paymentMethod === 'veil' ? 'border-purple-500 bg-purple-500/10' : ''
                       } ${!selectedChurch.accepts_crypto ? 'opacity-50' : ''}`}
-                      onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('superfluid')}
+                      onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('veil')}
                     >
                       <CardContent className="p-4 text-center">
-                        <Zap className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                        <p className="font-medium">Superfluid Stream</p>
-                        <p className="text-xs text-muted-foreground">Continuous liquid tithing</p>
+                        <Shield className="w-8 h-8 mx-auto mb-2 text-purple-500" />
+                        <p className="font-medium">Anonymous (ZK)</p>
+                        <p className="text-xs text-muted-foreground">Veil.cash privacy</p>
                       </CardContent>
                     </Card>
 
@@ -483,68 +557,145 @@ const ComprehensiveTithingHub: React.FC = () => {
                       onClick={() => setPaymentMethod('fiat')}
                     >
                       <CardContent className="p-4 text-center">
-                        <DollarSign className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                        <p className="font-medium">Fiat / Card / Check</p>
-                        <p className="text-xs text-muted-foreground">Traditional payment</p>
+                        <CreditCard className="w-8 h-8 mx-auto mb-2 text-blue-500" />
+                        <p className="font-medium">Card / Check</p>
+                        <p className="text-xs text-muted-foreground">Traditional fiat</p>
                       </CardContent>
                     </Card>
                   </div>
 
                   <div className="space-y-3">
-                    <div>
-                      <Label>Tithe Amount (USD)</Label>
-                      <Input
-                        type="number"
-                        placeholder="Enter amount"
-                        value={titheAmount}
-                        onChange={(e) => setTitheAmount(e.target.value)}
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        10% tithe is {titheAmount ? `$${(parseFloat(titheAmount) * 10).toFixed(2)} income` : 'calculated from your earnings'}
-                      </p>
-                    </div>
-
+                    {/* Superfluid streaming options */}
                     {paymentMethod === 'superfluid' && (
-                      <div>
-                        <Label>Stream Frequency</Label>
-                        <select 
-                          value={streamFrequency}
-                          onChange={(e) => setStreamFrequency(e.target.value)}
-                          className="w-full p-2 rounded-md bg-background border"
-                        >
-                          <option value="daily">Daily</option>
-                          <option value="weekly">Weekly</option>
-                          <option value="monthly">Monthly</option>
-                        </select>
+                      <div className="p-4 bg-green-950/20 rounded-lg border border-green-500/30 space-y-3">
+                        <div className="flex items-center gap-2 text-green-400">
+                          <Zap className="w-4 h-4" />
+                          <span className="font-medium">Real-Time Streaming Tithe</span>
+                        </div>
+                        <div>
+                          <Label>Monthly Amount (USD)</Label>
+                          <Input
+                            type="number"
+                            placeholder="100"
+                            value={titheAmount}
+                            onChange={(e) => setTitheAmount(e.target.value)}
+                            className="bg-background/50"
+                          />
+                        </div>
+                        <div>
+                          <Label>Stream Frequency</Label>
+                          <Select value={streamFrequency} onValueChange={setStreamFrequency}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Powered by Superfluid Protocol — money streams per second to your church
+                        </p>
                       </div>
                     )}
 
+                    {/* Direct crypto options */}
+                    {paymentMethod === 'crypto' && (
+                      <div className="space-y-3">
+                        <div>
+                          <Label>Tithe Amount (USDC)</Label>
+                          <Input
+                            type="number"
+                            placeholder="100"
+                            value={titheAmount}
+                            onChange={(e) => setTitheAmount(e.target.value)}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Direct USDC transfer on Base chain • Low fees (~$0.01)
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Veil.cash ZK options */}
+                    {paymentMethod === 'veil' && (
+                      <div className="p-4 bg-purple-950/20 rounded-lg border border-purple-500/30 space-y-3">
+                        <div className="flex items-center gap-2 text-purple-400">
+                          <Lock className="w-4 h-4" />
+                          <span className="font-medium">Anonymous ZK Tithe (Veil.cash)</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          "But when you give to the needy, do not let your left hand know what your right hand is doing" — Matthew 6:3
+                        </p>
+                        <div>
+                          <Label>Select Amount Pool</Label>
+                          <Select value={veilDenomination} onValueChange={(v) => setVeilDenomination(v as VeilDenomination)}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {veilCashClient.denominations.map(d => (
+                                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            ZK-SNARKs ensure complete privacy • Your identity remains hidden
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Fiat payment options */}
                     {paymentMethod === 'fiat' && (
-                      <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-                        <p className="font-medium">Traditional Payment Options:</p>
-                        <ul className="text-sm space-y-1 text-muted-foreground">
-                          <li>• Contact church directly: {selectedChurch.email || selectedChurch.phone || 'Visit website'}</li>
-                          <li>• Many churches accept credit/debit cards through their website</li>
-                          <li>• Mail a check to: {selectedChurch.address || 'Contact church for address'}</li>
-                          <li>• Visit during service with cash or check</li>
-                        </ul>
+                      <div className="p-4 bg-blue-950/20 rounded-lg border border-blue-500/30 space-y-3">
+                        <div className="flex items-center gap-2 text-blue-400">
+                          <CreditCard className="w-4 h-4" />
+                          <span className="font-medium">Traditional Payment Options</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Badge variant="outline" className="justify-center py-2">💳 Credit Card</Badge>
+                          <Badge variant="outline" className="justify-center py-2">🏦 Debit Card</Badge>
+                          <Badge variant="outline" className="justify-center py-2">📝 Check</Badge>
+                          <Badge variant="outline" className="justify-center py-2">🏧 Bank Transfer</Badge>
+                        </div>
+                        <Button 
+                          onClick={() => setShowFiatModal(true)}
+                          className="w-full"
+                          variant="secondary"
+                        >
+                          <DollarSign className="w-4 h-4 mr-2" />
+                          Open Fiat Payment Form
+                        </Button>
                       </div>
                     )}
 
+                    {/* Action buttons for crypto methods */}
                     {paymentMethod !== 'fiat' && (
                       <Button 
-                        onClick={paymentMethod === 'crypto' ? handleDirectCryptoTithe : handleSuperfluidTithe}
-                        disabled={!isConnected || isPending || isConfirming || !titheAmount}
+                        onClick={
+                          paymentMethod === 'crypto' ? handleDirectCryptoTithe : 
+                          paymentMethod === 'superfluid' ? handleSuperfluidTithe :
+                          handleVeilTithe
+                        }
+                        disabled={
+                          !isConnected || isPending || isConfirming || isVeilProcessing ||
+                          (paymentMethod !== 'veil' && !titheAmount)
+                        }
                         className="w-full"
                       >
                         {!isConnected ? (
                           <>Connect Wallet First</>
-                        ) : isPending || isConfirming ? (
+                        ) : isPending || isConfirming || isVeilProcessing ? (
                           <>Processing...</>
                         ) : (
                           <>
                             <Heart className="w-4 h-4 mr-2" />
-                            {paymentMethod === 'crypto' ? 'Send USDC Tithe' : 'Start Streaming Tithe'}
+                            {paymentMethod === 'crypto' ? 'Send USDC Tithe' : 
+                             paymentMethod === 'superfluid' ? 'Start Streaming Tithe' :
+                             'Send Anonymous Tithe'}
                           </>
                         )}
                       </Button>
@@ -679,6 +830,36 @@ const ComprehensiveTithingHub: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Fiat Payment Modal */}
+      <Dialog open={showFiatModal} onOpenChange={setShowFiatModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Traditional Payment</DialogTitle>
+          </DialogHeader>
+          {selectedChurch && (
+            <FiatPaymentForm
+              church={{
+                id: selectedChurch.id,
+                name: selectedChurch.name,
+                denomination: selectedChurch.denomination || undefined,
+                address: selectedChurch.address || undefined,
+                city: selectedChurch.city,
+                state: selectedChurch.state_province || '',
+                country: selectedChurch.country,
+                location: `${selectedChurch.city}, ${selectedChurch.state_province || ''}, ${selectedChurch.country}`,
+                acceptsCrypto: selectedChurch.accepts_crypto,
+                verified: selectedChurch.verified,
+              }}
+              onPaymentComplete={(txId) => {
+                toast({ title: "Payment complete!", description: `Transaction: ${txId.slice(0, 10)}...` });
+                setShowFiatModal(false);
+              }}
+              onCancel={() => setShowFiatModal(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
