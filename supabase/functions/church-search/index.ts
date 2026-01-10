@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
+const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org';
+
 interface ChurchResult {
   id: string;
   name: string;
@@ -28,7 +31,6 @@ interface ChurchResult {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -37,22 +39,21 @@ serve(async (req) => {
     const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
-    console.log('Starting church search...');
+    console.log('Starting global church search...');
     
-    const { query, location, radius = 50000 } = await req.json();
-    console.log('Search request:', { query, location, radius });
+    const { query, location, radius = 50000, continent } = await req.json();
+    console.log('Search request:', { query, location, radius, continent });
 
     const allChurches: ChurchResult[] = [];
 
-    // STEP 1: Search database using direct PostgreSQL connection
+    // STEP 1: Search local database first
     if (databaseUrl) {
-      console.log('Searching database via direct PostgreSQL...');
+      console.log('Searching database via PostgreSQL...');
       try {
         const pool = new Pool(databaseUrl, 1);
         const connection = await pool.connect();
         
         try {
-          // Parse location for filtering
           let searchCity = '';
           let searchState = '';
           if (location) {
@@ -65,7 +66,6 @@ serve(async (req) => {
             }
           }
           
-          // Build WHERE conditions
           const conditions: string[] = [];
           const params: string[] = [];
           let paramIndex = 1;
@@ -102,9 +102,6 @@ serve(async (req) => {
           
           sql += ` ORDER BY verified DESC NULLS LAST, rating DESC NULLS LAST LIMIT 50`;
           
-          console.log('SQL:', sql);
-          console.log('Params:', params);
-          
           const result = await connection.queryObject(sql, params);
           console.log('Found', result.rows.length, 'churches in database');
           
@@ -137,38 +134,158 @@ serve(async (req) => {
       } catch (dbError) {
         console.error('Database search error:', dbError);
       }
-    } else {
-      console.log('No database URL configured');
     }
 
-    // STEP 2: Try Google Places API if key is available and we need more results
-    if (googleApiKey && allChurches.length < 5) {
-      console.log('Attempting Google Places API search...');
+    // STEP 2: Use OpenStreetMap Overpass API for global coverage (FREE)
+    if (allChurches.length < 20 && (location || query || continent)) {
+      console.log('Searching OpenStreetMap Overpass API...');
+      try {
+        let overpassQuery: string;
+        
+        if (continent) {
+          // Search by continent
+          const continentBounds: Record<string, string> = {
+            'north_america': '14.5,-170,72,-52',
+            'south_america': '-56,-82,13,-34',
+            'europe': '35,-25,72,65',
+            'asia': '-10,25,77,180',
+            'africa': '-35,-20,37,52',
+            'australia': '-48,110,-10,180',
+            'oceania': '-48,110,-10,180'
+          };
+          const bbox = continentBounds[continent.toLowerCase().replace(' ', '_')] || '35,-25,72,65';
+          
+          const nameClause = query ? `["name"~"${escapeOverpassString(query)}",i]` : '';
+          overpassQuery = `
+            [out:json][timeout:60];
+            (
+              node["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(${bbox});
+              way["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(${bbox});
+            );
+            out center 100;
+          `;
+        } else if (location) {
+          // Geocode location first
+          const coords = await geocodeLocation(location);
+          if (coords) {
+            const nameClause = query ? `["name"~"${escapeOverpassString(query)}",i]` : '';
+            overpassQuery = `
+              [out:json][timeout:30];
+              (
+                node["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(around:${radius},${coords.lat},${coords.lon});
+                way["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(around:${radius},${coords.lat},${coords.lon});
+                node["building"="church"]${nameClause}(around:${radius},${coords.lat},${coords.lon});
+                way["building"="church"]${nameClause}(around:${radius},${coords.lat},${coords.lon});
+              );
+              out center 100;
+            `;
+          } else {
+            // Fallback to area search
+            overpassQuery = `
+              [out:json][timeout:30];
+              area["name"~"${escapeOverpassString(location)}",i]->.searchArea;
+              (
+                node["amenity"="place_of_worship"]["religion"="christian"](area.searchArea);
+                way["amenity"="place_of_worship"]["religion"="christian"](area.searchArea);
+              );
+              out center 100;
+            `;
+          }
+        } else if (query) {
+          // Global name search
+          overpassQuery = `
+            [out:json][timeout:45];
+            (
+              node["amenity"="place_of_worship"]["religion"="christian"]["name"~"${escapeOverpassString(query)}",i];
+              way["amenity"="place_of_worship"]["religion"="christian"]["name"~"${escapeOverpassString(query)}",i];
+            );
+            out center 50;
+          `;
+        } else {
+          overpassQuery = '';
+        }
+
+        if (overpassQuery) {
+          const osmResponse = await fetch(OVERPASS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `data=${encodeURIComponent(overpassQuery)}`
+          });
+
+          if (osmResponse.ok) {
+            const osmData = await osmResponse.json();
+            console.log('OpenStreetMap returned', osmData.elements?.length || 0, 'results');
+            
+            for (const el of (osmData.elements || [])) {
+              if (!el.tags?.name) continue;
+              
+              // Check for duplicates
+              const isDuplicate = allChurches.some(c => 
+                c.name.toLowerCase() === (el.tags?.name || '').toLowerCase()
+              );
+              
+              if (!isDuplicate) {
+                const lat = el.lat || el.center?.lat;
+                const lon = el.lon || el.center?.lon;
+                const tags = el.tags || {};
+                
+                const address = [
+                  tags['addr:housenumber'],
+                  tags['addr:street'],
+                  tags['addr:city'],
+                  tags['addr:state'],
+                  tags['addr:postcode']
+                ].filter(Boolean).join(', ');
+
+                allChurches.push({
+                  id: `osm-${el.type}-${el.id}`,
+                  name: tags.name || 'Unknown Church',
+                  address: address || `${tags['addr:city'] || ''}, ${tags['addr:state'] || ''}`.trim(),
+                  city: tags['addr:city'] || '',
+                  state: tags['addr:state'] || '',
+                  country: tags['addr:country'] || '',
+                  latitude: lat,
+                  longitude: lon,
+                  rating: null,
+                  reviewCount: null,
+                  phone: tags.phone || null,
+                  website: tags.website || null,
+                  source: 'openstreetmap',
+                  verified: false,
+                  acceptsCrypto: false,
+                  denomination: tags.denomination || null,
+                });
+              }
+            }
+          } else {
+            console.log('Overpass API error:', osmResponse.status);
+          }
+        }
+      } catch (osmError) {
+        console.log('OpenStreetMap search error:', osmError);
+      }
+    }
+
+    // STEP 3: Google Places API as final fallback (if configured and still need results)
+    if (googleApiKey && allChurches.length < 5 && location) {
+      console.log('Attempting Google Places API fallback...');
       try {
         const searchQuery = query ? `${query} church` : 'christian church';
         
-        // Geocode location if provided
+        // Geocode for location bias
         let locationBias = {};
-        if (location) {
-          const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${googleApiKey}`;
-          const geocodeResponse = await fetch(geocodeUrl);
-          const geocodeData = await geocodeResponse.json();
-          
-          if (geocodeData.status === 'OK' && geocodeData.results?.length > 0) {
-            const { lat, lng } = geocodeData.results[0].geometry.location;
-            console.log('Location geocoded:', { lat, lng });
-            locationBias = {
-              circle: {
-                center: { latitude: lat, longitude: lng },
-                radius: radius
-              }
-            };
-          }
+        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${googleApiKey}`;
+        const geocodeResponse = await fetch(geocodeUrl);
+        const geocodeData = await geocodeResponse.json();
+        
+        if (geocodeData.status === 'OK' && geocodeData.results?.length > 0) {
+          const { lat, lng } = geocodeData.results[0].geometry.location;
+          locationBias = {
+            circle: { center: { latitude: lat, longitude: lng }, radius: radius }
+          };
         }
 
-        // Use Places API (New) - Text Search
         const url = 'https://places.googleapis.com/v1/places:searchText';
-        
         const requestBody: Record<string, unknown> = {
           textQuery: searchQuery,
           maxResultCount: 20,
@@ -177,8 +294,6 @@ serve(async (req) => {
         if (Object.keys(locationBias).length > 0) {
           requestBody.locationBias = locationBias;
         }
-
-        console.log('Calling Google Places API...');
         
         const response = await fetch(url, {
           method: 'POST',
@@ -195,7 +310,6 @@ serve(async (req) => {
           console.log('Google API returned', data.places?.length || 0, 'results');
           
           for (const place of (data.places || [])) {
-            // Check for duplicates by name
             const isDuplicate = allChurches.some(c => 
               c.name.toLowerCase() === (place.displayName?.text || '').toLowerCase()
             );
@@ -220,12 +334,9 @@ serve(async (req) => {
               });
             }
           }
-        } else {
-          const errorData = await response.json();
-          console.log('Google API error:', errorData.error?.message || 'Unknown error');
         }
       } catch (apiError) {
-        console.log('Google API request failed:', apiError);
+        console.log('Google API fallback failed:', apiError);
       }
     }
 
@@ -235,7 +346,8 @@ serve(async (req) => {
       JSON.stringify({ 
         churches: allChurches, 
         source: allChurches.length > 0 ? 'combined' : 'none',
-        count: allChurches.length
+        count: allChurches.length,
+        coverage: 'global'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -245,15 +357,37 @@ serve(async (req) => {
     console.error('Error in church-search function:', err.message);
     return new Response(
       JSON.stringify({ error: err.message, churches: [] }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
-// Helper functions to parse address components
+// Geocode location using Nominatim (free)
+async function geocodeLocation(location: string): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const url = `${NOMINATIM_API_URL}/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'Bible.fi/1.0 (Biblical DeFi Tithing App)' }
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    if (data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Escape special characters for Overpass regex
+function escapeOverpassString(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Helper functions for Google Places address parsing
 function extractCity(address: string): string {
   const parts = address.split(',').map(p => p.trim());
   return parts.length >= 3 ? parts[parts.length - 3] : parts[0] || '';
