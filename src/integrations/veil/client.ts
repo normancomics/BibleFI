@@ -9,6 +9,17 @@
  */
 
 import { ethers } from 'ethers';
+import {
+  createBrowserProvider,
+  keccak256,
+  toUtf8Bytes,
+  hexlify,
+  randomBytes,
+  concat,
+  getBytes,
+  type Provider,
+  type Signer
+} from '@/lib/ethers-compat';
 
 // Veil.cash contract addresses on Base
 const VEIL_CONTRACTS = {
@@ -55,8 +66,8 @@ interface VeilWithdrawResult {
  * Veil.cash Client for private tithing on Base chain
  */
 export class VeilCashClient {
-  private provider: ethers.providers.Provider | null = null;
-  private signer: ethers.Signer | null = null;
+  private provider: Provider | null = null;
+  private signer: Signer | null = null;
   
   // Supported denominations for tithing
   readonly denominations: { value: VeilDenomination; label: string; amount: string }[] = [
@@ -70,13 +81,14 @@ export class VeilCashClient {
   /**
    * Initialize the Veil.cash client with a signer
    */
-  async initialize(signer?: ethers.Signer): Promise<void> {
+  async initialize(signer?: Signer): Promise<void> {
     if (signer) {
       this.signer = signer;
       this.provider = signer.provider || null;
     } else if (typeof window !== 'undefined' && (window as any).ethereum) {
-      this.provider = new ethers.providers.Web3Provider((window as any).ethereum);
-      this.signer = (this.provider as ethers.providers.Web3Provider).getSigner();
+      const browserProvider = createBrowserProvider((window as any).ethereum);
+      this.provider = browserProvider;
+      this.signer = await browserProvider.getSigner();
     }
   }
 
@@ -85,15 +97,15 @@ export class VeilCashClient {
    */
   generateCommitment(): { commitment: string; nullifier: string; secret: string } {
     // Generate random nullifier and secret
-    const nullifier = ethers.utils.hexlify(ethers.utils.randomBytes(31));
-    const secret = ethers.utils.hexlify(ethers.utils.randomBytes(31));
+    const nullifier = hexlify(randomBytes(31));
+    const secret = hexlify(randomBytes(31));
     
     // Create commitment hash (simplified - actual implementation uses Pedersen hash)
-    const preimage = ethers.utils.concat([
-      ethers.utils.arrayify(nullifier),
-      ethers.utils.arrayify(secret)
+    const preimage = concat([
+      getBytes(nullifier),
+      getBytes(secret)
     ]);
-    const commitment = ethers.utils.keccak256(preimage);
+    const commitment = keccak256(preimage);
     
     return { commitment, nullifier, secret };
   }
@@ -110,7 +122,7 @@ export class VeilCashClient {
       network: 'base',
       timestamp: Date.now()
     };
-    return `veil-note-${Buffer.from(JSON.stringify(noteData)).toString('base64')}`;
+    return `veil-note-${btoa(JSON.stringify(noteData))}`;
   }
 
   /**
@@ -120,7 +132,7 @@ export class VeilCashClient {
     try {
       if (!note.startsWith('veil-note-')) return null;
       const base64Data = note.replace('veil-note-', '');
-      const noteData = JSON.parse(Buffer.from(base64Data, 'base64').toString());
+      const noteData = JSON.parse(atob(base64Data));
       return {
         denomination: noteData.denomination,
         nullifier: noteData.nullifier,
@@ -148,9 +160,7 @@ export class VeilCashClient {
       console.log('Veil.cash deposit initiated:', { denomination, commitment });
 
       // Simulate transaction
-      const simulatedTxHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes(`deposit-${Date.now()}-${commitment}`)
-      );
+      const simulatedTxHash = keccak256(toUtf8Bytes(`deposit-${Date.now()}-${commitment}`));
 
       return {
         success: true,
@@ -190,9 +200,7 @@ export class VeilCashClient {
 
       // Simulate proof generation and withdrawal
       const denominationInfo = this.denominations.find(d => d.value === parsedNote.denomination);
-      const simulatedTxHash = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes(`withdraw-${Date.now()}-${recipientAddress}`)
-      );
+      const simulatedTxHash = keccak256(toUtf8Bytes(`withdraw-${Date.now()}-${recipientAddress}`));
 
       return {
         success: true,
@@ -241,7 +249,7 @@ export class VeilCashClient {
     try {
       const network = await this.provider.getNetwork();
       // Base mainnet (8453) or Base Goerli (84531)
-      return network.chainId === 8453 || network.chainId === 84531;
+      return Number(network.chainId) === 8453 || Number(network.chainId) === 84531;
     } catch {
       return false;
     }

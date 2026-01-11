@@ -1,5 +1,11 @@
 import { Framework } from "@superfluid-finance/sdk-core";
 import { ethers } from "ethers";
+import {
+  createJsonRpcProvider,
+  parseUnits,
+  type Provider,
+  type Signer
+} from "@/lib/ethers-compat";
 
 export interface SuperfluidToken {
   name: string;
@@ -39,7 +45,7 @@ export interface TithingStream {
 
 export class RealSuperfluidClient {
   private framework: Framework | null = null;
-  private provider: ethers.providers.Provider | null = null;
+  private provider: Provider | null = null;
   private readonly BASE_CHAIN_ID = 8453;
   private readonly BASE_RPC_URL = "https://mainnet.base.org";
   private readonly BIBLE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"; // Will be updated after deployment
@@ -91,15 +97,15 @@ export class RealSuperfluidClient {
   /**
    * Initialize the Superfluid Framework
    */
-  public async initialize(signer?: ethers.Signer): Promise<void> {
+  public async initialize(signer?: Signer): Promise<void> {
     try {
       // Create provider for Base chain
-      this.provider = new ethers.providers.JsonRpcProvider(this.BASE_RPC_URL);
+      this.provider = createJsonRpcProvider(this.BASE_RPC_URL);
 
       // Initialize Superfluid Framework
       this.framework = await Framework.create({
         chainId: this.BASE_CHAIN_ID,
-        provider: this.provider,
+        provider: this.provider as any, // Type compatibility with Superfluid SDK
         resolverAddress: undefined, // Use default resolver for Base
         protocolReleaseVersion: "v1"
       });
@@ -115,7 +121,7 @@ export class RealSuperfluidClient {
    * Create a real Superfluid flow
    */
   public async createFlow(
-    signer: ethers.Signer,
+    signer: Signer,
     receiver: string,
     tokenAddress: string,
     flowRate: string
@@ -140,12 +146,12 @@ export class RealSuperfluidClient {
       });
 
       // Execute the transaction
-      const txn = await createFlowOperation.exec(signer);
+      const txn = await createFlowOperation.exec(signer as any);
       const receipt = await txn.wait();
 
       return {
         success: true,
-        txHash: receipt.transactionHash
+        txHash: receipt?.hash || receipt?.transactionHash
       };
     } catch (error) {
       console.error("Error creating flow:", error);
@@ -160,7 +166,7 @@ export class RealSuperfluidClient {
    * Update an existing flow
    */
   public async updateFlow(
-    signer: ethers.Signer,
+    signer: Signer,
     receiver: string,
     tokenAddress: string,
     newFlowRate: string
@@ -182,12 +188,12 @@ export class RealSuperfluidClient {
         flowRate: newFlowRate
       });
 
-      const txn = await updateFlowOperation.exec(signer);
+      const txn = await updateFlowOperation.exec(signer as any);
       const receipt = await txn.wait();
 
       return {
         success: true,
-        txHash: receipt.transactionHash
+        txHash: receipt?.hash || receipt?.transactionHash
       };
     } catch (error) {
       console.error("Error updating flow:", error);
@@ -202,7 +208,7 @@ export class RealSuperfluidClient {
    * Delete a flow
    */
   public async deleteFlow(
-    signer: ethers.Signer,
+    signer: Signer,
     receiver: string,
     tokenAddress: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
@@ -222,12 +228,12 @@ export class RealSuperfluidClient {
         receiver: receiver
       });
 
-      const txn = await deleteFlowOperation.exec(signer);
+      const txn = await deleteFlowOperation.exec(signer as any);
       const receipt = await txn.wait();
 
       return {
         success: true,
-        txHash: receipt.transactionHash
+        txHash: receipt?.hash || receipt?.transactionHash
       };
     } catch (error) {
       console.error("Error deleting flow:", error);
@@ -259,7 +265,7 @@ export class RealSuperfluidClient {
       const flow = await superToken.getFlow({
         sender,
         receiver,
-        providerOrSigner: this.provider!
+        providerOrSigner: this.provider as any
       });
 
       return {
@@ -277,9 +283,9 @@ export class RealSuperfluidClient {
    * Calculate flow rate from monthly amount
    */
   public calculateFlowRate(monthlyAmount: number, decimals: number = 18): string {
-    const monthlyWei = ethers.utils.parseUnits(monthlyAmount.toString(), decimals);
-    const secondsInMonth = 30 * 24 * 60 * 60;
-    const flowRateWei = monthlyWei.div(secondsInMonth);
+    const monthlyWei = parseUnits(monthlyAmount.toString(), decimals);
+    const secondsInMonth = 30n * 24n * 60n * 60n;
+    const flowRateWei = monthlyWei / secondsInMonth;
     return flowRateWei.toString();
   }
 
@@ -287,25 +293,24 @@ export class RealSuperfluidClient {
    * Calculate flow rate from amount and period
    */
   public calculateFlowRateFromPeriod(amount: number, period: string, decimals: number = 18): string {
-    let secondsInPeriod: number;
+    let secondsInPeriod: bigint;
     
     switch (period) {
       case 'day':
-        secondsInPeriod = 24 * 60 * 60;
+        secondsInPeriod = 24n * 60n * 60n;
         break;
       case 'week':
-        secondsInPeriod = 7 * 24 * 60 * 60;
+        secondsInPeriod = 7n * 24n * 60n * 60n;
         break;
       case 'month':
       default:
-        secondsInPeriod = 30 * 24 * 60 * 60;
+        secondsInPeriod = 30n * 24n * 60n * 60n;
         break;
     }
     
-    const flowRate = ethers.utils.parseUnits(
-      (amount / secondsInPeriod).toString(),
-      decimals
-    );
+    // Calculate amount per second with proper precision
+    const amountWei = parseUnits(amount.toString(), decimals);
+    const flowRate = amountWei / secondsInPeriod;
     return flowRate.toString();
   }
 
@@ -327,7 +332,7 @@ export class RealSuperfluidClient {
    * Create a tithing stream with real Superfluid integration
    */
   public async createTithingStream(
-    signer: ethers.Signer,
+    signer: Signer,
     churchAddress: string,
     tokenSymbol: string,
     amount: number,
