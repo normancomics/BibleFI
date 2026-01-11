@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
+import {
+  keccak256,
+  toUtf8Bytes,
+  solidityPacked,
+  parseUnits
+} from '@/lib/ethers-compat';
 
 interface NoirProof {
   proof: Uint8Array;
@@ -71,21 +76,19 @@ export function useNoir() {
       console.log('[Noir] Generating tithe proof...');
       
       // Hash the donor secret to create a commitment
-      const donorCommitment = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes(inputs.donorSecret)
-      );
+      const donorCommitment = keccak256(toUtf8Bytes(inputs.donorSecret));
       
       // Create the nullifier (unique per tithe to prevent double-spending)
-      const nullifier = ethers.utils.keccak256(
-        ethers.utils.solidityPack(
+      const nullifier = keccak256(
+        solidityPacked(
           ['bytes32', 'address'],
           [donorCommitment, inputs.receiverAddress]
         )
       );
       
       // Calculate expected tithe (10%)
-      const totalProfits = ethers.BigNumber.from(inputs.totalProfits);
-      const expectedTithe = totalProfits.mul(10).div(100);
+      const totalProfits = parseUnits(inputs.totalProfits, 0);
+      const expectedTithe = (totalProfits * 10n) / 100n;
       
       // In production, this would use actual Noir proof generation
       // For now, simulate the proof structure
@@ -132,13 +135,11 @@ export function useNoir() {
       }
       
       // Hash the user secret to create a commitment
-      const userCommitment = ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes(inputs.userSecret)
-      );
+      const userCommitment = keccak256(toUtf8Bytes(inputs.userSecret));
       
       // Create wisdom commitment (hides exact score)
-      const wisdomCommitment = ethers.utils.keccak256(
-        ethers.utils.solidityPack(
+      const wisdomCommitment = keccak256(
+        solidityPacked(
           ['bytes32', 'uint256'],
           [userCommitment, inputs.wisdomScore]
         )
@@ -201,12 +202,10 @@ export function useNoir() {
     donorSecret: string,
     receiverAddress: string
   ): string => {
-    const donorCommitment = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(donorSecret)
-    );
+    const donorCommitment = keccak256(toUtf8Bytes(donorSecret));
     
-    return ethers.utils.keccak256(
-      ethers.utils.solidityPack(
+    return keccak256(
+      solidityPacked(
         ['bytes32', 'address'],
         [donorCommitment, receiverAddress]
       )

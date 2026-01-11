@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { realSuperfluidClient } from '@/integrations/superfluid/realClient';
 import { toast } from 'sonner';
-import { ethers } from 'ethers';
+import {
+  createBrowserProvider,
+  parseUnits
+} from '@/lib/ethers-compat';
 
 // BWSP Constants (matching BWSPCore.sol)
-const TITHE_RATE = 1000; // 10.00% in basis points
-const BASIS_POINTS = 10000;
-const MIN_STREAM_DURATION = 30 * 24 * 60 * 60; // 30 days in seconds
+const TITHE_RATE = 1000n; // 10.00% in basis points
+const BASIS_POINTS = 10000n;
+const MIN_STREAM_DURATION = 30n * 24n * 60n * 60n; // 30 days in seconds
 
 export interface TithingStreamParams {
   profitAmount: number;
@@ -38,21 +41,21 @@ export const useSuperfluid = () => {
    * Get Web3 provider and ensure Base chain
    */
   const getProvider = useCallback(async () => {
-    if (typeof window !== 'undefined' && window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      const provider = createBrowserProvider((window as any).ethereum);
       const network = await provider.getNetwork();
       
       // Check if we're on Base chain (8453)
-      if (network.chainId !== 8453) {
+      if (Number(network.chainId) !== 8453) {
         try {
-          await window.ethereum.request({
+          await (window as any).ethereum.request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: '0x2105' }], // Base chain ID in hex
           });
         } catch (error: any) {
           if (error.code === 4902) {
             // Chain not added, add Base chain
-            await window.ethereum.request({
+            await (window as any).ethereum.request({
               method: 'wallet_addEthereumChain',
               params: [{
                 chainId: '0x2105',
@@ -74,15 +77,15 @@ export const useSuperfluid = () => {
    * Calculate tithe amount (10% of profits) - matches BWSPCore.sol
    */
   const calculateTithe = useCallback((profitAmount: number): number => {
-    return (profitAmount * TITHE_RATE) / BASIS_POINTS;
+    return (profitAmount * Number(TITHE_RATE)) / Number(BASIS_POINTS);
   }, []);
 
   /**
    * Calculate flow rate from tithe amount (per second over 30 days)
    */
   const calculateTitheFlowRate = useCallback((titheAmount: number, decimals: number = 18): string => {
-    const amountInWei = ethers.utils.parseUnits(titheAmount.toString(), decimals);
-    const flowRatePerSecond = amountInWei.div(MIN_STREAM_DURATION);
+    const amountInWei = parseUnits(titheAmount.toString(), decimals);
+    const flowRatePerSecond = amountInWei / MIN_STREAM_DURATION;
     return flowRatePerSecond.toString();
   }, []);
 
@@ -90,14 +93,14 @@ export const useSuperfluid = () => {
    * Apply wisdom bonus to flow rate (matches BWSPCore.sol logic)
    */
   const applyWisdomBonus = useCallback((baseFlowRate: string, wisdomScore: number): string => {
-    const flowRateBN = ethers.BigNumber.from(baseFlowRate);
+    const flowRateBN = BigInt(baseFlowRate);
     
     if (wisdomScore >= 500) {
       // Generous givers: 5% bonus
-      return flowRateBN.add(flowRateBN.mul(5).div(100)).toString();
+      return (flowRateBN + (flowRateBN * 5n / 100n)).toString();
     } else if (wisdomScore >= 100) {
       // Faithful givers: 2% bonus
-      return flowRateBN.add(flowRateBN.mul(2).div(100)).toString();
+      return (flowRateBN + (flowRateBN * 2n / 100n)).toString();
     }
     
     return baseFlowRate;
@@ -110,7 +113,7 @@ export const useSuperfluid = () => {
         try {
           setIsLoading(true);
           const provider = await getProvider();
-          const signer = provider.getSigner();
+          const signer = await provider.getSigner();
           await realSuperfluidClient.initialize(signer);
           setIsInitialized(true);
           console.log('[BWSP] Superfluid initialized on Base chain');
@@ -138,7 +141,7 @@ export const useSuperfluid = () => {
 
     try {
       const provider = await getProvider();
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
       setIsLoading(true);
 
       // Calculate tithe (10%)
@@ -197,7 +200,7 @@ export const useSuperfluid = () => {
 
     try {
       const provider = await getProvider();
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
 
       setIsLoading(true);
       const result = await realSuperfluidClient.createFlow(signer, receiver, tokenAddress, flowRate);
@@ -229,7 +232,7 @@ export const useSuperfluid = () => {
 
     try {
       const provider = await getProvider();
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
       setIsLoading(true);
       const result = await realSuperfluidClient.updateFlow(signer, receiver, tokenAddress, newFlowRate);
       
@@ -260,7 +263,7 @@ export const useSuperfluid = () => {
 
     try {
       const provider = await getProvider();
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
       setIsLoading(true);
       const result = await realSuperfluidClient.deleteFlow(signer, receiver, tokenAddress);
       

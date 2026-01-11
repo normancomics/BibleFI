@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Pool } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +9,9 @@ const corsHeaders = {
 
 const OVERPASS_API_URL = 'https://overpass-api.de/api/interpreter';
 const NOMINATIM_API_URL = 'https://nominatim.openstreetmap.org';
+
+// Rate limiting map (in-memory, resets on cold start)
+const rateLimits = new Map<string, { count: number; reset: number }>();
 
 interface ChurchResult {
   id: string;
@@ -30,110 +33,147 @@ interface ChurchResult {
   denomination?: string | null;
 }
 
+/**
+ * Validate and sanitize search input to prevent injection attacks
+ */
+function validateSearchInput(input: string | undefined): string | null {
+  if (!input) return null;
+  
+  // Max length 100 chars, alphanumeric + common characters only
+  const sanitized = input.trim().slice(0, 100);
+  if (!/^[a-zA-Z0-9\s\-,.'&]+$/.test(sanitized)) {
+    return null; // Invalid characters
+  }
+  return sanitized;
+}
+
+/**
+ * Check rate limit (10 requests per minute per IP)
+ */
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute
+  const maxRequests = 10;
+  
+  const limit = rateLimits.get(identifier);
+  
+  if (!limit || now > limit.reset) {
+    rateLimits.set(identifier, { count: 1, reset: now + windowMs });
+    return true;
+  }
+  
+  if (limit.count >= maxRequests) {
+    return false;
+  }
+  
+  limit.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
+    // Get client IP for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    
+    // Check rate limit
+    if (!checkRateLimit(clientIP)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded. Please wait before trying again.', churches: [] }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
     
     console.log('Starting global church search...');
     
-    const { query, location, radius = 50000, continent } = await req.json();
-    console.log('Search request:', { query, location, radius, continent });
+    const { query: rawQuery, location: rawLocation, radius = 50000, continent: rawContinent } = await req.json();
+    
+    // Validate and sanitize inputs
+    const query = validateSearchInput(rawQuery);
+    const location = validateSearchInput(rawLocation);
+    const continent = validateSearchInput(rawContinent);
+    
+    console.log('Search request (sanitized):', { query, location, radius, continent });
 
     const allChurches: ChurchResult[] = [];
 
-    // STEP 1: Search local database first
-    if (databaseUrl) {
-      console.log('Searching database via PostgreSQL...');
-      try {
-        const pool = new Pool(databaseUrl, 1);
-        const connection = await pool.connect();
-        
-        try {
-          let searchCity = '';
-          let searchState = '';
-          if (location) {
-            const locationParts = location.split(',').map((p: string) => p.trim());
-            if (locationParts.length >= 2) {
-              searchCity = locationParts[0];
-              searchState = locationParts[1];
-            } else if (locationParts.length === 1) {
-              searchCity = locationParts[0];
-            }
-          }
-          
-          const conditions: string[] = [];
-          const params: string[] = [];
-          let paramIndex = 1;
-          
-          if (query) {
-            conditions.push(`(name ILIKE $${paramIndex} OR denomination ILIKE $${paramIndex})`);
-            params.push(`%${query}%`);
-            paramIndex++;
-          }
-          
-          if (searchCity) {
-            conditions.push(`(city ILIKE $${paramIndex} OR state_province ILIKE $${paramIndex} OR country ILIKE $${paramIndex})`);
-            params.push(`%${searchCity}%`);
-            paramIndex++;
-          }
-          
-          if (searchState && searchState !== searchCity) {
-            conditions.push(`state_province ILIKE $${paramIndex}`);
-            params.push(`%${searchState}%`);
-            paramIndex++;
-          }
-          
-          let sql = `
-            SELECT 
-              id, name, address, city, state_province, country,
-              rating, review_count, phone, website, 
-              verified, accepts_crypto, crypto_networks, denomination
-            FROM global_churches
-          `;
-          
-          if (conditions.length > 0) {
-            sql += ` WHERE ${conditions.join(' OR ')}`;
-          }
-          
-          sql += ` ORDER BY verified DESC NULLS LAST, rating DESC NULLS LAST LIMIT 50`;
-          
-          const result = await connection.queryObject(sql, params);
-          console.log('Found', result.rows.length, 'churches in database');
-          
-          for (const row of result.rows as Record<string, unknown>[]) {
-            allChurches.push({
-              id: row.id as string,
-              name: row.name as string,
-              address: (row.address as string) || `${row.city}, ${row.state_province || ''}, ${row.country}`.trim(),
-              city: row.city as string,
-              state: (row.state_province as string) || '',
-              country: row.country as string,
-              latitude: null,
-              longitude: null,
-              rating: row.rating as number | null,
-              reviewCount: row.review_count as number | null,
-              phone: row.phone as string | null,
-              website: row.website as string | null,
-              source: 'database',
-              verified: (row.verified as boolean) || false,
-              acceptsCrypto: (row.accepts_crypto as boolean) || false,
-              cryptoNetworks: (row.crypto_networks as string[]) || [],
-              denomination: row.denomination as string | null,
-            });
-          }
-        } finally {
-          connection.release();
+    // STEP 1: Search local database using Supabase client (prevents SQL injection)
+    console.log('Searching database via Supabase client...');
+    try {
+      let searchCity = '';
+      let searchState = '';
+      if (location) {
+        const locationParts = location.split(',').map((p: string) => p.trim());
+        if (locationParts.length >= 2) {
+          searchCity = locationParts[0];
+          searchState = locationParts[1];
+        } else if (locationParts.length === 1) {
+          searchCity = locationParts[0];
         }
-        
-        await pool.end();
-      } catch (dbError) {
-        console.error('Database search error:', dbError);
       }
+      
+      // Build query using Supabase client (safe from SQL injection)
+      let dbQuery = supabase
+        .from('global_churches')
+        .select('id, name, address, city, state_province, country, rating, review_count, phone, website, verified, accepts_crypto, crypto_networks, denomination')
+        .limit(50);
+      
+      // Apply filters using Supabase's built-in sanitization
+      if (query) {
+        dbQuery = dbQuery.or(`name.ilike.%${query}%,denomination.ilike.%${query}%`);
+      }
+      
+      if (searchCity) {
+        dbQuery = dbQuery.or(`city.ilike.%${searchCity}%,state_province.ilike.%${searchCity}%,country.ilike.%${searchCity}%`);
+      }
+      
+      if (searchState && searchState !== searchCity) {
+        dbQuery = dbQuery.ilike('state_province', `%${searchState}%`);
+      }
+      
+      dbQuery = dbQuery.order('verified', { ascending: false, nullsFirst: false })
+                       .order('rating', { ascending: false, nullsFirst: false });
+      
+      const { data: rows, error } = await dbQuery;
+      
+      if (error) {
+        console.error('Database query error:', error);
+      } else {
+        console.log('Found', rows?.length || 0, 'churches in database');
+        
+        for (const row of (rows || [])) {
+          allChurches.push({
+            id: row.id,
+            name: row.name,
+            address: row.address || `${row.city}, ${row.state_province || ''}, ${row.country}`.trim(),
+            city: row.city,
+            state: row.state_province || '',
+            country: row.country,
+            latitude: null,
+            longitude: null,
+            rating: row.rating,
+            reviewCount: row.review_count,
+            phone: row.phone,
+            website: row.website,
+            source: 'database',
+            verified: row.verified || false,
+            acceptsCrypto: row.accepts_crypto || false,
+            cryptoNetworks: row.crypto_networks || [],
+            denomination: row.denomination,
+          });
+        }
+      }
+    } catch (dbError) {
+      console.error('Database search error:', dbError);
     }
 
     // STEP 2: Use OpenStreetMap Overpass API for global coverage (FREE)
@@ -143,7 +183,6 @@ serve(async (req) => {
         let overpassQuery: string;
         
         if (continent) {
-          // Search by continent
           const continentBounds: Record<string, string> = {
             'north_america': '14.5,-170,72,-52',
             'south_america': '-56,-82,13,-34',
@@ -165,7 +204,6 @@ serve(async (req) => {
             out center 100;
           `;
         } else if (location) {
-          // Geocode location first
           const coords = await geocodeLocation(location);
           if (coords) {
             const nameClause = query ? `["name"~"${escapeOverpassString(query)}",i]` : '';
@@ -180,7 +218,6 @@ serve(async (req) => {
               out center 100;
             `;
           } else {
-            // Fallback to area search
             overpassQuery = `
               [out:json][timeout:30];
               area["name"~"${escapeOverpassString(location)}",i]->.searchArea;
@@ -192,7 +229,6 @@ serve(async (req) => {
             `;
           }
         } else if (query) {
-          // Global name search
           overpassQuery = `
             [out:json][timeout:45];
             (
@@ -219,7 +255,6 @@ serve(async (req) => {
             for (const el of (osmData.elements || [])) {
               if (!el.tags?.name) continue;
               
-              // Check for duplicates
               const isDuplicate = allChurches.some(c => 
                 c.name.toLowerCase() === (el.tags?.name || '').toLowerCase()
               );
@@ -272,7 +307,6 @@ serve(async (req) => {
       try {
         const searchQuery = query ? `${query} church` : 'christian church';
         
-        // Geocode for location bias
         let locationBias = {};
         const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${googleApiKey}`;
         const geocodeResponse = await fetch(geocodeUrl);
@@ -356,13 +390,12 @@ serve(async (req) => {
     const err = error as Error;
     console.error('Error in church-search function:', err.message);
     return new Response(
-      JSON.stringify({ error: err.message, churches: [] }),
+      JSON.stringify({ error: 'An error occurred while searching', churches: [] }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
-// Geocode location using Nominatim (free)
 async function geocodeLocation(location: string): Promise<{ lat: number; lon: number } | null> {
   try {
     const url = `${NOMINATIM_API_URL}/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
@@ -382,12 +415,10 @@ async function geocodeLocation(location: string): Promise<{ lat: number; lon: nu
   }
 }
 
-// Escape special characters for Overpass regex
 function escapeOverpassString(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// Helper functions for Google Places address parsing
 function extractCity(address: string): string {
   const parts = address.split(',').map(p => p.trim());
   return parts.length >= 3 ? parts[parts.length - 3] : parts[0] || '';

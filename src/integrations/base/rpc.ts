@@ -1,10 +1,17 @@
-
 /**
  * Base Chain RPC Integration for real blockchain data
  * Uses public Base RPC endpoints
  */
 
 import { ethers } from 'ethers';
+import {
+  createJsonRpcProvider,
+  formatUnits,
+  formatEther,
+  type Provider,
+  type TransactionReceipt,
+  type TransactionRequest
+} from '@/lib/ethers-compat';
 
 // Public Base RPC endpoints
 const BASE_RPC_URLS = [
@@ -32,10 +39,10 @@ const ERC20_ABI = [
 ];
 
 export class BaseRPCClient {
-  private provider: ethers.providers.JsonRpcProvider;
+  private provider: ethers.JsonRpcProvider;
   
   constructor() {
-    this.provider = new ethers.providers.JsonRpcProvider(BASE_RPC_URLS[0]);
+    this.provider = createJsonRpcProvider(BASE_RPC_URLS[0]);
   }
 
   /**
@@ -44,7 +51,7 @@ export class BaseRPCClient {
   async getETHBalance(address: string): Promise<string> {
     try {
       const balance = await this.provider.getBalance(address);
-      return ethers.utils.formatEther(balance);
+      return formatEther(balance);
     } catch (error) {
       console.error('Error getting ETH balance:', error);
       return '0';
@@ -59,7 +66,7 @@ export class BaseRPCClient {
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider);
       const balance = await contract.balanceOf(walletAddress);
       const decimals = await contract.decimals();
-      return ethers.utils.formatUnits(balance, decimals);
+      return formatUnits(balance, decimals);
     } catch (error) {
       console.error('Error getting token balance:', error);
       return '0';
@@ -87,8 +94,8 @@ export class BaseRPCClient {
       return {
         name,
         symbol,
-        decimals,
-        totalSupply: ethers.utils.formatUnits(totalSupply, decimals)
+        decimals: Number(decimals),
+        totalSupply: formatUnits(totalSupply, decimals)
       };
     } catch (error) {
       console.error('Error getting token info:', error);
@@ -101,8 +108,8 @@ export class BaseRPCClient {
    */
   async getGasPrice(): Promise<string> {
     try {
-      const gasPrice = await this.provider.getGasPrice();
-      return ethers.utils.formatUnits(gasPrice, 'gwei');
+      const feeData = await this.provider.getFeeData();
+      return formatUnits(feeData.gasPrice || 0n, 9); // gwei
     } catch (error) {
       console.error('Error getting gas price:', error);
       return '0.001'; // Default fallback
@@ -124,7 +131,7 @@ export class BaseRPCClient {
   /**
    * Get transaction receipt
    */
-  async getTransactionReceipt(txHash: string): Promise<ethers.providers.TransactionReceipt | null> {
+  async getTransactionReceipt(txHash: string): Promise<TransactionReceipt | null> {
     try {
       return await this.provider.getTransactionReceipt(txHash);
     } catch (error) {
@@ -136,7 +143,7 @@ export class BaseRPCClient {
   /**
    * Estimate gas for a transaction
    */
-  async estimateGas(transaction: ethers.providers.TransactionRequest): Promise<string> {
+  async estimateGas(transaction: TransactionRequest): Promise<string> {
     try {
       const gasEstimate = await this.provider.estimateGas(transaction);
       return gasEstimate.toString();
