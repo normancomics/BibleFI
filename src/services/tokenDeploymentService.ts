@@ -1,4 +1,11 @@
-import { ethers } from 'ethers';
+import { 
+  Provider, 
+  Signer, 
+  ContractFactory, 
+  Contract, 
+  formatEther, 
+  ZeroAddress 
+} from 'ethers';
 import { useToast } from '@/hooks/use-toast';
 
 // Contract ABIs (simplified for demo)
@@ -49,14 +56,14 @@ export interface DeploymentResult {
 }
 
 export class TokenDeploymentService {
-  private provider: ethers.providers.Provider;
-  private signer: ethers.Signer | null = null;
+  private provider: Provider;
+  private signer: Signer | null = null;
 
-  constructor(provider: ethers.providers.Provider) {
+  constructor(provider: Provider) {
     this.provider = provider;
   }
 
-  async setSigner(signer: ethers.Signer) {
+  async setSigner(signer: Signer) {
     this.signer = signer;
   }
 
@@ -64,17 +71,18 @@ export class TokenDeploymentService {
     if (!this.signer) throw new Error('Signer not set');
 
     // Deploy wisdom rewards pool first
-    const wisdomPoolFactory = new ethers.ContractFactory(
+    const wisdomPoolFactory = new ContractFactory(
       WISDOM_REWARDS_POOL_ABI,
       "0x608060405234801561001057600080fd5b50", // Bytecode placeholder
       this.signer
     );
 
-    const wisdomPool = await wisdomPoolFactory.deploy(ethers.constants.AddressZero);
-    await wisdomPool.deployed();
+    const wisdomPool = await wisdomPoolFactory.deploy(ZeroAddress);
+    await wisdomPool.waitForDeployment();
+    const wisdomPoolAddress = await wisdomPool.getAddress();
 
     // Deploy Bible token
-    const tokenFactory = new ethers.ContractFactory(
+    const tokenFactory = new ContractFactory(
       BIBLE_TOKEN_ABI,
       "0x608060405234801561001057600080fd5b50", // Bytecode placeholder
       this.signer
@@ -82,12 +90,12 @@ export class TokenDeploymentService {
 
     const bibleToken = await tokenFactory.deploy(
       config.treasuryAddress,
-      wisdomPool.address
+      wisdomPoolAddress
     );
 
-    await bibleToken.deployed();
+    await bibleToken.waitForDeployment();
 
-    return bibleToken.address;
+    return await bibleToken.getAddress();
   }
 
   async createLiquidityPool(tokenAddress: string): Promise<string> {
@@ -98,10 +106,10 @@ export class TokenDeploymentService {
     const WETH_ADDRESS = "0x4200000000000000000000000000000000000006";
     const FEE_TIER = 3000; // 0.3%
 
-    const factory = new ethers.Contract(UNISWAP_V3_FACTORY, UNISWAP_V3_FACTORY_ABI, this.signer);
+    const factory = new Contract(UNISWAP_V3_FACTORY, UNISWAP_V3_FACTORY_ABI, this.signer);
     
     const tx = await factory.createPool(tokenAddress, WETH_ADDRESS, FEE_TIER);
-    const receipt = await tx.wait();
+    await tx.wait();
     
     const poolAddress = await factory.getPool(tokenAddress, WETH_ADDRESS, FEE_TIER);
     return poolAddress;
@@ -119,16 +127,16 @@ export class TokenDeploymentService {
       "function earned(address account) view returns (uint256)"
     ];
 
-    const stakingFactory = new ethers.ContractFactory(
+    const stakingFactory = new ContractFactory(
       stakingABI,
       "0x608060405234801561001057600080fd5b50", // Bytecode placeholder
       this.signer
     );
 
     const stakingContract = await stakingFactory.deploy(tokenAddress, tokenAddress);
-    await stakingContract.deployed();
+    await stakingContract.waitForDeployment();
 
-    return stakingContract.address;
+    return await stakingContract.getAddress();
   }
 
   async verifyContract(contractAddress: string, constructorArgs: any[]): Promise<boolean> {
@@ -144,13 +152,14 @@ export class TokenDeploymentService {
     usdEstimate: string;
   }> {
     // Estimate deployment costs
-    const gasPrice = await this.provider.getGasPrice();
-    const gasEstimate = ethers.BigNumber.from("5000000"); // 5M gas estimate
-    const ethRequired = gasPrice.mul(gasEstimate);
+    const feeData = await this.provider.getFeeData();
+    const gasPrice = feeData.gasPrice || 0n;
+    const gasEstimate = 5000000n; // 5M gas estimate
+    const ethRequired = gasPrice * gasEstimate;
     
     return {
       gasEstimate: gasEstimate.toString(),
-      ethRequired: ethers.utils.formatEther(ethRequired),
+      ethRequired: formatEther(ethRequired),
       usdEstimate: "50.00" // Placeholder USD estimate
     };
   }
@@ -169,11 +178,11 @@ export class TokenDeploymentService {
       const stakingPoolAddress = await this.deployStakingContract(tokenAddress);
       
       // Step 4: Verify Contracts
-      await this.verifyContract(tokenAddress, [config.treasuryAddress, ethers.constants.AddressZero]);
+      await this.verifyContract(tokenAddress, [config.treasuryAddress, ZeroAddress]);
       
       return {
         tokenAddress,
-        wisdomPoolAddress: ethers.constants.AddressZero, // Placeholder
+        wisdomPoolAddress: ZeroAddress, // Placeholder
         liquidityPoolAddress,
         stakingPoolAddress,
         transactionHashes: {

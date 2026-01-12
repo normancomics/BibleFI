@@ -2,10 +2,10 @@
  * Deployment script for TitheVerifier contract
  * Deploy to Base Sepolia (testnet) or Base Mainnet
  * 
- * NOTE: This uses ethers v5 syntax. Upgrade to v6 for production.
+ * Uses ethers v6 syntax.
  */
 
-import { ethers } from 'ethers';
+import { JsonRpcProvider, Wallet, ContractFactory, Contract, formatEther } from 'ethers';
 
 // Contract deployment configuration
 export const DEPLOYMENT_CONFIG = {
@@ -35,19 +35,19 @@ export async function deployTitheVerifier(network: 'baseSepolia' | 'baseMainnet'
   console.log(`   Chain ID: ${config.chainId}`);
   console.log(`   RPC: ${config.rpcUrl}`);
   
-  // Initialize provider and wallet (ethers v5)
-  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
+  // Initialize provider and wallet (ethers v6)
+  const provider = new JsonRpcProvider(config.rpcUrl);
   const privateKey = process.env.PRIVATE_KEY;
   
   if (!privateKey) {
     throw new Error('PRIVATE_KEY not set in environment');
   }
   
-  const wallet = new ethers.Wallet(privateKey, provider);
+  const wallet = new Wallet(privateKey, provider);
   const balance = await provider.getBalance(wallet.address);
   
   console.log(`   Deployer: ${wallet.address}`);
-  console.log(`   Balance: ${ethers.utils.formatEther(balance)} ETH`);
+  console.log(`   Balance: ${formatEther(balance)} ETH`);
   
   // Load contract ABI and bytecode
   // In production, import from compiled artifacts
@@ -65,7 +65,7 @@ export async function deployTitheVerifier(network: 'baseSepolia' | 'baseMainnet'
   
   // Deploy contract
   console.log('\n📝 Deploying contract...');
-  const factory = new ethers.ContractFactory(
+  const factory = new ContractFactory(
     contractArtifact.abi,
     contractArtifact.bytecode,
     wallet
@@ -100,10 +100,10 @@ export async function registerChurches(
   churches: Array<{ address: string; name: string }>
 ) {
   const config = DEPLOYMENT_CONFIG[network];
-  const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
-  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+  const provider = new JsonRpcProvider(config.rpcUrl);
+  const wallet = new Wallet(process.env.PRIVATE_KEY!, provider);
   
-  const contract = new ethers.Contract(
+  const contract = new Contract(
     contractAddress,
     [
       "function registerChurch(address churchAddress, string calldata churchName) external",

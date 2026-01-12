@@ -1,5 +1,4 @@
-
-import { ethers } from 'ethers';
+import { parseUnits } from 'ethers';
 
 interface Token {
   symbol: string;
@@ -76,13 +75,11 @@ export class OdosClient {
         price = '1'; // Default 1:1 for other pairs
       }
       
-      // Calculate buy amount
-      const parsedAmount = ethers.BigNumber.from(sellAmount);
-      const buyAmount = parsedAmount.mul(
-        ethers.utils.parseUnits(price, buyTokenInfo.decimals)
-      ).div(
-        ethers.utils.parseUnits('1', sellTokenInfo.decimals)
-      );
+      // Calculate buy amount using native bigint
+      const parsedAmount = BigInt(sellAmount);
+      const priceUnits = parseUnits(price, buyTokenInfo.decimals);
+      const sellUnits = parseUnits('1', sellTokenInfo.decimals);
+      const buyAmount = (parsedAmount * priceUnits) / sellUnits;
       
       // Return mock quote
       return {

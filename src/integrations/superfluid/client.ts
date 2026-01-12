@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { parseEther } from 'ethers';
 
 export interface SuperfluidToken {
   name: string;
@@ -248,9 +248,9 @@ export class SuperfluidClient {
    */
   public calculateFlowRate(monthlyAmount: number): string {
     // Convert to wei and calculate per-second rate
-    const monthlyWei = ethers.utils.parseEther(monthlyAmount.toString());
-    const secondsInMonth = 30 * 24 * 60 * 60;
-    const flowRateWei = monthlyWei.div(secondsInMonth);
+    const monthlyWei = parseEther(monthlyAmount.toString());
+    const secondsInMonth = 30n * 24n * 60n * 60n;
+    const flowRateWei = monthlyWei / secondsInMonth;
     return flowRateWei.toString();
   }
   
@@ -261,23 +261,23 @@ export class SuperfluidClient {
    * @returns Flow rate in tokens per second
    */
   public calculateFlowRateFromPeriod(amount: number, period: string): string {
-    let secondsInPeriod: number;
+    let secondsInPeriod: bigint;
     
     switch (period) {
       case 'day':
-        secondsInPeriod = 24 * 60 * 60;
+        secondsInPeriod = 24n * 60n * 60n;
         break;
       case 'week':
-        secondsInPeriod = 7 * 24 * 60 * 60;
+        secondsInPeriod = 7n * 24n * 60n * 60n;
         break;
       case 'month':
       default:
-        secondsInPeriod = 30 * 24 * 60 * 60;
+        secondsInPeriod = 30n * 24n * 60n * 60n;
         break;
     }
     
-    const flowRate = ethers.utils.parseEther(
-      (amount / secondsInPeriod).toString()
+    const flowRate = parseEther(
+      (amount / Number(secondsInPeriod)).toString()
     );
     return flowRate.toString();
   }
