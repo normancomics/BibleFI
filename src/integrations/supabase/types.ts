@@ -53,6 +53,13 @@ export type Database = {
             foreignKeyName: "agent_assignments_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
+            referencedRelation: "public_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_assignments_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
             referencedRelation: "sovereign_agents"
             referencedColumns: ["id"]
           },
@@ -1206,7 +1213,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_agents: {
+        Row: {
+          availability_hours: string | null
+          id: string | null
+          languages: string[] | null
+          name: string | null
+          rating: number | null
+          review_count: number | null
+          service_areas: string[] | null
+          specialties: string[] | null
+          verified: boolean | null
+        }
+        Insert: {
+          availability_hours?: string | null
+          id?: string | null
+          languages?: string[] | null
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          verified?: boolean | null
+        }
+        Update: {
+          availability_hours?: string | null
+          id?: string | null
+          languages?: string[] | null
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       search_biblical_knowledge: {
