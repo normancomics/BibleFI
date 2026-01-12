@@ -1,7 +1,14 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { 
+  checkRateLimit, 
+  getClientIP, 
+  validateInput, 
+  getOptionalUser,
+  errorResponse,
+  rateLimitResponse 
+} from '../_shared/auth.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -20,9 +27,36 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - 20 requests per minute per IP
+    const clientIP = getClientIP(req);
+    const rateLimit = checkRateLimit(clientIP, 20, 60000);
+    
+    if (!rateLimit.allowed) {
+      return rateLimitResponse(rateLimit.resetAt, corsHeaders);
+    }
+
+    // Optional authentication - authenticated users get higher limits
+    const { user } = await getOptionalUser(req);
+    if (user) {
+      // Authenticated users get more lenient rate limiting
+      const userRateLimit = checkRateLimit(`user:${user.id}`, 50, 60000);
+      if (!userRateLimit.allowed) {
+        return rateLimitResponse(userRateLimit.resetAt, corsHeaders);
+      }
+    }
+
     const { query, context } = await req.json();
 
-    console.log('Biblical advisor request:', { query, context });
+    // Input validation
+    const queryValidation = validateInput(query, { 
+      maxLength: 1000, 
+      fieldName: 'Query' 
+    });
+    if (!queryValidation.valid) {
+      return errorResponse(queryValidation.error!, 400, corsHeaders);
+    }
+
+    console.log('Biblical advisor request:', { query: query.substring(0, 100), hasUser: !!user });
 
     // Enhanced fallback response without OpenAI
     if (!openAIApiKey) {
@@ -63,14 +97,15 @@ serve(async (req) => {
       // Smart verse selection based on query
       let relevantVerses = [];
       let advice = "";
+      const queryLower = query.toLowerCase();
       
-      if (query.toLowerCase().includes('tithe') || query.toLowerCase().includes('give')) {
+      if (queryLower.includes('tithe') || queryLower.includes('give')) {
         relevantVerses = [comprehensiveVerses[0], comprehensiveVerses[1]];
         advice = `Based on ${comprehensiveVerses[0].reference}: "${comprehensiveVerses[0].verse_text}"\n\nBiblical guidance on tithing: God invites us to test Him in the area of tithing. This isn't about earning His love, but about demonstrating our trust in His provision. In the DeFi space, you can set up automated tithing streams using protocols like Superfluid, ensuring your giving has priority over reinvestment. Remember, tithing should come from your gross income, including DeFi yields.`;
-      } else if (query.toLowerCase().includes('debt') || query.toLowerCase().includes('borrow')) {
+      } else if (queryLower.includes('debt') || queryLower.includes('borrow')) {
         relevantVerses = [comprehensiveVerses[2], comprehensiveVerses[1]];
         advice = `According to ${comprehensiveVerses[2].reference}: "${comprehensiveVerses[2].verse_text}"\n\nBiblical wisdom on debt: The Bible consistently warns against the dangers of debt. In DeFi, this translates to being extremely cautious with leverage and borrowed positions. While some protocols offer attractive borrowing rates, remember that liquidation risks can quickly turn profitable positions into significant losses.`;
-      } else if (query.toLowerCase().includes('invest') || query.toLowerCase().includes('defi')) {
+      } else if (queryLower.includes('invest') || queryLower.includes('defi')) {
         relevantVerses = [comprehensiveVerses[3], comprehensiveVerses[1]];
         advice = `Based on ${comprehensiveVerses[3].reference}: "${comprehensiveVerses[3].verse_text}"\n\nBiblical approach to DeFi investing: God's word emphasizes gradual, steady wealth building over get-rich-quick schemes. Apply this to DeFi by using dollar-cost averaging, diversifying across multiple protocols, and focusing on sustainable yields rather than unsustainable APYs that often indicate higher risk.`;
       } else {

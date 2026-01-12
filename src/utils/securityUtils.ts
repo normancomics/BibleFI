@@ -208,15 +208,39 @@ export function createSecureToken(userId: string, expiryMinutes: number = 60): s
 }
 
 /**
- * Implements secure storage with military-grade encryption
+ * Generate a cryptographically secure per-session key
+ * This key is unique per browser session and not stored in code
+ */
+const getSessionEncryptionKey = (): string => {
+  const SESSION_KEY_NAME = 'bfi_session_key';
+  let sessionKey = sessionStorage.getItem(SESSION_KEY_NAME);
+  
+  if (!sessionKey) {
+    // Generate a cryptographically random key for this session
+    const randomBytes = new Uint8Array(32);
+    crypto.getRandomValues(randomBytes);
+    sessionKey = Array.from(randomBytes)
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    sessionStorage.setItem(SESSION_KEY_NAME, sessionKey);
+  }
+  
+  return sessionKey;
+};
+
+/**
+ * Implements secure storage with per-session encryption keys
+ * NOTE: This provides obfuscation, not true security. Sensitive data 
+ * (private keys, passwords) should NEVER be stored in localStorage.
+ * For truly sensitive data, use server-side storage with proper encryption.
  */
 export const secureStorage = {
   /**
-   * Store encrypted data in localStorage with enhanced security
+   * Store encrypted data in localStorage with session-based key
    */
   setItem: (key: string, data: any, secret?: string): void => {
-    // Use default app secret or provided secret
-    const encryptionKey = secret || (import.meta.env.VITE_ENCRYPTION_KEY || 'bible-fi-default-secret');
+    // Use provided secret, or derive from session key
+    const encryptionKey = secret || getSessionEncryptionKey();
     const encryptedData = encryptData(data, encryptionKey);
     localStorage.setItem(key, encryptedData);
   },
@@ -229,9 +253,15 @@ export const secureStorage = {
     
     if (!encryptedData) return null;
     
-    // Use default app secret or provided secret
-    const encryptionKey = secret || (import.meta.env.VITE_ENCRYPTION_KEY || 'bible-fi-default-secret');
-    return decryptData(encryptedData, encryptionKey);
+    try {
+      // Use provided secret, or derive from session key
+      const encryptionKey = secret || getSessionEncryptionKey();
+      return decryptData(encryptedData, encryptionKey);
+    } catch (error) {
+      // If decryption fails (e.g., new session), return null
+      console.warn('Failed to decrypt stored data, may be from different session');
+      return null;
+    }
   },
   
   /**
@@ -239,6 +269,14 @@ export const secureStorage = {
    */
   removeItem: (key: string): void => {
     localStorage.removeItem(key);
+  },
+  
+  /**
+   * Clear all secure storage items
+   */
+  clear: (): void => {
+    localStorage.clear();
+    sessionStorage.removeItem('bfi_session_key');
   }
 };
 
