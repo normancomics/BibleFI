@@ -214,8 +214,9 @@ const ComprehensiveTithingHub: React.FC = () => {
       setIsVeilProcessing(true);
       
       // Initialize Veil client
-      const provider = new (await import('ethers')).ethers.providers.Web3Provider((window as any).ethereum);
-      const signer = provider.getSigner();
+      const { BrowserProvider } = await import('ethers');
+      const provider = new BrowserProvider((window as any).ethereum);
+      const signer = await provider.getSigner();
       await veilCashClient.initialize(signer);
       
       // Deposit to privacy pool

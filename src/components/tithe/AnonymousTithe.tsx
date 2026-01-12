@@ -119,8 +119,9 @@ export const AnonymousTithe: React.FC = () => {
 
       if (zkProvider === 'veil') {
         // Veil.cash ZK-SNARK approach
-        const provider = new ethers.providers.Web3Provider((window as any).ethereum);
-        const signer = provider.getSigner();
+        const { BrowserProvider } = await import('ethers');
+        const provider = new BrowserProvider((window as any).ethereum);
+        const signer = await provider.getSigner();
         await veilCashClient.initialize(signer);
         
         const result = await veilCashClient.deposit(veilDenomination);

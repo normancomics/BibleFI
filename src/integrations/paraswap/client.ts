@@ -1,5 +1,3 @@
-import { ethers } from 'ethers';
-
 export interface ParaSwapQuote {
   srcToken: string;
   destToken: string;
@@ -95,8 +93,8 @@ export class ParaSwapClient {
       console.error('Error getting ParaSwap quote:', error);
       
       // Return mock quote for development
-      const srcAmountBN = ethers.BigNumber.from(srcAmount);
-      const destAmount = srcAmountBN.mul(95).div(100); // 5% slippage simulation
+      const srcAmountBigInt = BigInt(srcAmount);
+      const destAmount = (srcAmountBigInt * 95n) / 100n; // 5% slippage simulation
       
       return {
         srcToken,

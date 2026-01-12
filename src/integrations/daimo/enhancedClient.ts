@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { parseEther } from 'ethers';
 
 export interface DaimoAccount {
   address: string;
@@ -67,7 +67,7 @@ export class EnhancedDaimoClient {
       return {
         address,
         name: 'Bible.fi User',
-        balance: ethers.utils.parseEther('100').toString(),
+        balance: parseEther('100').toString(),
         isVerified: true
       };
     }
@@ -150,7 +150,7 @@ export class EnhancedDaimoClient {
         id: paymentId,
         from: '0x1234567890123456789012345678901234567890',
         to: '0x0987654321098765432109876543210987654321',
-        amount: ethers.utils.parseEther('10').toString(),
+        amount: parseEther('10').toString(),
         memo: 'Bible.fi Tithe',
         status: 'completed',
         timestamp: Date.now(),
@@ -184,7 +184,7 @@ export class EnhancedDaimoClient {
           id: 'daimo_1',
           from: address,
           to: '0x0987654321098765432109876543210987654321',
-          amount: ethers.utils.parseEther('10').toString(),
+          amount: parseEther('10').toString(),
           memo: 'Weekly Tithe',
           status: 'completed',
           timestamp: Date.now() - 86400000, // 1 day ago
@@ -196,7 +196,7 @@ export class EnhancedDaimoClient {
           id: 'daimo_2',
           from: address,
           to: '0x1111111111111111111111111111111111111111',
-          amount: ethers.utils.parseEther('5').toString(),
+          amount: parseEther('5').toString(),
           memo: 'Special Offering',
           status: 'completed',
           timestamp: Date.now() - 172800000, // 2 days ago

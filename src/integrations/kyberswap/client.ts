@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { parseEther } from 'ethers';
 
 export interface KyberSwapQuote {
   inputAmount: string;
@@ -75,8 +75,8 @@ export class KyberSwapClient {
       console.error('Error getting KyberSwap quote:', error);
       
       // Return mock data for development
-      const amountInBN = ethers.BigNumber.from(amountIn);
-      const outputAmount = amountInBN.mul(98).div(100); // 2% slippage simulation
+      const amountInBigInt = BigInt(amountIn);
+      const outputAmount = (amountInBigInt * 98n) / 100n; // 2% slippage simulation
       
       return {
         inputAmount: amountIn,
@@ -132,18 +132,18 @@ export class KyberSwapClient {
           token0: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
           token1: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
           fee: 300,
-          liquidity: ethers.utils.parseEther('1000000').toString(),
+          liquidity: parseEther('1000000').toString(),
           apy: '15.2',
-          volume24h: ethers.utils.parseEther('50000').toString()
+          volume24h: parseEther('50000').toString()
         },
         {
           address: '0x2345678901234567890123456789012345678901',
           token0: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
           token1: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
           fee: 100,
-          liquidity: ethers.utils.parseEther('750000').toString(),
+          liquidity: parseEther('750000').toString(),
           apy: '8.7',
-          volume24h: ethers.utils.parseEther('25000').toString()
+          volume24h: parseEther('25000').toString()
         }
       ];
     }

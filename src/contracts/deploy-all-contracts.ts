@@ -19,7 +19,7 @@
  * ts-node src/contracts/deploy-all-contracts.ts --network base-mainnet
  */
 
-import { ethers } from 'ethers';
+import { ethers, JsonRpcProvider, Wallet, formatEther, id } from 'ethers';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -56,16 +56,16 @@ interface DeploymentResult {
 }
 
 class ContractDeployer {
-  private provider: ethers.providers.JsonRpcProvider;
-  private wallet: ethers.Wallet;
+  private provider: JsonRpcProvider;
+  private wallet: Wallet;
   private config: DeploymentConfig;
   private results: DeploymentResult[] = [];
 
   constructor(config: DeploymentConfig) {
     this.config = config;
     const network = NETWORKS[config.network];
-    this.provider = new ethers.providers.JsonRpcProvider(network.rpcUrl);
-    this.wallet = new ethers.Wallet(config.privateKey, this.provider);
+    this.provider = new JsonRpcProvider(network.rpcUrl);
+    this.wallet = new Wallet(config.privateKey, this.provider);
     
     console.log('\n🚀 Bible.fi Contract Deployment');
     console.log('================================');
@@ -92,8 +92,8 @@ class ContractDeployer {
       console.log('   Run: npx hardhat compile or forge build');
       
       // Simulated deployment for now
-      const mockAddress = ethers.Wallet.createRandom().address;
-      const mockTxHash = ethers.utils.id('tithe-verifier-deployment');
+      const mockAddress = Wallet.createRandom().address;
+      const mockTxHash = id('tithe-verifier-deployment');
       
       this.results.push({
         contractName: 'TitheVerifier',
@@ -125,8 +125,8 @@ class ContractDeployer {
       console.log('⚠️  Note: Wisdom verifier contract needs to be created');
       console.log('   Create: src/contracts/WisdomVerifier.sol');
       
-      const mockAddress = ethers.Wallet.createRandom().address;
-      const mockTxHash = ethers.utils.id('wisdom-verifier-deployment');
+      const mockAddress = Wallet.createRandom().address;
+      const mockTxHash = id('wisdom-verifier-deployment');
       
       this.results.push({
         contractName: 'WisdomVerifier',
@@ -248,9 +248,9 @@ class ContractDeployer {
     try {
       // Check wallet balance
       const balance = await this.provider.getBalance(this.wallet.address);
-      console.log(`💰 Deployer balance: ${ethers.utils.formatEther(balance)} ETH\n`);
+      console.log(`💰 Deployer balance: ${formatEther(balance)} ETH\n`);
       
-      if (balance.isZero()) {
+      if (balance === 0n) {
         throw new Error('Deployer wallet has no ETH. Please fund it first.');
       }
       

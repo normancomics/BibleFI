@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { Signer, parseEther, parseUnits, formatEther } from 'ethers';
 import { BASE_TOKENS } from '@/integrations/zerox/client';
 
 export interface UniswapQuote {
@@ -47,12 +47,10 @@ export class UniswapClient {
         rate = 1 / 1800;
       }
 
-      const amountInBN = ethers.BigNumber.from(amountIn);
-      const amountOut = amountInBN.mul(
-        ethers.utils.parseUnits(rate.toString(), outputToken.decimals)
-      ).div(
-        ethers.utils.parseUnits('1', inputToken.decimals)
-      );
+      const amountInBigInt = BigInt(amountIn);
+      const rateUnits = parseUnits(rate.toString(), outputToken.decimals);
+      const inputUnits = parseUnits('1', inputToken.decimals);
+      const amountOut = (amountInBigInt * rateUnits) / inputUnits;
 
       return {
         amountOut: amountOut.toString(),
@@ -75,19 +73,19 @@ export class UniswapClient {
         {
           tokenA: BASE_TOKENS.ETH.address,
           tokenB: BASE_TOKENS.USDC.address,
-          liquidity: ethers.utils.parseEther('1000000').toString(),
-          token0Amount: ethers.utils.parseEther('500').toString(),
-          token1Amount: ethers.utils.parseUnits('900000', 6).toString(),
-          fees24h: ethers.utils.parseEther('2.5').toString(),
+          liquidity: parseEther('1000000').toString(),
+          token0Amount: parseEther('500').toString(),
+          token1Amount: parseUnits('900000', 6).toString(),
+          fees24h: parseEther('2.5').toString(),
           apy: '12.5'
         },
         {
           tokenA: BASE_TOKENS.USDC.address,
           tokenB: BASE_TOKENS.DAI.address,
-          liquidity: ethers.utils.parseEther('500000').toString(),
-          token0Amount: ethers.utils.parseUnits('250000', 6).toString(),
-          token1Amount: ethers.utils.parseEther('250000').toString(),
-          fees24h: ethers.utils.parseEther('0.8').toString(),
+          liquidity: parseEther('500000').toString(),
+          token0Amount: parseUnits('250000', 6).toString(),
+          token1Amount: parseEther('250000').toString(),
+          fees24h: parseEther('0.8').toString(),
           apy: '8.2'
         }
       ];
@@ -103,7 +101,7 @@ export class UniswapClient {
     amountA: string,
     amountB: string,
     slippage: number,
-    signer: ethers.Signer
+    signer: Signer
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     try {
       console.log('Adding liquidity to Uniswap V3...');
@@ -111,8 +109,8 @@ export class UniswapClient {
       // Mock transaction for development
       const mockTx = await signer.sendTransaction({
         to: '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45', // Uniswap V3 Router
-        value: ethers.utils.parseEther('0.01'),
-        gasLimit: 300000
+        value: parseEther('0.01'),
+        gasLimit: 300000n
       });
 
       return {

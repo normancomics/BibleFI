@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { Signer, parseEther } from 'ethers';
 
 export interface RelayQuote {
   toAmount: string;
@@ -67,8 +67,8 @@ export class RelayClient {
       console.error('Error getting relay quote:', error);
       // Return mock data for development
       return {
-        toAmount: ethers.utils.parseEther('0.95').toString(),
-        feeAmount: ethers.utils.parseEther('0.05').toString(),
+        toAmount: parseEther('0.95').toString(),
+        feeAmount: parseEther('0.05').toString(),
         gasLimit: '200000',
         steps: [
           {
@@ -86,7 +86,7 @@ export class RelayClient {
 
   async executeCrossChainTx(
     quote: RelayQuote,
-    signer: ethers.Signer
+    signer: Signer
   ): Promise<{ txHash: string; success: boolean }> {
     try {
       // In production, this would execute the actual cross-chain transaction
@@ -95,8 +95,8 @@ export class RelayClient {
       // Mock execution for development
       const mockTx = await signer.sendTransaction({
         to: '0x1111111254fb6c44bAC0beD2854e76F90643097d', // Mock relay contract
-        value: ethers.utils.parseEther('0.01'),
-        gasLimit: 21000
+        value: parseEther('0.01'),
+        gasLimit: 21000n
       });
 
       return {
