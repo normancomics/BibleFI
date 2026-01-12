@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { parseUnits } from '@/lib/ethers-compat';
 import { SUPERFLUID_ADDRESSES } from './hardhat.config';
 
 /**
@@ -63,8 +64,8 @@ export const DEPLOYMENT_CONFIG = {
   
   // Gas settings for Base
   gasSettings: {
-    maxFeePerGas: ethers.utils.parseUnits('0.1', 'gwei'),
-    maxPriorityFeePerGas: ethers.utils.parseUnits('0.1', 'gwei')
+    maxFeePerGas: parseUnits('0.1', 9),
+    maxPriorityFeePerGas: parseUnits('0.1', 9)
   },
   
   // Initial wisdom score thresholds

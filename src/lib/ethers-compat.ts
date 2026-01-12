@@ -72,7 +72,10 @@ export function toUtf8Bytes(text: string): Uint8Array {
 /**
  * Convert bytes to hex string (replaces ethers.utils.hexlify)
  */
-export function hexlify(value: Uint8Array | string | number | bigint): string {
+export function hexlify(value: Uint8Array | string | bigint): string {
+  if (typeof value === 'bigint') {
+    return ethers.toBeHex(value);
+  }
   return ethers.hexlify(value);
 }
 
