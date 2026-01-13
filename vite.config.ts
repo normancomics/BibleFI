@@ -1,4 +1,3 @@
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
@@ -18,8 +17,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
       buffer: 'buffer',
-      // Alias ethers imports from Superfluid SDK to our compatibility shim
-      'ethers': path.resolve(__dirname, './src/lib/ethers-shim.ts'),
     },
   },
   define: {
@@ -27,7 +24,7 @@ export default defineConfig(({ mode }) => ({
     'process.env': {},
   },
   optimizeDeps: {
-    include: ['buffer'],
+    include: ['buffer', 'ethers'],
     exclude: ['@superfluid-finance/sdk-core'],
     esbuildOptions: {
       define: {
@@ -38,6 +35,10 @@ export default defineConfig(({ mode }) => ({
   build: {
     commonjsOptions: {
       transformMixedEsModules: true,
+    },
+    rollupOptions: {
+      // Provide a shim for ethers v5 BigNumber used by Superfluid SDK
+      shimMissingExports: true,
     },
   },
 }))
