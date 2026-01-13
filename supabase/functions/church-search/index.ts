@@ -88,10 +88,12 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'public' }
+    });
     
     console.log('Starting global church search...');
     
