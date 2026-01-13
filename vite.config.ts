@@ -18,6 +18,8 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
       buffer: 'buffer',
+      // Alias ethers imports from Superfluid SDK to our compatibility shim
+      'ethers': path.resolve(__dirname, './src/lib/ethers-shim.ts'),
     },
   },
   define: {
@@ -26,10 +28,16 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['buffer'],
+    exclude: ['@superfluid-finance/sdk-core'],
     esbuildOptions: {
       define: {
         global: 'globalThis'
       },
+    },
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
     },
   },
 }))
