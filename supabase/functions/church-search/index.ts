@@ -91,8 +91,12 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
+    // Create Supabase client with proper schema configuration
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      db: { schema: 'public' }
+      db: { schema: 'public' },
+      global: {
+        headers: { 'Accept-Profile': 'public', 'Content-Profile': 'public' }
+      }
     });
     
     console.log('Starting global church search...');
@@ -108,8 +112,8 @@ serve(async (req) => {
 
     const allChurches: ChurchResult[] = [];
 
-    // STEP 1: Search local database using Supabase client (prevents SQL injection)
-    console.log('Searching database via Supabase client...');
+    // STEP 1: Search local database using direct REST API with explicit schema header
+    console.log('Searching database via REST API...');
     try {
       let searchCity = '';
       let searchState = '';
@@ -123,33 +127,42 @@ serve(async (req) => {
         }
       }
       
-      // Build query using Supabase client (safe from SQL injection)
-      let dbQuery = supabase
-        .from('global_churches')
-        .select('id, name, address, city, state_province, country, rating, review_count, phone, website, verified, accepts_crypto, crypto_networks, denomination')
-        .limit(50);
+      // Build filter query for PostgREST
+      const filters: string[] = [];
       
-      // Apply filters using Supabase's built-in sanitization
       if (query) {
-        dbQuery = dbQuery.or(`name.ilike.%${query}%,denomination.ilike.%${query}%`);
+        filters.push(`or=(name.ilike.*${encodeURIComponent(query)}*,denomination.ilike.*${encodeURIComponent(query)}*)`);
       }
       
       if (searchCity) {
-        dbQuery = dbQuery.or(`city.ilike.%${searchCity}%,state_province.ilike.%${searchCity}%,country.ilike.%${searchCity}%`);
+        filters.push(`or=(city.ilike.*${encodeURIComponent(searchCity)}*,state_province.ilike.*${encodeURIComponent(searchCity)}*,country.ilike.*${encodeURIComponent(searchCity)}*)`);
       }
       
-      if (searchState && searchState !== searchCity) {
-        dbQuery = dbQuery.ilike('state_province', `%${searchState}%`);
-      }
+      // Direct fetch to REST API with public schema header
+      const restUrl = new URL(`${supabaseUrl}/rest/v1/global_churches`);
+      restUrl.searchParams.set('select', 'id,name,address,city,state_province,country,rating,review_count,phone,website,verified,accepts_crypto,crypto_networks,denomination');
+      restUrl.searchParams.set('limit', '50');
+      restUrl.searchParams.set('order', 'verified.desc.nullslast,rating.desc.nullslast');
       
-      dbQuery = dbQuery.order('verified', { ascending: false, nullsFirst: false })
-                       .order('rating', { ascending: false, nullsFirst: false });
+      // Add filters to URL
+      filters.forEach(f => {
+        const [key, value] = f.split('=');
+        restUrl.searchParams.set(key, value);
+      });
       
-      const { data: rows, error } = await dbQuery;
+      const dbResponse = await fetch(restUrl.toString(), {
+        method: 'GET',
+        headers: {
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Accept': 'application/json',
+          'Accept-Profile': 'public',
+          'Content-Profile': 'public'
+        }
+      });
       
-      if (error) {
-        console.error('Database query error:', error);
-      } else {
+      if (dbResponse.ok) {
+        const rows = await dbResponse.json();
         console.log('Found', rows?.length || 0, 'churches in database');
         
         for (const row of (rows || [])) {
@@ -173,6 +186,9 @@ serve(async (req) => {
             denomination: row.denomination,
           });
         }
+      } else {
+        const errorText = await dbResponse.text();
+        console.error('Database REST API error:', dbResponse.status, errorText);
       }
     } catch (dbError) {
       console.error('Database search error:', dbError);
