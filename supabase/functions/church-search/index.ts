@@ -91,11 +91,11 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     
-    // Create Supabase client with proper schema configuration
+    // Create Supabase client with api schema (view exposed there)
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      db: { schema: 'public' },
+      db: { schema: 'api' },
       global: {
-        headers: { 'Accept-Profile': 'public', 'Content-Profile': 'public' }
+        headers: { 'Accept-Profile': 'api', 'Content-Profile': 'api' }
       }
     });
     
@@ -138,7 +138,7 @@ serve(async (req) => {
         filters.push(`or=(city.ilike.*${encodeURIComponent(searchCity)}*,state_province.ilike.*${encodeURIComponent(searchCity)}*,country.ilike.*${encodeURIComponent(searchCity)}*)`);
       }
       
-      // Direct fetch to REST API with public schema header
+      // Direct fetch to REST API using api schema view
       const restUrl = new URL(`${supabaseUrl}/rest/v1/global_churches`);
       restUrl.searchParams.set('select', 'id,name,address,city,state_province,country,rating,review_count,phone,website,verified,accepts_crypto,crypto_networks,denomination');
       restUrl.searchParams.set('limit', '50');
@@ -156,8 +156,8 @@ serve(async (req) => {
           'apikey': supabaseServiceKey,
           'Authorization': `Bearer ${supabaseServiceKey}`,
           'Accept': 'application/json',
-          'Accept-Profile': 'public',
-          'Content-Profile': 'public'
+          'Accept-Profile': 'api',
+          'Content-Profile': 'api'
         }
       });
       
