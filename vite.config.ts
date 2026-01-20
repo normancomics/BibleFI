@@ -17,8 +17,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
       buffer: 'buffer',
-      // Redirect ethers BigNumber imports to our shim
-      'ethers/lib/utils': path.resolve(__dirname, './src/lib/ethers-compat.ts'),
     },
   },
   define: {
