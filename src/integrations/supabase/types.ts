@@ -70,6 +70,13 @@ export type Database = {
             referencedRelation: "global_churches"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "agent_assignments_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "public_church_directory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ai_context_sessions: {
@@ -434,6 +441,13 @@ export type Database = {
             referencedRelation: "global_churches"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "church_payment_processors_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "public_church_directory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       church_reviews: {
@@ -470,6 +484,13 @@ export type Database = {
             columns: ["church_id"]
             isOneToOne: false
             referencedRelation: "global_churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "church_reviews_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "public_church_directory"
             referencedColumns: ["id"]
           },
         ]
@@ -1130,6 +1151,7 @@ export type Database = {
           churches: Json | null
           created_at: string | null
           crypto_donations: Json | null
+          deleted_at: string | null
           documentation_generated: boolean | null
           fiat_donations: Json | null
           form_1099_generated: boolean | null
@@ -1146,6 +1168,7 @@ export type Database = {
           churches?: Json | null
           created_at?: string | null
           crypto_donations?: Json | null
+          deleted_at?: string | null
           documentation_generated?: boolean | null
           fiat_donations?: Json | null
           form_1099_generated?: boolean | null
@@ -1162,6 +1185,7 @@ export type Database = {
           churches?: Json | null
           created_at?: string | null
           crypto_donations?: Json | null
+          deleted_at?: string | null
           documentation_generated?: boolean | null
           fiat_donations?: Json | null
           form_1099_generated?: boolean | null
@@ -1249,8 +1273,87 @@ export type Database = {
         }
         Relationships: []
       }
+      public_church_directory: {
+        Row: {
+          accepts_cards: boolean | null
+          accepts_checks: boolean | null
+          accepts_crypto: boolean | null
+          accepts_fiat: boolean | null
+          address: string | null
+          city: string | null
+          coordinates: unknown
+          country: string | null
+          created_at: string | null
+          crypto_networks: string[] | null
+          denomination: string | null
+          id: string | null
+          masked_crypto_address: string | null
+          masked_email: string | null
+          masked_phone: string | null
+          name: string | null
+          rating: number | null
+          review_count: number | null
+          state_province: string | null
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          accepts_cards?: boolean | null
+          accepts_checks?: boolean | null
+          accepts_crypto?: boolean | null
+          accepts_fiat?: boolean | null
+          address?: string | null
+          city?: string | null
+          coordinates?: unknown
+          country?: string | null
+          created_at?: string | null
+          crypto_networks?: string[] | null
+          denomination?: string | null
+          id?: string | null
+          masked_crypto_address?: never
+          masked_email?: never
+          masked_phone?: never
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          state_province?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          accepts_cards?: boolean | null
+          accepts_checks?: boolean | null
+          accepts_crypto?: boolean | null
+          accepts_fiat?: boolean | null
+          address?: string | null
+          city?: string | null
+          coordinates?: unknown
+          country?: string | null
+          created_at?: string | null
+          crypto_networks?: string[] | null
+          denomination?: string | null
+          id?: string | null
+          masked_crypto_address?: never
+          masked_email?: never
+          masked_phone?: never
+          name?: string | null
+          rating?: number | null
+          review_count?: number | null
+          state_province?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_full_church_details: { Args: { p_church_id: string }; Returns: Json }
+      get_masked_church_info: {
+        Args: {
+          church_row: Database["public"]["Tables"]["global_churches"]["Row"]
+        }
+        Returns: Json
+      }
       search_biblical_knowledge: {
         Args: {
           match_count?: number
