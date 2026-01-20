@@ -1,11 +1,48 @@
-import { Framework } from "@superfluid-finance/sdk-core";
-import { ethers } from "ethers";
-import {
-  createJsonRpcProvider,
+/**
+ * Superfluid client using direct contract calls (ethers v6 compatible)
+ * Replaces @superfluid-finance/sdk-core to avoid ethers v5 BigNumber conflicts
+ */
+
+import { 
+  Contract, 
+  JsonRpcProvider, 
+  BrowserProvider,
+  formatUnits,
   parseUnits,
-  type Provider,
-  type Signer
-} from "@/lib/ethers-compat";
+  ZeroAddress,
+  type Signer,
+  type Provider
+} from 'ethers';
+
+// Superfluid CFA V1 ABI (simplified for flow operations)
+const CFA_V1_ABI = [
+  'function createFlow(address token, address receiver, int96 flowRate, bytes userData) external returns (bool)',
+  'function updateFlow(address token, address receiver, int96 flowRate, bytes userData) external returns (bool)',
+  'function deleteFlow(address token, address sender, address receiver, bytes userData) external returns (bool)',
+  'function getFlow(address token, address sender, address receiver) external view returns (uint256 timestamp, int96 flowRate, uint256 deposit, uint256 owedDeposit)',
+  'function getNetFlow(address token, address account) external view returns (int96 flowRate)',
+];
+
+// Super Token ABI (simplified)
+const SUPER_TOKEN_ABI = [
+  'function upgrade(uint256 amount) external',
+  'function downgrade(uint256 amount) external',
+  'function balanceOf(address account) external view returns (uint256)',
+  'function approve(address spender, uint256 amount) external returns (bool)',
+  'function getUnderlyingToken() external view returns (address)',
+  'function realtimeBalanceOfNow(address account) external view returns (int256 availableBalance, uint256 deposit, uint256 owedDeposit, uint256 timestamp)',
+];
+
+// Superfluid Host ABI
+const HOST_ABI = [
+  'function callAgreement(address agreementClass, bytes callData, bytes userData) external returns (bytes memory returnedData)',
+];
+
+// Base chain Superfluid addresses
+const SUPERFLUID_ADDRESSES = {
+  host: '0x4C073B3baB6d8826b8C5b229f3cfdC1eC6E47E74',
+  cfaV1: '0x19ba78B9cDB05A877718841c574325fdB53601bb',
+};
 
 export interface SuperfluidToken {
   name: string;
@@ -44,18 +81,19 @@ export interface TithingStream {
 }
 
 export class RealSuperfluidClient {
-  private framework: Framework | null = null;
+  private cfaContract: Contract | null = null;
+  private hostContract: Contract | null = null;
   private provider: Provider | null = null;
   private readonly BASE_CHAIN_ID = 8453;
   private readonly BASE_RPC_URL = "https://mainnet.base.org";
-  private readonly BIBLE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000"; // Will be updated after deployment
+  private readonly BIBLE_TOKEN_ADDRESS = ZeroAddress;
 
   // Real Base chain Super Tokens
   private tokens: Record<string, SuperfluidToken> = {
     'USDCx': {
       name: 'Super USDC',
       symbol: 'USDCx',
-      address: '0x1efF3Dd78F4A14aBfa9Fa66579bD3Ce9E1B30529', // Real USDCx on Base
+      address: '0x1efF3Dd78F4A14aBfa9Fa66579bD3Ce9E1B30529',
       underlyingToken: {
         symbol: 'USDC',
         address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
@@ -65,7 +103,7 @@ export class RealSuperfluidClient {
     'ETHx': {
       name: 'Super ETH',
       symbol: 'ETHx',
-      address: '0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93', // Real ETHx on Base
+      address: '0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93',
       underlyingToken: {
         symbol: 'ETH',
         address: '0x4200000000000000000000000000000000000006'
@@ -75,7 +113,7 @@ export class RealSuperfluidClient {
     'DAIx': {
       name: 'Super DAI',
       symbol: 'DAIx',
-      address: '0x7D60e4223A5C1e8A167aEF98a92a4B5C6889bE9C', // Real DAIx on Base
+      address: '0x7D60e4223A5C1e8A167aEF98a92a4B5C6889bE9C',
       underlyingToken: {
         symbol: 'DAI',
         address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb'
@@ -85,7 +123,7 @@ export class RealSuperfluidClient {
     'BIBLEx': {
       name: 'Super BIBLE',
       symbol: 'BIBLEx',
-      address: '0x0000000000000000000000000000000000000000', // Will be updated after deployment
+      address: ZeroAddress,
       underlyingToken: {
         symbol: 'BIBLE',
         address: this.BIBLE_TOKEN_ADDRESS
@@ -95,30 +133,54 @@ export class RealSuperfluidClient {
   };
 
   /**
-   * Initialize the Superfluid Framework
+   * Initialize the Superfluid contracts
    */
   public async initialize(signer?: Signer): Promise<void> {
     try {
       // Create provider for Base chain
-      this.provider = createJsonRpcProvider(this.BASE_RPC_URL);
+      this.provider = new JsonRpcProvider(this.BASE_RPC_URL);
 
-      // Initialize Superfluid Framework
-      this.framework = await Framework.create({
-        chainId: this.BASE_CHAIN_ID,
-        provider: this.provider as any, // Type compatibility with Superfluid SDK
-        resolverAddress: undefined, // Use default resolver for Base
-        protocolReleaseVersion: "v1"
-      });
+      // Initialize contracts with read-only provider
+      this.cfaContract = new Contract(
+        SUPERFLUID_ADDRESSES.cfaV1,
+        CFA_V1_ABI,
+        this.provider
+      );
 
-      console.log("Superfluid Framework initialized for Base chain");
+      this.hostContract = new Contract(
+        SUPERFLUID_ADDRESSES.host,
+        HOST_ABI,
+        this.provider
+      );
+
+      console.log("Superfluid contracts initialized for Base chain (ethers v6)");
     } catch (error) {
-      console.error("Failed to initialize Superfluid Framework:", error);
+      console.error("Failed to initialize Superfluid contracts:", error);
       throw error;
     }
   }
 
   /**
-   * Create a real Superfluid flow
+   * Encode flow operation for host.callAgreement
+   */
+  private encodeCreateFlowData(token: string, receiver: string, flowRate: bigint): string {
+    const iface = new (new JsonRpcProvider('').constructor as any).Interface(CFA_V1_ABI);
+    // For direct CFA calls, we use createFlow selector + encoded params
+    const selector = '0x5d6df3a1'; // createFlow(address,address,int96,bytes) selector
+    const encoder = new TextEncoder();
+    const userData = '0x';
+    
+    // ABI encode the parameters
+    const encodedParams = new Contract(ZeroAddress, CFA_V1_ABI).interface.encodeFunctionData(
+      'createFlow',
+      [token, receiver, flowRate, userData]
+    ).slice(10); // Remove function selector
+    
+    return selector + encodedParams;
+  }
+
+  /**
+   * Create a real Superfluid flow using direct contract call
    */
   public async createFlow(
     signer: Signer,
@@ -127,31 +189,31 @@ export class RealSuperfluidClient {
     flowRate: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     try {
-      if (!this.framework) {
+      if (!this.cfaContract) {
         await this.initialize();
       }
 
-      if (!this.framework) {
-        throw new Error("Framework not initialized");
-      }
+      // Connect CFA contract to signer for write operations
+      const cfaWithSigner = new Contract(
+        SUPERFLUID_ADDRESSES.cfaV1,
+        CFA_V1_ABI,
+        signer
+      );
 
-      // Get the Super Token
-      const superToken = await this.framework.loadSuperToken(tokenAddress);
+      // Create flow directly on CFA
+      const flowRateBigInt = BigInt(flowRate);
+      const tx = await cfaWithSigner.createFlow(
+        tokenAddress,
+        receiver,
+        flowRateBigInt,
+        '0x' // Empty user data
+      );
 
-      // Create flow operation
-      const createFlowOperation = superToken.createFlow({
-        sender: await signer.getAddress(),
-        receiver: receiver,
-        flowRate: flowRate
-      });
-
-      // Execute the transaction
-      const txn = await createFlowOperation.exec(signer as any);
-      const receipt = await txn.wait();
+      const receipt = await tx.wait();
 
       return {
         success: true,
-        txHash: receipt?.hash || receipt?.transactionHash
+        txHash: receipt?.hash
       };
     } catch (error) {
       console.error("Error creating flow:", error);
@@ -172,28 +234,29 @@ export class RealSuperfluidClient {
     newFlowRate: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     try {
-      if (!this.framework) {
+      if (!this.cfaContract) {
         await this.initialize();
       }
 
-      if (!this.framework) {
-        throw new Error("Framework not initialized");
-      }
+      const cfaWithSigner = new Contract(
+        SUPERFLUID_ADDRESSES.cfaV1,
+        CFA_V1_ABI,
+        signer
+      );
 
-      const superToken = await this.framework.loadSuperToken(tokenAddress);
+      const flowRateBigInt = BigInt(newFlowRate);
+      const tx = await cfaWithSigner.updateFlow(
+        tokenAddress,
+        receiver,
+        flowRateBigInt,
+        '0x'
+      );
 
-      const updateFlowOperation = superToken.updateFlow({
-        sender: await signer.getAddress(),
-        receiver: receiver,
-        flowRate: newFlowRate
-      });
-
-      const txn = await updateFlowOperation.exec(signer as any);
-      const receipt = await txn.wait();
+      const receipt = await tx.wait();
 
       return {
         success: true,
-        txHash: receipt?.hash || receipt?.transactionHash
+        txHash: receipt?.hash
       };
     } catch (error) {
       console.error("Error updating flow:", error);
@@ -213,27 +276,29 @@ export class RealSuperfluidClient {
     tokenAddress: string
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     try {
-      if (!this.framework) {
+      if (!this.cfaContract) {
         await this.initialize();
       }
 
-      if (!this.framework) {
-        throw new Error("Framework not initialized");
-      }
+      const cfaWithSigner = new Contract(
+        SUPERFLUID_ADDRESSES.cfaV1,
+        CFA_V1_ABI,
+        signer
+      );
 
-      const superToken = await this.framework.loadSuperToken(tokenAddress);
+      const sender = await signer.getAddress();
+      const tx = await cfaWithSigner.deleteFlow(
+        tokenAddress,
+        sender,
+        receiver,
+        '0x'
+      );
 
-      const deleteFlowOperation = superToken.deleteFlow({
-        sender: await signer.getAddress(),
-        receiver: receiver
-      });
-
-      const txn = await deleteFlowOperation.exec(signer as any);
-      const receipt = await txn.wait();
+      const receipt = await tx.wait();
 
       return {
         success: true,
-        txHash: receipt?.hash || receipt?.transactionHash
+        txHash: receipt?.hash
       };
     } catch (error) {
       console.error("Error deleting flow:", error);
@@ -253,25 +318,20 @@ export class RealSuperfluidClient {
     tokenAddress: string
   ): Promise<{ flowRate: string; deposit: string; owedDeposit: string } | null> {
     try {
-      if (!this.framework) {
+      if (!this.cfaContract) {
         await this.initialize();
       }
 
-      if (!this.framework) {
-        throw new Error("Framework not initialized");
+      if (!this.cfaContract) {
+        throw new Error("CFA contract not initialized");
       }
 
-      const superToken = await this.framework.loadSuperToken(tokenAddress);
-      const flow = await superToken.getFlow({
-        sender,
-        receiver,
-        providerOrSigner: this.provider as any
-      });
+      const flow = await this.cfaContract.getFlow(tokenAddress, sender, receiver);
 
       return {
-        flowRate: flow.flowRate,
-        deposit: flow.deposit,
-        owedDeposit: flow.owedDeposit
+        flowRate: flow.flowRate.toString(),
+        deposit: flow.deposit.toString(),
+        owedDeposit: flow.owedDeposit.toString()
       };
     } catch (error) {
       console.error("Error getting flow:", error);
@@ -308,7 +368,6 @@ export class RealSuperfluidClient {
         break;
     }
     
-    // Calculate amount per second with proper precision
     const amountWei = parseUnits(amount.toString(), decimals);
     const flowRate = amountWei / secondsInPeriod;
     return flowRate.toString();
@@ -329,7 +388,7 @@ export class RealSuperfluidClient {
   }
 
   /**
-   * Create a tithing stream with real Superfluid integration
+   * Create a tithing stream
    */
   public async createTithingStream(
     signer: Signer,
@@ -347,10 +406,7 @@ export class RealSuperfluidClient {
         };
       }
 
-      // Calculate flow rate
       const flowRate = this.calculateFlowRateFromPeriod(amount, period, 18);
-
-      // Create the actual flow
       const result = await this.createFlow(signer, churchAddress, token.address, flowRate);
 
       if (result.success) {
