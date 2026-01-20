@@ -1,9 +1,13 @@
 /**
  * Ethers.js v6 compatibility layer
  * Provides utility functions that work with ethers v6 API
+ * Also exports BigNumber shim for v5 compatibility with Superfluid SDK
  */
 
 import { ethers } from 'ethers';
+
+// Export BigNumber shim for libraries expecting ethers v5
+export { BigNumber } from './ethers-shim';
 
 // Re-export common types
 export type Provider = ethers.Provider;

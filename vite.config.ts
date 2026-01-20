@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
       buffer: 'buffer',
+      // Redirect ethers BigNumber imports to our shim
+      'ethers/lib/utils': path.resolve(__dirname, './src/lib/ethers-compat.ts'),
     },
   },
   define: {
@@ -25,7 +27,6 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['buffer', 'ethers'],
-    exclude: ['@superfluid-finance/sdk-core'],
     esbuildOptions: {
       define: {
         global: 'globalThis'
@@ -37,7 +38,6 @@ export default defineConfig(({ mode }) => ({
       transformMixedEsModules: true,
     },
     rollupOptions: {
-      // Provide a shim for ethers v5 BigNumber used by Superfluid SDK
       shimMissingExports: true,
     },
   },
