@@ -2,7 +2,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SoundProvider } from "@/contexts/SoundContext";
@@ -44,14 +43,11 @@ import ZKMonitorPage from "./pages/ZKMonitorPage";
 import BiblicalFinanceEncyclopediaPage from "./pages/BiblicalFinanceEncyclopediaPage";
 import "./App.css";
 
-const queryClient = new QueryClient();
-
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <SecurityProvider>
-          <EnhancedSecurityProvider>
-            <SoundProvider>
+  <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <SecurityProvider>
+      <EnhancedSecurityProvider>
+        <SoundProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -92,11 +88,10 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
-            </SoundProvider>
-          </EnhancedSecurityProvider>
-        </SecurityProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+        </SoundProvider>
+      </EnhancedSecurityProvider>
+    </SecurityProvider>
+  </ThemeProvider>
 );
 
 export default App;
