@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +18,7 @@ import {
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
 import WisdomScoreNavbar from '@/components/ui/WisdomScoreNavbar';
+import NetworkStatusIndicator from '@/components/wallet/NetworkStatusIndicator';
 
 const NavBar: React.FC = () => {
   const location = useLocation();
@@ -87,8 +87,10 @@ const NavBar: React.FC = () => {
             ))}
           </div>
 
-          {/* Wisdom Score, Wallet & Sound Toggle */}
+          {/* Network Status, Wisdom Score, Wallet & Sound Toggle */}
           <div className="flex items-center gap-2">
+            <NetworkStatusIndicator showLabel className="hidden sm:flex" />
+            <NetworkStatusIndicator className="sm:hidden" />
             <WisdomScoreNavbar />
             <WalletButton variant="outline" size="sm" />
             <SoundToggle />
