@@ -18,7 +18,7 @@ const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
   className,
   showLabel = false,
 }) => {
-  const { isConnected, isOnBaseChain, connectionStep, chainId } = useWallet();
+  const { isConnected, isOnBaseChain, connectionStep, chainId, switchToBase } = useWallet();
 
   const getStatusConfig = () => {
     if (!isConnected) {
@@ -29,6 +29,7 @@ const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
         pulseColor: '',
         label: 'Not Connected',
         tooltip: 'Connect your wallet to access DeFi features',
+        clickable: false,
       };
     }
 
@@ -41,6 +42,7 @@ const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
         label: 'Switching...',
         tooltip: 'Switching to Base network',
         animate: true,
+        clickable: false,
       };
     }
 
@@ -48,10 +50,11 @@ const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
       return {
         icon: AlertTriangle,
         color: 'text-amber-500',
-        bgColor: 'bg-amber-500/10',
+        bgColor: 'bg-amber-500/10 hover:bg-amber-500/20',
         pulseColor: 'bg-amber-500',
         label: 'Wrong Network',
-        tooltip: `Connected to chain ${chainId}. Click to switch to Base.`,
+        tooltip: 'Click to switch to Base network',
+        clickable: true,
       };
     }
 
@@ -62,23 +65,37 @@ const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
       pulseColor: 'bg-green-500',
       label: 'Base',
       tooltip: 'Connected to Base network',
+      clickable: false,
     };
   };
 
   const config = getStatusConfig();
   const Icon = config.icon;
 
+  const handleClick = () => {
+    if (config.clickable && !isOnBaseChain) {
+      switchToBase();
+    }
+  };
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <motion.div
+        <motion.button
+          type="button"
+          onClick={handleClick}
+          disabled={!config.clickable}
           className={cn(
-            'relative flex items-center gap-1.5 rounded-full px-2 py-1 cursor-default',
+            'relative flex items-center gap-1.5 rounded-full px-2 py-1 transition-colors',
             config.bgColor,
+            config.clickable && 'cursor-pointer active:scale-95',
+            !config.clickable && 'cursor-default',
             className
           )}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
+          whileHover={config.clickable ? { scale: 1.05 } : undefined}
+          whileTap={config.clickable ? { scale: 0.95 } : undefined}
           transition={{ duration: 0.2 }}
         >
           {/* Pulse indicator for connected state */}
@@ -117,7 +134,7 @@ const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
               {config.label}
             </span>
           )}
-        </motion.div>
+        </motion.button>
       </TooltipTrigger>
       <TooltipContent side="bottom" className="text-xs">
         <div className="flex items-center gap-2">
