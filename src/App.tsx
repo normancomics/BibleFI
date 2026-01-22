@@ -1,10 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { SoundProvider } from "@/contexts/SoundContext";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
 import Index from "./pages/Index";
@@ -47,48 +45,46 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
     <SecurityProvider>
       <EnhancedSecurityProvider>
-        <SoundProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/defi" element={<EnhancedDefiPage />} />
-              <Route path="/defi-classic" element={<DefiPage />} />
-              <Route path="/staking" element={<StakingPage />} />
-              <Route path="/farming" element={<FarmingPage />} />
-              <Route path="/tithe" element={<TithePage />} />
-              <Route path="/tithe-enhanced" element={<EnhancedTithePage />} />
-              <Route path="/wisdom" element={<WisdomPage />} />
-              <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
-              <Route path="/wallet" element={<WalletPage />} />
-              <Route path="/taxes" element={<TaxesPage />} />
-              <Route path="/security" element={<SecurityPage />} />
-              <Route path="/token" element={<TokenPage />} />
-              <Route path="/wisdom-token" element={<WisdomTokenPage />} />
-              <Route path="/admin" element={<AdminDashboardPage />} />
-              <Route path="/deployment" element={<DeploymentPage />} />
-              <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
-              <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
-              <Route path="/quantum-security" element={<QuantumSecurityPage />} />
-              <Route path="/system-check" element={<SystemCheckPage />} />
-              <Route path="/churches" element={<ChurchesPage />} />
-              <Route path="/live-data" element={<LiveDataPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/data-crawler" element={<DataCrawlerPage />} />
-              <Route path="/launch-plan" element={<LaunchActionPlanPage />} />
-              <Route path="/terms" element={<TermsOfServicePage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/compliance" element={<CompliancePage />} />
-              <Route path="/tax-compliance" element={<TaxCompliancePage />} />
-          <Route path="/zk-monitor" element={<ZKMonitorPage />} />
-          <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </SoundProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/defi" element={<EnhancedDefiPage />} />
+            <Route path="/defi-classic" element={<DefiPage />} />
+            <Route path="/staking" element={<StakingPage />} />
+            <Route path="/farming" element={<FarmingPage />} />
+            <Route path="/tithe" element={<TithePage />} />
+            <Route path="/tithe-enhanced" element={<EnhancedTithePage />} />
+            <Route path="/wisdom" element={<WisdomPage />} />
+            <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
+            <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/taxes" element={<TaxesPage />} />
+            <Route path="/security" element={<SecurityPage />} />
+            <Route path="/token" element={<TokenPage />} />
+            <Route path="/wisdom-token" element={<WisdomTokenPage />} />
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/deployment" element={<DeploymentPage />} />
+            <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
+            <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
+            <Route path="/quantum-security" element={<QuantumSecurityPage />} />
+            <Route path="/system-check" element={<SystemCheckPage />} />
+            <Route path="/churches" element={<ChurchesPage />} />
+            <Route path="/live-data" element={<LiveDataPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/data-crawler" element={<DataCrawlerPage />} />
+            <Route path="/launch-plan" element={<LaunchActionPlanPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/compliance" element={<CompliancePage />} />
+            <Route path="/tax-compliance" element={<TaxCompliancePage />} />
+            <Route path="/zk-monitor" element={<ZKMonitorPage />} />
+            <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
       </EnhancedSecurityProvider>
     </SecurityProvider>
   </ThemeProvider>
