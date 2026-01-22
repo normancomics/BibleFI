@@ -9,12 +9,20 @@ import { WagmiProvider } from 'wagmi';
 import { config } from '@/config/wagmi';
 import { SoundProvider } from '@/contexts/SoundContext';
 import { WalletProvider } from '@/contexts/WalletContext';
+import { WalletErrorBoundary } from '@/components/wallet/WalletErrorBoundary';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import App from "./App";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
 const authKitConfig = {
   rpcUrl: 'https://base.rpc.subquery.network/public',
@@ -31,9 +39,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <WagmiProvider config={config}>
           <BrowserRouter>
             <SoundProvider>
-              <WalletProvider>
-                <App />
-              </WalletProvider>
+              <WalletErrorBoundary>
+                <WalletProvider>
+                  <App />
+                </WalletProvider>
+              </WalletErrorBoundary>
             </SoundProvider>
           </BrowserRouter>
         </WagmiProvider>
