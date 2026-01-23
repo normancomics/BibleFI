@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { 
-  X, 
   Fuel, 
   Blocks, 
   Activity, 
@@ -10,13 +9,15 @@ import {
   AlertCircle,
   Zap,
   Clock,
-  Server
+  Server,
+  TrendingUp
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSound } from '@/contexts/SoundContext';
 import { cn } from '@/lib/utils';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface NetworkDetailsModalProps {
   open: boolean;
@@ -33,13 +34,22 @@ interface NetworkData {
   lastUpdated: Date;
 }
 
+interface GasHistoryPoint {
+  time: string;
+  timestamp: number;
+  gwei: number;
+}
+
 const BASE_RPC = 'https://mainnet.base.org';
+const MAX_HISTORY_POINTS = 60; // 1 hour at 1-minute intervals
 
 const NetworkDetailsModal: React.FC<NetworkDetailsModalProps> = ({ open, onOpenChange }) => {
   const [networkData, setNetworkData] = useState<NetworkData | null>(null);
+  const [gasHistory, setGasHistory] = useState<GasHistoryPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useSound();
+  const historyRef = useRef<GasHistoryPoint[]>([]);
 
   const fetchNetworkData = useCallback(async () => {
     const startTime = performance.now();
@@ -97,6 +107,18 @@ const NetworkDetailsModal: React.FC<NetworkDetailsModalProps> = ({ open, onOpenC
       if (latency > 1000) rpcStatus = 'degraded';
       if (latency > 3000) rpcStatus = 'error';
 
+      const now = new Date();
+      
+      // Add to gas history
+      const newPoint: GasHistoryPoint = {
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: now.getTime(),
+        gwei: gasPriceGwei,
+      };
+      
+      historyRef.current = [...historyRef.current, newPoint].slice(-MAX_HISTORY_POINTS);
+      setGasHistory([...historyRef.current]);
+
       setNetworkData({
         gasPrice: gasData.result,
         gasPriceGwei,
@@ -104,10 +126,12 @@ const NetworkDetailsModal: React.FC<NetworkDetailsModalProps> = ({ open, onOpenC
         rpcLatency: latency,
         rpcStatus,
         chainId,
-        lastUpdated: new Date(),
+        lastUpdated: now,
       });
 
-      playSound('success');
+      if (!loading) {
+        playSound('success');
+      }
     } catch (error) {
       console.error('Failed to fetch network data:', error);
       setNetworkData(prev => prev ? { ...prev, rpcStatus: 'error' } : null);
@@ -116,7 +140,7 @@ const NetworkDetailsModal: React.FC<NetworkDetailsModalProps> = ({ open, onOpenC
       setLoading(false);
       setRefreshing(false);
     }
-  }, [playSound]);
+  }, [playSound, loading]);
 
   useEffect(() => {
     if (open) {
@@ -153,9 +177,28 @@ const NetworkDetailsModal: React.FC<NetworkDetailsModalProps> = ({ open, onOpenC
     }
   };
 
+  const getAverageGas = () => {
+    if (gasHistory.length === 0) return 0;
+    return gasHistory.reduce((sum, p) => sum + p.gwei, 0) / gasHistory.length;
+  };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="rounded-lg border border-border/50 bg-popover/95 px-3 py-2 shadow-xl backdrop-blur-sm">
+          <p className="text-xs text-muted-foreground">{payload[0].payload.time}</p>
+          <p className="text-sm font-bold font-mono text-primary">
+            {payload[0].value.toFixed(4)} Gwei
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-primary/20 bg-background/95 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-lg border-primary/20 bg-background/95 backdrop-blur-xl">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="flex items-center gap-2 text-lg font-bold">
             <Activity className="h-5 w-5 text-primary" />
@@ -206,6 +249,79 @@ const NetworkDetailsModal: React.FC<NetworkDetailsModalProps> = ({ open, onOpenC
                 </div>
               )}
             </div>
+          </motion.div>
+
+          {/* Gas Price History Chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="rounded-xl border border-border/50 bg-card/50 p-4"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <p className="text-sm font-medium">Gas Price Trend</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>Avg: {getAverageGas().toFixed(4)} Gwei</span>
+                <span>•</span>
+                <span>{gasHistory.length} samples</span>
+              </div>
+            </div>
+            
+            {gasHistory.length < 2 ? (
+              <div className="h-32 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <Activity className="h-8 w-8 mx-auto mb-2 animate-pulse" />
+                  <p className="text-xs">Collecting gas price data...</p>
+                  <p className="text-xs">Chart will appear after a few samples</p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-32">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={gasHistory} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                    <defs>
+                      <linearGradient id="gasGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis 
+                      dataKey="time" 
+                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      axisLine={false}
+                      tickLine={false}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={40}
+                      tickFormatter={(value) => value.toFixed(3)}
+                      domain={['auto', 'auto']}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <ReferenceLine 
+                      y={getAverageGas()} 
+                      stroke="hsl(var(--muted-foreground))" 
+                      strokeDasharray="3 3" 
+                      strokeOpacity={0.5}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="gwei"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4, fill: 'hsl(var(--primary))' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </motion.div>
 
           {/* Block Number Card */}
