@@ -117,9 +117,32 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const switchToBase = useCallback(() => {
     if (!isOnBaseChain) {
       setConnectionStep('switching-chain');
-      switchChain({ chainId: base.id });
+      toast({
+        title: "🔄 Switching Network",
+        description: `Requesting switch to Base (Chain ID: ${base.id})...`,
+      });
+      switchChain(
+        { chainId: base.id },
+        {
+          onSuccess: () => {
+            playSound('success');
+            toast({
+              title: "✅ Network Switched",
+              description: `Successfully connected to Base network (Chain ID: ${base.id})`,
+            });
+          },
+          onError: (error) => {
+            playSound('error');
+            toast({
+              title: "❌ Switch Failed",
+              description: error.message || "Failed to switch to Base network",
+              variant: "destructive",
+            });
+          },
+        }
+      );
     }
-  }, [isOnBaseChain, switchChain]);
+  }, [isOnBaseChain, switchChain, toast, playSound]);
 
   // Auto switch to Base chain when wallet connects
   useEffect(() => {
