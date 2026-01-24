@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@base-org/account": "^2.5.1",
     "@coinbase/wallet-sdk": "^4.3.7",
     "@farcaster/auth-client": "^0.3.0",
     "@farcaster/auth-kit": "^0.6.0",

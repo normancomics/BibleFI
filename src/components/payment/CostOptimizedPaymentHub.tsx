@@ -11,10 +11,12 @@ import {
   Calculator,
   Globe,
   Smartphone,
-  Clock
+  Clock,
+  Nfc
 } from 'lucide-react';
 import OpenSourcePaymentService from '@/services/openSourcePaymentService';
 import { useToast } from '@/hooks/use-toast';
+import BasePayTithe from './BasePayTithe';
 
 const CostOptimizedPaymentHub: React.FC = () => {
   const { toast } = useToast();
@@ -104,12 +106,61 @@ const CostOptimizedPaymentHub: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="free" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="base-pay" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="base-pay" className="gap-1">
+            <Nfc className="h-3 w-3" />
+            Base Pay
+          </TabsTrigger>
           <TabsTrigger value="free">Free Methods</TabsTrigger>
           <TabsTrigger value="low-cost">Low Cost</TabsTrigger>
           <TabsTrigger value="alternatives">Alternatives</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="base-pay" className="space-y-4">
+          <BasePayTithe 
+            recipientName="Your Church"
+            testnet={true}
+          />
+          
+          {/* burner.pro Integration Info */}
+          <Card className="border-blue-400/30 bg-blue-400/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Smartphone className="h-5 w-5 text-blue-400" />
+                burner.pro Terminal Integration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Base Pay is designed for seamless integration with burner.pro physical terminals, 
+                enabling tap-to-tithe experiences in churches.
+              </p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-foreground">Supported Now:</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• USDC (Primary)</li>
+                    <li>• DAI, USDT</li>
+                    <li>• ETH, WETH</li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-foreground">Coming Soon:</h4>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>• $BIBLEFI token</li>
+                    <li>• $WISDOM token</li>
+                    <li>• cbBTC, USD1, NERITE</li>
+                  </ul>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full" disabled>
+                <Nfc className="mr-2 h-4 w-4" />
+                Connect burner.pro Terminal (Coming Soon)
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="free" className="space-y-4">
           <div className="grid gap-4">
@@ -248,24 +299,29 @@ const CostOptimizedPaymentHub: React.FC = () => {
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               <span className="font-medium">Phase 1:</span>
-              <span className="text-sm">Base Native + USDC transfers (FREE, immediate)</span>
+              <span className="text-sm">Base Pay tap-to-tithe (USDC, instant)</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               <span className="font-medium">Phase 2:</span>
-              <span className="text-sm">Daimo integration for mobile users (FREE)</span>
+              <span className="text-sm">burner.pro physical terminal integration</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
               <span className="font-medium">Phase 3:</span>
-              <span className="text-sm">Superfluid streams for recurring donations (Gas only)</span>
+              <span className="text-sm">Multi-token support (DAI, USDT, ETH, cbBTC)</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
               <span className="font-medium">Phase 4:</span>
-              <span className="text-sm">Open Banking for fiat onramps (Low cost)</span>
+              <span className="text-sm">$BIBLEFI & $WISDOM token integration</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-pink-400 rounded-full"></div>
+              <span className="font-medium">Phase 5:</span>
+              <span className="text-sm">Superfluid streams for recurring donations</span>
             </div>
           </div>
         </CardContent>
