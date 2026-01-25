@@ -15,7 +15,8 @@ import {
   FileCheck,
   Cpu,
   Activity,
-  Fingerprint
+  Fingerprint,
+  Atom
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -27,8 +28,10 @@ import {
   ZKProofSystem,
   secureStorage
 } from '@/utils/securityUtils';
+import { getPostQuantumStatus } from '@/utils/postQuantumCrypto';
 import { useSound } from '@/contexts/SoundContext';
 import { toast } from '@/components/ui/use-toast';
+import NISTPostQuantumDemo from './NISTPostQuantumDemo';
 
 interface SecurityMetric {
   name: string;
@@ -332,13 +335,22 @@ const QuantumSecurityDashboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="metrics" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="nist-pqc" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="nist-pqc" className="flex items-center gap-1">
+            <Atom className="h-4 w-4" />
+            NIST PQC
+          </TabsTrigger>
           <TabsTrigger value="metrics">Security Metrics</TabsTrigger>
           <TabsTrigger value="encryption">Encryption Tests</TabsTrigger>
           <TabsTrigger value="scans">Security Scans</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
         </TabsList>
+
+        {/* NIST Post-Quantum Cryptography Tab */}
+        <TabsContent value="nist-pqc" className="space-y-4">
+          <NISTPostQuantumDemo />
+        </TabsContent>
 
         {/* Security Metrics Tab */}
         <TabsContent value="metrics" className="space-y-4">
