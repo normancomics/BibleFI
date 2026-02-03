@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg3YkVkYTU3MDc0QUE5MTdGRjA5OTNmYjMyOUUxNkMyYzE4OGJhRjA4In0",
+    "payload": "eyJkb21haW4iOiJiaWJsZWZpLmxvdmFibGUuYXBwIn0",
+    "signature": "PENDING_SIGNATURE_FROM_TREASURY_WALLET"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Bible.fi",
+    "iconUrl": "https://biblefi.lovable.app/bible-fi-ios-icon-v2.png",
+    "homeUrl": "https://biblefi.lovable.app",
+    "imageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
+    "buttonTitle": "Enter Bible.fi",
+    "splashImageUrl": "https://biblefi.lovable.app/bible-fi-brand-logo-v2.png",
+    "splashBackgroundColor": "#1E40AF",
+    "webhookUrl": "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler"
+  }
+}
