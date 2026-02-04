@@ -4,6 +4,10 @@
 
 This guide walks through registering Bible.fi for Base Chain developer incentives and Farcaster mini-app programs.
 
+**Treasury Wallet:** `0x7bEda57074AA917FF0993fb329E16C2c188baF08`  
+**ENS:** biblefi.base.eth  
+**GitHub:** https://github.com/normancomics/BibleFI
+
 ---
 
 ## 📦 Part 1: Base Builds Program
@@ -18,30 +22,44 @@ Base Builds rewards developers for building on Base Chain. Earn incentives based
 
 ### Registration Steps
 
-1. **Visit Base Builds Portal**
-   ```
-   https://base.org/builders
-   ```
+#### Step 1: Visit Base Builds Portal
+```
+https://base.org/builders
+```
 
-2. **Connect Your Wallet**
-   - Use the treasury wallet: `0x7bEda57074AA917FF0993fb329E16C2c188baF08`
-   - Ensure it's connected to Base Mainnet
+#### Step 2: Connect Your Wallet
+- Use the treasury wallet: `0x7bEda57074AA917FF0993fb329E16C2c188baF08`
+- Ensure it's connected to Base Mainnet
+- Sign the verification message
 
-3. **Submit Project Details**
-   ```
-   Project Name: Bible.fi
-   Description: Biblical wisdom for DeFi on Base Chain
-   Category: DeFi / Social Impact
-   
-   Contract Addresses:
-   - BWSPCore: [After deployment]
-   - BWTYACore: [After deployment]
-   - WisdomOracle: [After deployment]
-   
-   GitHub: https://github.com/normancomics/BibleFI
-   Website: https://biblefi.lovable.app
-   ENS: biblefi.base.eth
-   ```
+#### Step 3: Submit Project Details
+```yaml
+Project Name: Bible.fi
+Tagline: Biblical Wisdom for Your Financial Journey
+Description: |
+  The world's first Christian faith-based DeFi platform on Base Chain.
+  Features Superfluid-powered tithing streams, wisdom-guided yield strategies,
+  and anonymous giving via Veil.cash. Built for 2.3 billion Christians worldwide.
+
+Category: DeFi / Social Impact / Public Goods
+
+Smart Contracts:
+  - BWSPCore: [Pending Deployment]
+  - BWTYACore: [Pending Deployment]
+  - WisdomOracle: [Pending Deployment]
+
+Integrations:
+  - Superfluid (real-time tithing streams)
+  - Veil.cash (anonymous giving)
+  - Coinbase Wallet
+  - RainbowKit
+  - Farcaster Frames
+
+GitHub: https://github.com/normancomics/BibleFI
+Website: https://biblefi.lovable.app
+ENS: biblefi.base.eth
+Treasury: 0x7bEda57074AA917FF0993fb329E16C2c188baF08
+```
 
 4. **Verify Ownership**
    - Sign message with treasury wallet

@@ -2,7 +2,7 @@
   "accountAssociation": {
     "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg3YkVkYTU3MDc0QUE5MTdGRjA5OTNmYjMyOUUxNkMyYzE4OGJhRjA4In0",
     "payload": "eyJkb21haW4iOiJiaWJsZWZpLmxvdmFibGUuYXBwIn0",
-    "signature": "PENDING_SIGNATURE_FROM_TREASURY_WALLET"
+    "signature": "PENDING_SIGNATURE_FROM_TREASURY_WALLET_0x7bEda57074AA917FF0993fb329E16C2c188baF08"
   },
   "frame": {
     "version": "1",
@@ -14,5 +14,58 @@
     "splashImageUrl": "https://biblefi.lovable.app/bible-fi-brand-logo-v2.png",
     "splashBackgroundColor": "#1E40AF",
     "webhookUrl": "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler"
+  },
+  "manifest": {
+    "appName": "Bible.fi - Biblical Wisdom for DeFi",
+    "appDescription": "The world's first Christian faith-based DeFi platform on Base Chain. Tithe, stake, invest & grow wealth according to Scripture.",
+    "appVersion": "1.0.0",
+    "appUrl": "https://biblefi.lovable.app",
+    "appCategory": "defi",
+    "appChain": "base",
+    "features": [
+      "real-time-tithing-streams",
+      "biblical-yield-strategies",
+      "wisdom-score-tracking",
+      "anonymous-giving",
+      "church-discovery"
+    ],
+    "protocols": [
+      "superfluid",
+      "veil-cash"
+    ],
+    "treasury": {
+      "base": "0x7bEda57074AA917FF0993fb329E16C2c188baF08",
+      "ens": "biblefi.base.eth"
+    },
+    "smartContracts": {
+      "BWSPCore": "PENDING_DEPLOYMENT",
+      "BWTYACore": "PENDING_DEPLOYMENT",
+      "WisdomOracle": "PENDING_DEPLOYMENT"
+    },
+    "tokens": {
+      "BIBLEFI": {
+        "type": "governance",
+        "supply": "1000000000",
+        "address": "PENDING_TGE"
+      },
+      "WISDOM": {
+        "type": "rewards",
+        "supply": "1000000000",
+        "address": "PENDING_TGE"
+      }
+    },
+    "links": {
+      "github": "https://github.com/normancomics/BibleFI",
+      "twitter": "https://x.com/Bibledotfi",
+      "discord": "https://discord.gg/jp6EzSpEjW",
+      "farcaster": "https://farcaster.xyz/BibleFi"
+    },
+    "grantProposals": {
+      "superfluid_season5": {
+        "amount": "2000000 $SUP",
+        "status": "submitted",
+        "date": "2026-01-29"
+      }
+    }
   }
 }
