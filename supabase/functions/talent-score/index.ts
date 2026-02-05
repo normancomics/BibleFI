@@ -1,22 +1,25 @@
  import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
  
- const TALENT_API_BASE = 'https://api.talentprotocol.com';
+// Talent Protocol API v3 - Base URL
+const TALENT_API_BASE = 'https://api.talentprotocol.com';
  
  const corsHeaders = {
    'Access-Control-Allow-Origin': '*',
    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
  };
  
- interface TalentPassport {
-   passport_id: number;
+interface TalentScore {
    score: number;
-   passport_profile: {
-     name: string;
-     bio: string;
-     image_url: string;
-   };
-   verified_wallets: string[];
-   credentials_count: number;
+  score_type: string;
+  last_calculated_at: string;
+}
+
+interface TalentCredential {
+  id: string;
+  name: string;
+  type: string;
+  value: string;
+  verified: boolean;
  }
  
  serve(async (req) => {
@@ -39,14 +42,14 @@
  
      if (!wallet_address) {
        return new Response(
-         JSON.stringify({ error: 'wallet_address is required' }),
+        JSON.stringify({ error: 'wallet_address is required' }),
          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
        );
      }
  
-     // Fetch passport from Talent Protocol
-     const passportResponse = await fetch(
-       `${TALENT_API_BASE}/api/v2/passports/${wallet_address}`,
+    // Fetch builder score from Talent Protocol v3 API
+    const scoreResponse = await fetch(
+      `${TALENT_API_BASE}/score?id=${wallet_address}`,
        {
          headers: {
            'X-API-KEY': TALENT_API_KEY,
@@ -55,53 +58,53 @@
        }
      );
  
-     if (!passportResponse.ok) {
-       if (passportResponse.status === 404) {
+    if (!scoreResponse.ok) {
+      if (scoreResponse.status === 404) {
          return new Response(
            JSON.stringify({ 
              found: false,
-             message: 'No Talent passport found for this wallet',
+            message: 'No Talent profile found for this wallet',
              builder_tier: 'Novice',
              multiplier: 1.0,
            }),
            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
          );
        }
-       throw new Error(`Talent API error: ${passportResponse.status}`);
+      throw new Error(`Talent API error: ${scoreResponse.status}`);
      }
  
-     const passportData = await passportResponse.json();
-     const passport: TalentPassport = passportData.passport;
+    const scoreData = await scoreResponse.json();
+    // Score is returned as an object with points property
+    const scorePoints = scoreData.score?.points || 0;
  
      // Calculate BibleFi builder tier
-     const score = passport.score || 0;
      let tier = 'Novice';
      let multiplier = 1.0;
      let description = 'New to the ecosystem';
  
-     if (score >= 90) {
+    if (scorePoints >= 90) {
        tier = 'Grandmaster';
        multiplier = 2.0;
        description = 'Elite builder - 2x APY bonus on all pools';
-     } else if (score >= 70) {
+    } else if (scorePoints >= 70) {
        tier = 'Master';
        multiplier = 1.75;
        description = 'Proven builder - 1.75x APY bonus';
-     } else if (score >= 50) {
+    } else if (scorePoints >= 50) {
        tier = 'Journeyman';
        multiplier = 1.5;
        description = 'Verified builder - 1.5x APY bonus';
-     } else if (score >= 25) {
+    } else if (scorePoints >= 25) {
        tier = 'Apprentice';
        multiplier = 1.25;
        description = 'Emerging builder - 1.25x APY bonus';
      }
  
      // Fetch credentials count
-     let credentials: any[] = [];
+    let credentials: TalentCredential[] = [];
      try {
        const credResponse = await fetch(
-         `${TALENT_API_BASE}/api/v2/passport_credentials?passport_id=${passport.passport_id}`,
+        `${TALENT_API_BASE}/credentials?id=${wallet_address}`,
          {
            headers: {
              'X-API-KEY': TALENT_API_KEY,
@@ -111,7 +114,7 @@
        );
        if (credResponse.ok) {
          const credData = await credResponse.json();
-         credentials = credData.passport_credentials || [];
+        credentials = credData.credentials || [];
        }
      } catch (e) {
        console.error('Error fetching credentials:', e);
@@ -120,15 +123,14 @@
      return new Response(
        JSON.stringify({
          found: true,
-         passport_id: passport.passport_id,
-         talent_score: score,
+        talent_score: scorePoints,
+        rank_position: scoreData.score?.rank_position,
          builder_tier: tier,
          multiplier,
          description,
-         profile: passport.passport_profile,
-         verified_wallets: passport.verified_wallets,
+        last_calculated_at: scoreData.score?.last_calculated_at,
          credentials_count: credentials.length,
-         credentials: credentials.slice(0, 5), // Top 5 credentials
+        credentials: credentials.slice(0, 5),
        }),
        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
      );
