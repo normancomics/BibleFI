@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTalentScore, TalentScoreData, TalentCredential } from '@/hooks/useTalentScore';
+import { useWallet } from '@/contexts/WalletContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,7 +104,16 @@ function TierBadge({ tier, multiplier }: { tier: string; multiplier: number }) {
 
 export default function BuilderScoreDashboard() {
   const { data, isLoading, error, fetchScore } = useTalentScore();
-  const [walletInput, setWalletInput] = useState('0x7bEda57074AA917FF0993fb329E16C2c188baF08');
+  const { address, isConnected } = useWallet();
+  const [walletInput, setWalletInput] = useState('');
+
+  // Auto-fetch when wallet connects
+  useEffect(() => {
+    if (isConnected && address) {
+      setWalletInput(address);
+      fetchScore(address);
+    }
+  }, [isConnected, address, fetchScore]);
 
   const handleLookup = () => {
     if (walletInput.trim()) fetchScore(walletInput.trim());
