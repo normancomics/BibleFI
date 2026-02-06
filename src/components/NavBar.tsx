@@ -13,7 +13,8 @@ import {
   Coins,
   Calculator,
   Settings,
-  Wheat
+  Wheat,
+  Trophy
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
@@ -37,6 +38,7 @@ const NavBar: React.FC = () => {
     { path: '/live-data', label: 'Live Data', icon: TrendingUp, badge: 'LIVE' },
     { path: '/analytics', label: 'Analytics', icon: Shield, badge: 'AI' },
     { path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' },
+    { path: '/builder-score', label: 'Builder', icon: Trophy, badge: 'REP' },
     { path: '/security', label: 'Security', icon: Shield },
   ];
 

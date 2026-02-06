@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Zap, Shield, BookOpen, Crown, Star, Calculator } from "lucide-react";
 import SoundEffect from "@/components/SoundEffect";
 import { useToast } from "@/hooks/use-toast";
+import { useTalentScore } from "@/hooks/useTalentScore";
+import { useWallet } from "@/contexts/WalletContext";
 
 interface YieldStrategy {
   id: string;
@@ -34,6 +36,18 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
   const [selectedStrategy, setSelectedStrategy] = useState<string>("");
   const [optimizeMode, setOptimizeMode] = useState<"conservative" | "balanced" | "growth">("balanced");
   const { toast } = useToast();
+  const { address, isConnected } = useWallet();
+  const { data: talentData, fetchScore } = useTalentScore();
+
+  // Auto-fetch builder score when wallet is connected
+  useEffect(() => {
+    if (isConnected && address) {
+      fetchScore(address);
+    }
+  }, [isConnected, address, fetchScore]);
+
+  const builderMultiplier = talentData?.multiplier ?? 1.0;
+  const builderTier = talentData?.builder_tier ?? 'Novice';
 
   useEffect(() => {
     // Mock yield strategies based on biblical themes
@@ -90,10 +104,18 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
   }, []);
 
   const getWisdomBonus = (baseApy: number): number => {
-    if (wisdomScore >= 80) return baseApy * 0.15; // 15% bonus for King Solomon level
-    if (wisdomScore >= 60) return baseApy * 0.10; // 10% bonus for Wise Steward
-    if (wisdomScore >= 40) return baseApy * 0.05; // 5% bonus for Faithful Servant
+    if (wisdomScore >= 80) return baseApy * 0.15;
+    if (wisdomScore >= 60) return baseApy * 0.10;
+    if (wisdomScore >= 40) return baseApy * 0.05;
     return 0;
+  };
+
+  const getBuilderBonus = (baseApy: number): number => {
+    return baseApy * (builderMultiplier - 1.0); // e.g. 1.75x → 75% bonus
+  };
+
+  const getEffectiveApy = (baseApy: number): number => {
+    return baseApy + getWisdomBonus(baseApy) + getBuilderBonus(baseApy);
   };
 
   const calculateOptimalAllocation = () => {
@@ -152,8 +174,8 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
     if (totalAllocation === 0) return 0;
     
     const weightedApy = activeStrategies.reduce((sum, strategy) => {
-      const effectiveApy = strategy.currentApy + getWisdomBonus(strategy.currentApy);
-      return sum + (effectiveApy * strategy.allocation / totalAllocation);
+      const effective = getEffectiveApy(strategy.currentApy);
+      return sum + (effective * strategy.allocation / totalAllocation);
     }, 0);
     
     return weightedApy;
@@ -283,8 +305,9 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
       {/* Strategy Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {strategies.map((strategy) => {
-          const effectiveApy = strategy.currentApy + getWisdomBonus(strategy.currentApy);
+          const effectiveApy = getEffectiveApy(strategy.currentApy);
           const wisdomBonus = getWisdomBonus(strategy.currentApy);
+          const builderBonus = getBuilderBonus(strategy.currentApy);
           
           return (
             <Card 
@@ -313,6 +336,9 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
                     <p className="text-xl font-bold text-scripture-light">{strategy.currentApy}%</p>
                     {wisdomBonus > 0 && (
                       <p className="text-xs text-purple-400">+{wisdomBonus.toFixed(1)}% Wisdom</p>
+                    )}
+                    {builderBonus > 0 && (
+                      <p className="text-xs text-secondary">+{builderBonus.toFixed(1)}% Builder ({builderTier})</p>
                     )}
                   </div>
                   <div>
