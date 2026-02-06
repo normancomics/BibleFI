@@ -39,6 +39,7 @@ import LaunchActionPlanPage from "./pages/LaunchActionPlanPage";
 import NotFound from "./pages/NotFound";
 import ZKMonitorPage from "./pages/ZKMonitorPage";
 import BiblicalFinanceEncyclopediaPage from "./pages/BiblicalFinanceEncyclopediaPage";
+import BuilderScorePage from "./pages/BuilderScorePage";
 import "./App.css";
 
 const App = () => (
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/tax-compliance" element={<TaxCompliancePage />} />
             <Route path="/zk-monitor" element={<ZKMonitorPage />} />
             <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
+            <Route path="/builder-score" element={<BuilderScorePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
