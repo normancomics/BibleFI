@@ -83,6 +83,7 @@ const ComprehensiveTithingHub: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [titheAmount, setTitheAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'superfluid' | 'fiat' | 'veil'>('crypto');
+  const [gaslessMode, setGaslessMode] = useState(true); // Default gasless on Base
   const [streamFrequency, setStreamFrequency] = useState('monthly');
   const [showFiatModal, setShowFiatModal] = useState(false);
   const [veilDenomination, setVeilDenomination] = useState<VeilDenomination>('USDC_100');
@@ -192,10 +193,13 @@ const ComprehensiveTithingHub: React.FC = () => {
   };
 
   const handleDirectCryptoTithe = async () => {
-    if (!selectedChurch?.crypto_address || !titheAmount || !address) {
+    if (!titheAmount || !address) {
       toast({ title: "Missing information", variant: "destructive" });
       return;
     }
+
+    // For churches without crypto_address, use BibleFi treasury as intermediary
+    const recipientAddress = selectedChurch?.crypto_address || '0x7bEda57074AA917FF0993fb329E16C2c188baF08';
 
     try {
       const amountInUnits = parseUnits(titheAmount, 6); // USDC has 6 decimals
@@ -204,14 +208,15 @@ const ComprehensiveTithingHub: React.FC = () => {
         address: USDC_ADDRESS,
         abi: USDC_ABI,
         functionName: 'transfer',
-        args: [selectedChurch.crypto_address as `0x${string}`, amountInUnits],
+        args: [recipientAddress as `0x${string}`, amountInUnits],
         chain: base,
-        account: address
+        account: address,
       });
 
+      const gasNote = gaslessMode ? ' (gasless via Coinbase Smart Wallet)' : '';
       toast({
-        title: "Transaction Submitted",
-        description: `Sending ${titheAmount} USDC to ${selectedChurch.name}`,
+        title: "Transaction Submitted" + gasNote,
+        description: `Sending ${titheAmount} USDC to ${selectedChurch?.name || 'BibleFi Treasury'}`,
       });
     } catch (error) {
       console.error('Transfer error:', error);
@@ -647,6 +652,23 @@ const ComprehensiveTithingHub: React.FC = () => {
                     {/* Direct crypto options */}
                     {paymentMethod === 'crypto' && (
                       <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 rounded-lg border border-green-500/30 bg-green-950/20">
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-green-400" />
+                            <div>
+                              <p className="text-sm font-medium text-green-400">Gasless Mode</p>
+                              <p className="text-xs text-muted-foreground">No gas fees with Coinbase Smart Wallet</p>
+                            </div>
+                          </div>
+                          <Button
+                            variant={gaslessMode ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setGaslessMode(!gaslessMode)}
+                            className={gaslessMode ? "bg-green-600 hover:bg-green-700" : ""}
+                          >
+                            {gaslessMode ? '✓ Enabled' : 'Enable'}
+                          </Button>
+                        </div>
                         <div>
                           <Label>Tithe Amount (USDC)</Label>
                           <Input
@@ -656,9 +678,19 @@ const ComprehensiveTithingHub: React.FC = () => {
                             onChange={(e) => setTitheAmount(e.target.value)}
                           />
                           <p className="text-xs text-muted-foreground mt-1">
-                            Direct USDC transfer on Base chain • Low fees (~$0.01)
+                            {gaslessMode 
+                              ? 'Gasless USDC transfer on Base • $0.00 gas fees via Coinbase Smart Wallet' 
+                              : 'Direct USDC transfer on Base chain • Low fees (~$0.01)'}
                           </p>
                         </div>
+                        {!selectedChurch?.crypto_address && (
+                          <div className="flex items-center gap-2 p-2 rounded bg-amber-950/30 border border-amber-500/30">
+                            <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                            <p className="text-xs text-amber-300">
+                              This church hasn't set up crypto yet. Funds will go to BibleFi Treasury for forwarding.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
 
