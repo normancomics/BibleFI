@@ -1,209 +1,292 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { 
-  checkRateLimit, 
-  getClientIP, 
-  validateInput, 
-  getOptionalUser,
-  errorResponse,
-  rateLimitResponse 
-} from '../_shared/auth.ts';
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+
+// Rate limiting
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+
+function getClientIP(req: Request): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+}
+
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Rate limiting - 20 requests per minute per IP
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Rate limit: 20 req/min per IP
     const clientIP = getClientIP(req);
-    const rateLimit = checkRateLimit(clientIP, 20, 60000);
-    
-    if (!rateLimit.allowed) {
-      return rateLimitResponse(rateLimit.resetAt, corsHeaders);
+    if (!checkRateLimit(clientIP, 20, 60000)) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please wait before trying again." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    // Optional authentication - authenticated users get higher limits
-    const { user } = await getOptionalUser(req);
-    if (user) {
-      // Authenticated users get more lenient rate limiting
-      const userRateLimit = checkRateLimit(`user:${user.id}`, 50, 60000);
-      if (!userRateLimit.allowed) {
-        return rateLimitResponse(userRateLimit.resetAt, corsHeaders);
-      }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { query, userContext } = await req.json();
+    if (!query || typeof query !== "string" || query.length > 1000) {
+      return new Response(
+        JSON.stringify({ error: "Missing or invalid 'query' (max 1000 chars)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const { query, context } = await req.json();
+    console.log(`[biblical-advisor] Query: "${query.substring(0, 80)}"`);
 
-    // Input validation
-    const queryValidation = validateInput(query, { 
-      maxLength: 1000, 
-      fieldName: 'Query' 
-    });
-    if (!queryValidation.valid) {
-      return errorResponse(queryValidation.error!, 400, corsHeaders);
+    // ── RAG Step 1: Retrieve relevant scriptures ──
+    const keywords = query
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .split(/\s+/)
+      .filter((w: string) => w.length > 3);
+
+    // Search bible_verses
+    const verseFilters = keywords
+      .slice(0, 5)
+      .map((kw: string) => `text.ilike.%${kw}%`)
+      .join(",");
+
+    const { data: verses } = await supabase
+      .from("bible_verses")
+      .select("book_name, chapter, verse, text, wisdom_category, defi_keywords")
+      .or(verseFilters || "text.ilike.%wisdom%")
+      .limit(8);
+
+    // Search biblical_knowledge_base
+    const knowledgeFilters = keywords
+      .slice(0, 5)
+      .flatMap((kw: string) => [`verse_text.ilike.%${kw}%`, `principle.ilike.%${kw}%`])
+      .join(",");
+
+    const { data: knowledgeBase } = await supabase
+      .from("biblical_knowledge_base")
+      .select("reference, verse_text, principle, application, defi_relevance, category")
+      .or(knowledgeFilters || "verse_text.ilike.%wisdom%")
+      .limit(5);
+
+    const retrievedVerses = verses || [];
+    const retrievedKnowledge = knowledgeBase || [];
+
+    console.log(
+      `[biblical-advisor] RAG: ${retrievedVerses.length} verses, ${retrievedKnowledge.length} knowledge entries`
+    );
+
+    // ── RAG Step 2: Build LLM context ──
+    const scriptureContext = retrievedVerses
+      .map(
+        (v: any) =>
+          `${v.book_name} ${v.chapter}:${v.verse} — "${v.text}" [Categories: ${(v.wisdom_category || []).join(", ")}] [DeFi Keywords: ${(v.defi_keywords || []).join(", ")}]`
+      )
+      .join("\n");
+
+    const knowledgeContext = retrievedKnowledge
+      .map(
+        (k: any) =>
+          `${k.reference}: "${k.verse_text}" — Principle: ${k.principle || "N/A"} — Application: ${k.application || "N/A"} — DeFi Relevance: ${k.defi_relevance || "N/A"}`
+      )
+      .join("\n");
+
+    const userCtxStr = userContext
+      ? `User context: wallet balance $${userContext.walletBalance || "unknown"}, risk tolerance: ${userContext.riskTolerance || "moderate"}, tithing history: ${userContext.tithingHistory || 0} transactions, primary church: ${userContext.primaryChurch || "not set"}.`
+      : "";
+
+    const systemPrompt = `You are BibleFi's Biblical Wisdom Synthesis Protocol (BWSP) — a faith-based financial advisor that grounds every recommendation in Scripture. You serve Christians worldwide who seek to honor God with their finances.
+
+RULES:
+1. Always cite specific Bible verses with book, chapter, and verse.
+2. Provide practical DeFi guidance on Base Chain (staking, tithing streams via Superfluid, stablecoin yields).
+3. Never encourage reckless speculation. Emphasize faithful stewardship (1 Corinthians 4:2).
+4. Include a Wisdom Score (0-100) based on how well the user's question aligns with Biblical financial principles.
+5. Be warm, pastoral, and encouraging — never guilt-based or manipulative.
+6. Respond ONLY with valid JSON matching this exact structure (no markdown, no code blocks):
+{
+  "biblicalPrinciple": "Primary biblical principle (2-3 sentences)",
+  "scriptureReferences": [
+    { "reference": "Book Chapter:Verse", "text": "The verse text" }
+  ],
+  "practicalGuidance": {
+    "tithingAdvice": "advice or null",
+    "investmentStrategy": "strategy or null",
+    "riskManagement": "risk advice or null",
+    "stakeRecommendations": ["recommendation 1", "recommendation 2"]
+  },
+  "wisdomScore": 75,
+  "defiApplications": [
+    {
+      "protocol": "Protocol Name",
+      "action": "What to do",
+      "biblicalRationale": "Why, citing scripture",
+      "riskLevel": "low"
     }
+  ],
+  "marketContext": {
+    "marketTrend": "neutral",
+    "riskAssessment": "medium"
+  }
+}`;
 
-    console.log('Biblical advisor request:', { query: query.substring(0, 100), hasUser: !!user });
+    const userPrompt = `RETRIEVED SCRIPTURES FROM BIBLEFI DATABASE:
+${scriptureContext || "No matching verses found in database."}
 
-    // Enhanced fallback response without OpenAI
-    if (!openAIApiKey) {
-      console.log('No OpenAI API key configured, returning enhanced fallback response');
-      
-      // Comprehensive offline biblical wisdom
-      const comprehensiveVerses = [
-        {
-          id: 'tithe-1',
-          reference: 'Malachi 3:10',
-          verse_text: 'Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this, says the Lord Almighty, and see if I will not throw open the floodgates of heaven and pour out so much blessing that there will not be room enough to store it.',
-          principle: 'Tithing demonstrates trust in God\'s provision and unlocks His blessings',
-          application: 'Set up automated 10% giving from your DeFi earnings to your local church'
-        },
-        {
-          id: 'stewardship-1',
-          reference: 'Proverbs 21:5',
-          verse_text: 'The plans of the diligent lead to profit as surely as haste leads to poverty.',
-          principle: 'Diligent planning leads to financial success',
-          application: 'Create detailed financial plans and avoid hasty investment decisions, especially in volatile DeFi markets'
-        },
-        {
-          id: 'debt-1',
-          reference: 'Proverbs 22:7',
-          verse_text: 'The rich rule over the poor, and the borrower is slave to the lender.',
-          principle: 'Debt creates financial bondage that limits freedom',
-          application: 'Avoid excessive leverage in DeFi protocols that could lead to liquidation'
-        },
-        {
-          id: 'wisdom-1',
-          reference: 'Proverbs 13:11',
-          verse_text: 'Dishonest money dwindles away, but whoever gathers money little by little makes it grow.',
-          principle: 'Sustainable wealth comes from consistent, honest accumulation',
-          application: 'Build DeFi positions gradually through regular contributions to stable yield protocols'
-        }
-      ];
+BIBLICAL KNOWLEDGE BASE ENTRIES:
+${knowledgeContext || "No matching knowledge entries found."}
 
-      // Smart verse selection based on query
-      let relevantVerses = [];
-      let advice = "";
-      const queryLower = query.toLowerCase();
-      
-      if (queryLower.includes('tithe') || queryLower.includes('give')) {
-        relevantVerses = [comprehensiveVerses[0], comprehensiveVerses[1]];
-        advice = `Based on ${comprehensiveVerses[0].reference}: "${comprehensiveVerses[0].verse_text}"\n\nBiblical guidance on tithing: God invites us to test Him in the area of tithing. This isn't about earning His love, but about demonstrating our trust in His provision. In the DeFi space, you can set up automated tithing streams using protocols like Superfluid, ensuring your giving has priority over reinvestment. Remember, tithing should come from your gross income, including DeFi yields.`;
-      } else if (queryLower.includes('debt') || queryLower.includes('borrow')) {
-        relevantVerses = [comprehensiveVerses[2], comprehensiveVerses[1]];
-        advice = `According to ${comprehensiveVerses[2].reference}: "${comprehensiveVerses[2].verse_text}"\n\nBiblical wisdom on debt: The Bible consistently warns against the dangers of debt. In DeFi, this translates to being extremely cautious with leverage and borrowed positions. While some protocols offer attractive borrowing rates, remember that liquidation risks can quickly turn profitable positions into significant losses.`;
-      } else if (queryLower.includes('invest') || queryLower.includes('defi')) {
-        relevantVerses = [comprehensiveVerses[3], comprehensiveVerses[1]];
-        advice = `Based on ${comprehensiveVerses[3].reference}: "${comprehensiveVerses[3].verse_text}"\n\nBiblical approach to DeFi investing: God's word emphasizes gradual, steady wealth building over get-rich-quick schemes. Apply this to DeFi by using dollar-cost averaging, diversifying across multiple protocols, and focusing on sustainable yields rather than unsustainable APYs that often indicate higher risk.`;
-      } else {
-        relevantVerses = [comprehensiveVerses[1], comprehensiveVerses[3]];
-        advice = `Based on ${comprehensiveVerses[1].reference}: "${comprehensiveVerses[1].verse_text}"\n\nGeneral biblical financial wisdom: God calls us to be wise stewards of our resources. This means careful planning, patient accumulation, and avoiding hasty decisions driven by greed or fear. In your financial journey, prioritize giving, maintain emergency funds, and invest wisely for the long term.`;
-      }
+${userCtxStr}
 
-      return new Response(JSON.stringify({
-        advice,
-        relevant_verses: relevantVerses,
-        biblical_principles: ['Faithful Stewardship', 'Wise Planning', 'Generous Giving', 'Avoiding Debt Bondage']
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+USER QUESTION: ${query}
 
-    // Generate AI response with biblical context
-    const completion = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
+Respond with comprehensive Biblical financial guidance. Include at least 2 scripture references and at least 1 DeFi application. Output ONLY the JSON object, no markdown wrapping.`;
+
+    // ── RAG Step 3: Call AI Gateway ──
+    console.log("[biblical-advisor] Calling AI gateway...");
+    const aiResponse = await fetch(AI_GATEWAY_URL, {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: "google/gemini-3-flash-preview",
         messages: [
-          {
-            role: 'system',
-            content: `You are a Biblical Financial Advisor for Bible.fi, a DeFi platform built on biblical principles. You provide financial guidance based on scriptural wisdom while being knowledgeable about modern DeFi practices on Base chain.
-
-CORE PRINCIPLES:
-- Every financial decision should align with biblical stewardship principles
-- Promote generosity, wisdom, and ethical investing
-- Warn against greed, get-rich-quick schemes, and usury
-- Encourage tithing and charitable giving
-- Emphasize long-term wealth building over speculation
-
-When giving advice:
-1. Start with relevant biblical principles
-2. Apply them to the user's specific situation
-3. Provide practical DeFi recommendations if appropriate
-4. Always consider risk management and security
-5. Encourage community and accountability
-
-User Context: ${JSON.stringify(context || {})}`
-          },
-          {
-            role: 'user',
-            content: query
-          }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
-        max_tokens: 500
+        max_tokens: 2000,
       }),
     });
 
-    const completionData = await completion.json();
-    const advice = completionData.choices[0].message.content;
+    if (!aiResponse.ok) {
+      const errBody = await aiResponse.text();
+      console.error(`[biblical-advisor] AI gateway error [${aiResponse.status}]:`, errBody);
+      throw new Error(`AI gateway error [${aiResponse.status}]`);
+    }
 
-    // Mock relevant verses for now
-    const mockVerses = [
-      {
-        id: 'verse-1',
-        reference: 'Proverbs 21:5',
-        verse_text: 'The plans of the diligent lead to profit as surely as haste leads to poverty.',
-        principle: 'Diligent planning leads to financial success',
-        application: 'Create detailed financial plans and avoid hasty investment decisions'
-      },
-      {
-        id: 'verse-2',
-        reference: 'Matthew 25:21',
-        verse_text: 'His master replied, "Well done, good and faithful servant! You have been faithful with a few things; I will put you in charge of many things."',
-        principle: 'Faithful stewardship leads to greater responsibility',
-        application: 'Start with small investments and prove your faithfulness before scaling up'
-      }
-    ];
+    const aiData = await aiResponse.json();
+    const rawContent = aiData.choices?.[0]?.message?.content || "";
+    console.log("[biblical-advisor] AI response received, length:", rawContent.length);
 
-    console.log('Biblical advisor response generated successfully');
+    // Parse JSON from response (handle possible markdown wrapping)
+    let parsed;
+    try {
+      const jsonMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const jsonStr = jsonMatch ? jsonMatch[1].trim() : rawContent.trim();
+      parsed = JSON.parse(jsonStr);
+    } catch {
+      console.error("[biblical-advisor] JSON parse error, building fallback from DB results");
+      parsed = {
+        biblicalPrinciple:
+          "Seek wisdom and trust in the Lord with all your heart (Proverbs 3:5-6). " +
+          rawContent.substring(0, 300),
+        scriptureReferences: retrievedVerses.slice(0, 3).map((v: any) => ({
+          reference: `${v.book_name} ${v.chapter}:${v.verse}`,
+          text: v.text,
+        })),
+        practicalGuidance: {
+          tithingAdvice: "Consider setting up consistent giving through automated streams.",
+          investmentStrategy: "Build gradually, diversify, and avoid excessive risk.",
+          riskManagement: "Never invest more than you can afford to lose.",
+          stakeRecommendations: ["USDC staking for stable returns"],
+        },
+        wisdomScore: 50,
+        defiApplications: [
+          {
+            protocol: "Superfluid Tithing",
+            action: "Set up automated tithe streams to your church",
+            biblicalRationale: "Malachi 3:10 — Bring the whole tithe into the storehouse",
+            riskLevel: "low",
+          },
+        ],
+        marketContext: { marketTrend: "neutral", riskAssessment: "medium" },
+      };
+    }
 
-    return new Response(JSON.stringify({
-      advice,
-      relevant_verses: mockVerses,
-      biblical_principles: ['Diligent planning', 'Faithful stewardship', 'Wise counsel']
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Ensure scripture references from DB are included if AI didn't provide any
+    if (
+      (!parsed.scriptureReferences || parsed.scriptureReferences.length === 0) &&
+      retrievedVerses.length > 0
+    ) {
+      parsed.scriptureReferences = retrievedVerses.slice(0, 3).map((v: any) => ({
+        reference: `${v.book_name} ${v.chapter}:${v.verse}`,
+        text: v.text,
+      }));
+    }
+
+    parsed.question = query;
+
+    // Ensure marketContext has relevantTokens array
+    if (!parsed.marketContext) parsed.marketContext = {};
+    if (!parsed.marketContext.relevantTokens) {
+      parsed.marketContext.relevantTokens = [
+        { symbol: "ETH", price: 0, change24h: 0, marketCap: 0, volume24h: 0 },
+        { symbol: "USDC", price: 1.0, change24h: 0, marketCap: 0, volume24h: 0 },
+      ];
+    }
+    if (!parsed.marketContext.marketTrend) parsed.marketContext.marketTrend = "neutral";
+    if (!parsed.marketContext.riskAssessment) parsed.marketContext.riskAssessment = "medium";
+
+    console.log("[biblical-advisor] Success. Wisdom score:", parsed.wisdomScore);
+
+    return new Response(JSON.stringify(parsed), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
   } catch (error) {
-    const err = error as any;
-    console.error('Error in biblical advisor:', err);
-    return new Response(JSON.stringify({ 
-      error: err?.message || 'Unknown error',
-      advice: "I'm currently experiencing technical difficulties. Please remember Proverbs 3:5-6: 'Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.' Seek wise counsel and make decisions based on biblical principles.",
-      relevant_verses: [],
-      biblical_principles: ['Trust in the LORD', 'Seek wise counsel']
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    console.error("[biblical-advisor] Error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({
+        error: message,
+        biblicalPrinciple:
+          "Trust in the LORD with all your heart (Proverbs 3:5-6). We encountered a technical issue — please try again.",
+        scriptureReferences: [
+          {
+            reference: "Proverbs 3:5-6",
+            text: "Trust in the LORD with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.",
+          },
+        ],
+        practicalGuidance: {},
+        wisdomScore: 50,
+        defiApplications: [],
+        marketContext: {
+          marketTrend: "neutral",
+          riskAssessment: "medium",
+          relevantTokens: [],
+        },
+        question: "",
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });
