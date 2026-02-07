@@ -247,24 +247,24 @@ const GlobalChurchDatabase: React.FC = () => {
               />
             </div>
             
-            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+            <Select value={selectedCountry || "all"} onValueChange={(v) => setSelectedCountry(v === "all" ? "" : v)}>
               <SelectTrigger className="w-48 bg-royal-purple/30 border-ancient-gold/50">
                 <SelectValue placeholder="Select Country" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Countries</SelectItem>
+                <SelectItem value="all">All Countries</SelectItem>
                 {getUniqueCountries().map(country => (
                   <SelectItem key={country} value={country}>{country}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             
-            <Select value={cryptoFilter} onValueChange={setCryptoFilter}>
+            <Select value={cryptoFilter || "all"} onValueChange={(v) => setCryptoFilter(v === "all" ? "" : v)}>
               <SelectTrigger className="w-48 bg-royal-purple/30 border-ancient-gold/50">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Churches</SelectItem>
+                <SelectItem value="all">All Churches</SelectItem>
                 <SelectItem value="crypto">Crypto Accepting</SelectItem>
                 <SelectItem value="verified">Verified Only</SelectItem>
               </SelectContent>
