@@ -17,6 +17,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { parseUnits } from 'viem';
 import { base } from 'wagmi/chains';
 import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 import { useSuperfluid } from '@/hooks/useSuperfluid';
 import { useTitheRewards } from '@/hooks/useTitheRewards';
 import { GooglePlacesChurchSearch } from './GooglePlacesChurchSearch';
@@ -107,7 +108,7 @@ const ComprehensiveTithingHub: React.FC = () => {
 
     setIsSearching(true);
     try {
-      let query = supabase.from('global_churches').select('*');
+      let query = supabaseApi.from('global_churches').select('*');
 
       // Flexible text search
       if (searchQuery.trim()) {
@@ -261,7 +262,7 @@ const ComprehensiveTithingHub: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase.from('global_churches').insert({
+      const { error } = await supabaseApi.from('global_churches').insert({
         ...newChurch,
         accepts_fiat: true,
         accepts_cards: true,

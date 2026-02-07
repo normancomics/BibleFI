@@ -52,7 +52,7 @@ function checkRateLimit(identifier: string): boolean {
 }
 
 /** Fetch with timeout helper */
-async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 8000): Promise<Response> {
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 15000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -190,7 +190,7 @@ serve(async (req) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `data=${encodeURIComponent(overpassQuery)}`
-          }, 10000);
+          }, 20000);
 
           if (osmResponse.ok) {
             const osmData = await osmResponse.json();

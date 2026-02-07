@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 interface ChurchPaymentData {
   churchId: string;
@@ -33,7 +33,7 @@ class ChurchPaymentProcessorCrawler {
     this.progress.status = 'running';
     
     // Fetch churches from database
-    const { data: churches } = await supabase
+    const { data: churches } = await supabaseApi
       .from('global_churches')
       .select('*')
       .eq('accepts_crypto', true)
@@ -66,7 +66,7 @@ class ChurchPaymentProcessorCrawler {
 
   private async analyzeChurchProcessor(church: any): Promise<ChurchPaymentData> {
     // Check existing processor data
-    const { data: existingProcessor } = await supabase
+    const { data: existingProcessor } = await supabaseApi
       .from('church_payment_processors')
       .select('*')
       .eq('church_id', church.id)

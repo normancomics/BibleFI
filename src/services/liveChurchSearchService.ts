@@ -3,7 +3,7 @@
  * Searches global_churches table with comprehensive real-time data
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseApi } from "@/integrations/supabase/apiClient";
 
 export interface LiveChurchSearchParams {
   query?: string;
@@ -45,7 +45,7 @@ export class LiveChurchSearchService {
    */
   static async searchChurches(params: LiveChurchSearchParams): Promise<LiveChurchResult[]> {
     try {
-      let query = supabase
+      let query = supabaseApi
         .from('global_churches')
         .select('*');
 
@@ -131,7 +131,7 @@ export class LiveChurchSearchService {
    */
   static async getVerifiedChurches(): Promise<LiveChurchResult[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseApi
         .from('global_churches')
         .select('*')
         .eq('verified', true)

@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 export interface GlobalChurchData {
   id?: string;
@@ -141,7 +141,7 @@ export class GlobalChurchCrawlerService {
 
       // Insert churches into the global_churches table
       for (const church of mockChurches) {
-        const { error } = await supabase
+        const { error } = await supabaseApi
           .from('global_churches')
           .insert({
             name: church.name,
@@ -274,7 +274,7 @@ export class GlobalChurchCrawlerService {
     acceptsCrypto?: boolean
   ): Promise<GlobalChurchData[]> {
     try {
-      let query = supabase
+      let query = supabaseApi
         .from('global_churches')
         .select('*')
         .eq('country', country);
@@ -304,7 +304,7 @@ export class GlobalChurchCrawlerService {
 
   static async getCryptoEnabledChurches(): Promise<GlobalChurchData[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseApi
         .from('global_churches')
         .select('*')
         .eq('accepts_crypto', true)
