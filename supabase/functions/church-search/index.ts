@@ -52,7 +52,7 @@ function checkRateLimit(identifier: string): boolean {
 }
 
 /** Fetch with timeout helper */
-async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 15000): Promise<Response> {
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 30000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -104,17 +104,20 @@ serve(async (req) => {
         .from('global_churches')
         .select('id,name,address,city,state_province,country,rating,review_count,phone,website,verified,accepts_crypto,crypto_networks,denomination');
 
-      if (query) {
-        dbQuery = dbQuery.or(`name.ilike.%${query}%,denomination.ilike.%${query}%`);
-      }
-
+      // When both query and location are provided, search more flexibly
+      // Don't AND them together - just use location for filtering, query for ranking
       if (location) {
         const locationParts = location.split(',').map((p: string) => p.trim());
-        if (locationParts.length >= 2) {
-          dbQuery = dbQuery.or(`city.ilike.%${locationParts[0]}%,state_province.ilike.%${locationParts[1]}%`);
-        } else if (locationParts.length === 1) {
-          dbQuery = dbQuery.or(`city.ilike.%${locationParts[0]}%,state_province.ilike.%${locationParts[0]}%,country.ilike.%${locationParts[0]}%`);
+        const expandedParts = locationParts.map(p => expandStateAbbreviation(p));
+        const locationFilters = expandedParts
+          .filter(p => p.length > 0)
+          .flatMap(p => [`city.ilike.%${p}%`, `state_province.ilike.%${p}%`, `country.ilike.%${p}%`])
+          .join(',');
+        if (locationFilters) {
+          dbQuery = dbQuery.or(locationFilters);
         }
+      } else if (query) {
+        dbQuery = dbQuery.or(`name.ilike.%${query}%,denomination.ilike.%${query}%,city.ilike.%${query}%`);
       }
 
       dbQuery = dbQuery
@@ -172,17 +175,18 @@ serve(async (req) => {
           };
           const bbox = continentBounds[continent.toLowerCase().replace(' ', '_')] || '35,-25,72,65';
           const nameClause = query ? `["name"~"${escapeOverpassString(query)}",i]` : '';
-          overpassQuery = `[out:json][timeout:15];(node["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(${bbox});way["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(${bbox}););out center 50;`;
+          overpassQuery = `[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(${bbox});way["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(${bbox}););out center 50;`;
         } else if (location) {
           const coords = await geocodeLocation(location);
           if (coords) {
-            const nameClause = query ? `["name"~"${escapeOverpassString(query)}",i]` : '';
-            overpassQuery = `[out:json][timeout:15];(node["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(around:${radius},${coords.lat},${coords.lon});way["amenity"="place_of_worship"]["religion"="christian"]${nameClause}(around:${radius},${coords.lat},${coords.lon}););out center 50;`;
+            // Don't filter by name in Overpass - OSM name data is inconsistent
+            // We'll filter results client-side instead
+            overpassQuery = `[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${coords.lat},${coords.lon});way["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${coords.lat},${coords.lon}););out center 50;`;
           } else {
-            overpassQuery = `[out:json][timeout:15];area["name"~"${escapeOverpassString(location)}",i]->.searchArea;(node["amenity"="place_of_worship"]["religion"="christian"](area.searchArea);way["amenity"="place_of_worship"]["religion"="christian"](area.searchArea););out center 50;`;
+            overpassQuery = `[out:json][timeout:25];area["name"~"${escapeOverpassString(location)}",i]->.searchArea;(node["amenity"="place_of_worship"]["religion"="christian"](area.searchArea);way["amenity"="place_of_worship"]["religion"="christian"](area.searchArea););out center 50;`;
           }
         } else if (query) {
-          overpassQuery = `[out:json][timeout:15];(node["amenity"="place_of_worship"]["religion"="christian"]["name"~"${escapeOverpassString(query)}",i];way["amenity"="place_of_worship"]["religion"="christian"]["name"~"${escapeOverpassString(query)}",i];);out center 30;`;
+          overpassQuery = `[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="christian"]["name"~"${escapeOverpassString(query)}",i];way["amenity"="place_of_worship"]["religion"="christian"]["name"~"${escapeOverpassString(query)}",i];);out center 30;`;
         }
 
         if (overpassQuery) {
@@ -350,4 +354,21 @@ function extractState(address: string): string {
 function extractCountry(address: string): string {
   const parts = address.split(',').map(p => p.trim());
   return parts[parts.length - 1] || 'USA';
+}
+
+function expandStateAbbreviation(input: string): string {
+  const abbrevs: Record<string, string> = {
+    'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+    'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+    'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+    'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+    'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+    'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+    'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+    'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+    'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+    'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming',
+  };
+  const upper = input.trim().toUpperCase();
+  return abbrevs[upper] || input;
 }
