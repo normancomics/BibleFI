@@ -167,22 +167,46 @@ export class FiatPaymentService {
     paymentMethodId: string,
     churchId: string,
     donorInfo: any
-  ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
-    console.log('Processing fiat payment:', { amount, currency, paymentMethodId, churchId });
+  ): Promise<{ success: boolean; transactionId?: string; error?: string; checkInstructions?: string; forwardingInfo?: any }> {
+    console.log('Processing fiat payment via edge function:', { amount, currency, paymentMethodId, churchId });
     
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock payment processing logic
-    if (Math.random() > 0.1) { // 90% success rate
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.functions.invoke('process-fiat-tithe', {
+        body: {
+          churchId,
+          churchName: donorInfo?.churchName || 'Church',
+          amount,
+          currency,
+          paymentMethod: paymentMethodId,
+          donorInfo: {
+            name: donorInfo?.cardholderName,
+            email: donorInfo?.email,
+            phone: donorInfo?.phone,
+            address: donorInfo?.address,
+            city: donorInfo?.city,
+            zipCode: donorInfo?.zipCode,
+          },
+          cardDetails: donorInfo?.cardNumber ? {
+            last4: donorInfo.cardNumber.slice(-4),
+          } : undefined,
+        }
+      });
+
+      if (error) throw new Error(error.message);
+      
       return {
-        success: true,
-        transactionId: `fiat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        success: data?.success ?? false,
+        transactionId: data?.transactionId,
+        checkInstructions: data?.checkInstructions,
+        forwardingInfo: data?.forwardingInfo,
+        error: data?.error,
       };
-    } else {
+    } catch (error) {
+      console.error('Fiat payment error:', error);
       return {
         success: false,
-        error: 'Payment failed. Please try again or use a different payment method.'
+        error: error instanceof Error ? error.message : 'Payment processing failed. Please try again.',
       };
     }
   }
