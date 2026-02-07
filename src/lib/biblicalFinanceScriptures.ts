@@ -278,6 +278,120 @@ export const WARNING_SCRIPTURES = [
   },
 ];
 
+// ============ WEALTH BUILDING & GENERATIONAL BLESSING ============
+
+export const WEALTH_BUILDING_SCRIPTURES = [
+  {
+    reference: 'Proverbs 13:22',
+    kjv: 'A good man leaveth an inheritance to his children\'s children: and the wealth of the sinner is laid up for the just.',
+    hebrew: 'טוֹב יַנְחִיל בְּנֵי בָנִים וְצָפוּן לַצַּדִּיק חֵיל חוֹטֵא',
+    strongNumbers: ['H2896', 'H5157', 'H1121', 'H6845', 'H6662', 'H2428', 'H2398'],
+    category: 'generational_wealth',
+    principle: 'Build wealth for future generations. Long-term multi-generational thinking.',
+    defiMapping: 'Generational vault: Long-term staking with inheritance transfer capabilities',
+    contractFunction: 'BWTYACore: Multi-generational staking with heir designation',
+    financialKeywords: ['inheritance', 'children', 'wealth', 'sinner', 'just', 'nachal']
+  },
+  {
+    reference: 'Genesis 26:12-13',
+    kjv: 'Then Isaac sowed in that land, and received in the same year an hundredfold: and the LORD blessed him. And the man waxed great, and went forward, and grew until he became very great.',
+    hebrew: 'וַיִּזְרַע יִצְחָק בָּאָרֶץ הַהִוא וַיִּמְצָא בַּשָּׁנָה הַהִיא מֵאָה שְׁעָרִים וַיְבָרְכֵהוּ יְהוָה',
+    strongNumbers: ['H2232', 'H3327', 'H776', 'H4672', 'H8141', 'H3967', 'H8179', 'H1288'],
+    category: 'investing',
+    principle: 'Sowing in good ground yields 100x. God blesses diligent stewardship.',
+    defiMapping: 'Yield farming with compounding: Reinvest yields for exponential growth',
+    contractFunction: 'BWTYACore: Auto-compound option for yield reinvestment',
+    financialKeywords: ['sowed', 'hundredfold', 'blessed', 'great', 'zara', 'meah']
+  },
+  {
+    reference: 'Psalm 112:3',
+    kjv: 'Wealth and riches shall be in his house: and his righteousness endureth for ever.',
+    hebrew: 'הוֹן־וָעֹשֶׁר בְּבֵיתוֹ וְצִדְקָתוֹ עֹמֶדֶת לָעַד',
+    strongNumbers: ['H1952', 'H6239', 'H1004', 'H6666', 'H5975', 'H5703'],
+    category: 'stewardship',
+    principle: 'Wealth in the house of the righteous endures. Righteousness + wealth coexist.',
+    defiMapping: 'Wisdom score gates: Higher righteousness (wisdom) unlocks higher yields',
+    contractFunction: 'BWTYACore._calculateWisdomMultiplier()',
+    financialKeywords: ['wealth', 'riches', 'house', 'righteousness', 'hon', 'osher']
+  },
+];
+
+// ============ WORK, DILIGENCE & LAZINESS ============
+
+export const WORK_DILIGENCE_SCRIPTURES = [
+  {
+    reference: 'Proverbs 10:4',
+    kjv: 'He becometh poor that dealeth with a slack hand: but the hand of the diligent maketh rich.',
+    hebrew: 'רָאשׁ עֹשֶׂה כַף־רְמִיָּה וְיַד חָרוּצִים תַּעֲשִׁיר',
+    strongNumbers: ['H7326', 'H6213', 'H3709', 'H7423', 'H3027', 'H2742', 'H6238'],
+    category: 'diligence',
+    principle: 'Laziness = poverty. Diligence = wealth. Active stewardship required.',
+    defiMapping: 'Active management bonus: Users who regularly rebalance earn higher wisdom scores',
+    contractFunction: 'WisdomOracle: stewardship_score increases with active participation',
+    financialKeywords: ['poor', 'slack', 'diligent', 'rich', 'charuts', 'remiyah']
+  },
+  {
+    reference: 'Proverbs 6:6-8',
+    kjv: 'Go to the ant, thou sluggard; consider her ways, and be wise: Which having no guide, overseer, or ruler, Provideth her meat in the summer, and gathereth her food in the harvest.',
+    hebrew: 'לֵךְ־אֶל־נְמָלָה עָצֵל רְאֵה דְרָכֶיהָ וַחֲכָם',
+    strongNumbers: ['H3212', 'H5244', 'H6102', 'H7200', 'H1870', 'H2449'],
+    category: 'saving',
+    principle: 'Save during abundance for times of scarcity. The ant\'s wisdom.',
+    defiMapping: 'Joseph pool: Automated savings during bull markets, reserves for bear',
+    contractFunction: 'BWTYACore.POOL_JOSEPH: Emergency fund with 9% stable APY',
+    financialKeywords: ['ant', 'sluggard', 'wise', 'summer', 'harvest', 'nemalah', 'atzel']
+  },
+  {
+    reference: 'Colossians 3:23',
+    kjv: 'And whatsoever ye do, do it heartily, as to the Lord, and not unto men.',
+    greek: 'ὃ ἐὰν ποιῆτε, ἐκ ψυχῆς ἐργάζεσθε ὡς τῷ κυρίῳ καὶ οὐκ ἀνθρώποις',
+    strongNumbers: ['G4160', 'G5590', 'G2038', 'G2962', 'G3756', 'G444'],
+    category: 'stewardship',
+    principle: 'Work for God, not people. Excellence in all financial stewardship.',
+    defiMapping: 'Every transaction is an act of worship when done with Biblical wisdom',
+    contractFunction: 'BWTYACore.invest(): reasoning field as worship declaration',
+    financialKeywords: ['do', 'heartily', 'Lord', 'men', 'ergazesthe', 'kyrio']
+  },
+];
+
+// ============ GENEROSITY, CHARITY & THE POOR ============
+
+export const GENEROSITY_SCRIPTURES = [
+  {
+    reference: 'Luke 6:38',
+    kjv: 'Give, and it shall be given unto you; good measure, pressed down, and shaken together, and running over, shall men give into your bosom.',
+    greek: 'δίδοτε, καὶ δοθήσεται ὑμῖν· μέτρον καλὸν πεπιεσμένον σεσαλευμένον ὑπερεκχυννόμενον',
+    strongNumbers: ['G1325', 'G3358', 'G2570', 'G4085', 'G4531', 'G5240'],
+    category: 'generosity',
+    principle: 'Radical generosity returns multiplied blessings. Give bountifully.',
+    defiMapping: 'Charity pool bonus: Generous giving to Widow pool earns extra multiplier',
+    contractFunction: 'BWTYACore.POOL_WIDOW + generosityMultiplier',
+    financialKeywords: ['give', 'measure', 'pressed', 'running over', 'didote', 'metron']
+  },
+  {
+    reference: 'Proverbs 19:17',
+    kjv: 'He that hath pity upon the poor lendeth unto the LORD; and that which he hath given will he pay him again.',
+    hebrew: 'מַלְוֵה יְהוָה חוֹנֵן דָּל וּגְמֻלוֹ יְשַׁלֶּם־לוֹ',
+    strongNumbers: ['H3867', 'H3068', 'H2603', 'H1800', 'H1576', 'H7999'],
+    category: 'charity',
+    principle: 'Lending to the poor is lending to God. God repays with interest.',
+    defiMapping: 'Widow pool: 0% interest micro-loans. God guarantees the yield.',
+    contractFunction: 'BWTYACore.POOL_WIDOW: charity-based micro-lending',
+    financialKeywords: ['pity', 'poor', 'lendeth', 'LORD', 'pay', 'malveh', 'dal']
+  },
+  {
+    reference: 'Acts 20:35',
+    kjv: 'I have shewed you all things, how that so labouring ye ought to support the weak, and to remember the words of the Lord Jesus, how he said, It is more blessed to give than to receive.',
+    greek: 'μακάριόν ἐστιν μᾶλλον διδόναι ἢ λαμβάνειν',
+    strongNumbers: ['G3107', 'G3123', 'G1325', 'G2228', 'G2983'],
+    category: 'generosity',
+    principle: 'Giving is more blessed than receiving. Core DeFi principle for BibleFi.',
+    defiMapping: 'Tithe-first protocol: Yield distributed after tithing deduction',
+    contractFunction: 'BWTYACore._claimRewards() with tithe-first logic',
+    financialKeywords: ['blessed', 'give', 'receive', 'weak', 'makarion', 'didonai']
+  },
+];
+
 // ============ COMPLETE SCRIPTURE INDEX ============
 
 export const ALL_FINANCIAL_SCRIPTURES = [
@@ -287,6 +401,9 @@ export const ALL_FINANCIAL_SCRIPTURES = [
   ...SABBATH_JUBILEE_SCRIPTURES,
   ...SOWING_REAPING_SCRIPTURES,
   ...WARNING_SCRIPTURES,
+  ...WEALTH_BUILDING_SCRIPTURES,
+  ...WORK_DILIGENCE_SCRIPTURES,
+  ...GENEROSITY_SCRIPTURES,
 ];
 
 // Scripture lookup by reference
