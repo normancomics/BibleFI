@@ -1,5 +1,7 @@
-
 project_id = "ojiipppypzigjnjblbzn"
+
+[functions.biblical-advisor]
+verify_jwt = false
 
 [functions.church-search]
 verify_jwt = false
