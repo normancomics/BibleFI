@@ -12,6 +12,9 @@ import {
   Bitcoin, DollarSign, Banknote, Building, CheckCircle, AlertCircle,
   Wallet, ArrowRight, BookOpen, Star, Sparkles, Shield, Lock
 } from 'lucide-react';
+import superfluidLogo from '@/assets/superfluid-logo.png';
+import usdcLogo from '@/assets/usdc-logo.png';
+import veilLogo from '@/assets/veil-logo.ico';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
@@ -515,7 +518,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                     >
                       <CardContent className="p-4 text-center">
                         <div className="relative">
-                          <img src="https://cryptologos.cc/logos/superfluid-super-logo.png" alt="Superfluid" className="w-8 h-8 mx-auto mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                          <img src={superfluidLogo} alt="Superfluid" className="w-8 h-8 mx-auto mb-2" />
                           <Badge className="absolute -top-1 -right-1 bg-green-500 text-[10px]">★</Badge>
                         </div>
                         <p className="font-medium">Superfluid Stream</p>
@@ -531,7 +534,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                       onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('crypto')}
                     >
                       <CardContent className="p-4 text-center">
-                        <img src="https://cryptologos.cc/logos/usd-coin-usdc-logo.png" alt="USDC" className="w-8 h-8 mx-auto mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        <img src={usdcLogo} alt="USDC" className="w-8 h-8 mx-auto mb-2" />
                         <p className="font-medium">Direct USDC</p>
                         <p className="text-xs text-muted-foreground">One-time stablecoin</p>
                       </CardContent>
@@ -545,7 +548,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                       onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('veil')}
                     >
                       <CardContent className="p-4 text-center">
-                        <img src="https://veil.cash/logo.png" alt="Veil.cash" className="w-8 h-8 mx-auto mb-2 rounded-full" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.insertAdjacentHTML('afterbegin', '<svg class="w-8 h-8 mx-auto mb-2 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'); }} />
+                        <img src={veilLogo} alt="Veil.cash" className="w-8 h-8 mx-auto mb-2 rounded-full" />
                         <p className="font-medium">Anonymous (ZK)</p>
                         <p className="text-xs text-muted-foreground">Veil.cash privacy</p>
                       </CardContent>
