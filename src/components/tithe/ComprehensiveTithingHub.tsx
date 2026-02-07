@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import superfluidLogo from '@/assets/superfluid-logo.png';
 import usdcLogo from '@/assets/usdc-logo.png';
-import veilLogo from '@/assets/veil-logo.ico';
+import veilLogo from '@/assets/veil-logo.png';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
@@ -111,39 +111,77 @@ const ComprehensiveTithingHub: React.FC = () => {
 
     setIsSearching(true);
     try {
+      // STEP 1: Search local database first
       let query = supabaseApi.from('global_churches').select('*');
 
-      // Flexible text search
       if (searchQuery.trim()) {
         query = query.or(`name.ilike.%${searchQuery}%,denomination.ilike.%${searchQuery}%`);
       }
-
-      // Location filters with flexible matching
       if (cityFilter.trim()) {
         query = query.ilike('city', `%${cityFilter}%`);
       }
-
       if (stateFilter.trim()) {
         query = query.ilike('state_province', `%${stateFilter}%`);
       }
-
       if (zipFilter.trim()) {
         query = query.ilike('postal_code', `%${zipFilter}%`);
       }
 
       const { data, error } = await query.order('verified', { ascending: false }).limit(100);
-
       if (error) throw error;
 
-      setChurches(data || []);
-      
-      if (!data?.length) {
+      let results: Church[] = data || [];
+
+      // STEP 2: If local DB returns 0 results, fallback to edge function (OSM + Google Places)
+      if (results.length === 0) {
+        console.log('📡 Local DB empty, falling back to hybrid search (OSM + Google Places)...');
+        toast({ title: "Searching global databases...", description: "Querying OpenStreetMap & Google Places" });
+
+        const locationParts = [cityFilter, stateFilter].filter(Boolean).join(', ');
+        const { data: edgeData, error: edgeError } = await supabase.functions.invoke('church-search', {
+          body: {
+            query: searchQuery || undefined,
+            location: locationParts || undefined,
+            radius: 50000,
+          },
+        });
+
+        if (edgeError) {
+          console.error('Edge function error:', edgeError);
+        } else if (edgeData?.churches?.length) {
+          console.log(`✅ Hybrid search returned ${edgeData.churches.length} churches`);
+          results = edgeData.churches.map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            denomination: c.denomination || undefined,
+            address: c.address,
+            city: c.city,
+            state_province: c.state || '',
+            country: c.country || 'United States',
+            website: c.website || undefined,
+            phone: c.phone || undefined,
+            accepts_crypto: c.acceptsCrypto || false,
+            accepts_fiat: true,
+            accepts_cards: true,
+            accepts_checks: true,
+            crypto_address: undefined,
+            crypto_networks: c.cryptoNetworks || [],
+            verified: c.verified || false,
+            rating: c.rating || undefined,
+          }));
+        }
+      }
+
+      setChurches(results);
+
+      if (!results.length) {
         toast({
           title: "No churches found",
           description: "Try different search terms or add your church to our database",
         });
       } else {
-        toast({ title: `Found ${data.length} churches` });
+        const source = (data?.length || 0) > 0 ? 'local database' : 'global search';
+        toast({ title: `Found ${results.length} churches from ${source}` });
       }
     } catch (error) {
       console.error('Search error:', error);
