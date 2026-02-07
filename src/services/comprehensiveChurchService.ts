@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 export interface Church {
   id: string;
@@ -63,7 +63,7 @@ export class ComprehensiveChurchService {
     const startTime = Date.now();
     
     try {
-      let query = supabase
+      let query = supabaseApi
         .from('global_churches')
         .select('*');
 
@@ -202,7 +202,7 @@ export class ComprehensiveChurchService {
 
   async findChurchByNameAndLocation(name: string, city: string, state?: string): Promise<Church | null> {
     try {
-      let query = supabase
+      let query = supabaseApi
         .from('global_churches')
         .select('*')
         .ilike('name', `%${name}%`)
@@ -253,7 +253,7 @@ export class ComprehensiveChurchService {
 
   async getCryptoEnabledChurches(limit: number = 100): Promise<Church[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseApi
         .from('global_churches')
         .select('*')
         .eq('accepts_crypto', true)
@@ -300,7 +300,7 @@ export class ComprehensiveChurchService {
 
   async addChurch(churchData: Omit<Church, 'id' | 'created_at' | 'updated_at'>): Promise<Church> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseApi
         .from('global_churches')
         .insert({
           name: churchData.name,

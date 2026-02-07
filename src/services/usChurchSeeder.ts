@@ -5,7 +5,7 @@
  * - All 50 states coverage
  */
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 interface ChurchSeedData {
   name: string;
@@ -543,7 +543,7 @@ export class USChurchSeederService {
     for (const church of ALL_US_CHURCHES) {
       try {
         // Check if church already exists
-        const { data: existing } = await supabase
+        const { data: existing } = await supabaseApi
           .from('global_churches')
           .select('id')
           .eq('name', church.name)
@@ -557,7 +557,7 @@ export class USChurchSeederService {
           continue;
         }
 
-        const { error } = await supabase.from('global_churches').insert({
+        const { error } = await supabaseApi.from('global_churches').insert({
           name: church.name,
           denomination: church.denomination,
           city: church.city,
@@ -593,7 +593,7 @@ export class USChurchSeederService {
   }
 
   static async getChurchCount(): Promise<number> {
-    const { count } = await supabase
+    const { count } = await supabaseApi
       .from('global_churches')
       .select('*', { count: 'exact', head: true });
     return count || 0;

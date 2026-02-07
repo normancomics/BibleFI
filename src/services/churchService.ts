@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { supabaseApi } from "@/integrations/supabase/apiClient";
 import { Church } from "@/types/church";
 import { ExternalChurchService } from "./externalChurchService";
 
@@ -16,7 +17,7 @@ export async function searchChurches(query: string): Promise<Church[]> {
         .select('*')
         .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state.ilike.%${query}%`)
         .limit(10),
-      supabase
+      supabaseApi
         .from('global_churches')
         .select('*')
         .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)

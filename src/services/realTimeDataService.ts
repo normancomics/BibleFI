@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 interface LiveStats {
   totalUsers: number;
@@ -55,7 +56,7 @@ export class RealTimeDataService {
         wisdomResult,
         versesResult
       ] = await Promise.allSettled([
-        supabase.from('global_churches').select('id, accepts_crypto', { count: 'exact' }),
+        supabaseApi.from('global_churches').select('id, accepts_crypto', { count: 'exact' }),
         supabase.from('superfluid_streams').select('id, status', { count: 'exact' }),
         supabase.from('wisdom_scores').select('score'),
         supabase.from('bible_verses').select('financial_relevance').gt('financial_relevance', 0)
@@ -112,7 +113,7 @@ export class RealTimeDataService {
   // Get church growth data over time
   async getChurchGrowthData(): Promise<ChurchGrowthData[]> {
     try {
-      const { data: churches, error } = await supabase
+      const { data: churches, error } = await supabaseApi
         .from('global_churches')
         .select('created_at, accepts_crypto, verified')
         .order('created_at');
