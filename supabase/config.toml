@@ -6,17 +6,29 @@ verify_jwt = false
 [functions.church-search]
 verify_jwt = false
 
+[functions.enhanced-biblical-advisor]
+verify_jwt = false
+
 [functions.farcaster-api]
 verify_jwt = false
 
 [functions.frame-handler]
 verify_jwt = false
 
+[functions.generate-embeddings]
+verify_jwt = false
+
 [functions.generate-image]
+verify_jwt = false
+
+[functions.market-data]
 verify_jwt = false
 
 [functions.process-fiat-tithe]
 verify_jwt = false
 
-[functions.market-data]
+[functions.talent-score]
+verify_jwt = false
+
+[functions.wisdom-score-calculator]
 verify_jwt = false
