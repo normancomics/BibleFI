@@ -4,7 +4,7 @@ import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 
 // Updated WalletConnect Project ID for Bible.fi production
-const projectId = '2f0f97a31e2243c89db717c84c2e7ee6' // Bible.fi official project ID
+const projectId = '2589ec8e083adaa554ee06641ce2b93b' // Bible.fi official project ID
 
 export const config = createConfig({
   chains: [base, mainnet],
