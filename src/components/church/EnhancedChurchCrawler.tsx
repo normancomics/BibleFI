@@ -86,15 +86,15 @@ const EnhancedChurchCrawler: React.FC = () => {
   const loadChurches = async () => {
     setIsLoading(true);
     try {
-      const cryptoChurches = await GlobalChurchCrawlerService.getCryptoEnabledChurches();
-      setChurches(cryptoChurches);
+      const allChurches = await GlobalChurchCrawlerService.getAllChurches();
+      setChurches(allChurches);
       
       // Calculate stats
-      const countries = new Set(cryptoChurches.map(c => c.country));
+      const countries = new Set(allChurches.map(c => c.country));
       setStats({
-        total: cryptoChurches.length,
-        cryptoEnabled: cryptoChurches.filter(c => c.accepts_crypto).length,
-        verified: cryptoChurches.filter(c => c.verified).length,
+        total: allChurches.length,
+        cryptoEnabled: allChurches.filter(c => c.accepts_crypto).length,
+        verified: allChurches.filter(c => c.verified).length,
         countries: countries.size
       });
     } catch (error) {
@@ -154,21 +154,51 @@ const EnhancedChurchCrawler: React.FC = () => {
   const filterChurches = () => {
     let filtered = churches;
 
-    if (searchQuery) {
-      filtered = filtered.filter(church =>
-        church.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.denomination?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
     if (selectedCountry) {
       filtered = filtered.filter(church => church.country === selectedCountry);
     }
 
     if (cryptoFilter !== null) {
       filtered = filtered.filter(church => church.accepts_crypto === cryptoFilter);
+    }
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      // Separate into exact name matches vs location/denomination matches
+      const nameMatches: GlobalChurchData[] = [];
+      const locationMatches: GlobalChurchData[] = [];
+      const otherMatches: GlobalChurchData[] = [];
+      const nonMatches: GlobalChurchData[] = [];
+
+      for (const church of filtered) {
+        const nameMatch = church.name.toLowerCase().includes(q);
+        const cityMatch = church.city.toLowerCase().includes(q);
+        const stateMatch = church.state_province?.toLowerCase().includes(q);
+        const countryMatch = church.country.toLowerCase().includes(q);
+        const denomMatch = church.denomination?.toLowerCase().includes(q);
+
+        if (nameMatch) {
+          nameMatches.push(church);
+        } else if (cityMatch || stateMatch) {
+          locationMatches.push(church);
+        } else if (countryMatch || denomMatch) {
+          otherMatches.push(church);
+        } else {
+          nonMatches.push(church);
+        }
+      }
+
+      // Sort each group alphabetically by name
+      const sortByName = (a: GlobalChurchData, b: GlobalChurchData) => a.name.localeCompare(b.name);
+      nameMatches.sort(sortByName);
+      locationMatches.sort(sortByName);
+      otherMatches.sort(sortByName);
+
+      // Prioritized: name matches first, then same location, then other matches
+      filtered = [...nameMatches, ...locationMatches, ...otherMatches];
+    } else {
+      // No search query - sort alphabetically
+      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
     }
 
     setFilteredChurches(filtered);
@@ -318,78 +348,87 @@ const EnhancedChurchCrawler: React.FC = () => {
               </div>
 
               {/* Church List */}
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {filteredChurches.map((church, index) => (
-                  <Card key={church.id || index} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold">{church.name}</h3>
-                            <DataQualityBadge church={church} />
-                            {church.verified && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Verified className="h-3 w-3 mr-1" />
-                                Verified
-                              </Badge>
-                            )}
-                            {church.accepts_crypto && (
-                              <Badge variant="default" className="text-xs">
-                                <Bitcoin className="h-3 w-3 mr-1" />
-                                Crypto
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-1 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4" />
-                              {church.city}, {church.country}
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {filteredChurches.map((church, index) => {
+                  const isNameMatch = searchQuery && church.name.toLowerCase().includes(searchQuery.toLowerCase());
+                  return (
+                    <Card key={church.id || index} className={`hover:shadow-md transition-shadow ${isNameMatch ? 'ring-2 ring-primary border-primary bg-primary/5' : ''}`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              {isNameMatch && (
+                                <Badge variant="default" className="text-xs">
+                                  <Search className="h-3 w-3 mr-1" />
+                                  Match
+                                </Badge>
+                              )}
+                              <h3 className="font-semibold">{church.name}</h3>
+                              <DataQualityBadge church={church} />
+                              {church.verified && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <Verified className="h-3 w-3 mr-1" />
+                                  Verified
+                                </Badge>
+                              )}
+                              {church.accepts_crypto && (
+                                <Badge variant="default" className="text-xs">
+                                  <Bitcoin className="h-3 w-3 mr-1" />
+                                  Crypto
+                                </Badge>
+                              )}
                             </div>
-                            {church.denomination && (
-                              <div>{church.denomination}</div>
-                            )}
-                            {church.phone && (
+                            
+                            <div className="space-y-1 text-sm text-muted-foreground">
                               <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
-                                {church.phone}
+                                <MapPin className="h-4 w-4" />
+                                {church.city}{church.state_province ? `, ${church.state_province}` : ''}, {church.country}
                               </div>
-                            )}
-                            {church.email && (
-                              <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                {church.email}
-                              </div>
-                            )}
+                              {church.denomination && (
+                                <div>{church.denomination}</div>
+                              )}
+                              {church.phone && (
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4" />
+                                  {church.phone}
+                                </div>
+                              )}
+                              {church.email && (
+                                <div className="flex items-center gap-2">
+                                  <Mail className="h-4 w-4" />
+                                  {church.email}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        
-                        <div className="flex flex-col gap-2">
-                          {church.website && (
-                            <Button variant="outline" size="sm" asChild>
-                              <a href={church.website} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
                           
-                          <div className="flex gap-1">
-                            {church.accepts_crypto && (
-                              <Badge variant="outline" className="text-xs">
-                                <Bitcoin className="h-3 w-3" />
-                              </Badge>
+                          <div className="flex flex-col gap-2">
+                            {church.website && (
+                              <Button variant="outline" size="sm" asChild>
+                                <a href={church.website} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              </Button>
                             )}
-                            {church.accepts_cards && (
-                              <Badge variant="outline" className="text-xs">
-                                <CreditCard className="h-3 w-3" />
-                              </Badge>
-                            )}
+                            
+                            <div className="flex gap-1">
+                              {church.accepts_crypto && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Bitcoin className="h-3 w-3" />
+                                </Badge>
+                              )}
+                              {church.accepts_cards && (
+                                <Badge variant="outline" className="text-xs">
+                                  <CreditCard className="h-3 w-3" />
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </TabsContent>
             
