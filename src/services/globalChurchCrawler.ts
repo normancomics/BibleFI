@@ -323,4 +323,26 @@ export class GlobalChurchCrawlerService {
       return [];
     }
   }
+
+  static async getAllChurches(): Promise<GlobalChurchData[]> {
+    try {
+      const { data, error } = await supabaseApi
+        .from('global_churches')
+        .select('*')
+        .order('name', { ascending: true })
+        .limit(1000);
+
+      if (error) throw error;
+      return (data || []).map(church => ({ 
+        ...church, 
+        source: 'database',
+        coordinates: church.coordinates ? 
+          { lat: (church.coordinates as any)[0], lng: (church.coordinates as any)[1] } : 
+          null
+      })) as GlobalChurchData[];
+    } catch (error) {
+      console.error('Error getting all churches:', error);
+      return [];
+    }
+  }
 }
