@@ -47,7 +47,7 @@ export const mockChurches: Church[] = [
     country: "USA",
     denomination: "Pentecostal",
     acceptsCrypto: true,
-    website: "https://thefathershouse.org",
+    website: "https://thefathershouse.com",
     payment_methods: ["Credit Card", "ACH", "Bitcoin", "Ethereum", "USDC"]
   },
   {
