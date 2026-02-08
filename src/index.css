@@ -418,22 +418,13 @@
   animation: coin-spin 2s linear infinite;
 }
 
-/* Font styles - Updated for consistency */
-@font-face {
-  font-family: 'PixelFont';
-  src: url('/fonts/pixel.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Font classes */
+/* Font classes — PixelFont uses Press Start 2P from Google Fonts */
 .font-pixel {
-  font-family: 'PixelFont', monospace;
+  font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
 }
 
 .font-game {
-  font-family: 'PixelFont', 'Press Start 2P', monospace;
+  font-family: 'Press Start 2P', 'JetBrains Mono', monospace;
 }
 
 .font-scroll {
