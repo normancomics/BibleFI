@@ -5,13 +5,56 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Search, Globe, MapPin, Verified, Bitcoin, CreditCard, 
   Download, Filter, RefreshCw, Church, Users, Heart,
-  Phone, Mail, ExternalLink
+  Phone, Mail, ExternalLink, AlertTriangle, CheckCircle2, Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GlobalChurchCrawlerService, type GlobalChurchData } from '@/services/globalChurchCrawler';
+
+/** Calculate data quality score for a church (0-100) */
+const getDataQuality = (church: GlobalChurchData) => {
+  let score = 0;
+  const missing: string[] = [];
+  if (church.name) score += 20; else missing.push('Name');
+  if (church.website) score += 25; else missing.push('Website');
+  if (church.phone) score += 20; else missing.push('Phone');
+  if (church.email) score += 10; else missing.push('Email');
+  if (church.denomination) score += 10; else missing.push('Denomination');
+  if (church.city && church.country) score += 15; else missing.push('Location');
+  return { score, missing };
+};
+
+const DataQualityBadge: React.FC<{ church: GlobalChurchData }> = ({ church }) => {
+  const { score, missing } = getDataQuality(church);
+  const color = score >= 80 ? 'text-green-400 border-green-500/40 bg-green-500/10'
+    : score >= 50 ? 'text-yellow-400 border-yellow-500/40 bg-yellow-500/10'
+    : 'text-red-400 border-red-500/40 bg-red-500/10';
+  const Icon = score >= 80 ? CheckCircle2 : score >= 50 ? Info : AlertTriangle;
+  
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className={`text-xs cursor-help ${color}`}>
+            <Icon className="h-3 w-3 mr-1" />
+            {score}%
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <p className="font-semibold mb-1">Data Quality: {score}%</p>
+          {missing.length > 0 ? (
+            <p className="text-xs">Missing: {missing.join(', ')}</p>
+          ) : (
+            <p className="text-xs">All key fields complete ✓</p>
+          )}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
 
 const EnhancedChurchCrawler: React.FC = () => {
   const { toast } = useToast();
@@ -279,6 +322,7 @@ const EnhancedChurchCrawler: React.FC = () => {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-semibold">{church.name}</h3>
+                            <DataQualityBadge church={church} />
                             {church.verified && (
                               <Badge variant="secondary" className="text-xs">
                                 <Verified className="h-3 w-3 mr-1" />
