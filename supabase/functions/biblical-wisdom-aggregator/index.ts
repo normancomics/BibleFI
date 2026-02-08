@@ -85,9 +85,13 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey, { db: { schema: 'api' } });
 
-    const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'seed';
-    const category = body.category;
+    let body: Record<string, unknown> = {};
+    try {
+      const text = await req.text();
+      if (text.trim()) body = JSON.parse(text);
+    } catch { /* defaults */ }
+    const mode = (body.mode as string) || 'seed';
+    const category = body.category as string | undefined;
 
     console.log(`📖 Biblical Wisdom Aggregator started — mode: ${mode}, category: ${category || 'all'}`);
 
