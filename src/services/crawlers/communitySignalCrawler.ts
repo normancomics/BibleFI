@@ -33,13 +33,8 @@ interface EmergingTopic {
  * Feeds signals into AI-driven Biblical Wisdom Synthesis
  */
 export class CommunitySignalCrawler {
-  private farcasterApiKey: string;
   private isMonitoring = false;
   private signalBuffer: CommunitySignal[] = [];
-
-  constructor() {
-    this.farcasterApiKey = import.meta.env.VITE_FARCASTER_API_KEY || '';
-  }
 
   async startMonitoring(): Promise<void> {
     if (this.isMonitoring) {
@@ -77,21 +72,20 @@ export class CommunitySignalCrawler {
 
     for (const keyword of keywords) {
       try {
-        const response = await fetch(
-          `https://api.neynar.com/v2/farcaster/cast/search?q=${encodeURIComponent(keyword)}&limit=25`,
-          {
-            headers: {
-              'api_key': this.farcasterApiKey,
-              'Content-Type': 'application/json'
-            }
+        // Use the farcaster-api edge function to proxy requests securely
+        const { data, error } = await supabase.functions.invoke('farcaster-api', {
+          body: {
+            endpoint: `/farcaster/cast/search?q=${encodeURIComponent(keyword)}&limit=25`,
+            method: 'GET'
           }
-        );
+        });
 
-        if (!response.ok) continue;
+        if (error) {
+          console.error(`Farcaster search error for "${keyword}":`, error);
+          continue;
+        }
 
-        const data = await response.json();
-
-        for (const cast of data.result?.casts || []) {
+        for (const cast of data?.result?.casts || []) {
           const signal = this.parseFarcasterCast(cast);
           this.signalBuffer.push(signal);
         }
