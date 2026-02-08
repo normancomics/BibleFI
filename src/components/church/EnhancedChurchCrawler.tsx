@@ -9,10 +9,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { 
   Search, Globe, MapPin, Verified, Bitcoin, CreditCard, 
   Download, Filter, RefreshCw, Church, Users, Heart,
-  Phone, Mail, ExternalLink, AlertTriangle, CheckCircle2, Info
+  Phone, Mail, ExternalLink, AlertTriangle, CheckCircle2, Info,
+  Bot, BookOpen, Zap, Shield
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { GlobalChurchCrawlerService, type GlobalChurchData } from '@/services/globalChurchCrawler';
+import AutomationPanel from './AutomationPanel';
 
 /** Calculate data quality score for a church (0-100) */
 const getDataQuality = (church: GlobalChurchData) => {
@@ -257,9 +260,10 @@ const EnhancedChurchCrawler: React.FC = () => {
         
         <CardContent>
           <Tabs defaultValue="search" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="search">Search Churches</TabsTrigger>
               <TabsTrigger value="crawl">Data Crawler</TabsTrigger>
+              <TabsTrigger value="automation">Automation</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
             
@@ -432,6 +436,10 @@ const EnhancedChurchCrawler: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="automation" className="space-y-4">
+              <AutomationPanel />
             </TabsContent>
             
             <TabsContent value="analytics" className="space-y-4">
