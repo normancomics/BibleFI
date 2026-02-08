@@ -36,10 +36,19 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey, { db: { schema: 'api' } });
 
-    const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'discover';
-    const region = body.region;
+    let body: Record<string, unknown> = {};
+    try {
+      const text = await req.text();
+      if (text.trim()) {
+        body = JSON.parse(text);
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not parse request body, using defaults:', (e as Error).message);
+    }
+    const mode = (body.mode as string) || 'discover';
+    const region = body.region as string | undefined;
 
     console.log(`⛪ Church Data Aggregator started — mode: ${mode}, region: ${region || 'all'}`);
 
@@ -221,13 +230,9 @@ async function discoverNewChurches(
               city: cityInfo.city,
               state_province: cityInfo.state || tags['addr:state'] || null,
               country: cityInfo.country,
-              postal_code: tags['addr:postcode'] || null,
               website: tags.website || null,
-              phone: tags.phone || tags['contact:phone'] || null,
-              email: tags.email || tags['contact:email'] || null,
               verified: false,
               accepts_crypto: false,
-              accepts_fiat: true,
             });
 
           if (insertError) {
@@ -279,8 +284,6 @@ async function verifyExistingData(
           .from('global_churches')
           .update({
             verified: true,
-            verification_date: new Date().toISOString(),
-            verified_by: 'automated_aggregator',
           })
           .eq('id', church.id);
         result.verifiedData++;
@@ -330,7 +333,7 @@ async function enrichMissingData(
           const updates: Record<string, unknown> = {};
 
           if (tags.website) updates.website = tags.website;
-          if (tags.phone || tags['contact:phone']) updates.phone = tags.phone || tags['contact:phone'];
+          // Note: phone/email are computed columns in the api view, can't update directly
 
           if (Object.keys(updates).length > 0) {
             await supabase
