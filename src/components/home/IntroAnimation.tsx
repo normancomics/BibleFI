@@ -61,6 +61,33 @@ const biblicalScenes = [
     greek: "ἀπόδοτε οὖν τὰ Καίσαρος Καίσαρι καὶ τὰ τοῦ θεοῦ τῷ θεῷ",
     aramaic: "הַבוּ הָכִיל דְּקֵיסָר לְקֵיסָר וְדַאלָהָא לַאלָהָא",
     sound: "powerup"
+  },
+  {
+    id: "scene7",
+    kjv: "\"Behold, I have given thee a wise and an understanding heart; so that there was none like thee before thee, neither after thee shall any arise like unto thee.\"",
+    reference: "1 Kings 3:12",
+    hebrew: "הִנֵּה נָתַתִּי לְךָ לֵב חָכָם וְנָבוֹן אֲשֶׁר כָּמוֹךָ לֹא הָיָה לְפָנֶיךָ וְאַחֲרֶיךָ לֹא יָקוּם כָּמוֹךָ",
+    greek: "ἰδοὺ δέδωκά σοι καρδίαν φρονίμην καὶ σοφήν ὡς σὺ οὐ γέγονεν ἔμπροσθέν σου καὶ μετὰ σὲ οὐκ ἀναστήσεται ὅμοιός σοι",
+    aramaic: "הָא יְהַבִית לָךְ לִבָּא חַכִּימָא וּסָכְלְתָנָא דִּכְוָתָךְ לָא הֲוָה קֳדָמָךְ וּבָתְרָךְ לָא יְקוּם כְּוָתָךְ",
+    sound: "scroll"
+  },
+  {
+    id: "scene8",
+    kjv: "\"And let them gather all the food of those good years that come, and lay up corn under the hand of Pharaoh, and let them keep food in the cities.\"",
+    reference: "Genesis 41:35-36",
+    hebrew: "וְיִקְבְּצוּ אֶת־כָּל־אֹכֶל הַשָּׁנִים הַטֹּבוֹת הַבָּאֹת וְיִצְבְּרוּ בָר תַּחַת יַד פַּרְעֹה",
+    greek: "καὶ συναγαγέτωσαν πάντα τὰ βρώματα τῶν ἐτῶν τῶν ἀγαθῶν τῶν ἐρχομένων καὶ συναχθήτω σῖτος ὑπὸ χεῖρα Φαραω",
+    aramaic: "וְיִכְנְשׁוּן יָת כָּל עִיבוּרָא דִּשְׁנַיָּא טָבָתָא דְּאָתְיָן וְיִצְבְּרוּן עִיבוּרָא תְּחוֹת יְדָא דְּפַרְעֹה",
+    sound: "coin"
+  },
+  {
+    id: "scene9",
+    kjv: "\"Well done, thou good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things.\"",
+    reference: "Matthew 25:21",
+    hebrew: "יָפֶה עָשִׂיתָ עֶבֶד טוֹב וְנֶאֱמָן עַל מְעַט הָיִיתָ נֶאֱמָן עַל הַרְבֵּה אֲשִׂימְךָ",
+    greek: "εὖ δοῦλε ἀγαθὲ καὶ πιστέ ἐπὶ ὀλίγα ἦς πιστός ἐπὶ πολλῶν σε καταστήσω",
+    aramaic: "יָאוּת עַבְדָּא טָבָא וּמְהֵימָנָא עַל קַלִּיל הֲוַיתְּ מְהֵימָן עַל סַגִּי אֲמַנִּנָךְ",
+    sound: "success"
   }
 ];
 
