@@ -88,6 +88,87 @@ const biblicalScenes = [
     greek: "εὖ δοῦλε ἀγαθὲ καὶ πιστέ ἐπὶ ὀλίγα ἦς πιστός ἐπὶ πολλῶν σε καταστήσω",
     aramaic: "יָאוּת עַבְדָּא טָבָא וּמְהֵימָנָא עַל קַלִּיל הֲוַיתְּ מְהֵימָן עַל סַגִּי אֲמַנִּנָךְ",
     sound: "success"
+  },
+  {
+    id: "scene10",
+    kjv: "\"But he that received seed into the good ground is he that heareth the word, and understandeth it; which also beareth fruit, and bringeth forth, some an hundredfold, some sixty, some thirty.\"",
+    reference: "Matthew 13:23",
+    hebrew: "וְהַנִּזְרָע עַל הָאֲדָמָה הַטּוֹבָה הוּא הַשֹּׁמֵעַ אֶת הַדָּבָר וּמֵבִין אֹתוֹ וְהוּא עֹשֶׂה פְרִי",
+    greek: "ὁ δὲ ἐπὶ τὴν καλὴν γῆν σπαρείς οὗτός ἐστιν ὁ τὸν λόγον ἀκούων καὶ συνιείς ὃς δὴ καρποφορεῖ",
+    aramaic: "וְהוּ דְּאִתְזְרַע בְּאַרְעָא טָבְתָא הוּ דְּשָׁמַע מִלְּתָא וּמִסְתַּכַּל בָּהּ וְעָבֵד פֵּירֵי",
+    sound: "scroll"
+  },
+  {
+    id: "scene11",
+    kjv: "\"He that is faithful in that which is least is faithful also in much: and he that is unjust in the least is unjust also in much.\"",
+    reference: "Luke 16:10",
+    hebrew: "הַנֶּאֱמָן בִּמְעַט גַּם בְּהַרְבֵּה נֶאֱמָן וְהַמְעַוֵּל בִּמְעַט גַּם בְּהַרְבֵּה מְעַוֵּל",
+    greek: "ὁ πιστὸς ἐν ἐλαχίστῳ καὶ ἐν πολλῷ πιστός ἐστιν καὶ ὁ ἐν ἐλαχίστῳ ἄδικος καὶ ἐν πολλῷ ἄδικός ἐστιν",
+    aramaic: "מַן דִּמְהֵימָן בִּקְלִיל אָף בְּסַגִּי מְהֵימָן וּמַן דְּעַוָּל בִּקְלִיל אָף בְּסַגִּי עַוָּל",
+    sound: "coin"
+  },
+  {
+    id: "scene12",
+    kjv: "\"Give a portion to seven, and also to eight; for thou knowest not what evil shall be upon the earth.\"",
+    reference: "Ecclesiastes 11:2",
+    hebrew: "תֶּן חֵלֶק לְשִׁבְעָה וְגַם לִשְׁמוֹנָה כִּי לֹא תֵדַע מַה יִּהְיֶה רָעָה עַל הָאָרֶץ",
+    greek: "δὸς μερίδα τοῖς ἑπτὰ καί γε τοῖς ὀκτώ ὅτι οὐ γινώσκεις τί ἔσται πονηρὸν ἐπὶ τὴν γῆν",
+    aramaic: "הַב חוּלָקָא לְשַׁבְעָא וְאַף לִתְמָנְיָא אֲרֵי לָא יָדַע אַתְּ מָה יְהֵי בִישׁ עַל אַרְעָא",
+    sound: "powerup"
+  },
+  {
+    id: "scene13",
+    kjv: "\"The borrower is servant to the lender.\"",
+    reference: "Proverbs 22:7",
+    hebrew: "עָשִׁיר בְּרָשִׁים יִמְשׁוֹל וְעֶבֶד לֹוֶה לְאִישׁ מַלְוֶה",
+    greek: "πλούσιοι πτωχῶν ἄρξουσιν καὶ οἰκέτης ἰδίῳ δεσπότῃ δανιεῖ",
+    aramaic: "עַתִּירָא בְמִסְכְּנַיָּא שַׁלִּיט וְעַבְדָּא דְּלָוֵי לְגַבְרָא דְּמוֹזֵיף",
+    sound: "select"
+  },
+  {
+    id: "scene14",
+    kjv: "\"Be thou diligent to know the state of thy flocks, and look well to thy herds.\"",
+    reference: "Proverbs 27:23",
+    hebrew: "יָדֹעַ תֵּדַע פְּנֵי צֹאנֶךָ שִׁית לִבְּךָ לַעֲדָרִים",
+    greek: "γνωστῶς ἐπιγνώσῃ ψυχὰς ποιμνίου σου καὶ ἐπιστήσεις καρδίαν σου ἀγέλαις",
+    aramaic: "מִנְדַע תִּנְדַע אַפֵּי עָנָךְ שַׁוִּי לִבָּךְ לְעֶדְרָיָא",
+    sound: "scroll"
+  },
+  {
+    id: "scene15",
+    kjv: "\"Owe no man any thing, but to love one another: for he that loveth another hath fulfilled the law.\"",
+    reference: "Romans 13:8",
+    hebrew: "אַל תִּהְיוּ חַיָּבִים לְאִישׁ דָּבָר בִּלְתִּי אִם לְאַהֲבָה אִישׁ אֶת רֵעֵהוּ",
+    greek: "μηδενὶ μηδὲν ὀφείλετε εἰ μὴ τὸ ἀλλήλους ἀγαπᾶν ὁ γὰρ ἀγαπῶν τὸν ἕτερον νόμον πεπλήρωκεν",
+    aramaic: "לָא תֶהְוֹן חַיָּבִין לְאֱנָשׁ מִדֶּם אֶלָּא דִּתְרַחְמוּן חַד לְחַד",
+    sound: "coin"
+  },
+  {
+    id: "scene16",
+    kjv: "\"The plans of the diligent lead surely to abundance, but everyone who is hasty comes only to poverty.\"",
+    reference: "Proverbs 21:5",
+    hebrew: "מַחְשְׁבוֹת חָרוּץ אַךְ לְמוֹתָר וְכָל אָץ אַךְ לְמַחְסוֹר",
+    greek: "λογισμοὶ ἐπιμελοῦς πρὸς πλεονασμόν καὶ πᾶς ὁ σπεύδων πρὸς ἐλάττωμα",
+    aramaic: "מַחְשְׁבַת חָרוּצָא בְּרַם לְיוּתְרָנָא וְכָל דִּמְבַהֵל בְּרַם לְחַסְרוּנָא",
+    sound: "powerup"
+  },
+  {
+    id: "scene17",
+    kjv: "\"Honour the LORD with thy substance, and with the firstfruits of all thine increase.\"",
+    reference: "Proverbs 3:9",
+    hebrew: "כַּבֵּד אֶת יְהוָה מֵהוֹנֶךָ וּמֵרֵאשִׁית כָּל תְּבוּאָתֶךָ",
+    greek: "τίμα τὸν κύριον ἀπὸ σῶν δικαίων πόνων καὶ ἀπάρχου αὐτῷ ἀπὸ σῶν καρπῶν",
+    aramaic: "יַקַּר יָת יְיָ מִנִּכְסָךְ וּמֵרֵאשִׁית כָּל עַלְלָתָךְ",
+    sound: "select"
+  },
+  {
+    id: "scene18",
+    kjv: "\"Cast thy bread upon the waters: for thou shalt find it after many days.\"",
+    reference: "Ecclesiastes 11:1",
+    hebrew: "שַׁלַּח לַחְמְךָ עַל פְּנֵי הַמָּיִם כִּי בְרֹב הַיָּמִים תִּמְצָאֶנּוּ",
+    greek: "ἀπόστειλον τὸν ἄρτον σου ἐπὶ πρόσωπον τοῦ ὕδατος ὅτι ἐν πλήθει τῶν ἡμερῶν εὑρήσεις αὐτόν",
+    aramaic: "שַׁדַּר לַחְמָךְ עַל אַפֵּי מַיָּא אֲרֵי בְּסוֹגָאַת יוֹמַיָּא תַּשְׁכְּחִנֵּיהּ",
+    sound: "coin"
   }
 ];
 
