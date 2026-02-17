@@ -89,11 +89,11 @@ const TitheForm: React.FC = () => {
               <SelectValue placeholder="Select your church" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="first-baptist">First Baptist Church</SelectItem>
-              <SelectItem value="grace-community">Grace Community Church</SelectItem>
-              <SelectItem value="new-life">New Life Fellowship</SelectItem>
-              <SelectItem value="crossroads">Crossroads Church</SelectItem>
-              <SelectItem value="harvest">Harvest Christian Center</SelectItem>
+              <SelectItem value="v1-church-mountdora">V1 Church — Non-Denominational · Mount Dora, FL 32757</SelectItem>
+              <SelectItem value="st-patricks-manhattan">St. Patrick's Cathedral — Catholic · Manhattan, NY 10022</SelectItem>
+              <SelectItem value="calvary-baptist-manhattan">Calvary Baptist Church — Baptist · Manhattan, NY 10019</SelectItem>
+              <SelectItem value="redeemer-presbyterian">Redeemer Presbyterian — Presbyterian · Manhattan, NY 10023</SelectItem>
+              <SelectItem value="first-baptist-mountdora">First Baptist Church of Mount Dora — Baptist · Mount Dora, FL 32757</SelectItem>
             </SelectContent>
           </Select>
         </div>
