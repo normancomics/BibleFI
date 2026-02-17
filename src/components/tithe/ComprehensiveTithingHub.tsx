@@ -798,7 +798,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                   <Input
                     value={newChurch.name}
                     onChange={(e) => setNewChurch(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="First Baptist Church"
+                    placeholder="Times Square Church"
                   />
                 </div>
                 <div>
@@ -806,7 +806,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                   <Input
                     value={newChurch.denomination}
                     onChange={(e) => setNewChurch(prev => ({ ...prev, denomination: e.target.value }))}
-                    placeholder="Baptist, Methodist, etc."
+                    placeholder="Non-Denominational"
                   />
                 </div>
                 <div>
@@ -814,7 +814,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                   <Input
                     value={newChurch.city}
                     onChange={(e) => setNewChurch(prev => ({ ...prev, city: e.target.value }))}
-                    placeholder="Mount Dora"
+                    placeholder="New York"
                   />
                 </div>
                 <div>
@@ -822,7 +822,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                   <Input
                     value={newChurch.state_province}
                     onChange={(e) => setNewChurch(prev => ({ ...prev, state_province: e.target.value }))}
-                    placeholder="Florida"
+                    placeholder="New York"
                   />
                 </div>
                 <div>
@@ -838,7 +838,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                   <Input
                     value={newChurch.postal_code}
                     onChange={(e) => setNewChurch(prev => ({ ...prev, postal_code: e.target.value }))}
-                    placeholder="32757"
+                    placeholder="10036"
                   />
                 </div>
                 <div>
@@ -854,7 +854,7 @@ const ComprehensiveTithingHub: React.FC = () => {
                   <Input
                     value={newChurch.phone}
                     onChange={(e) => setNewChurch(prev => ({ ...prev, phone: e.target.value }))}
-                    placeholder="(352) 555-0100"
+                    placeholder="(212) 541-6000"
                   />
                 </div>
                 <div>
