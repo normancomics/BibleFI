@@ -35,21 +35,41 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authentication" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const FIREWORKS_API_KEY = Deno.env.get("FIREWORKS_API_KEY");
     if (!FIREWORKS_API_KEY) {
       throw new Error("FIREWORKS_API_KEY is not configured");
     }
 
-    // Rate limit: 20 req/min per IP
-    const clientIP = getClientIP(req);
-    if (!checkRateLimit(clientIP, 20, 60000)) {
+    // Rate limit: 20 req/min per user
+    if (!checkRateLimit(user.id, 20, 60000)) {
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Please wait before trying again." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 

@@ -72,14 +72,27 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Authenticate user (optional for anonymous donations)
-    let userId: string | null = null;
+    // Authenticate user - required for payment processing
     const authHeader = req.headers.get('Authorization');
-    if (authHeader) {
-      const token = authHeader.replace('Bearer ', '');
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id ?? null;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Authentication required for payment processing' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
+
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      supabaseAnonKey,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    const userId: string = user.id;
 
     const body: FiatTitheRequest = await req.json();
     console.log(`[FiatTithe] Processing ${body.paymentMethod} payment: $${body.amount} ${body.currency} to ${body.churchName}`);
