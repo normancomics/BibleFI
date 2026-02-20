@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.wisdom-score-calculator]
 verify_jwt = false
+
+[functions.uniswap-quote]
+verify_jwt = false
