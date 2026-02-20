@@ -129,19 +129,34 @@ export async function getOptionalUser(req: Request): Promise<{
 }
 
 /**
- * Required authentication - rejects unauthenticated requests
+ * Required authentication using getClaims - rejects unauthenticated requests
+ * Uses getClaims() for JWT verification (recommended over getUser for performance)
  */
 export async function requireAuth(req: Request): Promise<{
   user: { id: string; email?: string };
   error?: string;
 }> {
-  const result = await getOptionalUser(req);
-  
-  if (!result.user) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
     throw new Error('Authentication required');
   }
-  
-  return { user: result.user };
+
+  const token = authHeader.replace('Bearer ', '');
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } }
+  });
+
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data?.claims) {
+    throw new Error('Authentication required');
+  }
+
+  return {
+    user: {
+      id: data.claims.sub as string,
+      email: data.claims.email as string | undefined,
+    }
+  };
 }
 
 /**

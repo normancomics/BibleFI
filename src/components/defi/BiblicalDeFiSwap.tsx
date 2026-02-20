@@ -11,6 +11,7 @@ import { toast } from '@/components/ui/use-toast';
 import { validateInput, UserInputSchemas, apiRateLimiter } from '@/utils/inputValidation';
 import { useSecurityContext } from '@/contexts/EnhancedSecurityContext';
 import EnhancedBiblicalTrading from '@/components/wisdom/EnhancedBiblicalTrading';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Token {
   symbol: string;
@@ -135,27 +136,47 @@ const BiblicalDeFiSwap: React.FC = () => {
     setIsLoading(true);
     playSound('click');
 
-    // Simulate API call to DEX aggregator
-    setTimeout(() => {
-      const fromValue = parseFloat(fromAmount);
-      const estimatedOutput = fromValue * (fromToken.price || 1) / (toToken.price || 1);
-      const priceImpact = Math.random() * 0.5; // Random 0-0.5%
-      const fee = fromValue * 0.003; // 0.3% fee
+    try {
+      const { data, error } = await supabase.functions.invoke('uniswap-quote', {
+        body: {
+          fromToken: fromToken.symbol,
+          toToken: toToken.symbol,
+          amount: fromAmount,
+          slippage: parseFloat(slippage),
+        },
+      });
 
-      const mockQuote: SwapQuote = {
+      if (error) throw error;
+
+      const uniQuote: SwapQuote = {
         fromAmount,
-        toAmount: (estimatedOutput * (1 - priceImpact / 100 - 0.003)).toFixed(6),
-        priceImpact: priceImpact.toFixed(2),
-        fee: fee.toFixed(6),
-        route: [fromToken.symbol, toToken.symbol],
-        dex: 'Uniswap V3',
-        gasEstimate: (Math.random() * 0.01 + 0.005).toFixed(6),
-        slippage
+        toAmount: data.toAmount || '0',
+        priceImpact: data.priceImpact || '0.00',
+        fee: (parseFloat(fromAmount) * 0.003).toFixed(6),
+        route: typeof data.route === 'string' ? [data.route] : [fromToken.symbol, toToken.symbol],
+        dex: data.dex || 'Uniswap V3',
+        gasEstimate: data.gasEstimate || '0.000500',
+        slippage,
       };
 
-      setQuote(mockQuote);
+      setQuote(uniQuote);
+
+      if (data.source === 'estimate') {
+        toast({
+          title: "Estimated Quote",
+          description: data.warning || "Using estimated pricing. Live quotes temporarily unavailable.",
+        });
+      }
+    } catch (err) {
+      console.error('Quote error:', err);
+      toast({
+        title: "Quote Failed",
+        description: "Could not fetch live pricing. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const executeSwap = async () => {
