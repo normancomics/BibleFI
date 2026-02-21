@@ -7,9 +7,11 @@ const corsHeaders = {
 };
 
 // Base Chain token addresses
-const SUPPORTED_TOKENS: Record<string, { address: string; decimals: number; name: string }> = {
-  ETH: { address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', decimals: 18, name: 'Ethereum' },
-  WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18, name: 'Wrapped Ether' },
+// Note: For Uniswap API, ETH must use WETH address since it's a DEX (ERC-20 only)
+const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
+const SUPPORTED_TOKENS: Record<string, { address: string; decimals: number; name: string; apiAddress?: string }> = {
+  ETH: { address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', decimals: 18, name: 'Ethereum', apiAddress: WETH_ADDRESS },
+  WETH: { address: WETH_ADDRESS, decimals: 18, name: 'Wrapped Ether' },
   USDC: { address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', decimals: 6, name: 'USD Coin' },
   USDT: { address: '0xfde4c96c8593536e31f229ea441f725e18cc5773', decimals: 6, name: 'Tether USD' },
   DAI: { address: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb', decimals: 18, name: 'Dai' },
@@ -62,28 +64,33 @@ Deno.serve(async (req: Request) => {
 
     const amountInUnits = BigInt(Math.floor(amountFloat * (10 ** fromTokenInfo.decimals))).toString();
 
-    // Call Uniswap Quote API
-    const quoteParams = new URLSearchParams({
-      tokenInChainId: BASE_CHAIN_ID.toString(),
-      tokenOutChainId: BASE_CHAIN_ID.toString(),
-      tokenIn: fromTokenInfo.address,
-      tokenOut: toTokenInfo.address,
+    // Call Uniswap Trading API (v1)
+    // swapper is required by the API - use provided address or a zero address for quote-only
+    const effectiveSwapper = swapperAddress || '0x0000000000000000000000000000000000000001';
+    
+    const quoteBody: Record<string, unknown> = {
+      tokenInChainId: BASE_CHAIN_ID,
+      tokenOutChainId: BASE_CHAIN_ID,
+      tokenIn: fromTokenInfo.apiAddress || fromTokenInfo.address,
+      tokenOut: toTokenInfo.apiAddress || toTokenInfo.address,
       amount: amountInUnits,
       type: 'EXACT_INPUT',
+      protocols: ['V3', 'V2'],
+      swapper: effectiveSwapper,
       ...(slippage ? { slippageTolerance: slippage.toString() } : {}),
-      ...(swapperAddress ? { swapper: swapperAddress } : {}),
-    });
+    };
 
-    console.log(`[uniswap-quote] Fetching quote: ${fromToken} -> ${toToken}, amount: ${amount}`);
+    console.log(`[uniswap-quote] Fetching quote: ${fromToken} -> ${toToken}, amount: ${amount}, body:`, JSON.stringify(quoteBody));
 
     const quoteResponse = await fetch(
-      `https://api.uniswap.org/v2/quote?${quoteParams.toString()}`,
+      'https://trade-api.gateway.uniswap.org/v1/quote',
       {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'x-api-key': UNISWAP_API_KEY,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(quoteBody),
       }
     );
 
@@ -104,16 +111,18 @@ Deno.serve(async (req: Request) => {
 
     const quoteData = await quoteResponse.json();
 
-    // Parse the output amount
-    const outputAmountRaw = quoteData.quote?.amountOut || quoteData.amountOut || '0';
+    // Parse the output amount from quote.output.amount
+    const outputAmountRaw = quoteData.quote?.output?.amount || quoteData.quote?.amountOut || '0';
     const outputAmount = parseFloat(outputAmountRaw) / (10 ** toTokenInfo.decimals);
 
     // Calculate price impact
-    const priceImpact = quoteData.quote?.priceImpact || quoteData.priceImpact || 0;
+    const priceImpact = quoteData.quote?.priceImpact ?? 0;
 
-    // Gas estimate
-    const gasEstimateWei = quoteData.quote?.gasUseEstimate || quoteData.gasUseEstimate || '0';
-    const gasEstimateETH = parseFloat(gasEstimateWei) / 1e18;
+    // Gas estimate in ETH
+    const gasUseEstimate = quoteData.quote?.gasUseEstimate || '0';
+    const gasPrice = quoteData.quote?.gasPrice || '0';
+    const gasFeeWei = parseFloat(quoteData.quote?.gasFee || '0');
+    const gasEstimateETH = gasFeeWei / 1e18;
 
     const result = {
       fromToken: fromToken.toUpperCase(),
@@ -121,17 +130,14 @@ Deno.serve(async (req: Request) => {
       fromAmount: amount,
       toAmount: outputAmount.toFixed(toTokenInfo.decimals <= 6 ? 6 : 8),
       priceImpact: (typeof priceImpact === 'number' ? priceImpact : parseFloat(priceImpact || '0')).toFixed(4),
-      gasEstimate: gasEstimateETH.toFixed(6),
-      route: quoteData.route || quoteData.routing || `${fromToken} → ${toToken}`,
+      gasEstimate: gasEstimateETH.toFixed(8),
+      gasFeeUSD: quoteData.quote?.gasFeeUSD || '0',
+      route: quoteData.routing || `${fromToken} → ${toToken}`,
       dex: 'Uniswap V3',
       chainId: BASE_CHAIN_ID,
       source: 'uniswap',
-      // Include calldata for execution if swapper address provided
-      ...(quoteData.methodParameters ? {
-        calldata: quoteData.methodParameters.calldata,
-        value: quoteData.methodParameters.value,
-        to: quoteData.methodParameters.to,
-      } : {}),
+      quoteId: quoteData.quote?.quoteId,
+      slippage: quoteData.quote?.slippage,
     };
 
     return new Response(JSON.stringify(result), {
