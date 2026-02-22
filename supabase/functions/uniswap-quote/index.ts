@@ -98,12 +98,12 @@ Deno.serve(async (req: Request) => {
       const errorText = await quoteResponse.text();
       console.error(`[uniswap-quote] API error: ${quoteResponse.status} - ${errorText}`);
       
-      // Return a fallback estimated quote if API fails
-      const fallbackQuote = generateFallbackQuote(fromToken, toToken, amountFloat, fromTokenInfo, toTokenInfo);
+      // Fallback: fetch real-time prices from CoinGecko
+      const fallbackQuote = await generateCoinGeckoFallback(fromToken, toToken, amountFloat, fromTokenInfo, toTokenInfo);
       return new Response(JSON.stringify({
         ...fallbackQuote,
-        source: 'estimate',
-        warning: 'Using estimated pricing. Live quotes temporarily unavailable.',
+        source: fallbackQuote.source || 'estimate',
+        warning: fallbackQuote.warning || 'Using estimated pricing. Live Uniswap quotes temporarily unavailable.',
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -150,39 +150,103 @@ Deno.serve(async (req: Request) => {
   }
 });
 
+// CoinGecko token ID mapping
+const COINGECKO_IDS: Record<string, string> = {
+  ETH: 'ethereum',
+  WETH: 'weth',
+  USDC: 'usd-coin',
+  USDT: 'tether',
+  DAI: 'dai',
+};
+
+// Simple in-memory cache for CoinGecko prices (TTL: 60s)
+let priceCache: { prices: Record<string, number>; fetchedAt: number } | null = null;
+const CACHE_TTL_MS = 60_000;
+
 /**
- * Generate a fallback quote using approximate market rates
+ * Fetch real-time USD prices from CoinGecko's free API, with caching.
  */
-function generateFallbackQuote(
+async function fetchCoinGeckoPrices(): Promise<Record<string, number>> {
+  if (priceCache && Date.now() - priceCache.fetchedAt < CACHE_TTL_MS) {
+    return priceCache.prices;
+  }
+
+  const ids = Object.values(COINGECKO_IDS).join(',');
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+
+  try {
+    console.log('[uniswap-quote] Fetching CoinGecko prices...');
+    const res = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(`[uniswap-quote] CoinGecko error ${res.status}: ${text}`);
+      return {};
+    }
+
+    const data = await res.json();
+    const prices: Record<string, number> = {};
+
+    for (const [symbol, geckoId] of Object.entries(COINGECKO_IDS)) {
+      prices[symbol] = data[geckoId]?.usd ?? 0;
+    }
+
+    priceCache = { prices, fetchedAt: Date.now() };
+    console.log('[uniswap-quote] CoinGecko prices cached:', JSON.stringify(prices));
+    return prices;
+  } catch (err) {
+    console.error('[uniswap-quote] CoinGecko fetch failed:', err);
+    return {};
+  }
+}
+
+// Hardcoded last-resort prices
+const HARDCODED_PRICES: Record<string, number> = {
+  ETH: 2500,
+  WETH: 2500,
+  USDC: 1.0,
+  USDT: 1.0,
+  DAI: 1.0,
+};
+
+/**
+ * Generate a fallback quote using CoinGecko real-time prices,
+ * falling back to hardcoded estimates only if CoinGecko is also down.
+ */
+async function generateCoinGeckoFallback(
   fromToken: string,
   toToken: string,
   amount: number,
   fromInfo: { decimals: number },
-  toInfo: { decimals: number }
+  toInfo: { decimals: number },
 ) {
-  // Approximate USD prices for Base Chain tokens
-  const approxPrices: Record<string, number> = {
-    ETH: 2500,
-    WETH: 2500,
-    USDC: 1.0,
-    USDT: 1.0,
-    DAI: 1.0,
-  };
+  const livePrices = await fetchCoinGeckoPrices();
+  const from = fromToken.toUpperCase();
+  const to = toToken.toUpperCase();
 
-  const fromPrice = approxPrices[fromToken.toUpperCase()] || 1;
-  const toPrice = approxPrices[toToken.toUpperCase()] || 1;
+  const fromPrice = livePrices[from] || HARDCODED_PRICES[from] || 1;
+  const toPrice = livePrices[to] || HARDCODED_PRICES[to] || 1;
+  const usedLive = Object.keys(livePrices).length > 0;
+
   const estimatedOutput = (amount * fromPrice) / toPrice;
   const fee = 0.003; // 0.3% swap fee estimate
 
   return {
-    fromToken: fromToken.toUpperCase(),
-    toToken: toToken.toUpperCase(),
+    fromToken: from,
+    toToken: to,
     fromAmount: amount.toString(),
     toAmount: (estimatedOutput * (1 - fee)).toFixed(toInfo.decimals <= 6 ? 6 : 8),
     priceImpact: '0.10',
     gasEstimate: '0.000500',
-    route: `${fromToken} → ${toToken}`,
-    dex: 'Uniswap V3 (Estimated)',
+    route: `${from} → ${to}`,
+    dex: usedLive ? 'CoinGecko (Live Estimate)' : 'Hardcoded Estimate',
     chainId: BASE_CHAIN_ID,
+    source: usedLive ? 'coingecko' : 'estimate',
+    warning: usedLive
+      ? 'Using CoinGecko live pricing. Uniswap quotes temporarily unavailable.'
+      : 'Using hardcoded estimates. Both Uniswap and CoinGecko unavailable.',
+    livePrices: usedLive ? { [from]: fromPrice, [to]: toPrice } : undefined,
   };
 }
