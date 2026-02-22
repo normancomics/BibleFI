@@ -77,7 +77,7 @@ Deno.serve(async (req: Request) => {
       type: 'EXACT_INPUT',
       protocols: ['V3', 'V2'],
       swapper: effectiveSwapper,
-      ...(slippage ? { slippageTolerance: slippage.toString() } : {}),
+      ...(slippage ? { slippageTolerance: parseFloat(slippage) } : {}),
     };
 
     console.log(`[uniswap-quote] Fetching quote: ${fromToken} -> ${toToken}, amount: ${amount}, body:`, JSON.stringify(quoteBody));
