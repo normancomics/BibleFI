@@ -32,6 +32,7 @@ interface SwapQuote {
   dex: string;
   gasEstimate: string;
   slippage: string;
+  source?: 'uniswap' | 'coingecko' | 'estimate';
 }
 
 const BiblicalDeFiSwap: React.FC = () => {
@@ -157,6 +158,7 @@ const BiblicalDeFiSwap: React.FC = () => {
         dex: data.dex || 'Uniswap V3',
         gasEstimate: data.gasEstimate || '0.000500',
         slippage,
+        source: data.source || 'estimate',
       };
 
       setQuote(uniQuote);
@@ -399,6 +401,23 @@ const BiblicalDeFiSwap: React.FC = () => {
                 className="space-y-3"
               >
                 <div className="p-4 bg-muted rounded-lg space-y-2">
+                  {/* Price Source Indicator */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Source:</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      quote.source === 'uniswap'
+                        ? 'bg-eboy-green/20 text-eboy-green border border-eboy-green/40'
+                        : quote.source === 'coingecko'
+                        ? 'bg-ancient-gold/20 text-ancient-gold border border-ancient-gold/40'
+                        : 'bg-destructive/20 text-destructive border border-destructive/40'
+                    }`}>
+                      {quote.source === 'uniswap'
+                        ? '🟢 Uniswap Live'
+                        : quote.source === 'coingecko'
+                        ? '🟡 CoinGecko Live'
+                        : '🔴 Estimated'}
+                    </span>
+                  </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Route:</span>
                     <span className="text-sm font-medium">{quote.dex}</span>
