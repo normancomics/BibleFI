@@ -40,6 +40,7 @@ import NotFound from "./pages/NotFound";
 import ZKMonitorPage from "./pages/ZKMonitorPage";
 import BiblicalFinanceEncyclopediaPage from "./pages/BiblicalFinanceEncyclopediaPage";
 import BuilderScorePage from "./pages/BuilderScorePage";
+import SwapPage from "./pages/SwapPage";
 import "./App.css";
 
 const App = () => (
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/home" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/defi" element={<EnhancedDefiPage />} />
+            <Route path="/swap" element={<SwapPage />} />
             <Route path="/defi-classic" element={<DefiPage />} />
             <Route path="/staking" element={<StakingPage />} />
             <Route path="/farming" element={<FarmingPage />} />
