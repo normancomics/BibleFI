@@ -13,7 +13,7 @@ const SUPPORTED_TOKENS: Record<string, { address: string; decimals: number; name
   ETH: { address: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', decimals: 18, name: 'Ethereum', apiAddress: WETH_ADDRESS },
   WETH: { address: WETH_ADDRESS, decimals: 18, name: 'Wrapped Ether' },
   USDC: { address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', decimals: 6, name: 'USD Coin' },
-  USDT: { address: '0xfde4c96c8593536e31f229ea441f725e18cc5773', decimals: 6, name: 'Tether USD' },
+  USDT: { address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2', decimals: 6, name: 'Tether USD' },
   DAI: { address: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb', decimals: 18, name: 'Dai' },
 };
 
