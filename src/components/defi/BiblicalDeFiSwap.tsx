@@ -70,7 +70,7 @@ const BiblicalDeFiSwap: React.FC = () => {
     {
       symbol: 'USDT',
       name: 'Tether USD',
-      address: '0xfde4c96c8593536e31f229ea441f725e18cc5773',
+      address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
       decimals: 6,
       logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
       price: 1.00,
