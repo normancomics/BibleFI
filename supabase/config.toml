@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.uniswap-quote]
 verify_jwt = false
+
+[functions.basescan-history]
+verify_jwt = false
