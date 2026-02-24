@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAccount, useChainId } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ import SuperfluidTithe from '@/components/tithe/SuperfluidTithe';
 import PixelButton from '@/components/PixelButton';
 
 const ProductionDefiHub: React.FC = () => {
+  const navigate = useNavigate();
   const { isConnected } = useAccount();
   const chainId = useChainId();
   const [activeTab, setActiveTab] = useState('swap');
@@ -220,7 +222,7 @@ const ProductionDefiHub: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <PixelButton
-              onClick={() => window.open('/wisdom', '_blank')}
+              onClick={() => navigate('/wisdom')}
               className="bg-purple-900 text-purple-200 border border-purple-500"
             >
               📖 Biblical Wisdom
@@ -235,7 +237,7 @@ const ProductionDefiHub: React.FC = () => {
             </PixelButton>
             
             <PixelButton
-              onClick={() => window.open('/security', '_blank')}
+              onClick={() => navigate('/security')}
               className="bg-red-900 text-red-200 border border-red-500"
             >
               🛡️ Security Center

@@ -12,6 +12,7 @@ import { validateInput, UserInputSchemas, apiRateLimiter } from '@/utils/inputVa
 import { useSecurityContext } from '@/contexts/EnhancedSecurityContext';
 import EnhancedBiblicalTrading from '@/components/wisdom/EnhancedBiblicalTrading';
 import { supabase } from '@/integrations/supabase/client';
+import TokenSearchSelect from '@/components/swap/TokenSearchSelect';
 
 interface Token {
   symbol: string;
@@ -38,8 +39,8 @@ interface SwapQuote {
 const BiblicalDeFiSwap: React.FC = () => {
   const { playSound } = useSound();
   const { validateTransaction, checkContentSecurity } = useSecurityContext();
-  const [fromToken, setFromToken] = useState<Token | null>(null);
-  const [toToken, setToToken] = useState<Token | null>(null);
+  const [fromSymbol, setFromSymbol] = useState('ETH');
+  const [toSymbol, setToSymbol] = useState('USDC');
   const [fromAmount, setFromAmount] = useState('');
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,89 +49,56 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [biblicalAnalysis, setBiblicalAnalysis] = useState(null);
 
   // Base chain tokens
-  const baseTokens: Token[] = [
-    {
-      symbol: 'ETH',
-      name: 'Ethereum',
-      address: '0x4200000000000000000000000000000000000006',
-      decimals: 18,
+  const baseTokens: Record<string, Token> = {
+    ETH: {
+      symbol: 'ETH', name: 'Ethereum',
+      address: '0x4200000000000000000000000000000000000006', decimals: 18,
       logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-      price: 2450.00,
-      balance: '0.0'
+      price: 2450.00, balance: '0.0'
     },
-    {
-      symbol: 'USDC',
-      name: 'USD Coin',
-      address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-      decimals: 6,
+    USDC: {
+      symbol: 'USDC', name: 'USD Coin',
+      address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', decimals: 6,
       logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
-      price: 1.00,
-      balance: '0.0'
+      price: 1.00, balance: '0.0'
     },
-    {
-      symbol: 'USDT',
-      name: 'Tether USD',
-      address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
-      decimals: 6,
+    USDT: {
+      symbol: 'USDT', name: 'Tether USD',
+      address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2', decimals: 6,
       logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
-      price: 1.00,
-      balance: '0.0'
+      price: 1.00, balance: '0.0'
     },
-    {
-      symbol: 'DAI',
-      name: 'Dai Stablecoin',
-      address: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb',
-      decimals: 18,
+    DAI: {
+      symbol: 'DAI', name: 'Dai Stablecoin',
+      address: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb', decimals: 18,
       logoURI: 'https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png',
-      price: 1.00,
-      balance: '0.0'
+      price: 1.00, balance: '0.0'
     },
-    {
-      symbol: 'WETH',
-      name: 'Wrapped Ethereum',
-      address: '0x4200000000000000000000000000000000000006',
-      decimals: 18,
+    WETH: {
+      symbol: 'WETH', name: 'Wrapped Ethereum',
+      address: '0x4200000000000000000000000000000000000006', decimals: 18,
       logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
-      price: 2450.00,
-      balance: '0.0'
-    }
-  ];
+      price: 2450.00, balance: '0.0'
+    },
+  };
 
-  useEffect(() => {
-    // Set default tokens
-    setFromToken(baseTokens[0]); // ETH
-    setToToken(baseTokens[1]); // USDC
-  }, []);
+  const fromToken = baseTokens[fromSymbol] || null;
+  const toToken = baseTokens[toSymbol] || null;
 
   const getSwapQuote = async () => {
-    if (!fromToken || !toToken || !fromAmount || parseFloat(fromAmount) <= 0) {
-      return;
-    }
+    if (!fromToken || !toToken || !fromAmount || parseFloat(fromAmount) <= 0) return;
 
-    // Validate swap inputs
     const validation = validateInput(UserInputSchemas.swapInputs, {
-      fromAmount,
-      fromToken: fromToken.symbol,
-      toToken: toToken.symbol,
-      slippage
+      fromAmount, fromToken: fromToken.symbol, toToken: toToken.symbol, slippage
     });
 
     if (!validation.success) {
-      toast({
-        title: "Invalid Input",
-        description: validation.error,
-        variant: "destructive"
-      });
+      toast({ title: "Invalid Input", description: validation.error, variant: "destructive" });
       return;
     }
 
-    // Rate limiting check
     if (!apiRateLimiter.canMakeCall('swap-quote', 5, 30000)) {
-      toast({
-        title: "Rate Limited",
-        description: "Please wait before requesting another quote",
-        variant: "destructive"
-      });
+      toast({ title: "Rate Limited", description: "Please wait before requesting another quote", variant: "destructive" });
       return;
     }
 
@@ -171,11 +139,7 @@ const BiblicalDeFiSwap: React.FC = () => {
       }
     } catch (err) {
       console.error('Quote error:', err);
-      toast({
-        title: "Quote Failed",
-        description: "Could not fetch live pricing. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Quote Failed", description: "Could not fetch live pricing. Please try again.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +148,6 @@ const BiblicalDeFiSwap: React.FC = () => {
   const executeSwap = async () => {
     if (!quote || !fromToken || !toToken) return;
 
-    // Validate transaction before execution
     const swapTransaction = {
       amount: fromAmount,
       fromToken: fromToken.symbol,
@@ -193,26 +156,19 @@ const BiblicalDeFiSwap: React.FC = () => {
     };
 
     if (!validateTransaction(swapTransaction)) {
-      toast({
-        title: "Transaction Blocked",
-        description: "Security validation failed. Transaction blocked for your protection.",
-        variant: "destructive"
-      });
+      toast({ title: "Transaction Blocked", description: "Security validation failed.", variant: "destructive" });
       return;
     }
 
     setIsSwapping(true);
     playSound('powerup');
 
-    // Simulate swap execution
     setTimeout(() => {
       setIsSwapping(false);
       toast({
         title: "Swap Completed! ✨",
         description: `Successfully swapped ${quote.fromAmount} ${fromToken?.symbol} for ${quote.toAmount} ${toToken?.symbol}`,
       });
-      
-      // Reset form
       setFromAmount('');
       setQuote(null);
       playSound('success');
@@ -220,36 +176,30 @@ const BiblicalDeFiSwap: React.FC = () => {
   };
 
   const swapTokens = () => {
-    const temp = fromToken;
-    setFromToken(toToken);
-    setToToken(temp);
+    const tempSymbol = fromSymbol;
+    setFromSymbol(toSymbol);
+    setToSymbol(tempSymbol);
     setQuote(null);
     playSound('select');
   };
 
   const getBiblicalWisdom = (action: string) => {
-    const wisdom = {
+    const wisdom: Record<string, string> = {
       swap: "The wise store up choice food and olive oil, but fools gulp theirs down. - Proverbs 21:20",
       caution: "The plans of the diligent lead to profit as surely as haste leads to poverty. - Proverbs 21:5",
       patience: "Patience is better than pride. Do not be quickly provoked in your spirit. - Ecclesiastes 7:8"
     };
-    return wisdom[action as keyof typeof wisdom] || wisdom.caution;
+    return wisdom[action] || wisdom.caution;
   };
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
       {/* Biblical Wisdom Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-eboy-green to-ancient-gold bg-clip-text text-transparent mb-2">
           Biblical DeFi Swaps
         </h2>
-        <p className="text-sm text-muted-foreground italic">
-          "{getBiblicalWisdom('patience')}"
-        </p>
+        <p className="text-sm text-muted-foreground italic">"{getBiblicalWisdom('patience')}"</p>
       </motion.div>
 
       {/* Swap Interface */}
@@ -265,21 +215,11 @@ const BiblicalDeFiSwap: React.FC = () => {
           <div className="space-y-2">
             <Label>From</Label>
             <div className="flex gap-2">
-              <Select value={fromToken?.symbol} onValueChange={(symbol) => setFromToken(baseTokens.find(t => t.symbol === symbol) || null)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {baseTokens.map((token) => (
-                    <SelectItem key={token.symbol} value={token.symbol}>
-                      <div className="flex items-center gap-2">
-                        <img src={token.logoURI} alt={token.symbol} className="w-4 h-4" />
-                        {token.symbol}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <TokenSearchSelect
+                value={fromSymbol}
+                onValueChange={(s) => { setFromSymbol(s); setQuote(null); }}
+                excludeToken={toSymbol}
+              />
               <Input
                 type="number"
                 placeholder="0.0"
@@ -297,12 +237,7 @@ const BiblicalDeFiSwap: React.FC = () => {
 
           {/* Swap Button */}
           <div className="flex justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={swapTokens}
-              className="rounded-full p-2 hover:bg-eboy-green/20"
-            >
+            <Button variant="ghost" size="sm" onClick={swapTokens} className="rounded-full p-2 hover:bg-eboy-green/20">
               <ArrowUpDown className="h-4 w-4 text-eboy-green" />
             </Button>
           </div>
@@ -311,29 +246,13 @@ const BiblicalDeFiSwap: React.FC = () => {
           <div className="space-y-2">
             <Label>To</Label>
             <div className="flex gap-2">
-              <Select value={toToken?.symbol} onValueChange={(symbol) => setToToken(baseTokens.find(t => t.symbol === symbol) || null)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {baseTokens.map((token) => (
-                    <SelectItem key={token.symbol} value={token.symbol}>
-                      <div className="flex items-center gap-2">
-                        <img src={token.logoURI} alt={token.symbol} className="w-4 h-4" />
-                        {token.symbol}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <TokenSearchSelect
+                value={toSymbol}
+                onValueChange={(s) => { setToSymbol(s); setQuote(null); }}
+                excludeToken={fromSymbol}
+              />
               <div className="flex-1 relative">
-                <Input
-                  type="text"
-                  placeholder="0.0"
-                  value={quote?.toAmount || ''}
-                  readOnly
-                  className="bg-muted/50"
-                />
+                <Input type="text" placeholder="0.0" value={quote?.toAmount || ''} readOnly className="bg-muted/50" />
                 {quote && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-eboy-green">
                     ≈ ${((toToken?.price || 0) * parseFloat(quote.toAmount)).toFixed(2)}
@@ -350,7 +269,7 @@ const BiblicalDeFiSwap: React.FC = () => {
               <SelectTrigger className="w-20">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card border-border z-[100]">
                 <SelectItem value="0.5">0.5%</SelectItem>
                 <SelectItem value="1.0">1.0%</SelectItem>
                 <SelectItem value="2.0">2.0%</SelectItem>
@@ -366,24 +285,12 @@ const BiblicalDeFiSwap: React.FC = () => {
           >
             <AnimatePresence mode="wait">
               {isLoading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2"
-                >
+                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                   Getting Best Price...
                 </motion.div>
               ) : (
-                <motion.div
-                  key="quote"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-2"
-                >
+                <motion.div key="quote" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   Get Quote
                 </motion.div>
@@ -394,14 +301,8 @@ const BiblicalDeFiSwap: React.FC = () => {
           {/* Quote Display */}
           <AnimatePresence>
             {quote && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="space-y-3"
-              >
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-3">
                 <div className="p-4 bg-muted rounded-lg space-y-2">
-                  {/* Price Source Indicator */}
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Source:</span>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
@@ -411,10 +312,8 @@ const BiblicalDeFiSwap: React.FC = () => {
                         ? 'bg-ancient-gold/20 text-ancient-gold border border-ancient-gold/40'
                         : 'bg-destructive/20 text-destructive border border-destructive/40'
                     }`}>
-                      {quote.source === 'uniswap'
-                        ? '🟢 Uniswap Live'
-                        : quote.source === 'coingecko'
-                        ? '🟡 CoinGecko Live'
+                      {quote.source === 'uniswap' ? '🟢 Uniswap Live'
+                        : quote.source === 'coingecko' ? '🟡 CoinGecko Live'
                         : '🔴 Estimated'}
                     </span>
                   </div>
@@ -438,7 +337,6 @@ const BiblicalDeFiSwap: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Risk Assessment */}
                 <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-ancient-purple/10 to-indigo-600/10 rounded-lg border border-ancient-purple/30">
                   {parseFloat(quote.priceImpact) > 1 ? (
                     <AlertTriangle className="h-4 w-4 text-yellow-500" />
@@ -452,14 +350,10 @@ const BiblicalDeFiSwap: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Biblical Wisdom */}
                 <div className="p-3 bg-ancient-gold/10 rounded-lg border border-ancient-gold/30">
-                  <p className="text-xs italic text-muted-foreground">
-                    💡 "{getBiblicalWisdom('swap')}"
-                  </p>
+                  <p className="text-xs italic text-muted-foreground">💡 "{getBiblicalWisdom('swap')}"</p>
                 </div>
 
-                {/* Execute Swap */}
                 <Button
                   onClick={executeSwap}
                   disabled={isSwapping}
@@ -467,24 +361,12 @@ const BiblicalDeFiSwap: React.FC = () => {
                 >
                   <AnimatePresence mode="wait">
                     {isSwapping ? (
-                      <motion.div
-                        key="swapping"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center gap-2"
-                      >
+                      <motion.div key="swapping" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
                         Executing Swap...
                       </motion.div>
                     ) : (
-                      <motion.div
-                        key="swap"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center gap-2"
-                      >
+                      <motion.div key="swap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
                         <Shield className="h-4 w-4" />
                         Execute Swap
                       </motion.div>

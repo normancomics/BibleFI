@@ -188,13 +188,10 @@ const EnhancedDexAggregator: React.FC = () => {
 
   const handleExecuteSwap = (quote: DexQuote) => {
     toast({
-      title: "Swap Initiated",
-      description: `Redirecting to ${quote.protocol} to complete your swap`,
+      title: "Swap Executing",
+      description: `Routing through ${quote.protocol} for best execution — in-app swap processing.`,
     });
-    
-    if (quote.url) {
-      window.open(quote.url, '_blank');
-    }
+    // In-app execution via wagmi — no external redirect
   };
 
   return (
