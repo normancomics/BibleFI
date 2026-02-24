@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import BiblicalDeFiSwap from '@/components/defi/BiblicalDeFiSwap';
 import PriceChart from '@/components/swap/PriceChart';
+import PriceTicker from '@/components/swap/PriceTicker';
 import TokenBalances from '@/components/swap/TokenBalances';
 import RecentTransactions from '@/components/swap/RecentTransactions';
 import { motion } from 'framer-motion';
@@ -20,6 +21,7 @@ const SwapPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
+      <PriceTicker />
 
       <main className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Page Header */}
