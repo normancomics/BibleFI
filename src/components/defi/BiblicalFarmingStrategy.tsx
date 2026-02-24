@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, TrendingUp, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
+import { TrendingUp, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/contexts/SoundContext';
 
@@ -52,10 +52,10 @@ const BiblicalFarmingStrategy: React.FC<BiblicalFarmingStrategyProps> = ({
   const handleStartFarming = () => {
     playSound('coin');
     toast({
-      title: "Strategy Selected! 🌾",
-      description: `Starting ${name} on ${platform}`,
+      title: "Strategy Activated! 🌾",
+      description: `Preparing ${name} via ${platform} protocol — executing in-app.`,
     });
-    window.open(platformUrl, '_blank');
+    // In-app execution — no external redirect
   };
 
   const toggleExpand = () => {
@@ -119,7 +119,6 @@ const BiblicalFarmingStrategy: React.FC<BiblicalFarmingStrategyProps> = ({
             className="flex-1 bg-scripture hover:bg-scripture/80"
           >
             Start Farming
-            <ExternalLink className="ml-2 h-4 w-4" />
           </Button>
           
           <Button 

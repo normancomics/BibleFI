@@ -3,40 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, ArrowUpRight, ArrowDownLeft, Clock, ExternalLink, RefreshCw, Repeat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAccount } from 'wagmi';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-
-interface Transaction {
-  id: string;
-  type: 'swap' | 'send' | 'receive';
-  fromToken: string;
-  toToken: string;
-  fromAmount: string;
-  toAmount: string;
-  timestamp: string;
-  status: 'completed' | 'pending' | 'failed';
-  txHash?: string;
-  counterparty?: string;
-}
+import { useTransactionHistory } from '@/hooks/useTransactionHistory';
 
 const RecentTransactions: React.FC = () => {
-  const { isConnected, address } = useAccount();
-
-  const { data: transactions = [], isLoading, refetch } = useQuery({
-    queryKey: ['basescan-history', address],
-    queryFn: async () => {
-      if (!address) return [];
-      const { data, error } = await supabase.functions.invoke('basescan-history', {
-        body: { address, page: 1, offset: 15 },
-      });
-      if (error) throw error;
-      return (data?.transactions || []) as Transaction[];
-    },
-    enabled: isConnected && !!address,
-    refetchInterval: 30000,
-    staleTime: 15000,
-  });
+  const { transactions, isLoading, refetch, isConnected } = useTransactionHistory(15);
 
   if (!isConnected) {
     return (
@@ -51,8 +21,7 @@ const RecentTransactions: React.FC = () => {
 
   const formatTime = (iso: string) => {
     const d = new Date(iso);
-    const now = Date.now();
-    const diff = now - d.getTime();
+    const diff = Date.now() - d.getTime();
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
