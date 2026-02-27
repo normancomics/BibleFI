@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react';
+import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, DollarSign, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '@/contexts/SoundContext';
 import { toast } from '@/components/ui/use-toast';
@@ -305,17 +306,33 @@ const BiblicalDeFiSwap: React.FC = () => {
                 <div className="p-4 bg-muted rounded-lg space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Source:</span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      quote.source === 'uniswap'
-                        ? 'bg-eboy-green/20 text-eboy-green border border-eboy-green/40'
-                        : quote.source === 'coingecko'
-                        ? 'bg-ancient-gold/20 text-ancient-gold border border-ancient-gold/40'
-                        : 'bg-destructive/20 text-destructive border border-destructive/40'
-                    }`}>
-                      {quote.source === 'uniswap' ? '🟢 Uniswap Live'
-                        : quote.source === 'coingecko' ? '🟡 CoinGecko Live'
-                        : '🔴 Estimated'}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        quote.source === 'uniswap'
+                          ? 'bg-eboy-green/20 text-eboy-green border border-eboy-green/40'
+                          : quote.source === 'coingecko'
+                          ? 'bg-ancient-gold/20 text-ancient-gold border border-ancient-gold/40'
+                          : 'bg-destructive/20 text-destructive border border-destructive/40'
+                      }`}>
+                        {quote.source === 'uniswap' ? '🟢 Uniswap Live'
+                          : quote.source === 'coingecko' ? '🟡 CoinGecko Live'
+                          : '🔴 Estimated'}
+                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent side="left" className="max-w-[260px] text-xs leading-relaxed">
+                          {quote.source === 'uniswap' ? (
+                            <p><strong className="text-eboy-green">Uniswap Live:</strong> Real-time quote direct from Uniswap V3 on Base. Most accurate pricing with exact gas & slippage.</p>
+                          ) : quote.source === 'coingecko' ? (
+                            <p><strong className="text-ancient-gold">CoinGecko Live:</strong> Market price from CoinGecko (refreshed every 60s). Accurate but doesn't reflect exact on-chain liquidity.</p>
+                          ) : (
+                            <p><strong className="text-destructive">Estimated:</strong> Hardcoded fallback prices. Both Uniswap & CoinGecko are unavailable. Use with caution.</p>
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Route:</span>
