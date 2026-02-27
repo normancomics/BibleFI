@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,42 +7,53 @@ import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
 import Index from "./pages/Index";
-import HomePage from "./pages/HomePage";
-import { TermsOfServicePage } from "./pages/TermsOfServicePage";
-import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
-import { CompliancePage } from "./pages/CompliancePage";
-import { TaxCompliancePage } from "./pages/TaxCompliancePage";
-import EnhancedWisdomPage from "./pages/EnhancedWisdomPage";
-import WalletPage from "./pages/WalletPage";
-import AboutPage from "./pages/AboutPage";
-import DefiPage from "./pages/DefiPage";
-import EnhancedDefiPage from "./pages/EnhancedDefiPage";
-import StakingPage from "./pages/StakingPage";
-import FarmingPage from "./pages/FarmingPage";
-import TithePage from "./pages/TithePage";
-import EnhancedTithePage from "./pages/EnhancedTithePage";
-import WisdomPage from "./pages/WisdomPage";
-import TaxesPage from "./pages/TaxesPage";
-import SecurityPage from "./pages/SecurityPage";
-import TokenPage from "./pages/TokenPage";
-import WisdomTokenPage from "./pages/WisdomTokenPage";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
-import ChurchesPage from "./pages/ChurchesPage";
-import DeploymentPage from "./pages/DeploymentPage";
-import BiblicalDefiPage from "./pages/BiblicalDefiPage";
-import LiveDataPage from "./pages/LiveDataPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
-import BiblicalStrategiesPage from "./pages/BiblicalStrategiesPage";
-import QuantumSecurityPage from "./pages/QuantumSecurityPage";
-import SystemCheckPage from "./pages/SystemCheckPage";
-import DataCrawlerPage from "./pages/DataCrawlerPage";
-import LaunchActionPlanPage from "./pages/LaunchActionPlanPage";
-import NotFound from "./pages/NotFound";
-import ZKMonitorPage from "./pages/ZKMonitorPage";
-import BiblicalFinanceEncyclopediaPage from "./pages/BiblicalFinanceEncyclopediaPage";
-import BuilderScorePage from "./pages/BuilderScorePage";
-import SwapPage from "./pages/SwapPage";
 import "./App.css";
+
+// Lazy-load all pages for code splitting
+const HomePage = lazy(() => import("./pages/HomePage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage").then(m => ({ default: m.TermsOfServicePage })));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage").then(m => ({ default: m.PrivacyPolicyPage })));
+const CompliancePage = lazy(() => import("./pages/CompliancePage").then(m => ({ default: m.CompliancePage })));
+const TaxCompliancePage = lazy(() => import("./pages/TaxCompliancePage").then(m => ({ default: m.TaxCompliancePage })));
+const EnhancedWisdomPage = lazy(() => import("./pages/EnhancedWisdomPage"));
+const WalletPage = lazy(() => import("./pages/WalletPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const DefiPage = lazy(() => import("./pages/DefiPage"));
+const EnhancedDefiPage = lazy(() => import("./pages/EnhancedDefiPage"));
+const StakingPage = lazy(() => import("./pages/StakingPage"));
+const FarmingPage = lazy(() => import("./pages/FarmingPage"));
+const TithePage = lazy(() => import("./pages/TithePage"));
+const EnhancedTithePage = lazy(() => import("./pages/EnhancedTithePage"));
+const WisdomPage = lazy(() => import("./pages/WisdomPage"));
+const TaxesPage = lazy(() => import("./pages/TaxesPage"));
+const SecurityPage = lazy(() => import("./pages/SecurityPage"));
+const TokenPage = lazy(() => import("./pages/TokenPage"));
+const WisdomTokenPage = lazy(() => import("./pages/WisdomTokenPage"));
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
+const ChurchesPage = lazy(() => import("./pages/ChurchesPage"));
+const DeploymentPage = lazy(() => import("./pages/DeploymentPage"));
+const BiblicalDefiPage = lazy(() => import("./pages/BiblicalDefiPage"));
+const LiveDataPage = lazy(() => import("./pages/LiveDataPage"));
+const AnalyticsPage = lazy(() => import("./pages/AnalyticsPage"));
+const BiblicalStrategiesPage = lazy(() => import("./pages/BiblicalStrategiesPage"));
+const QuantumSecurityPage = lazy(() => import("./pages/QuantumSecurityPage"));
+const SystemCheckPage = lazy(() => import("./pages/SystemCheckPage"));
+const DataCrawlerPage = lazy(() => import("./pages/DataCrawlerPage"));
+const LaunchActionPlanPage = lazy(() => import("./pages/LaunchActionPlanPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ZKMonitorPage = lazy(() => import("./pages/ZKMonitorPage"));
+const BiblicalFinanceEncyclopediaPage = lazy(() => import("./pages/BiblicalFinanceEncyclopediaPage"));
+const BuilderScorePage = lazy(() => import("./pages/BuilderScorePage"));
+const SwapPage = lazy(() => import("./pages/SwapPage"));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="text-center space-y-3">
+      <div className="w-10 h-10 border-2 border-ancient-gold border-t-transparent rounded-full animate-spin mx-auto" />
+      <p className="text-sm text-muted-foreground font-scroll">Loading...</p>
+    </div>
+  </div>
+);
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
@@ -50,44 +62,46 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/defi" element={<EnhancedDefiPage />} />
-            <Route path="/swap" element={<SwapPage />} />
-            <Route path="/defi-classic" element={<DefiPage />} />
-            <Route path="/staking" element={<StakingPage />} />
-            <Route path="/farming" element={<FarmingPage />} />
-            <Route path="/tithe" element={<TithePage />} />
-            <Route path="/tithe-enhanced" element={<EnhancedTithePage />} />
-            <Route path="/wisdom" element={<WisdomPage />} />
-            <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
-            <Route path="/wallet" element={<WalletPage />} />
-            <Route path="/taxes" element={<TaxesPage />} />
-            <Route path="/security" element={<SecurityPage />} />
-            <Route path="/token" element={<TokenPage />} />
-            <Route path="/wisdom-token" element={<WisdomTokenPage />} />
-            <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/deployment" element={<DeploymentPage />} />
-            <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
-            <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
-            <Route path="/quantum-security" element={<QuantumSecurityPage />} />
-            <Route path="/system-check" element={<SystemCheckPage />} />
-            <Route path="/churches" element={<ChurchesPage />} />
-            <Route path="/live-data" element={<LiveDataPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/data-crawler" element={<DataCrawlerPage />} />
-            <Route path="/launch-plan" element={<LaunchActionPlanPage />} />
-            <Route path="/terms" element={<TermsOfServicePage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/compliance" element={<CompliancePage />} />
-            <Route path="/tax-compliance" element={<TaxCompliancePage />} />
-            <Route path="/zk-monitor" element={<ZKMonitorPage />} />
-            <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
-            <Route path="/builder-score" element={<BuilderScorePage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/defi" element={<EnhancedDefiPage />} />
+              <Route path="/swap" element={<SwapPage />} />
+              <Route path="/defi-classic" element={<DefiPage />} />
+              <Route path="/staking" element={<StakingPage />} />
+              <Route path="/farming" element={<FarmingPage />} />
+              <Route path="/tithe" element={<TithePage />} />
+              <Route path="/tithe-enhanced" element={<EnhancedTithePage />} />
+              <Route path="/wisdom" element={<WisdomPage />} />
+              <Route path="/enhanced-wisdom" element={<EnhancedWisdomPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
+              <Route path="/taxes" element={<TaxesPage />} />
+              <Route path="/security" element={<SecurityPage />} />
+              <Route path="/token" element={<TokenPage />} />
+              <Route path="/wisdom-token" element={<WisdomTokenPage />} />
+              <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/deployment" element={<DeploymentPage />} />
+              <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
+              <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
+              <Route path="/quantum-security" element={<QuantumSecurityPage />} />
+              <Route path="/system-check" element={<SystemCheckPage />} />
+              <Route path="/churches" element={<ChurchesPage />} />
+              <Route path="/live-data" element={<LiveDataPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/data-crawler" element={<DataCrawlerPage />} />
+              <Route path="/launch-plan" element={<LaunchActionPlanPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/compliance" element={<CompliancePage />} />
+              <Route path="/tax-compliance" element={<TaxCompliancePage />} />
+              <Route path="/zk-monitor" element={<ZKMonitorPage />} />
+              <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
+              <Route path="/builder-score" element={<BuilderScorePage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </TooltipProvider>
       </EnhancedSecurityProvider>
     </SecurityProvider>
