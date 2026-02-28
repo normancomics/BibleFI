@@ -173,6 +173,23 @@ const ComprehensiveTithingHub: React.FC = () => {
         }
       }
 
+      // Prioritize: exact name matches first, then location, then rest
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        const nameMatches: Church[] = [];
+        const others: Church[] = [];
+        for (const c of results) {
+          if (c.name.toLowerCase().includes(q)) {
+            nameMatches.push(c);
+          } else {
+            others.push(c);
+          }
+        }
+        nameMatches.sort((a, b) => a.name.localeCompare(b.name));
+        others.sort((a, b) => a.name.localeCompare(b.name));
+        results = [...nameMatches, ...others];
+      }
+
       setChurches(results);
 
       if (!results.length) {
@@ -461,12 +478,14 @@ const ComprehensiveTithingHub: React.FC = () => {
               {/* Results */}
               {churches.length > 0 && (
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                  {churches.map((church) => (
+                  {churches.map((church) => {
+                    const isNameMatch = searchQuery.trim() && church.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+                    return (
                     <Card 
                       key={church.id}
                       className={`cursor-pointer transition-all hover:border-primary/50 ${
                         selectedChurch?.id === church.id ? 'border-primary bg-primary/10' : ''
-                      }`}
+                      } ${isNameMatch ? 'ring-2 ring-primary border-primary bg-primary/5' : ''}`}
                       onClick={() => {
                         setSelectedChurch(church);
                         setActiveTab('tithe');
@@ -477,6 +496,9 @@ const ComprehensiveTithingHub: React.FC = () => {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
                               <h3 className="font-medium">{church.name}</h3>
+                              {isNameMatch && (
+                                <Badge className="bg-primary/20 text-primary text-xs">Match</Badge>
+                              )}
                               {church.verified && (
                                 <CheckCircle className="w-4 h-4 text-green-500" />
                               )}
@@ -503,7 +525,8 @@ const ComprehensiveTithingHub: React.FC = () => {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
