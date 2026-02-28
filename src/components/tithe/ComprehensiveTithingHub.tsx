@@ -63,7 +63,40 @@ interface Church {
   crypto_networks?: string[];
   verified: boolean;
   rating?: number;
+  lat?: number;
+  lng?: number;
+  distance?: number; // miles from search origin
 }
+
+// Haversine distance in miles
+const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const geocodeLocation = async (location: string): Promise<{ lat: number; lng: number } | null> => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`, {
+      headers: { 'User-Agent': 'BibleFi/1.0' }
+    });
+    const data = await res.json();
+    if (data?.[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  } catch (e) { console.warn('Geocoding failed:', e); }
+  return null;
+};
+
+const getBrowserLocation = (): Promise<{ lat: number; lng: number } | null> =>
+  new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { timeout: 5000 }
+    );
+  });
 
 const ComprehensiveTithingHub: React.FC = () => {
   const { toast } = useToast();
@@ -131,7 +164,21 @@ const ComprehensiveTithingHub: React.FC = () => {
       const { data, error } = await query.order('verified', { ascending: false }).limit(100);
       if (error) throw error;
 
-      let results: Church[] = data || [];
+      // Extract lat/lng from PostGIS coordinates
+      let results: Church[] = (data || []).map((c: any) => {
+        let lat: number | undefined;
+        let lng: number | undefined;
+        if (c.coordinates) {
+          // PostGIS POINT format: could be string "POINT(lng lat)" or object
+          if (typeof c.coordinates === 'string') {
+            const match = c.coordinates.match(/POINT\(([-\d.]+)\s+([-\d.]+)\)/);
+            if (match) { lng = parseFloat(match[1]); lat = parseFloat(match[2]); }
+          } else if (c.coordinates?.coordinates) {
+            [lng, lat] = c.coordinates.coordinates;
+          }
+        }
+        return { ...c, lat, lng };
+      });
 
       // STEP 2: If local DB returns 0 results, fallback to edge function (OSM + Google Places)
       if (results.length === 0) {
@@ -169,11 +216,39 @@ const ComprehensiveTithingHub: React.FC = () => {
             crypto_networks: c.cryptoNetworks || [],
             verified: c.verified || false,
             rating: c.rating || undefined,
+            lat: c.lat || undefined,
+            lng: c.lng || c.lon || undefined,
           }));
         }
       }
 
-      // Prioritize: exact name matches first, then location, then rest
+      // STEP 3: Get origin point for distance sorting
+      // Priority: geocode search fields → browser geolocation
+      let origin: { lat: number; lng: number } | null = null;
+      const locationStr = [cityFilter, stateFilter, zipFilter, searchQuery].filter(Boolean).join(', ');
+      if (locationStr.trim()) {
+        origin = await geocodeLocation(locationStr);
+      }
+      if (!origin) {
+        origin = await getBrowserLocation();
+      }
+
+      // STEP 4: Calculate distances and sort
+      if (origin) {
+        results = results.map(c => ({
+          ...c,
+          distance: (c.lat && c.lng) ? haversineDistance(origin!.lat, origin!.lng, c.lat, c.lng) : undefined,
+        }));
+      }
+
+      // Sort: name matches first (with Match badge), then by distance within each group
+      const distSort = (a: Church, b: Church) => {
+        if (a.distance != null && b.distance != null) return a.distance - b.distance;
+        if (a.distance != null) return -1;
+        if (b.distance != null) return 1;
+        return a.name.localeCompare(b.name);
+      };
+
       if (searchQuery.trim()) {
         const q = searchQuery.trim().toLowerCase();
         const nameMatches: Church[] = [];
@@ -185,9 +260,11 @@ const ComprehensiveTithingHub: React.FC = () => {
             others.push(c);
           }
         }
-        nameMatches.sort((a, b) => a.name.localeCompare(b.name));
-        others.sort((a, b) => a.name.localeCompare(b.name));
+        nameMatches.sort(distSort);
+        others.sort(distSort);
         results = [...nameMatches, ...others];
+      } else {
+        results.sort(distSort);
       }
 
       setChurches(results);
@@ -505,6 +582,12 @@ const ComprehensiveTithingHub: React.FC = () => {
                             </div>
                             <p className="text-sm text-muted-foreground">
                               {church.city}, {church.state_province || church.country}
+                              {church.distance != null && (
+                                <span className="ml-2 text-xs text-primary">
+                                  <MapPin className="w-3 h-3 inline mr-0.5" />
+                                  {church.distance < 1 ? '< 1 mi' : `${Math.round(church.distance)} mi`}
+                                </span>
+                              )}
                             </p>
                             {church.denomination && (
                               <Badge variant="outline" className="text-xs">{church.denomination}</Badge>
