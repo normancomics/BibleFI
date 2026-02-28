@@ -15,7 +15,15 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   const [fadeOut, setFadeOut] = useState(false);
   const fullText = "Biblical wisdom for your financial journey.";
 
+  // Skip intro for returning users
+  useEffect(() => {
+    if (localStorage.getItem("biblefi_intro_seen")) {
+      onComplete();
+    }
+  }, [onComplete]);
+
   const handleSkip = useCallback(() => {
+    localStorage.setItem("biblefi_intro_seen", "1");
     setFadeOut(true);
     setTimeout(() => onComplete(), 400);
   }, [onComplete]);
