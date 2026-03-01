@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,34 @@ import { comprehensiveChurchService, Church } from '@/services/comprehensiveChur
 import { useToast } from '@/hooks/use-toast';
 import PixelButton from '@/components/PixelButton';
 import { useSound } from '@/contexts/SoundContext';
+
+// Haversine distance in miles
+const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const geocodeLocation = async (query: string): Promise<{ lat: number; lng: number } | null> => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    const data = await res.json();
+    if (data?.[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  } catch {}
+  return null;
+};
+
+const getBrowserLocation = (): Promise<{ lat: number; lng: number } | null> =>
+  new Promise(resolve => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { timeout: 5000 }
+    );
+  });
 
 interface EnhancedChurchSearchProps {
   onChurchSelect?: (church: Church) => void;
@@ -81,14 +109,44 @@ const EnhancedChurchSearch: React.FC<EnhancedChurchSearchProps> = ({
         limit: 50
       });
 
-      setChurches(result.churches);
+      let results = result.churches;
+
+      // Determine origin for distance sorting
+      const locationParts = [selectedCity, selectedState, selectedCountry].filter(Boolean).join(', ');
+      let origin = locationParts ? await geocodeLocation(locationParts) : await getBrowserLocation();
+
+      // Add distance to each church
+      if (origin) {
+        results = results.map(c => ({
+          ...c,
+          distance: (c.coordinates?.lat && c.coordinates?.lng) 
+            ? haversineDistance(origin!.lat, origin!.lng, c.coordinates.lat, c.coordinates.lng) 
+            : undefined,
+        }));
+      }
+
+      // Sort: name matches first, then by distance
+      const query = searchQuery.trim().toLowerCase();
+      const isMatch = (c: Church) => query && c.name.toLowerCase().includes(query);
+      const distSort = (a: any, b: any) => {
+        if (a.distance != null && b.distance != null) return a.distance - b.distance;
+        if (a.distance != null) return -1;
+        if (b.distance != null) return 1;
+        return a.name.localeCompare(b.name);
+      };
+
+      const matches = results.filter(c => isMatch(c)).sort(distSort);
+      const rest = results.filter(c => !isMatch(c)).sort(distSort);
+      results = [...matches, ...rest];
+
+      setChurches(results);
       
       toast({
         title: "Search Complete",
-        description: `Found ${result.churches.length} churches in ${result.searchMetadata.executionTime}ms`,
+        description: `Found ${results.length} churches${origin ? ' sorted by distance' : ''}`,
       });
 
-      if (result.churches.length === 0) {
+      if (results.length === 0) {
         toast({
           title: "No Churches Found",
           description: "Try expanding your search criteria or add a new church to our database",
@@ -307,10 +365,15 @@ const EnhancedChurchSearch: React.FC<EnhancedChurchSearchProps> = ({
           </h3>
           
           <div className="grid gap-4">
-            {churches.map((church) => (
+            {churches.map((church) => {
+              const isNameMatch = searchQuery.trim() && church.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+              const distanceMiles = (church as any).distance;
+              return (
               <Card 
                 key={church.id} 
-                className="bg-royal-purple/30 border-ancient-gold/30 hover:border-ancient-gold/60 transition-all cursor-pointer"
+                className={`bg-royal-purple/30 border-ancient-gold/30 hover:border-ancient-gold/60 transition-all cursor-pointer ${
+                  isNameMatch ? 'ring-2 ring-primary border-primary bg-primary/5' : ''
+                }`}
                 onClick={() => handleChurchClick(church)}
               >
                 <CardContent className="p-6">
@@ -319,10 +382,19 @@ const EnhancedChurchSearch: React.FC<EnhancedChurchSearchProps> = ({
                       <h3 className="text-xl font-semibold text-ancient-gold flex items-center gap-2">
                         {church.name}
                         {church.verified && <Verified className="w-5 h-5 text-green-400" />}
+                        {isNameMatch && (
+                          <Badge className="bg-primary/20 text-primary text-xs">Match</Badge>
+                        )}
                       </h3>
                       <p className="text-white/80">{church.denomination}</p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {distanceMiles != null && (
+                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                          <MapPin size={10} className="mr-1" />
+                          {distanceMiles < 1 ? '<1 mi' : `${Math.round(distanceMiles)} mi`}
+                        </Badge>
+                      )}
                       {getPaymentMethodsBadges(church)}
                     </div>
                   </div>
@@ -405,7 +477,8 @@ const EnhancedChurchSearch: React.FC<EnhancedChurchSearchProps> = ({
                   )}
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
