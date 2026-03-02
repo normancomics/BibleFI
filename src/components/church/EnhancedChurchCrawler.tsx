@@ -10,12 +10,30 @@ import {
   Search, Globe, MapPin, Verified, Bitcoin, CreditCard, 
   Download, Filter, RefreshCw, Church, Users, Heart,
   Phone, Mail, ExternalLink, AlertTriangle, CheckCircle2, Info,
-  Bot, BookOpen, Zap, Shield
+  Bot, BookOpen, Zap, Shield, Loader2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalChurchCrawlerService, type GlobalChurchData } from '@/services/globalChurchCrawler';
 import AutomationPanel from './AutomationPanel';
+
+/** Haversine distance in miles */
+const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const geocodeLocation = async (query: string): Promise<{ lat: number; lng: number } | null> => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+    const data = await res.json();
+    if (data?.[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  } catch {}
+  return null;
+};
 
 /** Calculate data quality score for a church (0-100) */
 const getDataQuality = (church: GlobalChurchData) => {
@@ -67,6 +85,9 @@ const EnhancedChurchCrawler: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [cryptoFilter, setCryptoFilter] = useState<boolean | null>(null);
+  const [searchLocation, setSearchLocation] = useState('');
+  const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
+  const [isGeocodingLocation, setIsGeocodingLocation] = useState(false);
   const [crawlProgress, setCrawlProgress] = useState(0);
   const [stats, setStats] = useState({
     total: 0,
@@ -81,7 +102,7 @@ const EnhancedChurchCrawler: React.FC = () => {
 
   useEffect(() => {
     filterChurches();
-  }, [churches, searchQuery, selectedCountry, cryptoFilter]);
+  }, [churches, searchQuery, selectedCountry, cryptoFilter, origin]);
 
   const loadChurches = async () => {
     setIsLoading(true);
@@ -162,15 +183,29 @@ const EnhancedChurchCrawler: React.FC = () => {
       filtered = filtered.filter(church => church.accepts_crypto === cryptoFilter);
     }
 
+    // Add distance data if origin is available
+    type ChurchWithDist = GlobalChurchData & { _distance?: number };
+    let withDist: ChurchWithDist[] = filtered.map(c => {
+      if (origin && c.coordinates?.lat && c.coordinates?.lng) {
+        return { ...c, _distance: haversineDistance(origin.lat, origin.lng, c.coordinates.lat, c.coordinates.lng) };
+      }
+      return { ...c };
+    });
+
+    const distSort = (a: ChurchWithDist, b: ChurchWithDist) => {
+      if (a._distance != null && b._distance != null) return a._distance - b._distance;
+      if (a._distance != null) return -1;
+      if (b._distance != null) return 1;
+      return a.name.localeCompare(b.name);
+    };
+
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      // Separate into exact name matches vs location/denomination matches
-      const nameMatches: GlobalChurchData[] = [];
-      const locationMatches: GlobalChurchData[] = [];
-      const otherMatches: GlobalChurchData[] = [];
-      const nonMatches: GlobalChurchData[] = [];
+      const nameMatches: ChurchWithDist[] = [];
+      const locationMatches: ChurchWithDist[] = [];
+      const otherMatches: ChurchWithDist[] = [];
 
-      for (const church of filtered) {
+      for (const church of withDist) {
         const nameMatch = church.name.toLowerCase().includes(q);
         const cityMatch = church.city.toLowerCase().includes(q);
         const stateMatch = church.state_province?.toLowerCase().includes(q);
@@ -183,25 +218,33 @@ const EnhancedChurchCrawler: React.FC = () => {
           locationMatches.push(church);
         } else if (countryMatch || denomMatch) {
           otherMatches.push(church);
-        } else {
-          nonMatches.push(church);
         }
       }
 
-      // Sort each group alphabetically by name
-      const sortByName = (a: GlobalChurchData, b: GlobalChurchData) => a.name.localeCompare(b.name);
-      nameMatches.sort(sortByName);
-      locationMatches.sort(sortByName);
-      otherMatches.sort(sortByName);
+      nameMatches.sort(distSort);
+      locationMatches.sort(distSort);
+      otherMatches.sort(distSort);
 
-      // Prioritized: name matches first, then same location, then other matches
-      filtered = [...nameMatches, ...locationMatches, ...otherMatches];
+      withDist = [...nameMatches, ...locationMatches, ...otherMatches];
     } else {
-      // No search query - sort alphabetically
-      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+      withDist = [...withDist].sort(distSort);
     }
 
-    setFilteredChurches(filtered);
+    setFilteredChurches(withDist as GlobalChurchData[]);
+  };
+
+  const handleLocationSearch = async () => {
+    if (!searchLocation.trim()) {
+      setOrigin(null);
+      return;
+    }
+    setIsGeocodingLocation(true);
+    const coords = await geocodeLocation(searchLocation);
+    setOrigin(coords);
+    setIsGeocodingLocation(false);
+    if (coords) {
+      toast({ title: "Location set", description: `Sorting by distance from ${searchLocation}` });
+    }
   };
 
   const getUniqueCountries = () => {
@@ -299,16 +342,35 @@ const EnhancedChurchCrawler: React.FC = () => {
             
             <TabsContent value="search" className="space-y-4">
               {/* Search Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Input
-                  placeholder="Search churches, cities, denominations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="md:col-span-2"
-                />
-                
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search churches, denominations..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="relative flex gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Location (e.g., Boulder, CO)"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleLocationSearch} disabled={isGeocodingLocation}>
+                    {isGeocodingLocation ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <select
-                  className="px-3 py-2 border rounded-md"
+                  className="px-3 py-2 border rounded-md bg-background text-foreground"
                   value={selectedCountry}
                   onChange={(e) => setSelectedCountry(e.target.value)}
                 >
@@ -319,7 +381,7 @@ const EnhancedChurchCrawler: React.FC = () => {
                 </select>
                 
                 <select
-                  className="px-3 py-2 border rounded-md"
+                  className="px-3 py-2 border rounded-md bg-background text-foreground"
                   value={cryptoFilter === null ? '' : cryptoFilter.toString()}
                   onChange={(e) => setCryptoFilter(
                     e.target.value === '' ? null : e.target.value === 'true'
@@ -380,9 +442,15 @@ const EnhancedChurchCrawler: React.FC = () => {
                             </div>
                             
                             <div className="space-y-1 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <MapPin className="h-4 w-4" />
                                 {church.city}{church.state_province ? `, ${church.state_province}` : ''}, {church.country}
+                                {(church as any)._distance != null && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <MapPin className="h-3 w-3 mr-1" />
+                                    {(church as any)._distance < 1 ? '<1 mi' : `${Math.round((church as any)._distance)} mi`}
+                                  </Badge>
+                                )}
                               </div>
                               {church.denomination && (
                                 <div>{church.denomination}</div>
