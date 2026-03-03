@@ -28,10 +28,10 @@ interface FrameData {
 
 const ProductionFarcasterFrame: React.FC = () => {
   const [frameData, setFrameData] = useState<FrameData>({
-    title: 'Bible.fi - Biblical DeFi on Base',
+    title: 'BibleFi - Biblical DeFi on Base',
     description: 'Experience biblical wisdom meets DeFi innovation. Tithe, stake, and trade with faith.',
     imageUrl: '/bible-fi-preview.png',
-    buttonText: 'Enter Bible.fi',
+    buttonText: 'Enter BibleFi',
     action: 'open_app'
   });
 
@@ -86,7 +86,7 @@ const ProductionFarcasterFrame: React.FC = () => {
   <meta property="fc:frame:button:3:target" content="${baseUrl}/staking" />
   <meta property="fc:frame:button:4" content="🤝 Share" />
   <meta property="fc:frame:button:4:action" content="link" />
-  <meta property="fc:frame:button:4:target" content="https://warpcast.com/~/compose?text=Discovered%20Bible.fi%20-%20Biblical%20wisdom%20meets%20DeFi!%20🙏💰&embeds[]=${encodeURIComponent(frameUrl)}" />
+  <meta property="fc:frame:button:4:target" content="https://warpcast.com/~/compose?text=Discovered%20BibleFi%20-%20Biblical%20wisdom%20meets%20DeFi!%20🙏💰&embeds[]=${encodeURIComponent(frameUrl)}" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="${frameData.title}" />
@@ -103,7 +103,7 @@ const ProductionFarcasterFrame: React.FC = () => {
 </head>
 <body>
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; font-family: Arial, sans-serif; text-align: center; padding: 20px;">
-    <img src="${baseUrl}/bible-fi-brand-logo-v2.png" alt="Bible.fi Logo" style="width: 200px; margin-bottom: 20px;" />
+    <img src="${baseUrl}/bible-fi-brand-logo-v2.png" alt="BibleFi Logo" style="width: 200px; margin-bottom: 20px;" />
     <h1 style="color: #FFD700; margin-bottom: 10px;">${frameData.title}</h1>
     <p style="color: #ccc; margin-bottom: 30px; max-width: 600px;">${frameData.description}</p>
     <a href="${baseUrl}" style="background: #FFD700; color: #000; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">${frameData.buttonText}</a>
@@ -130,7 +130,7 @@ const ProductionFarcasterFrame: React.FC = () => {
   };
 
   const shareOnFarcaster = () => {
-    const text = shareText || `Discovered Bible.fi - Biblical wisdom meets DeFi on Base chain! 🙏💰`;
+    const text = shareText || `Discovered BibleFi - Biblical wisdom meets DeFi on Base chain! 🙏💰`;
     const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(frameUrl)}`;
     window.open(url, '_blank');
   };
@@ -171,7 +171,7 @@ const ProductionFarcasterFrame: React.FC = () => {
           📡 Farcaster Frame Center
         </h2>
         <p className="text-white/80 max-w-2xl mx-auto">
-          Deploy and manage your Bible.fi Farcaster frame. Share biblical DeFi with the world.
+          Deploy and manage your BibleFi Farcaster frame. Share biblical DeFi with the world.
         </p>
       </div>
 
@@ -231,7 +231,7 @@ const ProductionFarcasterFrame: React.FC = () => {
                 value={frameData.title}
                 onChange={(e) => setFrameData(prev => ({ ...prev, title: e.target.value }))}
                 className="bg-black/20 border-ancient-gold/30 text-white"
-                placeholder="Bible.fi - Biblical DeFi on Base"
+                placeholder="BibleFi - Biblical DeFi on Base"
               />
             </div>
 
@@ -241,7 +241,7 @@ const ProductionFarcasterFrame: React.FC = () => {
                 value={frameData.buttonText}
                 onChange={(e) => setFrameData(prev => ({ ...prev, buttonText: e.target.value }))}
                 className="bg-black/20 border-ancient-gold/30 text-white"
-                placeholder="Enter Bible.fi"
+                placeholder="Enter BibleFi"
               />
             </div>
           </div>
@@ -318,7 +318,7 @@ const ProductionFarcasterFrame: React.FC = () => {
               value={shareText}
               onChange={(e) => setShareText(e.target.value)}
               className="bg-black/20 border-ancient-gold/30 text-white"
-              placeholder="Discovered Bible.fi - Biblical wisdom meets DeFi on Base chain! 🙏💰"
+              placeholder="Discovered BibleFi - Biblical wisdom meets DeFi on Base chain! 🙏💰"
               rows={2}
             />
           </div>

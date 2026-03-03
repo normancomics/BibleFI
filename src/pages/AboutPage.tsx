@@ -14,10 +14,10 @@ const AboutPage: React.FC = () => {
           <div className="text-center mb-12">
             <img 
               src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-              alt="Bible.fi Logo" 
+              alt="BibleFi Logo" 
               className="h-20 mx-auto mb-6"
             />
-            <h1 className="text-4xl font-scroll text-ancient-gold mb-4">About Bible.fi</h1>
+            <h1 className="text-4xl font-scroll text-ancient-gold mb-4">About BibleFi</h1>
             <p className="text-xl text-white/80 max-w-2xl mx-auto">
               The world's first Biblical DeFi platform, combining ancient wisdom with modern technology to transform how believers approach finance.
             </p>

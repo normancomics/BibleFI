@@ -1,5 +1,5 @@
 /**
- * Bible.fi Military-Grade Security Hardening
+ * BibleFi Military-Grade Security Hardening
  * Implements comprehensive security measures to protect against sophisticated attacks
  */
 

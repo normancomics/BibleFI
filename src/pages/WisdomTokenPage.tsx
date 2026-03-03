@@ -95,7 +95,7 @@ const WisdomTokenPage: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Gift className="text-blue-400" />
-              Integration with Bible.fi Ecosystem
+              Integration with BibleFi Ecosystem
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -157,7 +157,7 @@ const WisdomTokenPage: React.FC = () => {
           <CardContent>
             <div className="space-y-4">
               <p className="text-white/80">
-                Bible.fi is designed to pass the "Grandma Test" - simple enough for elderly users with no blockchain knowledge, 
+                BibleFi is designed to pass the "Grandma Test" - simple enough for elderly users with no blockchain knowledge, 
                 yet sophisticated enough for DeFi experts.
               </p>
               

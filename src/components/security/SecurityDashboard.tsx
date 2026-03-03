@@ -287,7 +287,7 @@ const SecurityDashboard: React.FC = () => {
       </Tabs>
       
       <CardFooter className="bg-gray-50 dark:bg-gray-900/30 text-xs text-muted-foreground">
-        Bible.fi Security System - Military-grade protection with quantum resistance
+        BibleFi Security System - Military-grade protection with quantum resistance
       </CardFooter>
     </Card>
   );

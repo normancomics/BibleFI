@@ -1,7 +1,7 @@
 /**
- * Master Deployment Script for Bible.fi Smart Contracts
+ * Master Deployment Script for BibleFi Smart Contracts
  * 
- * This script deploys all Bible.fi contracts to Base chain:
+ * This script deploys all BibleFi contracts to Base chain:
  * 1. TitheVerifier - Zero-knowledge anonymous tithing
  * 2. WisdomVerifier - Wisdom score threshold proofs
  * 3. BibleToken - Governance and rewards token (optional)
@@ -67,7 +67,7 @@ class ContractDeployer {
     this.provider = new JsonRpcProvider(network.rpcUrl);
     this.wallet = new Wallet(config.privateKey, this.provider);
     
-    console.log('\n🚀 Bible.fi Contract Deployment');
+    console.log('\n🚀 BibleFi Contract Deployment');
     console.log('================================');
     console.log(`Network: ${network.name}`);
     console.log(`Chain ID: ${network.chainId}`);

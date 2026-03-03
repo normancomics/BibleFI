@@ -2,7 +2,7 @@
 import { generateSecureHash } from './securityUtils';
 
 /**
- * Security Monitoring System for Bible.fi
+ * Security Monitoring System for BibleFi
  * Implements runtime security checks and anomaly detection
  */
 
@@ -33,7 +33,7 @@ class SecurityMonitor {
   // Initialize security monitoring system
   constructor() {
     this.setupActivityMonitoring();
-    console.log('Bible.fi Security Monitoring System initialized');
+    console.log('BibleFi Security Monitoring System initialized');
   }
   
   // Log a security event

@@ -28,7 +28,7 @@ const SoundManager: React.FC = () => {
           <AlertTitle className="text-pixel-yellow">About Sound Files</AlertTitle>
           <AlertDescription>
             <p className="mb-2">
-              Bible.Fi uses free 8-bit/retro arcade sound effects. You can test the built-in sounds below or replace them with your own.
+              BibleFi uses free 8-bit/retro arcade sound effects. You can test the built-in sounds below or replace them with your own.
             </p>
             <p>
               For custom sounds, upload MP3 files to the public/sounds folder with the exact names listed below.

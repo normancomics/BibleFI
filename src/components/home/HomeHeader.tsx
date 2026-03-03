@@ -15,7 +15,7 @@ const HomeHeader: React.FC = () => {
     playSound("select");
     toast({
       title: "Farcaster Integration",
-      description: "Opening Bible.fi mini-app in Farcaster...",
+      description: "Opening BibleFi mini-app in Farcaster...",
     });
     
     // For now, we'll just open the Frame HTML page
@@ -38,7 +38,7 @@ const HomeHeader: React.FC = () => {
         <div className="flex flex-col items-center justify-center">
           <div className="relative flex items-center justify-center mb-4">
             <div className="text-6xl md:text-7xl font-bold font-scroll text-ancient-gold tracking-wider">
-              BIBLE.FI
+              BIBLEFI
             </div>
           </div>
           

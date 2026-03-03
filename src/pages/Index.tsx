@@ -60,7 +60,7 @@ const Index = () => {
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-4 font-scroll">
               <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent">
-                Bible.fi
+                BibleFi
               </span>
             </h1>
             <p className="text-xl text-white/80 mb-2">

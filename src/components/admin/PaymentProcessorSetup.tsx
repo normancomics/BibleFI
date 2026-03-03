@@ -259,7 +259,7 @@ const PaymentProcessorSetup: React.FC = () => {
                           </Label>
                           <Input
                             id={`${processor.id}-webhook`}
-                            placeholder="https://api.bible.fi/webhooks/..."
+                            placeholder="https://api.biblefi.app/webhooks/..."
                             value={webhookUrls[processor.id] || ''}
                             onChange={(e) => handleWebhookUpdate(processor.id, e.target.value)}
                           />

@@ -81,7 +81,7 @@ const TaxesPage: React.FC = () => {
               <Card className="pixel-card">
                 <CardContent className="pt-6">
                   <h2 className="text-2xl font-scroll mb-4">Tax Reporting</h2>
-                  <p className="mb-6">Bible.Fi helps you track and report your cryptocurrency transactions for proper tax compliance.</p>
+                  <p className="mb-6">BibleFi helps you track and report your cryptocurrency transactions for proper tax compliance.</p>
                   
                   <div className="space-y-4">
                     <div className="flex items-center p-3 border border-border rounded" 

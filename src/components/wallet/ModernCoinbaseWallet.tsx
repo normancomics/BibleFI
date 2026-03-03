@@ -65,7 +65,7 @@ const ModernCoinbaseWallet: React.FC<ModernCoinbaseWalletProps> = ({
     try {
       if (window.CoinbaseWalletSDKClass) {
         const sdk = new window.CoinbaseWalletSDKClass({
-          appName: 'Bible.fi',
+          appName: 'BibleFi',
           appLogoUrl: '/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png',
           darkMode: true
         });

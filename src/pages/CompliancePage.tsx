@@ -138,7 +138,7 @@ export const CompliancePage: React.FC = () => {
                 <p className="text-sm text-green-600 dark:text-green-400">
                   <strong>Biblical Foundation:</strong> "Let everyone be subject to the governing authorities, 
                   for there is no authority except that which God has established." - Romans 13:1. 
-                  Bible.fi implements proactive compliance protocols demonstrating good stewardship.
+                  BibleFi implements proactive compliance protocols demonstrating good stewardship.
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,7 +351,7 @@ export const CompliancePage: React.FC = () => {
               </div>
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm">
-                  <strong>Commitment:</strong> Bible.fi is committed to maintaining the highest 
+                  <strong>Commitment:</strong> BibleFi is committed to maintaining the highest 
                   standards of legal and regulatory compliance as the regulatory landscape evolves.
                 </p>
               </div>

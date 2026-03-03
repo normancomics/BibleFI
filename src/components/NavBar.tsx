@@ -54,12 +54,12 @@ const NavBar: React.FC = () => {
             <div className="w-10 h-10 flex items-center justify-center">
               <img 
                 src={bibleFiLogo}
-                alt="Bible.Fi Logo" 
+                alt="BibleFi Logo" 
                 className="w-10 h-10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-purple-500/50"
               />
             </div>
             <span className="font-mono text-lg font-bold hidden sm:block tracking-wider text-ancient-gold hover:text-scripture transition-colors duration-300">
-              Bible.fi
+              BibleFi
             </span>
           </Link>
 

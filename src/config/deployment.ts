@@ -3,9 +3,9 @@
 export const DEPLOYMENT_CONFIG = {
   // App metadata
   app: {
-    name: 'Bible.fi',
+    name: 'BibleFi',
     version: '1.0.0',
-    description: 'Biblical wisdom for your financial journey on Base Chain',
+    description: 'BibleFi - Biblical wisdom for your financial journey on Base Chain',
     author: 'Bible.fi Team',
     keywords: ['defi', 'biblical', 'finance', 'base', 'farcaster'],
   },
@@ -42,7 +42,7 @@ export const DEPLOYMENT_CONFIG = {
   
   // SEO and social sharing
   seo: {
-    title: 'Bible.fi - Biblical DeFi on Base Chain',
+    title: 'BibleFi - Biblical DeFi on Base Chain',
     description: 'Apply biblical wisdom to your financial journey with DeFi, tithing, and tax management on Base Chain.',
     image: '/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png',
     twitterHandle: '@biblefi',

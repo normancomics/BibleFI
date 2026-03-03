@@ -305,7 +305,7 @@ export const QuantumEncryptionDemo: React.FC = () => {
             "The simple believe anything, but the prudent give thought to their steps." - Proverbs 14:15
           </p>
           <p className="text-xs mt-2 text-muted-foreground">
-            Bible.fi implements military-grade quantum-resistant encryption to protect your financial data and privacy.
+            BibleFi implements military-grade quantum-resistant encryption to protect your financial data and privacy.
           </p>
         </div>
       </CardContent>

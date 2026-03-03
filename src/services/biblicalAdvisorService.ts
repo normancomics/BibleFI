@@ -180,7 +180,7 @@ function generateDefiSuggestions(question: string, knowledgeResults: any[]): Arr
   
   if (lowerQuestion.includes('give') || lowerQuestion.includes('tithe')) {
     suggestions.push({
-      protocol: "Bible.fi Tithing",
+      protocol: "BibleFi Tithing",
       action: "Set up automated digital tithing",
       rationale: "Fulfills the biblical command to give faithfully and consistently"
     });

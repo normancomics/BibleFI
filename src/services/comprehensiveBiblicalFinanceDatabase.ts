@@ -310,7 +310,7 @@ export function getVersesByCategory(category: BiblicalFinanceVerse['category']):
 }
 
 /**
- * Get primary importance verses (most critical for Bible.fi)
+ * Get primary importance verses (most critical for BibleFi)
  */
 export function getPrimaryVerses(): BiblicalFinanceVerse[] {
   return getAllFinancialVerses().filter(v => v.importance === 'primary');
