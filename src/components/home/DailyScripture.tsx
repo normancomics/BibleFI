@@ -51,7 +51,7 @@ const DailyScripture: React.FC = () => {
   const handleShare = async () => {
     if (!dailyVerse) return;
 
-    const shareText = `📖 ${dailyVerse.reference}\n\n"${dailyVerse.kjv}"\n\n💡 DeFi Application: ${dailyVerse.defiApplication}\n\n— Bible.fi`;
+    const shareText = `📖 ${dailyVerse.reference}\n\n"${dailyVerse.kjv}"\n\n💡 DeFi Application: ${dailyVerse.defiApplication}\n\n— BibleFi`;
 
     if (navigator.share) {
       try {

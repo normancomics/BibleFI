@@ -321,7 +321,7 @@ const BiblicalDefiRoadmap: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-ancient-gold">
           <Target size={24} />
-          Bible.fi Development Roadmap
+          BibleFi Development Roadmap
         </CardTitle>
         <div className="flex items-center gap-4 mt-4">
           <div className="flex-1">

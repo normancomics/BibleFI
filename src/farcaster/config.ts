@@ -32,7 +32,7 @@ export const FARCASTER_CONFIG = {
 };
 
 export const APP_CONFIG = {
-  name: 'biblefi.base.eth',
+  name: 'BibleFi',
   description: 'Biblical wisdom for your financial journey',
   icon: 'https://biblefi.base.eth/api/generate-image?type=default',
   canonical: 'https://biblefi.base.eth',

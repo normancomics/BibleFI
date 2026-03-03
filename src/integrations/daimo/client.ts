@@ -48,7 +48,7 @@ export class DaimoClient {
     const recipient = churchAddress || this.DEFAULT_RECIPIENT;
     
     // Create donation-specific message
-    const donationMessage = message || `Tithe to ${churchName} via Bible.fi`;
+    const donationMessage = message || `Tithe to ${churchName} via BibleFi`;
     
     return this.generatePaymentLink({
       recipient,
@@ -109,7 +109,7 @@ export class DaimoClient {
         recipient: this.DEFAULT_RECIPIENT,
         amount,
         token: token.toLowerCase(),
-        message: `Tithe via Bible.fi ${senderAddress ? `from ${senderAddress}` : ''}`
+        message: `Tithe via BibleFi ${senderAddress ? `from ${senderAddress}` : ''}`
       });
       
       return {

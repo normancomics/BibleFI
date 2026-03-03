@@ -385,7 +385,7 @@ const DefiSwap: React.FC = () => {
       
       <CardFooter className="bg-black/30 border-t border-ancient-gold/20 p-3 text-xs text-center justify-center">
         <div className="flex items-center gap-2">
-          <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="Bible.fi" className="h-5" />
+          <img src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" alt="BibleFi" className="h-5" />
           <span className="text-white/70">Powered by Real-Time Base Chain Data</span>
           <span className="text-base-blue font-medium">● Live</span>
         </div>

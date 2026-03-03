@@ -3,7 +3,7 @@ import CryptoJS from 'crypto-js';
 import forge from 'node-forge';
 
 /**
- * Bible.fi Advanced Security Utilities
+ * BibleFi Advanced Security Utilities
  * Implements Fully Homomorphic Quantum-Resistant AES-256 encryption
  * Using lattice-based cryptography and advanced FHE techniques
  */

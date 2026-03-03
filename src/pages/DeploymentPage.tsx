@@ -60,7 +60,7 @@ const DeploymentPage: React.FC = () => {
             </h1>
           </div>
           <p className="text-xl max-w-2xl mx-auto mt-4 text-white/80">
-            Bible.fi is configured and ready for seamless deployment as a Farcaster mini-app on Base Chain.
+            BibleFi is configured and ready for seamless deployment as a Farcaster mini-app on Base Chain.
           </p>
         </div>
 
@@ -138,7 +138,7 @@ const DeploymentPage: React.FC = () => {
             <div className="p-4 bg-black/30 border border-purple-500/20 rounded-lg">
               <h4 className="font-medium mb-2">Frame URL</h4>
               <code className="text-sm bg-black/40 p-2 rounded block">
-                {typeof window !== 'undefined' ? `${window.location.origin}/frame.html` : 'https://bible.fi/frame.html'}
+                {typeof window !== 'undefined' ? `${window.location.origin}/frame.html` : 'https://biblefi.app/frame.html'}
               </code>
             </div>
           </CardContent>

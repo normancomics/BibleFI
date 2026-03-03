@@ -1,7 +1,7 @@
 
-# Sound Files for Bible.Fi
+# Sound Files for BibleFi
 
-This directory contains all sound effect files used in the Bible.Fi application. We're using free sound effects with 8-bit/retro arcade style.
+This directory contains all sound effect files used in the BibleFi application. We're using free sound effects with 8-bit/retro arcade style.
 
 ## Sound Files:
 - coin.mp3: Coin collection sound (used for tithes/donations)

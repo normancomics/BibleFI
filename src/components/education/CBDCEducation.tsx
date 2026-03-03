@@ -147,7 +147,7 @@ This "smart money" concept means your currency itself becomes a tool of social e
           </div>
           
           <div className="bg-purple-900/20 border border-purple-500/30 p-4 rounded-lg space-y-3">
-            <h4 className="font-semibold text-purple-300">Bible.fi's Theological Position</h4>
+            <h4 className="font-semibold text-purple-300">BibleFi's Theological Position</h4>
             
             <div className="space-y-3 text-white/90">
               <p>
@@ -217,7 +217,7 @@ This "smart money" concept means your currency itself becomes a tool of social e
               <h4 className="font-semibold text-blue-300 mb-2">Practical Steps</h4>
               <ul className="text-white/80 text-sm space-y-1">
                 <li>• Keep some physical cash reserves</li>
-                <li>• Use Bible.fi's DeFi tools for decentralized finance</li>
+                <li>• Use BibleFi's DeFi tools for decentralized finance</li>
                 <li>• Educate yourself about monetary policy</li>
                 <li>• Support privacy-preserving financial technologies</li>
               </ul>

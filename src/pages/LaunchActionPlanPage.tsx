@@ -354,7 +354,7 @@ const LaunchActionPlanPage = () => {
       {
         id: "legal-1",
         title: "LLC Formation & Registration",
-        description: "Establish legal entity for Bible.fi",
+        description: "Establish legal entity for BibleFi",
         status: "not-started",
         priority: "critical",
         estimatedDays: 7,
@@ -691,7 +691,7 @@ const LaunchActionPlanPage = () => {
             <Rocket className="w-10 h-10 text-primary" />
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Bible.fi Launch Action Plan
+                BibleFi Launch Action Plan
               </h1>
               <p className="text-muted-foreground mt-1">Detailed roadmap to production launch</p>
             </div>

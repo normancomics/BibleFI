@@ -71,7 +71,7 @@ const LogoIcon: React.FC<LogoIconProps> = ({
           <div className={cn(
             "inline-flex items-center justify-center rounded border border-ancient-gold/30 bg-ancient-gold/10",
             sizeClasses[size],
-            "animate-pulse-glow", // Always glowing for Bible.fi logo
+            "animate-pulse-glow", // Always glowing for BibleFi logo
             className
           )}>
             <div className="text-ancient-gold font-bold text-xs">B</div>

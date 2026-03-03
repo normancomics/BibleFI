@@ -6,17 +6,17 @@
   },
   "frame": {
     "version": "1",
-    "name": "Bible.fi",
+    "name": "BibleFi",
     "iconUrl": "https://biblefi.lovable.app/bible-fi-ios-icon-v2.png",
     "homeUrl": "https://biblefi.lovable.app",
     "imageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
-    "buttonTitle": "Enter Bible.fi",
+    "buttonTitle": "Enter BibleFi",
     "splashImageUrl": "https://biblefi.lovable.app/bible-fi-brand-logo-v2.png",
     "splashBackgroundColor": "#1E40AF",
     "webhookUrl": "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler"
   },
   "manifest": {
-    "appName": "Bible.fi - Biblical Wisdom for DeFi",
+    "appName": "BibleFi - Biblical Wisdom for DeFi",
     "appDescription": "The world's first Christian faith-based DeFi platform on Base Chain. Tithe, stake, invest & grow wealth according to Scripture.",
     "appVersion": "1.0.0",
     "appUrl": "https://biblefi.lovable.app",

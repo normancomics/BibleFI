@@ -28,16 +28,16 @@ const MobileSetupGuide: React.FC = () => {
     {
       id: 3,
       title: 'Test Farcaster Frame',
-      description: 'Share your Bible.fi frame on Warpcast to test the mini-app',
+      description: 'Share your BibleFi frame on Warpcast to test the mini-app',
       action: 'Open Frame',
       url: '/frame.html'
     },
     {
       id: 4,
       title: 'Share on Farcaster',
-      description: 'Cast your Bible.fi frame to the Farcaster community',
+      description: 'Cast your BibleFi frame to the Farcaster community',
       action: 'Compose Cast',
-      url: `https://warpcast.com/~/compose?text=Check out Bible.fi - Biblical wisdom for DeFi on Base Chain!&embeds[]=${encodeURIComponent(window.location.origin + '/frame.html')}`
+      url: `https://warpcast.com/~/compose?text=Check out BibleFi - Biblical wisdom for DeFi on Base Chain!&embeds[]=${encodeURIComponent(window.location.origin + '/frame.html')}`
     }
   ];
 
@@ -65,7 +65,7 @@ const MobileSetupGuide: React.FC = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-ancient-gold">
           <Smartphone className="h-5 w-5" />
-          iPad Setup Guide for Bible.fi
+          iPad Setup Guide for BibleFi
         </CardTitle>
         <p className="text-white/70">
           Follow these steps to get your Farcaster mini-app running
@@ -124,7 +124,7 @@ const MobileSetupGuide: React.FC = () => {
 
         <div className="mt-4 text-center">
           <p className="text-xs text-white/60">
-            Your Bible.fi Frame URL: <br />
+            Your BibleFi Frame URL: <br />
             <code className="bg-black/40 px-2 py-1 rounded text-ancient-gold">
               {window.location.origin}/frame.html
             </code>

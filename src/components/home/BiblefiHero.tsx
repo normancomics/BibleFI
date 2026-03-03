@@ -19,7 +19,7 @@ const BiblefiHero: React.FC = () => {
   const handleOpenFarcaster = () => {
     toast({
       title: "Farcaster Integration",
-      description: "Opening Bible.fi mini-app in Farcaster...",
+      description: "Opening BibleFi mini-app in Farcaster...",
     });
     
     // Open Farcaster frame
@@ -42,7 +42,7 @@ const BiblefiHero: React.FC = () => {
       >
         <div className="flex flex-col items-center justify-center">
           <div className="text-5xl md:text-6xl font-scroll font-bold mb-2">
-            <GlowingText color="yellow">Bible.fi</GlowingText>
+            <GlowingText color="yellow">BibleFi</GlowingText>
           </div>
           <div className="text-lg md:text-xl font-scroll text-ancient-gold opacity-80">
             Biblical Wisdom for Financial Stewardship

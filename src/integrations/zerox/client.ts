@@ -204,7 +204,7 @@ export class ZeroXClient {
   }
 }
 
-// Hook to use 0x API with Bible.fi customizations
+// Hook to use 0x API with BibleFi customizations
 export function useZeroX() {
   const { toast } = useToast();
   

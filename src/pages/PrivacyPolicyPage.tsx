@@ -32,7 +32,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                At Bible.fi, we are committed to protecting your privacy and maintaining the highest 
+                At BibleFi, we are committed to protecting your privacy and maintaining the highest 
                 standards of data security. This Privacy Policy explains how we collect, use, and 
                 safeguard your information.
               </p>
@@ -153,7 +153,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                Bible.fi integrates with several third-party services to provide comprehensive functionality:
+                BibleFi integrates with several third-party services to provide comprehensive functionality:
               </p>
               <div className="space-y-3">
                 <div className="bg-muted/50 p-4 rounded-lg">
@@ -207,7 +207,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </div>
               <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg">
                 <p className="text-sm text-blue-600 dark:text-blue-400">
-                  <strong>Contact Us:</strong> For privacy-related requests, contact us at privacy@bible.fi 
+                  <strong>Contact Us:</strong> For privacy-related requests, contact us at privacy@biblefi.app 
                   or through our support channels.
                 </p>
               </div>
@@ -221,7 +221,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                Bible.fi is committed to compliance with applicable privacy laws and regulations:
+                BibleFi is committed to compliance with applicable privacy laws and regulations:
               </p>
               <ul className="text-sm space-y-2 text-muted-foreground">
                 <li>• CCPA (California Consumer Privacy Act)</li>

@@ -83,7 +83,7 @@ const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ showDetails = false
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-ancient-gold">
           <Zap className="h-5 w-5" />
-          Bible.fi Deployment Status
+          BibleFi Deployment Status
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">

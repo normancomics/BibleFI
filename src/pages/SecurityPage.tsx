@@ -112,7 +112,7 @@ const SecurityPage: React.FC = () => {
                 Security Center
               </h1>
               <p className="text-white/80 mt-2">
-                Bible.fi features military-grade security with quantum-resistant encryption to protect your assets and data
+                BibleFi features military-grade security with quantum-resistant encryption to protect your assets and data
               </p>
             </div>
             
@@ -151,7 +151,7 @@ const SecurityPage: React.FC = () => {
                     <div>
                       <h3 className="text-lg font-semibold mb-2">AES-256 Encryption</h3>
                       <p className="text-sm text-white/80">
-                        Bible.fi uses AES-256 bit encryption, the same standard used by governments and military organizations 
+                        BibleFi uses AES-256 bit encryption, the same standard used by governments and military organizations 
                         worldwide to protect classified information. All sensitive data is encrypted both in transit and at rest.
                       </p>
                     </div>
@@ -254,7 +254,7 @@ const SecurityPage: React.FC = () => {
                       Security Features
                     </CardTitle>
                     <CardDescription>
-                      Comprehensive protection measures implemented in Bible.fi
+                      Comprehensive protection measures implemented in BibleFi
                     </CardDescription>
                   </CardHeader>
                   
@@ -303,7 +303,7 @@ const SecurityPage: React.FC = () => {
                       <div>
                         <h3 className="font-medium text-ancient-gold mb-3">Security Levels</h3>
                         <p className="text-sm text-white/80 mb-4">
-                          Bible.fi offers multiple security levels to balance protection and convenience based on your needs.
+                          BibleFi offers multiple security levels to balance protection and convenience based on your needs.
                           Higher security levels provide additional protection but may require additional verification steps.
                         </p>
                         

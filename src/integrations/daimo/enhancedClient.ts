@@ -66,7 +66,7 @@ export class EnhancedDaimoClient {
       // Return mock data for development
       return {
         address,
-        name: 'Bible.fi User',
+        name: 'BibleFi User',
         balance: parseEther('100').toString(),
         isVerified: true
       };
@@ -90,12 +90,12 @@ export class EnhancedDaimoClient {
         body: JSON.stringify({
           recipient: request.recipient,
           amount: request.amount,
-          memo: request.memo || 'Bible.fi Tithe',
+          memo: request.memo || 'BibleFi Tithe',
           metadata: {
             churchId: request.churchId,
             isRecurring: request.isRecurring,
             recurringFrequency: request.recurringFrequency,
-            source: 'bible.fi'
+            source: 'biblefi'
           }
         })
       });
@@ -151,7 +151,7 @@ export class EnhancedDaimoClient {
         from: '0x1234567890123456789012345678901234567890',
         to: '0x0987654321098765432109876543210987654321',
         amount: parseEther('10').toString(),
-        memo: 'Bible.fi Tithe',
+        memo: 'BibleFi Tithe',
         status: 'completed',
         timestamp: Date.now(),
         txHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
@@ -225,10 +225,10 @@ export class EnhancedDaimoClient {
           recipient: request.recipient,
           amount: request.amount,
           frequency: request.frequency,
-          memo: request.memo || 'Recurring Bible.fi Tithe',
+          memo: request.memo || 'Recurring BibleFi Tithe',
           metadata: {
             churchId: request.churchId,
-            source: 'bible.fi'
+            source: 'biblefi'
           }
         })
       });
@@ -264,8 +264,8 @@ export class EnhancedDaimoClient {
     const paymentData = {
       recipient,
       amount,
-      memo: memo || 'Bible.fi Payment',
-      source: 'bible.fi'
+      memo: memo || 'BibleFi Payment',
+      source: 'biblefi'
     };
     
     // In production, this would generate an actual QR code
@@ -281,7 +281,7 @@ export class EnhancedDaimoClient {
     const params = new URLSearchParams({
       to: recipient,
       amount,
-      memo: memo || 'Bible.fi Payment'
+      memo: memo || 'BibleFi Payment'
     });
     
     return `daimo://pay?${params.toString()}`;

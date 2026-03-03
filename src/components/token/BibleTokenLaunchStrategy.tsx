@@ -265,7 +265,7 @@ const BibleTokenLaunchStrategy: React.FC = () => {
             <CardHeader>
               <CardTitle>APY Generation Mechanisms</CardTitle>
               <p className="text-muted-foreground">
-                Multiple ways for users to earn rewards in the Bible.fi ecosystem
+                Multiple ways for users to earn rewards in the BibleFi ecosystem
               </p>
             </CardHeader>
             <CardContent>

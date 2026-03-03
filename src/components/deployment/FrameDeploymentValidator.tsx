@@ -150,7 +150,7 @@ const FrameDeploymentValidator: React.FC = () => {
           message: 'Using development domain',
           details: 'Ready for production deployment',
         });
-      } else if (currentDomain === 'bible.fi' || currentDomain === 'biblefi.base.eth') {
+      } else if (currentDomain === 'biblefi.app' || currentDomain === 'biblefi.base.eth') {
         results.push({
           test: 'Domain Configuration',
           status: 'pass',

@@ -28,7 +28,7 @@ const ProductionWalletConnect: React.FC = () => {
     if (isConnected && !isOnBase) {
       toast({
         title: "Switch to Base Network",
-        description: "Bible.fi runs on Base chain for optimal DeFi features",
+        description: "BibleFi runs on Base chain for optimal DeFi features",
         variant: "destructive",
       });
     }
@@ -40,7 +40,7 @@ const ProductionWalletConnect: React.FC = () => {
       await connect({ connector });
       toast({
         title: "🙏 Wallet Connected",
-        description: "Welcome to Bible.fi - Biblical wisdom meets DeFi",
+        description: "Welcome to BibleFi - Biblical wisdom meets DeFi",
       });
     } catch (error) {
       console.error('Connection error:', error);
@@ -129,7 +129,7 @@ const ProductionWalletConnect: React.FC = () => {
 
           <div className="text-xs text-white/60 space-y-1">
             <p>• Supports Coinbase Wallet, WalletConnect, and browser wallets</p>
-            <p>• Your keys, your crypto - Bible.fi never holds your funds</p>
+            <p>• Your keys, your crypto - BibleFi never holds your funds</p>
             <p>• Base chain optimized for low fees and fast transactions</p>
           </div>
         </CardContent>

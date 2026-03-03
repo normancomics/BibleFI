@@ -15,7 +15,7 @@ const FarcasterFrame: React.FC = () => {
   // Generate the frame URL for the current domain
   const frameUrl = typeof window !== 'undefined' 
     ? `${window.location.protocol}//${window.location.host}/frame.html`
-    : 'https://bible.fi/frame.html';
+    : 'https://biblefi.app/frame.html';
   
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(frameUrl)
@@ -45,7 +45,7 @@ const FarcasterFrame: React.FC = () => {
   
   const handleShareToFarcaster = () => {
     playSound('coin');
-    const text = 'Check out Bible.fi - Biblical wisdom for your financial journey on Base Chain';
+    const text = 'Check out BibleFi - Biblical wisdom for your financial journey on Base Chain';
     const url = encodeURIComponent(`https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(frameUrl)}`);
     window.open(url, '_blank');
   };
@@ -54,14 +54,14 @@ const FarcasterFrame: React.FC = () => {
     <Card className="bg-scripture/20 border border-ancient-gold shadow-md">
       <CardContent className="p-4">
         <div className="text-center mb-4">
-          <h3 className="text-xl text-ancient-gold font-medium">Bible.fi Frame</h3>
+          <h3 className="text-xl text-ancient-gold font-medium">BibleFi Frame</h3>
           <p className="text-sm text-white/70">Share biblical wisdom on Farcaster</p>
         </div>
         
         <div className="my-4 flex justify-center">
           <img 
             src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
-            alt="Bible.fi Logo" 
+            alt="BibleFi Logo" 
             className="h-24 object-contain"
           />
         </div>

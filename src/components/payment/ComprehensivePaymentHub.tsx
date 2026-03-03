@@ -141,7 +141,7 @@ const ComprehensivePaymentHub: React.FC = () => {
         const result = await enhancedDaimoClient.createPayment({
           recipient,
           amount: (parseFloat(amount) * 1e6).toString(), // Convert to USDC units
-          memo: 'Bible.fi Tithe Payment'
+          memo: 'BibleFi Tithe Payment'
         });
         
         if (result.success) {

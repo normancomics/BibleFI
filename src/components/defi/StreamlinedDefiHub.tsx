@@ -33,7 +33,7 @@ const StreamlinedDefiHub: React.FC = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Bible.fi DeFi Hub
+              BibleFi DeFi Hub
             </span>
           </CardTitle>
           <p className="text-center text-muted-foreground">

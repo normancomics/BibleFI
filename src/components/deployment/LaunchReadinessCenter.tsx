@@ -152,7 +152,7 @@ const LaunchReadinessCenter: React.FC = () => {
 
     toast({
       title: `Launch Readiness: ${readinessScore}%`,
-      description: `${completedChecks}/${totalChecks} checks passed. Bible.fi is ready for deployment!`,
+      description: `${completedChecks}/${totalChecks} checks passed. BibleFi is ready for deployment!`,
     });
   };
 
@@ -225,7 +225,7 @@ const LaunchReadinessCenter: React.FC = () => {
           🚀 Launch Readiness Center
         </h2>
         <p className="text-muted-foreground">
-          Bible.fi deployment status and security verification
+          BibleFi deployment status and security verification
         </p>
       </motion.div>
 
@@ -317,7 +317,7 @@ const LaunchReadinessCenter: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             <p className="text-muted-foreground">
-              Bible.fi has passed all critical security and functionality checks. 
+              BibleFi has passed all critical security and functionality checks. 
               The application is ready for deployment to production on Base chain.
             </p>
             

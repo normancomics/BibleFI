@@ -208,7 +208,7 @@ class BiblicalWisdomService {
         
       case 'debt':
         suggestions.push({
-          protocol: "Bible.fi Savings",
+          protocol: "BibleFi Savings",
           action: "Build an emergency fund before taking on leverage",
           rationale: "Follows Proverbs 22:7's warning about debt bondage"
         });
@@ -216,7 +216,7 @@ class BiblicalWisdomService {
         
       default:
         suggestions.push({
-          protocol: "Bible.fi Dashboard",
+          protocol: "BibleFi Dashboard",
           action: "Review your biblical financial wisdom score",
           rationale: "Helps ensure your finances align with scriptural principles"
         });

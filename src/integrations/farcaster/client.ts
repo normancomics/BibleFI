@@ -25,7 +25,7 @@ export const generateFrameHTML = (config: FrameConfig): string => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bible.fi Frame</title>
+  <title>BibleFi Frame</title>
   
   <!-- Farcaster Frame Meta Tags -->
   <meta property="fc:frame" content="vNext">
@@ -58,15 +58,15 @@ export const generateFrameHTML = (config: FrameConfig): string => {
 
   html += `
   <!-- Open Graph Meta Tags -->
-  <meta property="og:title" content="Bible.fi - Biblical Finance on Base Chain">
+  <meta property="og:title" content="BibleFi - Biblical Finance on Base Chain">
   <meta property="og:description" content="Discover biblical wisdom for your financial journey">
   <meta property="og:type" content="website">
 </head>
 <body style="margin: 0; padding: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh;">
   <div style="text-align: center; color: white; font-family: system-ui, sans-serif;">
-    <h1 style="color: gold;">Bible.fi Frame</h1>
+    <h1 style="color: gold;">BibleFi Frame</h1>
     <p>This HTML is meant to be embedded as a Farcaster Frame.</p>
-    <p>Visit <a href="https://biblefi.base.eth" style="color: gold; text-decoration: none;">Bible.fi</a> to explore biblical financial wisdom.</p>
+    <p>Visit <a href="https://biblefi.base.eth" style="color: gold; text-decoration: none;">BibleFi</a> to explore biblical financial wisdom.</p>
   </div>
 </body>
 </html>`;
@@ -125,7 +125,7 @@ export class FarcasterClient {
       buttons: [
         { label: "Get More Wisdom", action: "link", target: "https://biblefi.base.eth/wisdom" },
         { label: "Share This Verse", action: "post" },
-        { label: "Open Bible.fi", action: "link", target: "https://biblefi.base.eth" },
+        { label: "Open BibleFi", action: "link", target: "https://biblefi.base.eth" },
       ],
       postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
       state: generateFrameState({ verse, reference })
@@ -173,7 +173,7 @@ export class FarcasterClient {
   }
   
   /**
-   * Generate the default Bible.fi mini-app frame
+   * Generate the default BibleFi mini-app frame
    * @returns Frame HTML
    */
   public generateDefaultFrame(): string {
@@ -197,7 +197,7 @@ export class FarcasterClient {
    * @returns Shareable URL for Warpcast
    */
   public generateVerseSharingUrl(verse: string, reference: string): string {
-    const text = `"${verse}" - ${reference}\n\nBiblical wisdom from Bible.fi`;
+    const text = `"${verse}" - ${reference}\n\nBiblical wisdom from BibleFi`;
     const frameUrl = `https://biblefi.base.eth/frame.html?verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`;
     
     return generateFarcasterShareUrl(text, frameUrl);

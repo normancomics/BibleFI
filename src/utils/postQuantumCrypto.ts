@@ -1,5 +1,5 @@
 /**
- * Bible.fi Post-Quantum Cryptography Module
+ * BibleFi Post-Quantum Cryptography Module
  * Implements NIST FIPS 203/204 compliant post-quantum cryptography
  * Using @noble/post-quantum for ML-KEM (Kyber) and ML-DSA (Dilithium)
  * 
