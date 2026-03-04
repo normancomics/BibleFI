@@ -100,7 +100,7 @@ const RealWalletConnect: React.FC<RealWalletConnectProps> = ({
         <DialogHeader>
           <DialogTitle className="text-ancient-gold">Connect Wallet</DialogTitle>
           <DialogDescription className="text-white/70">
-            Choose your wallet to connect to Bible.fi
+            Choose your wallet to connect to BibleFi
           </DialogDescription>
         </DialogHeader>
         
@@ -145,7 +145,7 @@ const RealWalletConnect: React.FC<RealWalletConnectProps> = ({
         </div>
 
         <div className="text-center text-xs text-white/50 border-t border-ancient-gold/20 pt-4">
-          By connecting, you agree to Bible.fi's Terms of Service
+          By connecting, you agree to BibleFi's Terms of Service
         </div>
       </DialogContent>
     </Dialog>

@@ -17,7 +17,7 @@ interface Noir {
 }
 
 /**
- * ZK Proof Service for Bible.fi
+ * ZK Proof Service for BibleFi
  * Handles client-side proof generation using Noir circuits
  */
 class ZKProofService {

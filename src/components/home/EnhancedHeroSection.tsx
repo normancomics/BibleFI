@@ -13,7 +13,7 @@ const EnhancedHeroSection: React.FC = () => {
   const [showWelcome, setShowWelcome] = useState(true);
 
   const heroCharacters = [
-    { type: "jesus" as const, message: "Welcome to Bible.fi, where faith meets finance!" },
+    { type: "jesus" as const, message: "Welcome to BibleFi, where faith meets finance!" },
     { type: "solomon" as const, message: "Discover biblical wisdom for modern financial decisions" },
     { type: "moses" as const, message: "Lead your finances with divine guidance" },
   ];
@@ -43,7 +43,7 @@ const EnhancedHeroSection: React.FC = () => {
         {/* Animated Logo */}
         <div className="text-center mb-8 animate-entrance">
           <h1 className="eboy-title text-6xl md:text-8xl mb-4 animate-pulse-glow">
-            BIBLE.FI
+            BIBLEFI
           </h1>
           <div className="flex items-center justify-center gap-2 text-sm font-pixel text-eboy-green">
             <span>MADE ON</span>

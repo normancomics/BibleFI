@@ -83,7 +83,7 @@ const LaunchPage: React.FC = () => {
             <h1 className="text-4xl font-bold text-ancient-gold">🚀 Launch Control Center</h1>
           </div>
           <p className="text-white/80 max-w-2xl mx-auto">
-            Complete deployment dashboard for Bible.fi - from readiness checks to Farcaster frame deployment
+            Complete deployment dashboard for BibleFi - from readiness checks to Farcaster frame deployment
           </p>
         </div>
 

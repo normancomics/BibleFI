@@ -140,7 +140,7 @@ const EnhancedWalletConnect: React.FC = () => {
                 <span className="text-sm font-medium text-orange-400">Wrong Network</span>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                Please switch to Base network to use Bible.fi
+                Please switch to Base network to use BibleFi
               </p>
               <Button onClick={switchToBase} size="sm" className="bg-blue-600 hover:bg-blue-700">
                 Switch to Base
@@ -175,7 +175,7 @@ const EnhancedWalletConnect: React.FC = () => {
           Connect Your Wallet
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Choose your preferred wallet to start using Bible.fi on Base
+          Choose your preferred wallet to start using BibleFi on Base
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -244,7 +244,7 @@ const EnhancedWalletConnect: React.FC = () => {
           </div>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li>• Your wallet stays in your control</li>
-            <li>• No private keys stored by Bible.fi</li>
+            <li>• No private keys stored by BibleFi</li>
             <li>• All transactions require your approval</li>
             <li>• Built on Base for low fees</li>
           </ul>

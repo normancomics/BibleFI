@@ -138,7 +138,7 @@ export const ComplianceMonitor: React.FC = () => {
             Compliance Monitoring Dashboard
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Real-time compliance monitoring for Bible.fi platform
+            Real-time compliance monitoring for BibleFi platform
           </p>
         </CardHeader>
       </Card>

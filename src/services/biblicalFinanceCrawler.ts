@@ -281,7 +281,7 @@ export class BiblicalFinanceCrawlerService {
       application = 'Use automated giving through Superfluid streams, set up recurring donations to churches, and participate in DeFi yield farming that funds charitable causes.';
     } else if (categories.includes('tithing_principle')) {
       principle = 'The tithe represents our acknowledgment that all resources belong to God.';
-      application = 'Implement smart contract tithing through Bible.fi, use DeFi protocols to automatically allocate first 10% of yields to church giving.';
+      application = 'Implement smart contract tithing through BibleFi, use DeFi protocols to automatically allocate first 10% of yields to church giving.';
     } else if (categories.includes('debt_management')) {
       principle = 'Debt should be approached with wisdom, caution, and commitment to repayment.';
       application = 'Use DeFi lending protocols responsibly, maintain healthy collateralization ratios, and avoid over-leveraging in yield farming strategies.';

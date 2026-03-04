@@ -32,7 +32,7 @@ export const TermsOfServicePage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                By accessing or using Bible.fi ("the Service"), you covenant before God and agree to be bound by 
+                By accessing or using BibleFi ("the Service"), you covenant before God and agree to be bound by 
                 these Terms of Service and our Privacy Policy. If you do not agree to these terms, you may not use the Service.
               </p>
               <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-lg">
@@ -58,7 +58,7 @@ export const TermsOfServicePage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                Bible.fi is a decentralized finance (DeFi) application that integrates Biblical financial 
+                BibleFi is a decentralized finance (DeFi) application that integrates Biblical financial 
                 principles with modern blockchain technology on the Base network.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -103,8 +103,8 @@ export const TermsOfServicePage: React.FC = () => {
                 </p>
               </div>
               <div className="space-y-2">
-                <p><strong>© 2025 Bible.fi Holdings LLC. All rights reserved.</strong></p>
-                <p>Bible.fi™, Biblefi.xyz™, Biblical DeFi™, and $BIBLEFI™ are trademarks of Bible.fi Holdings LLC.</p>
+                <p><strong>© 2025 BibleFi Holdings LLC. All rights reserved.</strong></p>
+                <p>BibleFi™, Biblefi.xyz™, Biblical DeFi™, and $BIBLEFI™ are trademarks of BibleFi Holdings LLC.</p>
                 <p>
                   Protected materials include: smart contract architecture, algorithmic implementations, 
                   Biblical principle → DeFi mechanism mapping, tithing algorithms, wisdom scoring methodology, 
@@ -112,7 +112,7 @@ export const TermsOfServicePage: React.FC = () => {
                 </p>
                 <p>
                   Users may not reproduce, distribute, modify, or create derivative works without 
-                  explicit written permission from Bible.fi Holdings LLC.
+                  explicit written permission from BibleFi Holdings LLC.
                 </p>
               </div>
             </CardContent>
@@ -160,7 +160,7 @@ export const TermsOfServicePage: React.FC = () => {
             <CardContent className="space-y-4">
               <p>
                 The $BIBLEFI token is a utility token designed to facilitate ecosystem participation 
-                and governance within the Bible.fi platform.
+                and governance within the BibleFi platform.
               </p>
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                 <h4 className="font-semibold">Token Utility:</h4>

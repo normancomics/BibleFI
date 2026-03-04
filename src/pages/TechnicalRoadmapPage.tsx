@@ -38,7 +38,7 @@ const TechnicalRoadmapPage: React.FC = () => {
       completion: 0,
       tasks: [
         { name: "MCP Server Setup", status: "PLANNED", priority: "CRITICAL" },
-        { name: "Bible.fi MCP Tools", status: "PLANNED", priority: "HIGH" },
+        { name: "BibleFi MCP Tools", status: "PLANNED", priority: "HIGH" },
         { name: "Blockchain MCP Connectors", status: "PLANNED", priority: "HIGH" },
         { name: "Church Database MCP Interface", status: "PLANNED", priority: "MEDIUM" },
         { name: "DeFi Protocol MCP Bridges", status: "PLANNED", priority: "HIGH" }
@@ -185,7 +185,7 @@ const TechnicalRoadmapPage: React.FC = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-ancient-gold mb-4">
-            BIBLE.FI TECHNICAL ROADMAP
+            BIBLEFI TECHNICAL ROADMAP
           </h1>
           <p className="text-green-400 text-sm mb-2">
             BLOCKCHAIN • RAG • AGI • MCP • MULTI-CHAIN INTEGRATION

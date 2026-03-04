@@ -54,7 +54,7 @@ const CommunityDiscussion: React.FC<CommunityDiscussionProps> = ({ simplified = 
     setConnected(true);
     toast({
       title: "Farcaster Connection Initiated",
-      description: "Please authorize Bible.fi to connect with your Farcaster account.",
+      description: "Please authorize BibleFi to connect with your Farcaster account.",
     });
   };
 

@@ -297,7 +297,7 @@ const BiblicalFinanceEncyclopediaPage: React.FC = () => {
           <CardContent className="p-6 text-center">
             <BookOpen className="h-8 w-8 text-ancient-gold mx-auto mb-3" />
             <p className="text-foreground font-semibold mb-2">
-              Bible.fi is committed to 100% Biblical accuracy
+              BibleFi is committed to 100% Biblical accuracy
             </p>
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
               Every DeFi feature on this platform is grounded in Scripture. We prioritize tithing

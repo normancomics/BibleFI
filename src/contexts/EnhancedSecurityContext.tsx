@@ -26,7 +26,7 @@ export const SecurityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Security monitoring
   useEffect(() => {
-    console.log('🔒 Bible.fi Security System Initialized - Military Grade Protection Active');
+    console.log('🔒 BibleFi Security System Initialized - Military Grade Protection Active');
     
     // Monitor for potential security threats
     const securityMonitor = setInterval(() => {

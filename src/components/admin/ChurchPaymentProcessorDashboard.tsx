@@ -155,7 +155,7 @@ const ChurchPaymentProcessorDashboard: React.FC = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-ancient-gold to-scripture bg-clip-text text-transparent">
-          Bible.Fi Payment Processor Dashboard
+          BibleFi Payment Processor Dashboard
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Manage church payment processors, crawl biblical financial wisdom, and build the global church directory
@@ -409,7 +409,7 @@ const ChurchPaymentProcessorDashboard: React.FC = () => {
         <TabsContent value="setup" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Bible.fi DApp Launch Roadmap</CardTitle>
+              <CardTitle>BibleFi DApp Launch Roadmap</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
@@ -418,7 +418,7 @@ const ChurchPaymentProcessorDashboard: React.FC = () => {
                   <div>
                     <h4 className="font-semibold">Phase 1: Foundation (Completed)</h4>
                     <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                      <li>• Bible.fi DApp architecture</li>
+                      <li>• BibleFi DApp architecture</li>
                       <li>• Base chain integration</li>
                       <li>• Wallet connections (Coinbase, Rainbow, WalletConnect)</li>
                       <li>• Farcaster miniapp integration</li>

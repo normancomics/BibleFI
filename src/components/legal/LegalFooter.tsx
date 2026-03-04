@@ -11,10 +11,10 @@ export const LegalFooter: React.FC = () => {
         {/* Copyright and Trademark Section */}
         <div className="text-center mb-6 space-y-2">
           <div className="text-sm text-muted-foreground">
-            © {currentYear} Bible.fi Holdings LLC. All rights reserved.
+            © {currentYear} BibleFi Holdings LLC. All rights reserved.
           </div>
           <div className="text-xs text-muted-foreground">
-            Bible.fi™, Biblefi.xyz™, Biblical DeFi™, and $BIBLEFI™ are trademarks of Bible.fi Holdings LLC. 
+            BibleFi™, Biblefi.xyz™, Biblical DeFi™, and $BIBLEFI™ are trademarks of BibleFi Holdings LLC. 
             Built on Base Chain with Biblical principles. USPTO Applications Pending.
           </div>
         </div>

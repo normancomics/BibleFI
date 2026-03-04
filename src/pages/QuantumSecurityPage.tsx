@@ -33,7 +33,7 @@ const QuantumSecurityPage: React.FC = () => {
                 Quantum Security Center
               </h1>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Military-grade quantum-resistant security protecting Bible.fi with AES-256 encryption, 
+                Military-grade quantum-resistant security protecting BibleFi with AES-256 encryption, 
                 homomorphic computation, zero-knowledge proofs, and post-quantum cryptography.
               </p>
             </div>

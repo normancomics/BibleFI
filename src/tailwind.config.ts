@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Bible.Fi custom colors - All HSL format to match index.css
+				// BibleFi custom colors - All HSL format to match index.css
 				scripture: {
 					DEFAULT: 'hsl(var(--scripture))', // Use CSS variable
 					dark: 'hsl(var(--scripture-dark))',

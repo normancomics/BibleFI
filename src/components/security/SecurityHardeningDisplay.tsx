@@ -134,7 +134,7 @@ const SecurityHardeningDisplay: React.FC = () => {
     // Test input validation
     results.xssProtection = !InputValidator.sanitizeInput('<script>alert("xss")</script>').includes('<script>');
     results.sqlProtection = !InputValidator.validateSqlInput("'; DROP TABLE users; --");
-    results.emailValidation = InputValidator.validateEmail('test@bible.fi');
+    results.emailValidation = InputValidator.validateEmail('test@biblefi.app');
     results.cryptoValidation = InputValidator.validateCryptoAddress('0x742d35Cc6335C24A88D7e1Fc4c11B4C1d8b4c9A2');
     
     // Test rate limiting
@@ -357,7 +357,7 @@ const SecurityHardeningDisplay: React.FC = () => {
               "Above all else, guard your heart, for everything you do flows from it." - Proverbs 4:23
             </blockquote>
             <p className="text-sm text-scripture-light mt-3">
-              Just as we guard our hearts in spiritual matters, Bible.fi guards your digital assets 
+              Just as we guard our hearts in spiritual matters, BibleFi guards your digital assets 
               with military-grade quantum-resistant encryption and comprehensive security monitoring.
             </p>
           </div>

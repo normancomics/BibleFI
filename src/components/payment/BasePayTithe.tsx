@@ -43,7 +43,7 @@ const SUPPORTED_TOKENS: SupportedToken[] = [
   { symbol: 'cbBTC', name: 'Coinbase BTC', icon: '🟠', available: false, category: 'native' },
   
   // Governance/Future tokens
-  { symbol: 'BIBLEFI', name: 'Bible.fi Token', icon: '📖', available: false, category: 'governance' },
+  { symbol: 'BIBLEFI', name: 'BibleFi Token', icon: '📖', available: false, category: 'governance' },
   { symbol: 'WISDOM', name: 'Wisdom Token', icon: '🧠', available: false, category: 'governance' },
   { symbol: 'SUP', name: 'Superfluid Token', icon: '💧', available: false, category: 'governance' },
   { symbol: 'VEIL', name: 'Veil Privacy', icon: '🔒', available: false, category: 'governance' },

@@ -3,8 +3,8 @@ import { createConfig, http } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 
-// Updated WalletConnect Project ID for Bible.fi production
-const projectId = '2589ec8e083adaa554ee06641ce2b93b' // Bible.fi official project ID
+// Updated WalletConnect Project ID for BibleFi production
+const projectId = '2589ec8e083adaa554ee06641ce2b93b' // BibleFi official project ID
 
 export const config = createConfig({
   chains: [base, mainnet],
@@ -17,7 +17,7 @@ export const config = createConfig({
       }
     }),
     coinbaseWallet({
-      appName: 'Bible.fi - Biblical DeFi',
+      appName: 'BibleFi - Biblical DeFi',
       appLogoUrl: '/bible-fi-brand-logo-v2.png',
       preference: 'all',
       version: '4',
@@ -25,13 +25,13 @@ export const config = createConfig({
     walletConnect({
       projectId,
       metadata: {
-        name: 'Bible.fi',
+        name: 'BibleFi',
         description: 'Biblical wisdom meets DeFi innovation on Base chain',
-        url: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi',
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://biblefi.app',
         icons: [
           typeof window !== 'undefined' 
             ? `${window.location.origin}/bible-fi-brand-logo-v2.png`
-            : 'https://bible.fi/bible-fi-brand-logo-v2.png'
+            : 'https://biblefi.app/bible-fi-brand-logo-v2.png'
         ],
         verifyUrl: 'https://verify.walletconnect.com'
       },

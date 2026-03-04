@@ -51,7 +51,7 @@ export const NISTPostQuantumDemo: React.FC = () => {
   
   // ML-DSA State  
   const [dsaKeypair, setDsaKeypair] = useState<KeyPairState>({ publicKey: '', secretKey: '', generated: false });
-  const [messageToSign, setMessageToSign] = useState('Tithe transaction verified by Bible.fi');
+  const [messageToSign, setMessageToSign] = useState('Tithe transaction verified by BibleFi');
   const [signature, setSignature] = useState('');
   const [signatureValid, setSignatureValid] = useState<boolean | null>(null);
   
@@ -288,7 +288,7 @@ export const NISTPostQuantumDemo: React.FC = () => {
           <FileCheck className="h-4 w-4 text-cyan-400" />
           <AlertTitle>NIST FIPS Compliant</AlertTitle>
           <AlertDescription className="text-sm">
-            Bible.fi uses officially standardized post-quantum algorithms: ML-KEM (FIPS 203), 
+            BibleFi uses officially standardized post-quantum algorithms: ML-KEM (FIPS 203), 
             ML-DSA (FIPS 204), and SLH-DSA (FIPS 205). These protect your financial data 
             against both current and future quantum computer attacks.
           </AlertDescription>
@@ -505,7 +505,7 @@ export const NISTPostQuantumDemo: React.FC = () => {
             - Proverbs 27:12
           </p>
           <p className="text-xs mt-2 text-muted-foreground">
-            Bible.fi implements NIST-standardized post-quantum cryptography today to protect your 
+            BibleFi implements NIST-standardized post-quantum cryptography today to protect your 
             financial stewardship against tomorrow's quantum threats. Your tithes and investments 
             are secured by algorithms designed to withstand attacks from both classical and quantum computers.
           </p>

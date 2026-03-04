@@ -18,7 +18,7 @@ export const AnimatedLogo: React.FC<{ size?: "sm" | "md" | "lg", className?: str
   return (
     <div className={`${className} eboy-card p-4 bg-eboy-yellow`}>
       <div className={`font-pixel font-bold ${sizeClasses[size]} text-foreground uppercase tracking-wider`}>
-        Bible.fi
+        BibleFi
       </div>
     </div>
   );

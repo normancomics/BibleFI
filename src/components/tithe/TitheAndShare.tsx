@@ -26,7 +26,7 @@ const TitheAndShare: React.FC = () => {
     }
     
     const tithingVerse = "Honor the LORD with your wealth, with the firstfruits of all your crops. - Proverbs 3:9";
-    const text = `"${tithingVerse}"\n\nI just tithed through Bible.fi - Biblical wisdom for financial stewardship on Base Chain`;
+    const text = `"${tithingVerse}"\n\nI just tithed through BibleFi - Biblical wisdom for financial stewardship on Base Chain`;
     const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
     
     window.open(shareUrl, '_blank');
@@ -37,7 +37,7 @@ const TitheAndShare: React.FC = () => {
     
     toast({
       title: "Creating Frame",
-      description: "Opening Bible.fi Frame editor",
+      description: "Opening BibleFi Frame editor",
     });
     
     // Navigate to frame editor or preview
