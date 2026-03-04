@@ -173,7 +173,7 @@ In the context of DeFi and cryptocurrency earnings, this principle remains uncha
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-ancient-gold">
             <BookOpen size={24} />
-            Bible.fi Digital Wisdom
+            BibleFi Digital Wisdom
             <Badge className="ml-auto bg-ancient-gold text-black font-semibold">AI-Enhanced</Badge>
           </CardTitle>
           <p className="text-white/80 text-sm">
@@ -330,7 +330,7 @@ In the context of DeFi and cryptocurrency earnings, this principle remains uncha
       <Card className="bg-black/20 border-yellow-600/30">
         <CardContent className="p-4">
           <p className="text-xs text-white/70 italic">
-            <strong className="text-yellow-400">Important Disclaimer:</strong> Bible.fi provides biblical financial wisdom and DeFi guidance for educational purposes only. 
+            <strong className="text-yellow-400">Important Disclaimer:</strong> BibleFi provides biblical financial wisdom and DeFi guidance for educational purposes only. 
             We are not licensed financial advisors and this is not financial advice. Always consult with qualified financial professionals for significant financial decisions. 
             Never invest in DeFi with assets you are not willing to lose, as cryptocurrencies and DeFi protocols can be highly volatile and risky.
           </p>

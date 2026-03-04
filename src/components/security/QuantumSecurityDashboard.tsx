@@ -167,7 +167,7 @@ const QuantumSecurityDashboard: React.FC = () => {
     playSound('select');
     
     try {
-      const testData = "Bible.fi quantum-resistant test data 🔒";
+      const testData = "BibleFi quantum-resistant test data 🔒";
       const secret = generateSecureHash("test-secret-key");
       
       // Encrypt
@@ -290,7 +290,7 @@ const QuantumSecurityDashboard: React.FC = () => {
           Quantum Security Dashboard
         </h2>
         <p className="text-muted-foreground">
-          Military-grade quantum-resistant protection for Bible.fi
+          Military-grade quantum-resistant protection for BibleFi
         </p>
       </motion.div>
 
@@ -476,8 +476,8 @@ const QuantumSecurityDashboard: React.FC = () => {
                 <Button 
                   onClick={() => {
                     const signer = new QuantumResistantSigner();
-                    const signature = signer.sign("Bible.fi test message");
-                    const isValid = signer.verify("Bible.fi test message", signature);
+                    const signature = signer.sign("BibleFi test message");
+                    const isValid = signer.verify("BibleFi test message", signature);
                     
                     toast({
                       title: isValid ? "Signature Valid! ✅" : "Signature Invalid! ❌",

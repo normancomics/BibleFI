@@ -173,7 +173,7 @@ export const LiveDataDashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold gradient-text">Live Data Dashboard</h1>
-          <p className="text-muted-foreground">Real-time insights into Bible.fi ecosystem</p>
+          <p className="text-muted-foreground">Real-time insights into BibleFi ecosystem</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={loadInitialData} variant="outline" size="sm">

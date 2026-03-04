@@ -55,7 +55,7 @@ export class CommunitySignalCrawler {
   }
 
   private async monitorFarcaster(): Promise<void> {
-    console.log('Monitoring Farcaster for Bible.fi signals...');
+    console.log('Monitoring Farcaster for BibleFi signals...');
 
     setInterval(async () => {
       try {

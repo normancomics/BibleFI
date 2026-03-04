@@ -67,7 +67,7 @@ const MultiWalletConnector: React.FC<MultiWalletConnectorProps> = ({
         <DialogHeader>
           <DialogTitle>Connect Your Wallet</DialogTitle>
           <DialogDescription>
-            Choose your preferred wallet to connect with Bible.fi
+            Choose your preferred wallet to connect with BibleFi
           </DialogDescription>
         </DialogHeader>
         

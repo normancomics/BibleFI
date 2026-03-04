@@ -2,7 +2,7 @@
 import React from 'react';
 
 /**
- * Real-time statistics service for Bible.fi platform
+ * Real-time statistics service for BibleFi platform
  */
 
 export interface BiblicalStats {

@@ -174,7 +174,7 @@ const EnhancedPixelLanding: React.FC = () => {
           <div className="relative inline-block mb-6">
             <motion.img 
               src="/bible-fi-brand-logo-v2.png" 
-              alt="Bible.fi Logo"
+              alt="BibleFi Logo"
               className="h-32 w-auto mx-auto pixelated"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -200,7 +200,7 @@ const EnhancedPixelLanding: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 1 }}
           >
-            Bible.fi
+            BibleFi
           </motion.h1>
           
           <motion.p 

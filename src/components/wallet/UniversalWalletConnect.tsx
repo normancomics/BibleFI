@@ -112,7 +112,7 @@ const UniversalWalletConnect: React.FC<UniversalWalletConnectProps> = ({
       
       <DialogContent className="sm:max-w-[420px] bg-black/95 border border-ancient-gold/30">
         <DialogHeader>
-          <DialogTitle className="text-ancient-gold">Connect to Bible.fi</DialogTitle>
+          <DialogTitle className="text-ancient-gold">Connect to BibleFi</DialogTitle>
           <DialogDescription className="text-white/70">
             Choose your wallet to connect and start your biblical finance journey
           </DialogDescription>
@@ -154,7 +154,7 @@ const UniversalWalletConnect: React.FC<UniversalWalletConnectProps> = ({
         </div>
 
         <div className="text-center text-xs text-white/50 border-t border-ancient-gold/20 pt-4">
-          By connecting, you agree to Bible.fi's Terms of Service
+          By connecting, you agree to BibleFi's Terms of Service
         </div>
       </DialogContent>
     </Dialog>

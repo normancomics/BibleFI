@@ -59,7 +59,7 @@ export class OpenStreetMapClient {
     try {
       const url = `${NOMINATIM_API_URL}/search?q=${encodeURIComponent(location)}&format=json&limit=1`;
       const response = await fetch(url, {
-        headers: { 'User-Agent': 'Bible.fi/1.0 (Biblical DeFi Tithing App)' }
+        headers: { 'User-Agent': 'BibleFi/1.0 (Biblical DeFi Tithing App)' }
       });
       
       if (!response.ok) return null;
@@ -304,7 +304,7 @@ export class OpenStreetMapClient {
     try {
       const url = `${NOMINATIM_API_URL}/reverse?lat=${lat}&lon=${lon}&format=json`;
       const response = await fetch(url, {
-        headers: { 'User-Agent': 'Bible.fi/1.0 (Biblical DeFi Tithing App)' }
+        headers: { 'User-Agent': 'BibleFi/1.0 (Biblical DeFi Tithing App)' }
       });
       
       if (!response.ok) return null;

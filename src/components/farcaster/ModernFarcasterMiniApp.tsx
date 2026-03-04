@@ -83,7 +83,7 @@ const ModernFarcasterMiniApp: React.FC = () => {
 
         playSound('powerup');
         toast({
-          title: "🎮 Bible.fi Mini App Ready!",
+          title: "🎮 BibleFi Mini App Ready!",
           description: "Connected to Farcaster successfully",
         });
       } else {
@@ -136,7 +136,7 @@ const ModernFarcasterMiniApp: React.FC = () => {
     try {
       playSound('coin');
       
-      const shareText = `💰 Just discovered some biblical financial wisdom on Bible.fi!\n\n"${verse.text}" - ${verse.reference}\n\n🎮 Play the retro DeFi game: `;
+      const shareText = `💰 Just discovered some biblical financial wisdom on BibleFi!\n\n"${verse.text}" - ${verse.reference}\n\n🎮 Play the retro DeFi game: `;
       
       if (window.fc) {
         // Use Farcaster SDK to share
@@ -169,7 +169,7 @@ const ModernFarcasterMiniApp: React.FC = () => {
     return (
       <Card className="retro-card p-6 text-center animate-pulse">
         <div className="w-16 h-16 bg-pixel-purple rounded-lg mx-auto mb-4 animate-bounce"></div>
-        <div className="text-retro-cyan font-pixel">Loading Bible.fi...</div>
+        <div className="text-retro-cyan font-pixel">Loading BibleFi...</div>
       </Card>
     );
   }
@@ -182,7 +182,7 @@ const ModernFarcasterMiniApp: React.FC = () => {
           <div className="flex items-center">
             <div className="w-8 h-8 bg-pixel-purple rounded-lg mr-3 animate-pulse"></div>
             <div>
-              <h1 className="font-orbitron text-lg font-bold text-retro-cyan">Bible.fi</h1>
+              <h1 className="font-orbitron text-lg font-bold text-retro-cyan">BibleFi</h1>
               <p className="text-xs text-retro-green">Retro DeFi Wisdom</p>
             </div>
           </div>

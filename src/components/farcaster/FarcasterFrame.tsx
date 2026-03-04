@@ -31,7 +31,7 @@ const FramePreview: React.FC<FramePreviewProps> = ({ imageUrl, title, verse, but
       </div>
       <div className="relative aspect-[1.91/1] bg-black/40">
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-3xl font-bold text-ancient-gold">BIBLE.FI</div>
+          <div className="text-3xl font-bold text-ancient-gold">BIBLEFI</div>
           <div className="text-sm text-white/80 mt-2">Biblical Wisdom for Financial Stewardship</div>
           {verse && (
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -131,7 +131,7 @@ const FarcasterFrame: React.FC = () => {
   return (
     <Card className="pixel-card my-6 border-2 border-ancient-gold bg-gradient-to-b from-black/80 to-black/60">
       <CardContent className="pt-6">
-        <h2 className="text-2xl mb-4 text-center font-bold text-ancient-gold">BIBLE.FI on Farcaster</h2>
+        <h2 className="text-2xl mb-4 text-center font-bold text-ancient-gold">BIBLEFI on Farcaster</h2>
         
         <div className="bg-black/40 p-3 rounded-lg border border-ancient-gold/30 mb-4">
           <div className="flex justify-between items-center mb-2">
@@ -182,7 +182,7 @@ const FarcasterFrame: React.FC = () => {
               buttons={[
                 { label: "Get More Wisdom" },
                 { label: "Share This Verse" },
-                { label: "Open Bible.fi" },
+                { label: "Open BibleFi" },
               ]}
             />
           ) : frameType === 'wisdom' ? (
@@ -239,7 +239,7 @@ const FarcasterFrame: React.FC = () => {
               </PixelButton>
             </div>
             <p className="text-xs text-white/70">
-              To deploy Bible.fi as a Farcaster mini-app, copy the generated HTML and host it on your domain.
+              To deploy BibleFi as a Farcaster mini-app, copy the generated HTML and host it on your domain.
             </p>
           </div>
           

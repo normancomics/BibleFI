@@ -54,7 +54,7 @@ const LevelUpCelebration: React.FC<LevelUpCelebrationProps> = ({
   }, [isOpen]);
 
   const handleShare = () => {
-    const shareText = `🎉 I just reached ${levelInfo.title} level on Bible.fi with ${newScore} wisdom points! "${levelInfo.verse}" - ${levelInfo.reference}`;
+    const shareText = `🎉 I just reached ${levelInfo.title} level on BibleFi with ${newScore} wisdom points! "${levelInfo.verse}" - ${levelInfo.reference}`;
     
     if (navigator.share) {
       navigator.share({ text: shareText });

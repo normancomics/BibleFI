@@ -123,7 +123,7 @@ const ModernBiblefiHero: React.FC = () => {
             >
               <img 
                 src={bibleFiLogo}
-                alt="Bible.Fi"
+                alt="BibleFi"
                 className="pixelated w-full max-w-sm md:max-w-md mx-auto rounded-2xl"
                 style={{
                   filter: isHovered 
@@ -263,7 +263,7 @@ const ModernBiblefiHero: React.FC = () => {
             size="lg"
             className="bg-gradient-to-r from-golden-bright to-ancient-gold hover:from-golden-deep hover:to-golden-bright text-purple-900 font-bold px-8 py-4 text-lg rounded-xl shadow-lg shadow-golden-bright/25 transition-all duration-300 hover:scale-105"
           >
-            Enter Bible.fi
+            Enter BibleFi
             <ExternalLink className="ml-2 h-5 w-5" />
           </Button>
         </motion.div>

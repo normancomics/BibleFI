@@ -1,12 +1,12 @@
 
-// Deployment configuration for Bible.fi
+// Deployment configuration for BibleFi
 export const DEPLOYMENT_CONFIG = {
   // App metadata
   app: {
     name: 'BibleFi',
     version: '1.0.0',
     description: 'BibleFi - Biblical wisdom for your financial journey on Base Chain',
-    author: 'Bible.fi Team',
+    author: 'BibleFi Team',
     keywords: ['defi', 'biblical', 'finance', 'base', 'farcaster'],
   },
   
@@ -14,8 +14,8 @@ export const DEPLOYMENT_CONFIG = {
   environment: {
     isDevelopment: import.meta.env.DEV,
     isProduction: import.meta.env.PROD,
-    domain: typeof window !== 'undefined' ? window.location.host : 'bible.fi',
-    baseUrl: typeof window !== 'undefined' ? window.location.origin : 'https://bible.fi',
+    domain: typeof window !== 'undefined' ? window.location.host : 'biblefi.app',
+    baseUrl: typeof window !== 'undefined' ? window.location.origin : 'https://biblefi.app',
   },
   
   // Feature flags for deployment
@@ -50,12 +50,12 @@ export const DEPLOYMENT_CONFIG = {
   
   // Deployment endpoints
   endpoints: {
-    api: typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://bible.fi/api',
+    api: typeof window !== 'undefined' ? `${window.location.origin}/api` : 'https://biblefi.app/api',
     supabase: 'https://ojiipppypzigjnjblbzn.supabase.co',
     farcaster: 'https://api.farcaster.xyz',
     base: 'https://mainnet.base.org',
     // Secure Farcaster API endpoint using Supabase Edge Functions
-    farcasterSecure: typeof window !== 'undefined' ? `${window.location.origin}/functions/v1/farcaster-api` : 'https://bible.fi/functions/v1/farcaster-api',
+    farcasterSecure: typeof window !== 'undefined' ? `${window.location.origin}/functions/v1/farcaster-api` : 'https://biblefi.app/functions/v1/farcaster-api',
   },
   
   // Security configuration

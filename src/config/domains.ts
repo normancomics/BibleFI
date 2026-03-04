@@ -1,4 +1,4 @@
-// Domain configuration for Bible.fi deployment
+// Domain configuration for BibleFi deployment
 export const DOMAIN_CONFIG = {
   // Primary domains
   production: {
@@ -11,7 +11,7 @@ export const DOMAIN_CONFIG = {
   // Alternative domains
   alternatives: {
     eth: 'biblefi.eth',
-    legacy: 'bible.fi',
+    legacy: 'biblefi.app',
   },
   
   // GitHub Pages configuration
@@ -19,7 +19,7 @@ export const DOMAIN_CONFIG = {
     username: 'biblefi', // Replace with actual GitHub username
     repository: 'biblefi-app',
     domain: 'biblefi.github.io',
-    customDomain: 'bible.fi', // Custom domain for GitHub Pages
+    customDomain: 'biblefi.app', // Custom domain for GitHub Pages
     url: 'https://biblefi.github.io/biblefi-app',
   },
   

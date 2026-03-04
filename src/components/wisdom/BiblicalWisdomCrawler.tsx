@@ -269,7 +269,7 @@ const BiblicalWisdomCrawler: React.FC = () => {
         )}
 
         <div className="text-xs text-white/50 italic mt-4 p-3 bg-black/20 rounded">
-          <strong>Disclaimer:</strong> Bible.fi provides biblical financial wisdom and DeFi guidance for educational purposes. 
+          <strong>Disclaimer:</strong> BibleFi provides biblical financial wisdom and DeFi guidance for educational purposes. 
           We are not licensed financial advisors. Never invest assets you cannot afford to lose. 
           Cryptocurrencies and DeFi protocols are highly volatile and risky.
         </div>

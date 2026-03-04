@@ -17,7 +17,7 @@ const SystemCheckPage: React.FC = () => {
             System Status Dashboard
           </h1>
           <p className="text-white/80 max-w-2xl mx-auto">
-            Comprehensive health check for all Bible.fi systems, APIs, and integrations.
+            Comprehensive health check for all BibleFi systems, APIs, and integrations.
           </p>
         </div>
 

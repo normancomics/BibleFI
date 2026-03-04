@@ -159,7 +159,7 @@ const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ showDetails = false
               <span className="text-sm font-medium">Frame Ready</span>
             </div>
             <p className="text-xs text-white/70 mb-2">
-              Bible.fi is configured as a Farcaster Frame and can be deployed as a mini-app.
+              BibleFi is configured as a Farcaster Frame and can be deployed as a mini-app.
             </p>
             <div className="text-xs space-y-1">
               <div>• Frame metadata configured</div>

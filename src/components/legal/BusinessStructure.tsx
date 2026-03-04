@@ -15,11 +15,11 @@ export const BusinessStructure: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="bg-muted/50 p-4 rounded-lg">
-            <h4 className="font-semibold mb-3">Bible.fi Holdings LLC (Wyoming)</h4>
+            <h4 className="font-semibold mb-3">BibleFi Holdings LLC (Wyoming)</h4>
             <div className="space-y-2 text-sm text-muted-foreground ml-4">
-              <div>├── Bible.fi Operations LLC (Series A)</div>
-              <div>├── Bible.fi IP Holdings LLC (Series B)</div>
-              <div>└── Bible.fi Treasury LLC (Series C)</div>
+              <div>├── BibleFi Operations LLC (Series A)</div>
+              <div>├── BibleFi IP Holdings LLC (Series B)</div>
+              <div>└── BibleFi Treasury LLC (Series C)</div>
             </div>
           </div>
         </CardContent>
@@ -38,7 +38,7 @@ export const BusinessStructure: React.FC = () => {
             <div className="space-y-2">
               <h4 className="text-sm font-semibold">USPTO Applications Filed:</h4>
               <ul className="text-xs space-y-1 text-muted-foreground">
-                <li>• "Bible.fi" (Classes 9, 36, 42)</li>
+                <li>• "BibleFi" (Classes 9, 36, 42)</li>
                 <li>• "$BIBLEFI" (Classes 9, 36)</li>
                 <li>• "Biblical DeFi" (Classes 36, 42)</li>
                 <li>• Logo designs (stylized cross/blockchain)</li>

@@ -96,8 +96,8 @@ const FarmingPage: React.FC = () => {
       description: "A conservative strategy that automatically donates 10% of earnings to Christian ministries.",
       asset1: { symbol: "USDC" },
       asset2: { symbol: "ETH" },
-      platform: "Bible.fi",
-      platformUrl: "https://bible.fi",
+      platform: "BibleFi",
+      platformUrl: "https://biblefi.app",
       biblicalPrinciple: {
         verse: "Honor the LORD with your wealth, with the firstfruits of all your crops; then your barns will be filled to overflowing.",
         reference: "Proverbs 3:9-10",

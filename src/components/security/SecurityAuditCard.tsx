@@ -18,7 +18,7 @@ interface SecurityAudit {
 const SecurityAuditCard: React.FC = () => {
   const audits: SecurityAudit[] = [
     {
-      protocol: "Bible.fi Core",
+      protocol: "BibleFi Core",
       auditFirm: "CertiK",
       score: 95,
       status: 'passed',

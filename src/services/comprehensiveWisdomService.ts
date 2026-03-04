@@ -152,7 +152,7 @@ class ComprehensiveWisdomService {
     const strategies = [];
     
     for (const example of examples.slice(0, 3)) {
-      let protocol = "Bible.fi";
+      let protocol = "BibleFi";
       let action = "Review biblical principles";
       let riskLevel: "low" | "medium" | "high" = "low";
       

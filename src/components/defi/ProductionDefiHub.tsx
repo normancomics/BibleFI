@@ -134,7 +134,7 @@ const ProductionDefiHub: React.FC = () => {
         <Alert className="border-yellow-500/50 bg-yellow-900/20">
           <AlertTriangle className="h-4 w-4 text-yellow-400" />
           <AlertDescription className="text-yellow-300">
-            Please switch to Base network to access DeFi features. Bible.fi is optimized for Base chain.
+            Please switch to Base network to access DeFi features. BibleFi is optimized for Base chain.
           </AlertDescription>
         </Alert>
         <ProductionWalletConnect />

@@ -59,7 +59,7 @@ export async function deployBWSPContracts(
  * Example deployment configuration
  */
 export const DEPLOYMENT_CONFIG = {
-  // Bible.fi Treasury address (receives tithes)
+  // BibleFi Treasury address (receives tithes)
   tithingReceiver: '0x0000000000000000000000000000000000000000', // Replace with actual
   
   // Gas settings for Base
