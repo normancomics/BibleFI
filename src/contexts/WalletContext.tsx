@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain, Connector } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/contexts/SoundContext';
@@ -12,13 +12,14 @@ interface WalletContextType {
   isConnecting: boolean;
   chainId: number | undefined;
   isOnBaseChain: boolean;
-  connectWallet: () => void;
+  connectWallet: (connector?: Connector) => void;
   disconnectWallet: () => void;
   switchToBase: () => void;
   walletType: string | undefined;
   connectionStep: ConnectionStep;
   connectionError: string | undefined;
   retryConnection: () => void;
+  availableConnectors: readonly Connector[];
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -41,7 +42,6 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
 
   const isOnBaseChain = chainId === base.id;
 
-  // Update connection step based on state
   useEffect(() => {
     if (connectError) {
       setConnectionStep('error');
@@ -68,22 +68,13 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     }
   }, [connector]);
 
-  const connectWallet = useCallback(() => {
+  const connectWallet = useCallback((selectedConnector?: Connector) => {
     setConnectionError(undefined);
     setConnectionStep('connecting');
     
-    // Try to find available connectors in order of preference
-    const coinbaseConnector = connectors.find(c => c.name === 'Coinbase Wallet');
-    const walletConnectConnector = connectors.find(c => c.name === 'WalletConnect');
-    const injectedConnector = connectors.find(c => c.name === 'Browser Wallet');
-    
     try {
-      if (coinbaseConnector) {
-        connect({ connector: coinbaseConnector });
-      } else if (walletConnectConnector) {
-        connect({ connector: walletConnectConnector });
-      } else if (injectedConnector) {
-        connect({ connector: injectedConnector });
+      if (selectedConnector) {
+        connect({ connector: selectedConnector });
       } else if (connectors.length > 0) {
         connect({ connector: connectors[0] });
       } else {
@@ -99,8 +90,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const retryConnection = useCallback(() => {
     setConnectionStep('idle');
     setConnectionError(undefined);
-    setTimeout(() => connectWallet(), 100);
-  }, [connectWallet]);
+  }, []);
 
   const disconnectWallet = useCallback(() => {
     disconnect();
@@ -144,7 +134,6 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     }
   }, [isOnBaseChain, switchChain, toast, playSound]);
 
-  // Auto switch to Base chain when wallet connects
   useEffect(() => {
     if (isConnected && !isOnBaseChain) {
       setTimeout(() => {
@@ -153,7 +142,6 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     }
   }, [isConnected, isOnBaseChain, switchToBase]);
 
-  // Connection success notification
   useEffect(() => {
     if (isConnected && address && isOnBaseChain && connectionStep === 'connected') {
       playSound('success');
@@ -177,6 +165,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     connectionStep,
     connectionError,
     retryConnection,
+    availableConnectors: connectors,
   };
 
   return (
