@@ -6,8 +6,15 @@ import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
+import { useFarcasterFrame } from "@/hooks/useFarcasterFrame";
 import Index from "./pages/Index";
 import "./App.css";
+
+// Farcaster Frame auto-connect initializer (runs inside WalletProvider)
+function FarcasterFrameInit() {
+  useFarcasterFrame();
+  return null;
+}
 
 // Lazy-load all pages for code splitting
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -60,6 +67,7 @@ const App = () => (
     <SecurityProvider>
       <EnhancedSecurityProvider>
         <TooltipProvider>
+          <FarcasterFrameInit />
           <Toaster />
           <Sonner />
           <Suspense fallback={<PageLoader />}>
