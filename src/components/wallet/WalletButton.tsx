@@ -27,6 +27,7 @@ interface WalletButtonProps {
 
 const WALLET_ICONS: Record<string, string> = {
   'Farcaster Wallet': '🟣',
+  'Farcaster': '🟣',
   'Coinbase Wallet': '🔵',
   'WalletConnect': '🔗',
   'Browser Wallet': '🦊',
@@ -36,6 +37,7 @@ const WALLET_ICONS: Record<string, string> = {
 
 const WALLET_DESCRIPTIONS: Record<string, string> = {
   'Farcaster Wallet': 'Connect with your Farcaster/Warpcast wallet',
+  'Farcaster': 'Connect with your Farcaster/Warpcast wallet',
   'Coinbase Wallet': 'Connect with Coinbase Wallet or Smart Wallet',
   'WalletConnect': 'Scan QR code with any WalletConnect-compatible wallet',
   'Browser Wallet': 'Connect with MetaMask or other browser extension wallets',
