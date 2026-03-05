@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Wallet, ChevronDown, ExternalLink, AlertTriangle } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
@@ -11,12 +11,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface WalletButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'sm' | 'default' | 'lg';
   className?: string;
 }
+
+const WALLET_ICONS: Record<string, string> = {
+  'Coinbase Wallet': '🔵',
+  'WalletConnect': '🔗',
+  'Browser Wallet': '🦊',
+  'MetaMask': '🦊',
+  'Injected': '🌐',
+};
+
+const WALLET_DESCRIPTIONS: Record<string, string> = {
+  'Coinbase Wallet': 'Connect with Coinbase Wallet or Smart Wallet',
+  'WalletConnect': 'Scan QR code with any WalletConnect-compatible wallet',
+  'Browser Wallet': 'Connect with MetaMask or other browser extension wallets',
+  'MetaMask': 'Connect with MetaMask browser extension',
+  'Injected': 'Connect with your browser wallet extension',
+};
 
 const WalletButton: React.FC<WalletButtonProps> = ({ 
   variant = 'default', 
@@ -31,21 +54,70 @@ const WalletButton: React.FC<WalletButtonProps> = ({
     disconnectWallet, 
     switchToBase, 
     isOnBaseChain,
-    walletType 
+    walletType,
+    availableConnectors,
   } = useWallet();
+  const [showWalletPicker, setShowWalletPicker] = useState(false);
 
   if (!isConnected) {
     return (
-      <Button
-        onClick={connectWallet}
-        disabled={isConnecting}
-        variant={variant}
-        size={size}
-        className={`${className} bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700`}
-      >
-        <Wallet className="mr-2 h-4 w-4" />
-        {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-      </Button>
+      <>
+        <Button
+          onClick={() => setShowWalletPicker(true)}
+          disabled={isConnecting}
+          variant={variant}
+          size={size}
+          className={`${className} bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--accent))] hover:opacity-90`}
+        >
+          <Wallet className="mr-2 h-4 w-4" />
+          {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+        </Button>
+
+        <Dialog open={showWalletPicker} onOpenChange={setShowWalletPicker}>
+          <DialogContent className="sm:max-w-[420px] bg-stone-900 border-stone-700">
+            <DialogHeader>
+              <DialogTitle className="text-xl text-white flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-[hsl(var(--primary))]" />
+                Connect Your Wallet
+              </DialogTitle>
+              <DialogDescription className="text-stone-400">
+                Choose your preferred wallet to connect with BibleFi on Base Chain
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-1 gap-3 py-4">
+              {availableConnectors.map((connector) => (
+                <Button
+                  key={connector.uid}
+                  variant="outline"
+                  className="h-auto p-4 justify-start border-stone-600 hover:border-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10 transition-all"
+                  onClick={() => {
+                    connectWallet(connector);
+                    setShowWalletPicker(false);
+                  }}
+                  disabled={isConnecting}
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <span className="text-2xl">
+                      {WALLET_ICONS[connector.name] || '💼'}
+                    </span>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold text-white">{connector.name}</div>
+                      <div className="text-xs text-stone-400">
+                        {WALLET_DESCRIPTIONS[connector.name] || 'Connect with this wallet'}
+                      </div>
+                    </div>
+                  </div>
+                </Button>
+              ))}
+            </div>
+
+            <div className="text-xs text-stone-500 text-center pt-2 border-t border-stone-700">
+              By connecting, you agree to BibleFi's Terms of Service
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
@@ -70,7 +142,7 @@ const WalletButton: React.FC<WalletButtonProps> = ({
       
       <DropdownMenuContent align="end" className="w-64">
         <div className="p-3">
-          <Card className="border-ancient-gold/30">
+          <Card className="border-stone-600">
             <CardContent className="p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Connected</span>
@@ -78,7 +150,7 @@ const WalletButton: React.FC<WalletButtonProps> = ({
                   {walletType || 'Wallet'}
                 </Badge>
               </div>
-              <div className="text-xs text-white/70 font-mono break-all">
+              <div className="text-xs text-stone-400 font-mono break-all">
                 {address}
               </div>
               {!isOnBaseChain && (
