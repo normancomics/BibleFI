@@ -137,128 +137,77 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'scan'; // 'scan' | 'status'
+    const mode = body.mode || 'scan';
 
     if (mode === 'status') {
-      const { count: protocolCount } = await supabase
-        .from('defi_knowledge_base')
-        .select('*', { count: 'exact', head: true });
-
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { count: protocolCount } = await supabase.from('defi_knowledge_base').select('*', { count: 'exact', head: true });
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'defi-market-watchdog',
-        status: {
-          monitored_protocols: BASE_PROTOCOLS.length,
-          knowledge_base_entries: protocolCount || 0,
-          monitored_tokens: Object.keys(BASE_TOKENS).length,
-          last_run: new Date().toISOString(),
-        }
+        success: true, agent: 'defi-market-watchdog',
+        status: { monitored_protocols: BASE_PROTOCOLS.length, knowledge_base_entries: protocolCount || 0, monitored_tokens: Object.keys(BASE_TOKENS).length, last_run: new Date().toISOString() }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Scan mode: monitor market conditions
-    const signals: MarketSignal[] = [];
-    const tvlChanges: number[] = [];
+    const result = await withAgentSandbox(
+      { agentName: 'defi-market-watchdog', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode } },
+      async (ctx: AgentContext) => {
+        const signals: MarketSignal[] = [];
+        const tvlChanges: number[] = [];
+        const prices = await fetchTokenPrices();
+        const ethPrice = prices.ethereum?.usd || 0;
 
-    // 1. Fetch token prices
-    const prices = await fetchTokenPrices();
-    const ethPrice = prices.ethereum?.usd || 0;
+        for (const protocol of BASE_PROTOCOLS) {
+          try {
+            const tvlData = await fetchProtocolTVL(protocol.slug);
+            if (!tvlData) continue;
+            tvlChanges.push(tvlData.change_1d);
 
-    // 2. Fetch protocol TVLs and detect opportunities
-    for (const protocol of BASE_PROTOCOLS) {
-      try {
-        const tvlData = await fetchProtocolTVL(protocol.slug);
-        if (!tvlData) continue;
+            if (tvlData.change_1d > 15) {
+              signals.push({ type: 'warning', protocol: protocol.name, signal: `TVL surged ${tvlData.change_1d.toFixed(1)}% in 24h`, biblical_wisdom: BIBLICAL_MARKET_WISDOM.greed, data: { tvl: tvlData.tvl, change_1d: tvlData.change_1d }, timestamp: new Date().toISOString() });
+            } else if (tvlData.change_1d < -15) {
+              signals.push({ type: 'opportunity', protocol: protocol.name, signal: `TVL dropped ${Math.abs(tvlData.change_1d).toFixed(1)}%`, biblical_wisdom: BIBLICAL_MARKET_WISDOM.fear, data: { tvl: tvlData.tvl, change_1d: tvlData.change_1d }, timestamp: new Date().toISOString() });
+            }
 
-        tvlChanges.push(tvlData.change_1d);
+            await sandboxedInsert(ctx, 'defi_knowledge_base', {
+              protocol_name: protocol.name, protocol_type: protocol.type, chain: 'base', tvl: tvlData.tvl,
+              description: `${protocol.name} on Base Chain. TVL: $${(tvlData.tvl / 1e6).toFixed(1)}M. 24h change: ${tvlData.change_1d.toFixed(1)}%`,
+              risk_level: tvlData.change_1d > 20 ? 'high' : tvlData.change_1d < -20 ? 'high' : 'medium',
+            }, { onConflict: 'protocol_name' });
 
-        // Detect significant TVL changes
-        if (tvlData.change_1d > 15) {
-          signals.push({
-            type: 'warning',
-            protocol: protocol.name,
-            signal: `TVL surged ${tvlData.change_1d.toFixed(1)}% in 24h — potential overheating`,
-            biblical_wisdom: BIBLICAL_MARKET_WISDOM.greed,
-            data: { tvl: tvlData.tvl, change_1d: tvlData.change_1d },
-            timestamp: new Date().toISOString(),
-          });
-        } else if (tvlData.change_1d < -15) {
-          signals.push({
-            type: 'opportunity',
-            protocol: protocol.name,
-            signal: `TVL dropped ${Math.abs(tvlData.change_1d).toFixed(1)}% — potential buying opportunity`,
-            biblical_wisdom: BIBLICAL_MARKET_WISDOM.fear,
-            data: { tvl: tvlData.tvl, change_1d: tvlData.change_1d },
-            timestamp: new Date().toISOString(),
-          });
+            await new Promise(r => setTimeout(r, 300));
+          } catch (err) { console.error(`Error fetching ${protocol.name}:`, err); }
         }
 
-        // Upsert protocol data into defi_knowledge_base
-        await supabase.from('defi_knowledge_base').upsert({
-          protocol_name: protocol.name,
-          protocol_type: protocol.type,
-          chain: 'base',
-          tvl: tvlData.tvl,
-          description: `${protocol.name} on Base Chain. TVL: $${(tvlData.tvl / 1e6).toFixed(1)}M. 24h change: ${tvlData.change_1d.toFixed(1)}%`,
-          risk_level: tvlData.change_1d > 20 ? 'high' : tvlData.change_1d < -20 ? 'high' : 'medium',
-        }, { onConflict: 'protocol_name' });
+        const marketCondition = assessMarketCondition(prices, tvlChanges);
+        const wisdom = BIBLICAL_MARKET_WISDOM[marketCondition];
+        const gasFees = await fetchBaseFees();
 
-        // Rate limit
-        await new Promise(r => setTimeout(r, 300));
-      } catch (err) {
-        console.error(`Error fetching ${protocol.name}:`, err);
+        signals.unshift({
+          type: 'info', protocol: 'Base Chain Overall',
+          signal: `Market condition: ${marketCondition.replace('_', ' ')}. ETH: $${ethPrice.toFixed(2)}. Gas: ${gasFees?.gasPrice || 'N/A'} gwei.`,
+          biblical_wisdom: wisdom,
+          data: { eth_price: ethPrice, gas_price: gasFees?.gasPrice, market_condition: marketCondition, avg_tvl_change: tvlChanges.length > 0 ? (tvlChanges.reduce((a, b) => a + b, 0) / tvlChanges.length).toFixed(2) : 'N/A' },
+          timestamp: new Date().toISOString(),
+        });
+
+        await logOperation(ctx, 'CORRELATE', 'defi_knowledge_base', {
+          outputSummary: { market_condition: marketCondition, signals_count: signals.length, eth_price: ethPrice },
+        });
+
+        return {
+          market_condition: marketCondition, biblical_wisdom: wisdom, signals_count: signals.length, signals,
+          prices: { ETH: ethPrice, USDC: prices['usd-coin']?.usd || 1, DAI: prices.dai?.usd || 1 }, gas: gasFees,
+        };
       }
-    }
+    );
 
-    // 3. Assess overall market condition
-    const marketCondition = assessMarketCondition(prices, tvlChanges);
-    const wisdom = BIBLICAL_MARKET_WISDOM[marketCondition];
-
-    // 4. Fetch gas fees
-    const gasFees = await fetchBaseFees();
-
-    // 5. Generate overall market signal
-    signals.unshift({
-      type: 'info',
-      protocol: 'Base Chain Overall',
-      signal: `Market condition: ${marketCondition.replace('_', ' ')}. ETH: $${ethPrice.toFixed(2)}. Gas: ${gasFees?.gasPrice || 'N/A'} gwei.`,
-      biblical_wisdom: wisdom,
-      data: {
-        eth_price: ethPrice,
-        gas_price: gasFees?.gasPrice,
-        market_condition: marketCondition,
-        avg_tvl_change: tvlChanges.length > 0 ? (tvlChanges.reduce((a, b) => a + b, 0) / tvlChanges.length).toFixed(2) : 'N/A',
-      },
-      timestamp: new Date().toISOString(),
-    });
-
-    console.log(`📊 DeFi Market Watchdog: ${signals.length} signals, condition=${marketCondition}, ETH=$${ethPrice.toFixed(2)}`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      agent: 'defi-market-watchdog',
-      market_condition: marketCondition,
-      biblical_wisdom: wisdom,
-      signals_count: signals.length,
-      signals,
-      prices: {
-        ETH: ethPrice,
-        USDC: prices['usd-coin']?.usd || 1,
-        DAI: prices.dai?.usd || 1,
-      },
-      gas: gasFees,
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ agent: 'defi-market-watchdog', ...result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('DeFi Market Watchdog error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
