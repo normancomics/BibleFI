@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import EnhancedWalletConnect from '@/components/wallet/EnhancedWalletConnect';
 import RealPortfolioBalance from '@/components/defi/RealPortfolioBalance';
@@ -9,6 +9,7 @@ import { useWallet } from '@/contexts/WalletContext';
 
 const WalletPage: React.FC = () => {
   const { isConnected } = useWallet();
+  const [skipIntro, setSkipIntro] = useState(() => localStorage.getItem('biblefi_skip_intro') === 'true');
 
   return (
     <div className="min-h-screen bg-background">
