@@ -11,9 +11,12 @@ interface IntroAnimationProps {
 const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   const { playSound } = useSound();
   const [typedText, setTypedText] = useState("");
-  const [showMainTitle, setShowMainTitle] = useState(false);
+  const [phase, setPhase] = useState<'loading' | 'activating' | 'scene'>('loading');
   const [fadeOut, setFadeOut] = useState(false);
-  const fullText = "Biblical wisdom for your financial journey.";
+  const lines = [
+    "Loading Biblical-Wisdom...",
+    "Activating Biblical Wisdom Synthesis Protocol..."
+  ];
 
   // Skip intro for returning users
   useEffect(() => {
