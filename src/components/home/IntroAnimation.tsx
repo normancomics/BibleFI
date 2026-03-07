@@ -19,7 +19,6 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
 
 
   const handleSkip = useCallback(() => {
-    localStorage.setItem("biblefi_intro_seen", "1");
     setFadeOut(true);
     setTimeout(() => onComplete(), 400);
   }, [onComplete]);
