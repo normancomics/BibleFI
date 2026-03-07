@@ -1347,12 +1347,49 @@ export type Database = {
       }
     }
     Functions: {
+      check_agent_permission: {
+        Args: {
+          p_agent_name: string
+          p_operation: string
+          p_target_table: string
+        }
+        Returns: boolean
+      }
+      complete_agent_run: {
+        Args: {
+          p_error_details?: Json
+          p_records_created?: number
+          p_records_failed?: number
+          p_records_processed?: number
+          p_records_updated?: number
+          p_run_id: string
+          p_status?: string
+        }
+        Returns: undefined
+      }
+      get_agent_stats: { Args: never; Returns: Json }
       get_full_church_details: { Args: { p_church_id: string }; Returns: Json }
       get_masked_church_info: {
         Args: {
           church_row: Database["public"]["Tables"]["global_churches"]["Row"]
         }
         Returns: Json
+      }
+      log_agent_operation: {
+        Args: {
+          p_agent_name: string
+          p_error_message?: string
+          p_execution_time_ms?: number
+          p_input_summary?: Json
+          p_ip_address?: string
+          p_operation: string
+          p_output_summary?: Json
+          p_record_ids?: string[]
+          p_records_affected?: number
+          p_target_schema?: string
+          p_target_table: string
+        }
+        Returns: undefined
       }
       search_biblical_knowledge: {
         Args: {
@@ -1392,6 +1429,10 @@ export type Database = {
           strong_numbers: string[]
           verse: number
         }[]
+      }
+      start_agent_run: {
+        Args: { p_agent_name: string; p_metadata?: Json; p_run_mode?: string }
+        Returns: string
       }
     }
     Enums: {

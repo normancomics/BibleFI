@@ -13,7 +13,8 @@ import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-
 export interface AgentContext {
   agentName: string;
   runId: string | null;
-  supabase: SupabaseClient;
+  supabase: SupabaseClient;      // api schema - for sandbox RPC calls
+  supabasePublic: SupabaseClient; // public schema - for data operations
   startTime: number;
   stats: {
     processed: number;
@@ -37,7 +38,14 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+  // API schema client for sandbox gateway RPCs
   const supabase = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    db: { schema: 'api' },
+  });
+
+  // Public schema client for data operations
+  const supabasePublic = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
@@ -46,7 +54,7 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
     p_agent_name: config.agentName,
     p_run_mode: config.runMode || 'scheduled',
     p_metadata: config.metadata || {},
-  }, { schema: 'agent_ops' } as any);
+  });
 
   if (runError) {
     console.error(`🚫 Agent ${config.agentName} failed to start:`, runError.message);
@@ -59,6 +67,7 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
     agentName: config.agentName,
     runId: runId as string,
     supabase,
+    supabasePublic,
     startTime: Date.now(),
     stats: { processed: 0, created: 0, updated: 0, failed: 0 },
   };
@@ -77,7 +86,7 @@ export async function checkPermission(
     p_agent_name: ctx.agentName,
     p_operation: operation,
     p_target_table: targetTable,
-  }, { schema: 'agent_ops' } as any);
+  });
 
   if (error) {
     console.error(`🚫 Permission check failed for ${ctx.agentName}:`, error.message);
@@ -121,7 +130,7 @@ export async function logOperation(
     p_error_message: details.errorMessage || null,
     p_execution_time_ms: elapsed,
     p_ip_address: details.ipAddress || null,
-  }, { schema: 'agent_ops' } as any);
+  });
 }
 
 /**
@@ -136,7 +145,7 @@ export async function sandboxedRead(
     return { data: null, error: { message: `Permission denied: ${ctx.agentName} cannot READ ${table}` } };
   }
 
-  const result = await query(ctx.supabase.from(table));
+  const result = await query(ctx.supabasePublic.from(table));
 
   await logOperation(ctx, 'READ', table, {
     recordsAffected: result.data?.length || 0,
@@ -164,9 +173,9 @@ export async function sandboxedInsert(
 
   const arr = Array.isArray(records) ? records : [records];
   
-  let q = ctx.supabase.from(table).insert(arr);
+  let q = ctx.supabasePublic.from(table).insert(arr);
   if (options?.onConflict) {
-    q = ctx.supabase.from(table).upsert(arr, { onConflict: options.onConflict });
+    q = ctx.supabasePublic.from(table).upsert(arr, { onConflict: options.onConflict });
   }
   const result = await q.select();
 
@@ -197,7 +206,7 @@ export async function sandboxedUpdate(
     return { data: null, error: { message: `Permission denied: ${ctx.agentName} cannot UPDATE ${table}` } };
   }
 
-  const result = await filter(ctx.supabase.from(table).update(updates));
+  const result = await filter(ctx.supabasePublic.from(table).update(updates));
 
   const updatedCount = result.data?.length || 0;
   await logOperation(ctx, 'UPDATE', table, {
@@ -229,7 +238,7 @@ export async function completeAgentRun(
     p_records_updated: ctx.stats.updated,
     p_records_failed: ctx.stats.failed,
     p_error_details: errorDetails || null,
-  }, { schema: 'agent_ops' } as any);
+  });
 
   const elapsed = Date.now() - ctx.startTime;
   console.log(`🔒 Agent ${ctx.agentName} run ${status} in ${elapsed}ms | P:${ctx.stats.processed} C:${ctx.stats.created} U:${ctx.stats.updated} F:${ctx.stats.failed}`);
