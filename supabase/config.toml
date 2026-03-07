@@ -53,3 +53,12 @@ verify_jwt = false
 
 [functions.defi-market-watchdog]
 verify_jwt = false
+
+[functions.biblical-wisdom-expander]
+verify_jwt = false
+
+[functions.church-seeder-agent]
+verify_jwt = false
+
+[functions.market-wisdom-correlator]
+verify_jwt = false
