@@ -52,6 +52,7 @@ const ZKMonitorPage = lazy(() => import("./pages/ZKMonitorPage"));
 const BiblicalFinanceEncyclopediaPage = lazy(() => import("./pages/BiblicalFinanceEncyclopediaPage"));
 const BuilderScorePage = lazy(() => import("./pages/BuilderScorePage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -107,6 +108,7 @@ const App = () => (
               <Route path="/zk-monitor" element={<ZKMonitorPage />} />
               <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
               <Route path="/builder-score" element={<BuilderScorePage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
