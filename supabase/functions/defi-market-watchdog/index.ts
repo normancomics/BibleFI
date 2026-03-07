@@ -58,7 +58,7 @@ const BASE_TOKENS: Record<string, string> = {
   USDbC: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
 };
 
-// DeFi protocols on Base to monitor
+// DeFi protocols on Base to monitor (expanded)
 const BASE_PROTOCOLS = [
   { name: 'Aerodrome', slug: 'aerodrome-v2', type: 'dex' },
   { name: 'Uniswap V3 (Base)', slug: 'uniswap-v3-base', type: 'dex' },
@@ -67,6 +67,9 @@ const BASE_PROTOCOLS = [
   { name: 'Moonwell', slug: 'moonwell', type: 'lending' },
   { name: 'Extra Finance', slug: 'extra-finance', type: 'yield' },
   { name: 'Morpho Blue (Base)', slug: 'morpho-blue-base', type: 'lending' },
+  { name: 'Seamless Protocol', slug: 'seamless-protocol', type: 'lending' },
+  { name: 'BaseSwap', slug: 'baseswap', type: 'dex' },
+  { name: 'Beefy Finance', slug: 'beefy', type: 'yield' },
 ];
 
 interface MarketSignal {

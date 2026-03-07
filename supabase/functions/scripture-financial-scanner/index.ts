@@ -17,6 +17,10 @@ const FINANCIAL_TERMS = {
   ethics_finance: ['greed', 'covetous', 'avarice', 'love of money', 'oppression', 'extortion', 'theft', 'robbery', 'fraud', 'deceit', 'bribery', 'corruption', 'false balances', 'generosity', 'charity', 'justice', 'righteousness'],
   saving_investment: ['store', 'save', 'invest', 'talent', 'mina', 'increase', 'multiply', 'fruit', 'yield', 'return', 'profit', 'gain'],
   release_forgiveness: ['jubilee', 'sabbatical', 'release', 'forgive', 'cancel', 'remit', 'redeem', 'redemption', 'kinsman'],
+  generational_wealth: ['inheritance', 'children', 'generation', 'legacy', 'portion', 'birthright', 'blessing', 'estate', 'heir', 'promise', 'land'],
+  risk_management: ['prudent', 'wise', 'counsel', 'foresight', 'plan', 'prepare', 'count', 'cost', 'tower', 'diversify'],
+  contentment: ['content', 'enough', 'sufficient', 'satisfied', 'peace', 'rest', 'provision', 'daily bread'],
+  prosperity: ['prosper', 'abundance', 'overflow', 'bless', 'plenty', 'full', 'running over'],
 };
 
 const DEFI_CONCEPT_MAP: Record<string, string> = {
