@@ -17,15 +17,8 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   const line1 = "Loading Biblical-Wisdom...";
   const line2 = "Activating Biblical Wisdom Synthesis Protocol...";
 
-  // Skip intro for returning users
-  useEffect(() => {
-    if (localStorage.getItem("biblefi_intro_seen")) {
-      onComplete();
-    }
-  }, [onComplete]);
 
   const handleSkip = useCallback(() => {
-    localStorage.setItem("biblefi_intro_seen", "1");
     setFadeOut(true);
     setTimeout(() => onComplete(), 400);
   }, [onComplete]);
