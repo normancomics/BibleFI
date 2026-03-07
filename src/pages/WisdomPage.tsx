@@ -1,8 +1,9 @@
 import React from 'react';
 import ComprehensiveBiblicalAdvisor from '@/components/wisdom/ComprehensiveBiblicalAdvisor';
 import WisdomProgressionSystem from '@/components/wisdom/WisdomProgressionSystem';
+import CastComposer from '@/components/farcaster/CastComposer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Trophy } from 'lucide-react';
+import { BookOpen, Trophy, Share2 } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 
 const WisdomPage: React.FC = () => {
@@ -16,7 +17,7 @@ const WisdomPage: React.FC = () => {
         </h1>
         
         <Tabs defaultValue="progression" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="progression" className="gap-2">
               <Trophy className="w-4 h-4" />
               Wisdom Journey
@@ -24,6 +25,10 @@ const WisdomPage: React.FC = () => {
             <TabsTrigger value="advisor" className="gap-2">
               <BookOpen className="w-4 h-4" />
               Biblical Advisor
+            </TabsTrigger>
+            <TabsTrigger value="share" className="gap-2">
+              <Share2 className="w-4 h-4" />
+              Share on Farcaster
             </TabsTrigger>
           </TabsList>
           
@@ -33,6 +38,10 @@ const WisdomPage: React.FC = () => {
           
           <TabsContent value="advisor">
             <ComprehensiveBiblicalAdvisor />
+          </TabsContent>
+
+          <TabsContent value="share">
+            <CastComposer />
           </TabsContent>
         </Tabs>
       </div>
