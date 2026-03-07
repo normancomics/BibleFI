@@ -39,6 +39,7 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
 
   const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    db: { schema: 'api' },
   });
 
   // Start the run via SECURITY DEFINER gateway
