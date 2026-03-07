@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import EnhancedWalletConnect from '@/components/wallet/EnhancedWalletConnect';
 import RealPortfolioBalance from '@/components/defi/RealPortfolioBalance';
@@ -9,6 +9,7 @@ import { useWallet } from '@/contexts/WalletContext';
 
 const WalletPage: React.FC = () => {
   const { isConnected } = useWallet();
+  const [skipIntro, setSkipIntro] = useState(() => localStorage.getItem('biblefi_skip_intro') === 'true');
 
   return (
     <div className="min-h-screen bg-background">
@@ -166,53 +167,84 @@ const WalletPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            {isConnected ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Privacy Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>ZK Privacy Mode</span>
-                      <div className="w-12 h-6 bg-green-600 rounded-full"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* App Preferences - always visible */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>App Preferences</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="block font-medium">Skip Intro Animation</span>
+                      <span className="text-xs text-muted-foreground">Disable the Biblical Wisdom loading sequence on startup</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span>Hide Balances</span>
-                      <div className="w-12 h-6 bg-gray-600 rounded-full"></div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Anonymous Staking</span>
-                      <div className="w-12 h-6 bg-green-600 rounded-full"></div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <button
+                      onClick={() => {
+                        const current = localStorage.getItem('biblefi_skip_intro') === 'true';
+                        localStorage.setItem('biblefi_skip_intro', current ? 'false' : 'true');
+                        // Force re-render
+                        window.dispatchEvent(new Event('storage'));
+                        setSkipIntro(!current);
+                      }}
+                      className={`w-12 h-6 rounded-full transition-colors ${skipIntro ? 'bg-green-600' : 'bg-muted'}`}
+                    >
+                      <div className={`w-5 h-5 rounded-full bg-white transition-transform ${skipIntro ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
 
+              {isConnected ? (
+                <>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Privacy Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span>ZK Privacy Mode</span>
+                        <div className="w-12 h-6 bg-green-600 rounded-full"></div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Hide Balances</span>
+                        <div className="w-12 h-6 bg-muted rounded-full"></div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Anonymous Staking</span>
+                        <div className="w-12 h-6 bg-green-600 rounded-full"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Notification Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span>Transaction Alerts</span>
+                        <div className="w-12 h-6 bg-green-600 rounded-full"></div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Reward Notifications</span>
+                        <div className="w-12 h-6 bg-green-600 rounded-full"></div>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Weekly Summaries</span>
+                        <div className="w-12 h-6 bg-muted rounded-full"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Notification Settings</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>Transaction Alerts</span>
-                      <div className="w-12 h-6 bg-green-600 rounded-full"></div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Reward Notifications</span>
-                      <div className="w-12 h-6 bg-green-600 rounded-full"></div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Weekly Summaries</span>
-                      <div className="w-12 h-6 bg-gray-600 rounded-full"></div>
-                    </div>
+                  <CardContent className="pt-6 text-center text-muted-foreground">
+                    Connect your wallet for more settings
                   </CardContent>
                 </Card>
-              </div>
-            ) : (
-              <div className="text-center text-muted-foreground">
-                Please connect your wallet to access settings
-              </div>
-            )}
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
