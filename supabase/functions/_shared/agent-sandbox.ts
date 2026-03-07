@@ -46,7 +46,7 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
     p_agent_name: config.agentName,
     p_run_mode: config.runMode || 'scheduled',
     p_metadata: config.metadata || {},
-  }, { schema: 'agent_ops' } as any);
+  });
 
   if (runError) {
     console.error(`🚫 Agent ${config.agentName} failed to start:`, runError.message);
@@ -77,7 +77,7 @@ export async function checkPermission(
     p_agent_name: ctx.agentName,
     p_operation: operation,
     p_target_table: targetTable,
-  }, { schema: 'agent_ops' } as any);
+  });
 
   if (error) {
     console.error(`🚫 Permission check failed for ${ctx.agentName}:`, error.message);
@@ -121,7 +121,7 @@ export async function logOperation(
     p_error_message: details.errorMessage || null,
     p_execution_time_ms: elapsed,
     p_ip_address: details.ipAddress || null,
-  }, { schema: 'agent_ops' } as any);
+  });
 }
 
 /**
@@ -229,7 +229,7 @@ export async function completeAgentRun(
     p_records_updated: ctx.stats.updated,
     p_records_failed: ctx.stats.failed,
     p_error_details: errorDetails || null,
-  }, { schema: 'agent_ops' } as any);
+  });
 
   const elapsed = Date.now() - ctx.startTime;
   console.log(`🔒 Agent ${ctx.agentName} run ${status} in ${elapsed}ms | P:${ctx.stats.processed} C:${ctx.stats.created} U:${ctx.stats.updated} F:${ctx.stats.failed}`);
