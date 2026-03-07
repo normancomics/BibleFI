@@ -38,9 +38,15 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+  // API schema client for sandbox gateway RPCs
   const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
     db: { schema: 'api' },
+  });
+
+  // Public schema client for data operations
+  const supabasePublic = createClient(supabaseUrl, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
 
   // Start the run via SECURITY DEFINER gateway
@@ -61,6 +67,7 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
     agentName: config.agentName,
     runId: runId as string,
     supabase,
+    supabasePublic,
     startTime: Date.now(),
     stats: { processed: 0, created: 0, updated: 0, failed: 0 },
   };
