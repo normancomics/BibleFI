@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import CastComposer from '@/components/farcaster/CastComposer';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -90,6 +91,9 @@ const HomePage: React.FC = () => {
 
         {/* DeFi Hub */}
         <StreamlinedDefiHub />
+
+        {/* Share on Farcaster */}
+        <CastComposer />
 
         {/* Features Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
