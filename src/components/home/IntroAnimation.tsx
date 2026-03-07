@@ -11,9 +11,11 @@ interface IntroAnimationProps {
 const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   const { playSound } = useSound();
   const [typedText, setTypedText] = useState("");
-  const [showMainTitle, setShowMainTitle] = useState(false);
+  const [phase, setPhase] = useState<'line1' | 'line2' | 'scene'>('line1');
   const [fadeOut, setFadeOut] = useState(false);
-  const fullText = "Biblical wisdom for your financial journey.";
+
+  const line1 = "Loading Biblical-Wisdom...";
+  const line2 = "Activating Biblical Wisdom Synthesis Protocol...";
 
   // Skip intro for returning users
   useEffect(() => {
@@ -29,26 +31,32 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   useEffect(() => {
+    const currentLine = phase === 'line1' ? line1 : phase === 'line2' ? line2 : '';
+    if (phase === 'scene') return;
+
     let i = 0;
+    setTypedText('');
     const typingInterval = setInterval(() => {
-      if (i < fullText.length) {
-        setTypedText(fullText.substring(0, i + 1));
+      if (i < currentLine.length) {
+        setTypedText(currentLine.substring(0, i + 1));
         i++;
-        if (i % 8 === 0) playSound("select");
+        if (i % 6 === 0) playSound("select");
       } else {
         clearInterval(typingInterval);
-        setTimeout(() => {
-          setShowMainTitle(true);
-          playSound("powerup");
-          // Auto-complete after showing one scene briefly
-          setTimeout(() => handleSkip(), 2500);
-        }, 600);
+        if (phase === 'line1') {
+          setTimeout(() => setPhase('line2'), 400);
+        } else {
+          setTimeout(() => {
+            setPhase('scene');
+            playSound("powerup");
+            setTimeout(() => handleSkip(), 2000);
+          }, 500);
+        }
       }
-    }, 35); // Much faster typing
+    }, 30);
     return () => clearInterval(typingInterval);
-  }, [playSound, fullText, handleSkip]);
+  }, [phase, playSound, handleSkip]);
 
-  // Pick a random scene to show
   const scene = biblicalScenes[Math.floor(Math.random() * biblicalScenes.length)];
 
   return (
@@ -60,13 +68,13 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
       onKeyDown={(e) => e.key === 'Enter' && handleSkip()}
     >
       <div className="text-center max-w-3xl mx-auto p-8">
-        {showMainTitle ? (
+        {phase === 'scene' ? (
           <div className="mb-12 animate-entrance">
             <div className="text-5xl md:text-7xl font-scroll font-bold mb-4">
               <GlowingText color="yellow">BibleFi</GlowingText>
             </div>
             <div className="text-xl font-scroll font-bold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
-              Biblical Wisdom for Financial Stewardship
+              Biblical Wisdom Synthesis Protocol — Active
             </div>
           </div>
         ) : (
@@ -78,9 +86,9 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
         )}
 
         <div className="border-2 border-ancient-gold/50 p-6 bg-purple-900/30 min-h-[200px] flex flex-col items-center justify-center rounded-lg">
-          {showMainTitle ? (
+          {phase === 'scene' ? (
             <div className="space-y-4 animate-fade-in">
-              <p className="text-lg md:text-xl font-scroll font-bold text-white leading-relaxed" style={{ textShadow: '0 0 12px rgba(255, 255, 255, 0.4)' }}>
+              <p className="text-lg md:text-xl font-scroll font-bold text-foreground leading-relaxed" style={{ textShadow: '0 0 12px rgba(255, 255, 255, 0.4)' }}>
                 {scene?.kjv}
               </p>
               <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-wider bg-ancient-gold/20 border border-ancient-gold/40 text-ancient-gold">
@@ -102,14 +110,21 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
               </div>
             </div>
           ) : (
-            <p className="text-xl font-scroll font-extrabold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8)' }}>
-              {typedText}
-              <span className="animate-pulse">|</span>
-            </p>
+            <div className="space-y-3">
+              {phase === 'line2' && (
+                <p className="text-lg font-scroll font-bold text-ancient-gold/60">
+                  ✓ {line1}
+                </p>
+              )}
+              <p className="text-xl font-scroll font-extrabold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8)' }}>
+                {typedText}
+                <span className="animate-pulse">|</span>
+              </p>
+            </div>
           )}
         </div>
 
-        <p className="mt-6 text-xs text-white/40 animate-pulse">Tap anywhere to skip</p>
+        <p className="mt-6 text-xs text-muted-foreground/40 animate-pulse">Tap anywhere to skip</p>
       </div>
     </div>
   );
