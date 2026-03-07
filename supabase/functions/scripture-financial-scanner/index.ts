@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -164,127 +165,91 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'scan'; // 'scan' | 'status'
+    const mode = body.mode || 'scan';
     const batchSize = body.batchSize || 10;
 
     if (mode === 'status') {
-      const { count: totalVerses } = await supabase
-        .from('biblical_knowledge_base')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: financialVerses } = await supabase
-        .from('comprehensive_biblical_texts')
-        .select('*', { count: 'exact', head: true });
-
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { count: totalVerses } = await supabase.from('biblical_knowledge_base').select('*', { count: 'exact', head: true });
+      const { count: financialVerses } = await supabase.from('comprehensive_biblical_texts').select('*', { count: 'exact', head: true });
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'scripture-financial-scanner',
-        status: {
-          biblical_knowledge_entries: totalVerses || 0,
-          comprehensive_texts: financialVerses || 0,
-          total_passages_to_scan: FINANCIAL_PASSAGES.length,
-          last_run: new Date().toISOString(),
-        }
+        success: true, agent: 'scripture-financial-scanner',
+        status: { biblical_knowledge_entries: totalVerses || 0, comprehensive_texts: financialVerses || 0, total_passages_to_scan: FINANCIAL_PASSAGES.length, last_run: new Date().toISOString() }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Scan mode: process a batch of passages
-    const results: VerseResult[] = [];
-    const errors: string[] = [];
+    // Run in sandbox with full audit trail
+    const result = await withAgentSandbox(
+      { agentName: 'scripture-financial-scanner', runMode: body.manual ? 'manual' : 'scheduled', metadata: { batchSize, mode } },
+      async (ctx: AgentContext) => {
+        const results: VerseResult[] = [];
+        const errors: string[] = [];
+        const shuffled = [...FINANCIAL_PASSAGES].sort(() => Math.random() - 0.5);
+        const batch = shuffled.slice(0, batchSize);
 
-    // Pick a random batch to avoid always scanning the same ones
-    const shuffled = [...FINANCIAL_PASSAGES].sort(() => Math.random() - 0.5);
-    const batch = shuffled.slice(0, batchSize);
+        for (const ref of batch) {
+          try {
+            const data = await fetchVerse(ref);
+            if (!data) { errors.push(`Failed to fetch: ${ref}`); continue; }
 
-    for (const ref of batch) {
-      try {
-        const data = await fetchVerse(ref);
-        if (!data) {
-          errors.push(`Failed to fetch: ${ref}`);
-          continue;
-        }
+            if (data.verses && data.verses.length > 0) {
+              for (const v of data.verses) {
+                const text = v.text?.trim();
+                if (!text) continue;
+                const keywords = extractFinancialKeywords(text);
+                const categories = categorizeVerse(keywords);
+                const defiRelevance = getDefiRelevance(keywords);
+                const relevance = calculateRelevance(keywords, categories);
+                if (keywords.length === 0) continue;
 
-        if (data.verses && data.verses.length > 0) {
-          for (const v of data.verses) {
-            const text = v.text?.trim();
-            if (!text) continue;
+                const verseResult: VerseResult = {
+                  book: v.book_name || ref.split(' ')[0],
+                  chapter: v.chapter || parseInt(ref.split(':')[0]?.split(' ').pop() || '1'),
+                  verse: v.verse || 1, text, financial_keywords: keywords,
+                  topic_categories: categories, defi_relevance: defiRelevance, financial_relevance: relevance,
+                };
+                results.push(verseResult);
 
-            const keywords = extractFinancialKeywords(text);
-            const categories = categorizeVerse(keywords);
-            const defiRelevance = getDefiRelevance(keywords);
-            const relevance = calculateRelevance(keywords, categories);
+                // Sandboxed upsert into biblical_knowledge_base
+                await sandboxedInsert(ctx, 'biblical_knowledge_base', {
+                  reference: `${verseResult.book} ${verseResult.chapter}:${verseResult.verse}`,
+                  verse_text: text, category: categories[0] || 'general_finance',
+                  principle: `Financial wisdom: ${keywords.slice(0, 3).join(', ')}`,
+                  application: defiRelevance || 'Biblical financial stewardship principle',
+                  defi_relevance: defiRelevance, financial_keywords: keywords,
+                }, { onConflict: 'reference' });
 
-            if (keywords.length === 0) continue;
-
-            const verseResult: VerseResult = {
-              book: v.book_name || ref.split(' ')[0],
-              chapter: v.chapter || parseInt(ref.split(':')[0]?.split(' ').pop() || '1'),
-              verse: v.verse || 1,
-              text,
-              financial_keywords: keywords,
-              topic_categories: categories,
-              defi_relevance: defiRelevance,
-              financial_relevance: relevance,
-            };
-            results.push(verseResult);
-
-            // Upsert into biblical_knowledge_base
-            await supabase.from('biblical_knowledge_base').upsert({
-              reference: `${verseResult.book} ${verseResult.chapter}:${verseResult.verse}`,
-              verse_text: text,
-              category: categories[0] || 'general_finance',
-              principle: `Financial wisdom: ${keywords.slice(0, 3).join(', ')}`,
-              application: defiRelevance || 'Biblical financial stewardship principle',
-              defi_relevance: defiRelevance,
-              financial_keywords: keywords,
-            }, { onConflict: 'reference' });
-
-            // Upsert into comprehensive_biblical_texts
-            await supabase.from('comprehensive_biblical_texts').upsert({
-              book: verseResult.book,
-              chapter: verseResult.chapter,
-              verse: verseResult.verse,
-              kjv_text: text,
-              financial_keywords: keywords,
-              financial_relevance: relevance,
-            }, { onConflict: 'book,chapter,verse' });
+                // Sandboxed upsert into comprehensive_biblical_texts
+                await sandboxedInsert(ctx, 'comprehensive_biblical_texts', {
+                  book: verseResult.book, chapter: verseResult.chapter, verse: verseResult.verse,
+                  kjv_text: text, financial_keywords: keywords, financial_relevance: relevance,
+                }, { onConflict: 'book,chapter,verse' });
+              }
+            }
+            await new Promise(r => setTimeout(r, 200));
+          } catch (err) {
+            errors.push(`Error processing ${ref}: ${err instanceof Error ? err.message : String(err)}`);
           }
         }
 
-        // Rate limit: wait 200ms between API calls
-        await new Promise(r => setTimeout(r, 200));
-      } catch (err) {
-        errors.push(`Error processing ${ref}: ${err instanceof Error ? err.message : String(err)}`);
+        return {
+          processed: batch.length, financial_verses_found: results.length,
+          errors: errors.length, error_details: errors.slice(0, 5),
+          sample_results: results.slice(0, 3).map(r => ({
+            reference: `${r.book} ${r.chapter}:${r.verse}`, keywords: r.financial_keywords,
+            defi_relevance: r.defi_relevance, relevance_score: r.financial_relevance,
+          })),
+        };
       }
-    }
+    );
 
-    console.log(`📜 Scripture Financial Scanner: Processed ${batch.length} passages, found ${results.length} financial verses, ${errors.length} errors`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      agent: 'scripture-financial-scanner',
-      processed: batch.length,
-      financial_verses_found: results.length,
-      errors: errors.length,
-      error_details: errors.slice(0, 5),
-      sample_results: results.slice(0, 3).map(r => ({
-        reference: `${r.book} ${r.chapter}:${r.verse}`,
-        keywords: r.financial_keywords,
-        defi_relevance: r.defi_relevance,
-        relevance_score: r.financial_relevance,
-      })),
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ agent: 'scripture-financial-scanner', ...result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('Scripture Financial Scanner error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
