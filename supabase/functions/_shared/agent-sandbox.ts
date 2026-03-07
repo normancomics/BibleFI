@@ -145,7 +145,7 @@ export async function sandboxedRead(
     return { data: null, error: { message: `Permission denied: ${ctx.agentName} cannot READ ${table}` } };
   }
 
-  const result = await query(ctx.supabase.from(table));
+  const result = await query(ctx.supabasePublic.from(table));
 
   await logOperation(ctx, 'READ', table, {
     recordsAffected: result.data?.length || 0,
@@ -173,9 +173,9 @@ export async function sandboxedInsert(
 
   const arr = Array.isArray(records) ? records : [records];
   
-  let q = ctx.supabase.from(table).insert(arr);
+  let q = ctx.supabasePublic.from(table).insert(arr);
   if (options?.onConflict) {
-    q = ctx.supabase.from(table).upsert(arr, { onConflict: options.onConflict });
+    q = ctx.supabasePublic.from(table).upsert(arr, { onConflict: options.onConflict });
   }
   const result = await q.select();
 
@@ -206,7 +206,7 @@ export async function sandboxedUpdate(
     return { data: null, error: { message: `Permission denied: ${ctx.agentName} cannot UPDATE ${table}` } };
   }
 
-  const result = await filter(ctx.supabase.from(table).update(updates));
+  const result = await filter(ctx.supabasePublic.from(table).update(updates));
 
   const updatedCount = result.data?.length || 0;
   await logOperation(ctx, 'UPDATE', table, {
