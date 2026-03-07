@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -164,125 +165,80 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'correlate'; // 'correlate' | 'status'
+    const mode = body.mode || 'correlate';
 
     if (mode === 'status') {
-      const { count: defiCount } = await supabase
-        .from('defi_knowledge_base')
-        .select('*', { count: 'exact', head: true });
-      const { count: crossrefCount } = await supabase
-        .from('biblical_financial_crossref')
-        .select('*', { count: 'exact', head: true });
-
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { count: defiCount } = await supabase.from('defi_knowledge_base').select('*', { count: 'exact', head: true });
+      const { count: crossrefCount } = await supabase.from('biblical_financial_crossref').select('*', { count: 'exact', head: true });
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'market-wisdom-correlator',
-        status: {
-          monitored_protocols: MONITORED_PROTOCOLS.length,
-          defi_knowledge_entries: defiCount || 0,
-          crossref_entries: crossrefCount || 0,
-          correlation_rules: Object.keys(MARKET_SCRIPTURE_CORRELATIONS).length,
-          last_run: new Date().toISOString(),
-        }
+        success: true, agent: 'market-wisdom-correlator',
+        status: { monitored_protocols: MONITORED_PROTOCOLS.length, defi_knowledge_entries: defiCount || 0, crossref_entries: crossrefCount || 0, correlation_rules: Object.keys(MARKET_SCRIPTURE_CORRELATIONS).length, last_run: new Date().toISOString() }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    // Correlate mode: analyze live market and match with scripture
-    const prices = await fetchTokenPrices();
-    const protocolResults: { name: string; tvl: number; change_1d: number }[] = [];
+    const result = await withAgentSandbox(
+      { agentName: 'market-wisdom-correlator', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode } },
+      async (ctx: AgentContext) => {
+        const prices = await fetchTokenPrices();
+        const protocolResults: { name: string; tvl: number; change_1d: number }[] = [];
 
-    for (const protocol of MONITORED_PROTOCOLS) {
-      const data = await fetchProtocolData(protocol.slug);
-      if (data) {
-        protocolResults.push({ name: protocol.name, ...data });
+        for (const protocol of MONITORED_PROTOCOLS) {
+          const data = await fetchProtocolData(protocol.slug);
+          if (data) {
+            protocolResults.push({ name: protocol.name, ...data });
+            await sandboxedInsert(ctx, 'defi_knowledge_base', {
+              protocol_name: protocol.name, protocol_type: protocol.type, chain: 'base', tvl: data.tvl,
+              description: `${protocol.name} (${protocol.type}) on Base. TVL: $${(data.tvl / 1e6).toFixed(1)}M. 24h: ${data.change_1d.toFixed(1)}%`,
+              risk_level: Math.abs(data.change_1d) > 20 ? 'high' : Math.abs(data.change_1d) > 10 ? 'medium' : 'low',
+            }, { onConflict: 'protocol_name' });
+          }
+          await new Promise(r => setTimeout(r, 400));
+        }
 
-        // Update defi_knowledge_base
-        await supabase.from('defi_knowledge_base').upsert({
-          protocol_name: protocol.name,
-          protocol_type: protocol.type,
-          chain: 'base',
-          tvl: data.tvl,
-          description: `${protocol.name} (${protocol.type}) on Base. TVL: $${(data.tvl / 1e6).toFixed(1)}M. 24h: ${data.change_1d.toFixed(1)}%`,
-          risk_level: Math.abs(data.change_1d) > 20 ? 'high' : Math.abs(data.change_1d) > 10 ? 'medium' : 'low',
-        }, { onConflict: 'protocol_name' });
+        const conditions = determineMarketConditions(prices, protocolResults);
+        const correlations: CorrelationResult[] = [];
+
+        for (const condition of conditions) {
+          const correlation = MARKET_SCRIPTURE_CORRELATIONS[condition];
+          if (!correlation) continue;
+          const affectedProtocols = condition === 'liquidity_crisis'
+            ? protocolResults.filter(p => p.change_1d < -15).map(p => p.name)
+            : condition === 'yield_opportunity'
+            ? protocolResults.filter(p => p.change_1d > 5).map(p => p.name)
+            : protocolResults.map(p => p.name);
+
+          correlations.push({
+            market_condition: condition, correlation, protocols_affected: affectedProtocols,
+            data_points: { avg_tvl_change: (protocolResults.reduce((s, p) => s + p.change_1d, 0) / (protocolResults.length || 1)).toFixed(2), eth_price: prices.ethereum?.usd || 0, eth_24h_change: (prices.ethereum?.usd_24h_change || 0).toFixed(2), btc_price: prices.bitcoin?.usd || 0 },
+            timestamp: new Date().toISOString(),
+          });
+
+          await logOperation(ctx, 'CORRELATE', 'defi_knowledge_base', {
+            outputSummary: { condition, risk: correlation.risk_level, protocols: affectedProtocols.length },
+          });
+        }
+
+        const highestRisk = correlations.reduce((max, c) => {
+          const riskMap = { low: 1, medium: 2, high: 3, critical: 4 };
+          return riskMap[c.correlation.risk_level] > riskMap[max] ? c.correlation.risk_level : max;
+        }, 'low' as 'low' | 'medium' | 'high' | 'critical');
+
+        return {
+          market_conditions: conditions, highest_risk: highestRisk, correlations_count: correlations.length, correlations,
+          protocols_monitored: protocolResults.length,
+          prices: { ETH: prices.ethereum?.usd || 0, BTC: prices.bitcoin?.usd || 0, USDC: prices['usd-coin']?.usd || 1 },
+        };
       }
-      await new Promise(r => setTimeout(r, 400));
-    }
+    );
 
-    // Determine market conditions
-    const conditions = determineMarketConditions(prices, protocolResults);
-    const correlations: CorrelationResult[] = [];
-
-    for (const condition of conditions) {
-      const correlation = MARKET_SCRIPTURE_CORRELATIONS[condition];
-      if (!correlation) continue;
-
-      const affectedProtocols = condition === 'liquidity_crisis'
-        ? protocolResults.filter(p => p.change_1d < -15).map(p => p.name)
-        : condition === 'yield_opportunity'
-        ? protocolResults.filter(p => p.change_1d > 5).map(p => p.name)
-        : protocolResults.map(p => p.name);
-
-      correlations.push({
-        market_condition: condition,
-        correlation,
-        protocols_affected: affectedProtocols,
-        data_points: {
-          avg_tvl_change: (protocolResults.reduce((s, p) => s + p.change_1d, 0) / (protocolResults.length || 1)).toFixed(2),
-          eth_price: prices.ethereum?.usd || 0,
-          eth_24h_change: (prices.ethereum?.usd_24h_change || 0).toFixed(2),
-          btc_price: prices.bitcoin?.usd || 0,
-        },
-        timestamp: new Date().toISOString(),
-      });
-
-      // Store correlation in knowledge graph
-      await supabase.from('mcp_ai_knowledge_graph').insert({
-        query_text: `Market condition: ${condition} — ${correlation.defi_action}`,
-        biblical_references: correlation.scriptures.map(s => s.reference),
-        defi_protocols: affectedProtocols,
-        risk_assessment: {
-          level: correlation.risk_level,
-          condition,
-          action: correlation.defi_action,
-        },
-        confidence_score: protocolResults.length >= 5 ? 0.85 : 0.6,
-        wisdom_score: correlation.risk_level === 'low' ? 80 : correlation.risk_level === 'medium' ? 60 : 40,
-      }).then(() => {}).catch(() => {}); // Best effort, no session_id needed for system entries
-    }
-
-    const highestRisk = correlations.reduce((max, c) => {
-      const riskMap = { low: 1, medium: 2, high: 3, critical: 4 };
-      return riskMap[c.correlation.risk_level] > riskMap[max] ? c.correlation.risk_level : max;
-    }, 'low' as 'low' | 'medium' | 'high' | 'critical');
-
-    console.log(`🔗 Market Wisdom Correlator: ${conditions.join(', ')}, ${protocolResults.length} protocols, risk=${highestRisk}`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      agent: 'market-wisdom-correlator',
-      market_conditions: conditions,
-      highest_risk: highestRisk,
-      correlations_count: correlations.length,
-      correlations,
-      protocols_monitored: protocolResults.length,
-      prices: {
-        ETH: prices.ethereum?.usd || 0,
-        BTC: prices.bitcoin?.usd || 0,
-        USDC: prices['usd-coin']?.usd || 1,
-      },
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ agent: 'market-wisdom-correlator', ...result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('Market Wisdom Correlator error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

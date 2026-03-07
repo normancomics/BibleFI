@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { withAgentSandbox, sandboxedRead, sandboxedUpdate, sandboxedInsert, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -135,171 +136,109 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'validate'; // 'validate' | 'status' | 'seed'
+    const mode = body.mode || 'validate';
     const batchSize = body.batchSize || 50;
     const offset = body.offset || 0;
 
     if (mode === 'status') {
-      const { count: totalChurches } = await supabase
-        .from('global_churches')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: verifiedChurches } = await supabase
-        .from('global_churches')
-        .select('*', { count: 'exact', head: true })
-        .eq('verified', true);
-
-      const { count: cryptoChurches } = await supabase
-        .from('global_churches')
-        .select('*', { count: 'exact', head: true })
-        .eq('accepts_crypto', true);
-
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { count: totalChurches } = await supabase.from('global_churches').select('*', { count: 'exact', head: true });
+      const { count: verifiedChurches } = await supabase.from('global_churches').select('*', { count: 'exact', head: true }).eq('verified', true);
+      const { count: cryptoChurches } = await supabase.from('global_churches').select('*', { count: 'exact', head: true }).eq('accepts_crypto', true);
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'church-data-validator',
-        status: {
-          total_churches: totalChurches || 0,
-          verified_churches: verifiedChurches || 0,
-          crypto_enabled: cryptoChurches || 0,
-          last_run: new Date().toISOString(),
-        }
+        success: true, agent: 'church-data-validator',
+        status: { total_churches: totalChurches || 0, verified_churches: verifiedChurches || 0, crypto_enabled: cryptoChurches || 0, last_run: new Date().toISOString() }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    if (mode === 'seed') {
-      // Seed new churches from OpenStreetMap via Nominatim
-      const regions = [
-        { country: 'US', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'] },
-        { country: 'GB', cities: ['London', 'Manchester', 'Birmingham'] },
-        { country: 'NG', cities: ['Lagos', 'Abuja'] },
-        { country: 'KE', cities: ['Nairobi'] },
-        { country: 'BR', cities: ['São Paulo', 'Rio de Janeiro'] },
-      ];
+    const result = await withAgentSandbox(
+      { agentName: 'church-data-validator', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode, batchSize } },
+      async (ctx: AgentContext) => {
+        if (mode === 'seed') {
+          const regions = [
+            { country: 'US', cities: ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'] },
+            { country: 'GB', cities: ['London', 'Manchester', 'Birmingham'] },
+            { country: 'NG', cities: ['Lagos', 'Abuja'] },
+            { country: 'KE', cities: ['Nairobi'] },
+            { country: 'BR', cities: ['São Paulo', 'Rio de Janeiro'] },
+          ];
+          const region = regions[Math.floor(Math.random() * regions.length)];
+          const city = region.cities[Math.floor(Math.random() * region.cities.length)];
+          let seeded = 0;
 
-      const region = regions[Math.floor(Math.random() * regions.length)];
-      const city = region.cities[Math.floor(Math.random() * region.cities.length)];
+          try {
+            const resp = await fetch(
+              `https://nominatim.openstreetmap.org/search?q=church+in+${encodeURIComponent(city)}+${region.country}&format=json&limit=10&addressdetails=1`,
+              { headers: { 'User-Agent': 'BibleFi/1.0 (contact@bible.fi)' } }
+            );
+            if (resp.ok) {
+              const results = await resp.json();
+              for (const r of results) {
+                if (!r.display_name) continue;
+                const name = r.display_name.split(',')[0].trim();
+                if (name.length < 4) continue;
 
-      let seeded = 0;
-      try {
-        const resp = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=church+in+${encodeURIComponent(city)}+${region.country}&format=json&limit=10&addressdetails=1`,
-          { headers: { 'User-Agent': 'BibleFi/1.0 (contact@bible.fi)' } }
+                const { data: existing } = await sandboxedRead(ctx, 'global_churches', (from) =>
+                  from.select('id').ilike('name', name).eq('city', city).limit(1)
+                );
+                if (existing && existing.length > 0) continue;
+
+                await sandboxedInsert(ctx, 'global_churches', {
+                  name, city, country: region.country, state_province: r.address?.state || null,
+                  address: r.display_name, denomination: null, verified: false, accepts_crypto: false, accepts_fiat: true,
+                });
+                seeded++;
+              }
+            }
+          } catch (err) { console.error(`Seed error for ${city}:`, err); }
+
+          return { mode: 'seed', region: `${city}, ${region.country}`, churches_seeded: seeded };
+        }
+
+        // Validate mode
+        const { data: churches, error } = await sandboxedRead(ctx, 'global_churches', (from) =>
+          from.select('*').range(offset, offset + batchSize - 1).order('updated_at', { ascending: true })
         );
+        if (error) throw error;
 
-        if (resp.ok) {
-          const results = await resp.json();
-          for (const r of results) {
-            if (!r.display_name) continue;
-            const name = r.display_name.split(',')[0].trim();
-            if (name.length < 4) continue;
+        const validationResults: ValidationResult[] = [];
+        let criticalCount = 0, warningCount = 0, actionsCount = 0;
 
-            // Check for duplicate
-            const { data: existing } = await supabase
-              .from('global_churches')
-              .select('id')
-              .ilike('name', name)
-              .eq('city', city)
-              .limit(1);
+        for (const church of churches || []) {
+          const securityIssues = detectSecurityIssues(church);
+          const dataIssues = validateDataQuality(church);
+          const allIssues = [...securityIssues, ...dataIssues];
+          if (allIssues.length === 0) continue;
 
-            if (existing && existing.length > 0) continue;
+          const severity = determineSeverity(allIssues);
+          let actionTaken: string | null = null;
 
-            await supabase.from('global_churches').insert({
-              name,
-              city,
-              country: region.country,
-              state_province: r.address?.state || null,
-              address: r.display_name,
-              denomination: null,
-              verified: false,
-              accepts_crypto: false,
-              accepts_fiat: true,
-            });
-            seeded++;
-          }
+          if (severity === 'critical') {
+            criticalCount++;
+            await sandboxedUpdate(ctx, 'global_churches', { verified: false, updated_at: new Date().toISOString() },
+              (q) => q.eq('id', church.id).select());
+            actionTaken = 'Unverified due to security concern';
+            actionsCount++;
+          } else if (severity === 'warning') { warningCount++; }
+
+          validationResults.push({ church_id: church.id, church_name: church.name, issues: allIssues, severity, action_taken: actionTaken });
         }
-      } catch (err) {
-        console.error(`Seed error for ${city}:`, err);
+
+        return {
+          checked: churches?.length || 0, issues_found: validationResults.length,
+          critical: criticalCount, warnings: warningCount, actions_taken: actionsCount,
+          results: validationResults.slice(0, 10),
+        };
       }
+    );
 
-      return new Response(JSON.stringify({
-        success: true,
-        agent: 'church-data-validator',
-        mode: 'seed',
-        region: `${city}, ${region.country}`,
-        churches_seeded: seeded,
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    // Validate mode: check existing records
-    const { data: churches, error } = await supabase
-      .from('global_churches')
-      .select('*')
-      .range(offset, offset + batchSize - 1)
-      .order('updated_at', { ascending: true }); // oldest first
-
-    if (error) throw error;
-
-    const validationResults: ValidationResult[] = [];
-    let criticalCount = 0;
-    let warningCount = 0;
-    let actionsCount = 0;
-
-    for (const church of churches || []) {
-      const securityIssues = detectSecurityIssues(church);
-      const dataIssues = validateDataQuality(church);
-      const allIssues = [...securityIssues, ...dataIssues];
-
-      if (allIssues.length === 0) continue;
-
-      const severity = determineSeverity(allIssues);
-      let actionTaken: string | null = null;
-
-      // Auto-actions for critical issues
-      if (severity === 'critical') {
-        criticalCount++;
-        // Flag as unverified if security issue found
-        await supabase
-          .from('global_churches')
-          .update({ verified: false, updated_at: new Date().toISOString() })
-          .eq('id', church.id);
-        actionTaken = 'Unverified due to security concern';
-        actionsCount++;
-      } else if (severity === 'warning') {
-        warningCount++;
-      }
-
-      validationResults.push({
-        church_id: church.id,
-        church_name: church.name,
-        issues: allIssues,
-        severity,
-        action_taken: actionTaken,
-      });
-    }
-
-    console.log(`⛪ Church Data Validator: Checked ${churches?.length || 0} churches, ${criticalCount} critical, ${warningCount} warnings, ${actionsCount} actions taken`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      agent: 'church-data-validator',
-      checked: churches?.length || 0,
-      issues_found: validationResults.length,
-      critical: criticalCount,
-      warnings: warningCount,
-      actions_taken: actionsCount,
-      results: validationResults.slice(0, 10),
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ agent: 'church-data-validator', ...result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('Church Data Validator error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

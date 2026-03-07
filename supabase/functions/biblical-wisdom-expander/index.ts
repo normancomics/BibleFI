@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -114,184 +115,107 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'expand'; // 'expand' | 'status' | 'crossref'
+    const mode = body.mode || 'expand';
 
     if (mode === 'status') {
-      const { count: knowledgeCount } = await supabase
-        .from('biblical_knowledge_base')
-        .select('*', { count: 'exact', head: true });
-      const { count: crossrefCount } = await supabase
-        .from('biblical_financial_crossref')
-        .select('*', { count: 'exact', head: true });
-      const { count: comprehensiveCount } = await supabase
-        .from('comprehensive_biblical_texts')
-        .select('*', { count: 'exact', head: true });
-
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { count: knowledgeCount } = await supabase.from('biblical_knowledge_base').select('*', { count: 'exact', head: true });
+      const { count: crossrefCount } = await supabase.from('biblical_financial_crossref').select('*', { count: 'exact', head: true });
+      const { count: comprehensiveCount } = await supabase.from('comprehensive_biblical_texts').select('*', { count: 'exact', head: true });
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'biblical-wisdom-expander',
-        status: {
-          knowledge_base_entries: knowledgeCount || 0,
-          crossref_entries: crossrefCount || 0,
-          comprehensive_texts: comprehensiveCount || 0,
-          total_books: BIBLE_BOOKS.length,
-          deep_categories: Object.keys(DEEP_FINANCIAL_TERMS).length,
-          last_run: new Date().toISOString(),
-        }
+        success: true, agent: 'biblical-wisdom-expander',
+        status: { knowledge_base_entries: knowledgeCount || 0, crossref_entries: crossrefCount || 0, comprehensive_texts: comprehensiveCount || 0, total_books: BIBLE_BOOKS.length, deep_categories: Object.keys(DEEP_FINANCIAL_TERMS).length, last_run: new Date().toISOString() }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    if (mode === 'crossref') {
-      // Build cross-references between biblical terms and DeFi concepts
-      const { data: verses } = await supabase
-        .from('biblical_knowledge_base')
-        .select('id, reference, verse_text, financial_keywords, defi_relevance')
-        .not('financial_keywords', 'is', null)
-        .limit(50);
-
-      let crossrefsCreated = 0;
-      for (const verse of (verses || [])) {
-        const keywords = verse.financial_keywords || [];
-        for (const kw of keywords) {
-          for (const [category, terms] of Object.entries(DEEP_FINANCIAL_TERMS)) {
-            if (terms.includes(kw)) {
-              const mapping = DEFI_DEEP_MAP[category];
-              if (!mapping) continue;
-
-              await supabase.from('biblical_financial_crossref').upsert({
-                biblical_verse_id: verse.id,
-                biblical_term: kw,
-                financial_term: category,
-                defi_concept: mapping.concept,
-                relationship_type: 'wisdom_application',
-                explanation: `${kw} in ${verse.reference} maps to ${mapping.concept}`,
-                practical_application: `Protocol: ${mapping.protocol_example}`,
-                risk_consideration: mapping.risk_note,
-              }, { onConflict: 'id' });
-              crossrefsCreated++;
+    const result = await withAgentSandbox(
+      { agentName: 'biblical-wisdom-expander', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode } },
+      async (ctx: AgentContext) => {
+        if (mode === 'crossref') {
+          const { data: verses } = await sandboxedRead(ctx, 'biblical_knowledge_base', (from) =>
+            from.select('id, reference, verse_text, financial_keywords, defi_relevance').not('financial_keywords', 'is', null).limit(50)
+          );
+          let crossrefsCreated = 0;
+          for (const verse of (verses || [])) {
+            for (const kw of (verse.financial_keywords || [])) {
+              for (const [category, terms] of Object.entries(DEEP_FINANCIAL_TERMS)) {
+                if (terms.includes(kw)) {
+                  const mapping = DEFI_DEEP_MAP[category];
+                  if (!mapping) continue;
+                  await sandboxedInsert(ctx, 'biblical_financial_crossref', {
+                    biblical_verse_id: verse.id, biblical_term: kw, financial_term: category,
+                    defi_concept: mapping.concept, relationship_type: 'wisdom_application',
+                    explanation: `${kw} in ${verse.reference} maps to ${mapping.concept}`,
+                    practical_application: `Protocol: ${mapping.protocol_example}`, risk_consideration: mapping.risk_note,
+                  }, { onConflict: 'id' });
+                  crossrefsCreated++;
+                }
+              }
             }
+            await new Promise(r => setTimeout(r, 50));
+          }
+          return { mode: 'crossref', crossrefs_created: crossrefsCreated };
+        }
+
+        // Expand mode
+        const booksToScan = body.books || [];
+        const chaptersPerBook = body.chapters_per_book || 3;
+        const results: ExpandedVerse[] = [];
+        const errors: string[] = [];
+        let targetBooks = booksToScan.length > 0 ? booksToScan : [...BIBLE_BOOKS].sort(() => Math.random() - 0.5).slice(0, 3);
+
+        for (const book of targetBooks) {
+          const chapters = Array.from({ length: chaptersPerBook }, () => Math.floor(Math.random() * 40) + 1);
+          for (const chapter of chapters) {
+            try {
+              const verses = await fetchChapterVerses(book, chapter);
+              if (!verses || verses.length === 0) continue;
+              for (const v of verses) {
+                const text = v.text?.trim();
+                if (!text || text.length < 20) continue;
+                const { keywords, categories } = extractDeepKeywords(text);
+                if (keywords.length === 0) continue;
+                const defiApps = categories.map(c => DEFI_DEEP_MAP[c]).filter(Boolean);
+                const relevance = Math.min(keywords.length * 10 + categories.length * 15, 100);
+                const practicalApp = buildPracticalApplication(categories, text);
+                const expanded: ExpandedVerse = { book: v.book_name || book, chapter: v.chapter || chapter, verse: v.verse || 1, text, financial_keywords: keywords, wisdom_categories: categories, defi_applications: defiApps, financial_relevance: relevance, practical_application: practicalApp };
+                results.push(expanded);
+
+                const ref = `${expanded.book} ${expanded.chapter}:${expanded.verse}`;
+                await sandboxedInsert(ctx, 'biblical_knowledge_base', {
+                  reference: ref, verse_text: text, category: categories[0] || 'general_finance',
+                  principle: `Financial wisdom: ${keywords.slice(0, 5).join(', ')}`,
+                  application: practicalApp, defi_relevance: defiApps.length > 0 ? defiApps.map(d => d.concept).join('; ') : null,
+                  financial_keywords: keywords,
+                }, { onConflict: 'reference' });
+
+                await sandboxedInsert(ctx, 'comprehensive_biblical_texts', {
+                  book: expanded.book, chapter: expanded.chapter, verse: expanded.verse,
+                  kjv_text: text, financial_keywords: keywords, financial_relevance: relevance,
+                }, { onConflict: 'book,chapter,verse' });
+              }
+              await new Promise(r => setTimeout(r, 300));
+            } catch (err) { errors.push(`${book} ${chapter}: ${err instanceof Error ? err.message : String(err)}`); }
           }
         }
-        await new Promise(r => setTimeout(r, 50));
+
+        return {
+          mode: 'expand', books_scanned: targetBooks, financial_verses_found: results.length, errors: errors.length,
+          sample_results: results.slice(0, 5).map(r => ({
+            reference: `${r.book} ${r.chapter}:${r.verse}`, keywords: r.financial_keywords,
+            categories: r.wisdom_categories, defi_apps: r.defi_applications.map(d => d.concept), relevance: r.financial_relevance,
+          })),
+        };
       }
+    );
 
-      return new Response(JSON.stringify({
-        success: true,
-        agent: 'biblical-wisdom-expander',
-        mode: 'crossref',
-        crossrefs_created: crossrefsCreated,
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    // Expand mode: scan random chapters for financial wisdom
-    const booksToScan = body.books || [];
-    const chaptersPerBook = body.chapters_per_book || 3;
-    const results: ExpandedVerse[] = [];
-    const errors: string[] = [];
-
-    // Pick random books if not specified
-    let targetBooks: string[];
-    if (booksToScan.length > 0) {
-      targetBooks = booksToScan;
-    } else {
-      const shuffled = [...BIBLE_BOOKS].sort(() => Math.random() - 0.5);
-      targetBooks = shuffled.slice(0, 3); // 3 random books per run
-    }
-
-    for (const book of targetBooks) {
-      // Scan random chapters (1-50 range, API will return error for non-existent)
-      const chapters = Array.from({ length: chaptersPerBook }, () => Math.floor(Math.random() * 40) + 1);
-
-      for (const chapter of chapters) {
-        try {
-          const verses = await fetchChapterVerses(book, chapter);
-          if (!verses || verses.length === 0) continue;
-
-          for (const v of verses) {
-            const text = v.text?.trim();
-            if (!text || text.length < 20) continue;
-
-            const { keywords, categories } = extractDeepKeywords(text);
-            if (keywords.length === 0) continue;
-
-            const defiApps = categories
-              .map(c => DEFI_DEEP_MAP[c])
-              .filter(Boolean);
-
-            const relevance = Math.min(keywords.length * 10 + categories.length * 15, 100);
-            const practicalApp = buildPracticalApplication(categories, text);
-
-            const expanded: ExpandedVerse = {
-              book: v.book_name || book,
-              chapter: v.chapter || chapter,
-              verse: v.verse || 1,
-              text,
-              financial_keywords: keywords,
-              wisdom_categories: categories,
-              defi_applications: defiApps,
-              financial_relevance: relevance,
-              practical_application: practicalApp,
-            };
-            results.push(expanded);
-
-            // Upsert into knowledge base
-            const ref = `${expanded.book} ${expanded.chapter}:${expanded.verse}`;
-            await supabase.from('biblical_knowledge_base').upsert({
-              reference: ref,
-              verse_text: text,
-              category: categories[0] || 'general_finance',
-              principle: `Financial wisdom: ${keywords.slice(0, 5).join(', ')}`,
-              application: practicalApp,
-              defi_relevance: defiApps.length > 0 ? defiApps.map(d => d.concept).join('; ') : null,
-              financial_keywords: keywords,
-            }, { onConflict: 'reference' });
-
-            // Also upsert comprehensive text
-            await supabase.from('comprehensive_biblical_texts').upsert({
-              book: expanded.book,
-              chapter: expanded.chapter,
-              verse: expanded.verse,
-              kjv_text: text,
-              financial_keywords: keywords,
-              financial_relevance: relevance,
-            }, { onConflict: 'book,chapter,verse' });
-          }
-
-          await new Promise(r => setTimeout(r, 300));
-        } catch (err) {
-          errors.push(`${book} ${chapter}: ${err instanceof Error ? err.message : String(err)}`);
-        }
-      }
-    }
-
-    console.log(`📖 Biblical Wisdom Expander: Scanned ${targetBooks.join(', ')}, found ${results.length} financial verses, ${errors.length} errors`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      agent: 'biblical-wisdom-expander',
-      mode: 'expand',
-      books_scanned: targetBooks,
-      financial_verses_found: results.length,
-      errors: errors.length,
-      sample_results: results.slice(0, 5).map(r => ({
-        reference: `${r.book} ${r.chapter}:${r.verse}`,
-        keywords: r.financial_keywords,
-        categories: r.wisdom_categories,
-        defi_apps: r.defi_applications.map(d => d.concept),
-        relevance: r.financial_relevance,
-      })),
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ agent: 'biblical-wisdom-expander', ...result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('Biblical Wisdom Expander error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

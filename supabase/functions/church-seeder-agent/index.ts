@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -138,172 +139,92 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json().catch(() => ({}));
-    const mode = body.mode || 'seed'; // 'seed' | 'status' | 'verify'
+    const mode = body.mode || 'seed';
 
     if (mode === 'status') {
-      const { count: totalChurches } = await supabase
-        .from('global_churches')
-        .select('*', { count: 'exact', head: true });
-
-      // Count by country
-      const { data: countryCounts } = await supabase
-        .from('global_churches')
-        .select('country')
-        .limit(1000);
-
+      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const { count: totalChurches } = await supabase.from('global_churches').select('*', { count: 'exact', head: true });
+      const { data: countryCounts } = await supabase.from('global_churches').select('country').limit(1000);
       const countryMap: Record<string, number> = {};
-      for (const row of (countryCounts || [])) {
-        countryMap[row.country] = (countryMap[row.country] || 0) + 1;
-      }
-
+      for (const row of (countryCounts || [])) { countryMap[row.country] = (countryMap[row.country] || 0) + 1; }
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'church-seeder-agent',
-        status: {
-          total_churches: totalChurches || 0,
-          countries_covered: Object.keys(countryMap).length,
-          regions_available: SEED_REGIONS.length,
-          top_countries: Object.entries(countryMap)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 10),
-          last_run: new Date().toISOString(),
-        }
+        success: true, agent: 'church-seeder-agent',
+        status: { total_churches: totalChurches || 0, countries_covered: Object.keys(countryMap).length, regions_available: SEED_REGIONS.length, top_countries: Object.entries(countryMap).sort(([, a], [, b]) => b - a).slice(0, 10), last_run: new Date().toISOString() }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    if (mode === 'verify') {
-      // Verify existing church data integrity
-      const { data: churches } = await supabase
-        .from('global_churches')
-        .select('id, name, website, email, phone, city, country')
-        .limit(100);
-
-      let flagged = 0;
-      const issues: string[] = [];
-
-      for (const church of (churches || [])) {
-        // Check for suspicious patterns
-        if (church.email && /[<>"';]/.test(church.email)) {
-          issues.push(`${church.name}: suspicious email chars`);
-          flagged++;
-        }
-        if (church.website && !/^https?:\/\//.test(church.website) && church.website !== '') {
-          issues.push(`${church.name}: invalid website URL format`);
-          flagged++;
-        }
-        if (church.name && church.name.length < 3) {
-          issues.push(`${church.name}: name too short`);
-          flagged++;
-        }
-      }
-
-      return new Response(JSON.stringify({
-        success: true,
-        agent: 'church-seeder-agent',
-        mode: 'verify',
-        churches_checked: (churches || []).length,
-        issues_found: flagged,
-        issue_details: issues.slice(0, 20),
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-
-    // Seed mode: fetch churches from random regions
-    const regionsToSeed = body.regions || [];
-    let targetRegions;
-
-    if (regionsToSeed.length > 0) {
-      targetRegions = SEED_REGIONS.filter(r => regionsToSeed.includes(r.name));
-    } else {
-      // Pick 2-3 random regions per run to avoid rate limiting
-      const shuffled = [...SEED_REGIONS].sort(() => Math.random() - 0.5);
-      targetRegions = shuffled.slice(0, 3);
-    }
-
-    let totalSeeded = 0;
-    let totalSkipped = 0;
-    const seededRegions: string[] = [];
-
-    for (const region of targetRegions) {
-      try {
-        const churches = await fetchChurchesFromOSM(region.lat, region.lon, region.radius);
-
-        for (const church of churches) {
-          const cleanName = sanitizeInput(church.name);
-          if (!cleanName || !isValidChurchName(cleanName)) {
-            totalSkipped++;
-            continue;
+    const result = await withAgentSandbox(
+      { agentName: 'church-seeder-agent', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode } },
+      async (ctx: AgentContext) => {
+        if (mode === 'verify') {
+          const { data: churches } = await sandboxedRead(ctx, 'global_churches', (from) =>
+            from.select('id, name, website, email, phone, city, country').limit(100)
+          );
+          let flagged = 0;
+          const issues: string[] = [];
+          for (const church of (churches || [])) {
+            if (church.email && /[<>"';]/.test(church.email)) { issues.push(`${church.name}: suspicious email chars`); flagged++; }
+            if (church.website && !/^https?:\/\//.test(church.website) && church.website !== '') { issues.push(`${church.name}: invalid website URL`); flagged++; }
+            if (church.name && church.name.length < 3) { issues.push(`${church.name}: name too short`); flagged++; }
           }
-
-          const city = sanitizeInput(church.city) || region.name;
-          const country = sanitizeInput(church.country) || region.country;
-
-          // Check if already exists (by name + city + country)
-          const { data: existing } = await supabase
-            .from('global_churches')
-            .select('id')
-            .eq('name', cleanName)
-            .eq('city', city)
-            .eq('country', country)
-            .limit(1);
-
-          if (existing && existing.length > 0) {
-            totalSkipped++;
-            continue;
-          }
-
-          const denom = sanitizeInput(church.denomination);
-          const normalizedDenom = denom && CHRISTIAN_DENOMINATIONS.includes(denom.toLowerCase())
-            ? denom.charAt(0).toUpperCase() + denom.slice(1)
-            : denom || 'Christian';
-
-          await supabase.from('global_churches').insert({
-            name: cleanName,
-            denomination: normalizedDenom,
-            address: sanitizeInput(church.address),
-            city,
-            state_province: sanitizeInput(church.state_province),
-            country,
-            website: sanitizeInput(church.website),
-            phone: sanitizeInput(church.phone),
-            coordinates: church.lat && church.lon ? `(${church.lon},${church.lat})` : null,
-            verified: false,
-            accepts_fiat: true,
-          });
-
-          totalSeeded++;
+          return { mode: 'verify', churches_checked: (churches || []).length, issues_found: flagged, issue_details: issues.slice(0, 20) };
         }
 
-        seededRegions.push(`${region.name} (${churches.length} found)`);
+        // Seed mode
+        const regionsToSeed = body.regions || [];
+        let targetRegions = regionsToSeed.length > 0
+          ? SEED_REGIONS.filter(r => regionsToSeed.includes(r.name))
+          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 3);
 
-        // Rate limit between regions (Overpass API courtesy)
-        await new Promise(r => setTimeout(r, 2000));
-      } catch (err) {
-        console.error(`Error seeding ${region.name}:`, err);
-        seededRegions.push(`${region.name} (error)`);
+        let totalSeeded = 0, totalSkipped = 0;
+        const seededRegions: string[] = [];
+
+        for (const region of targetRegions) {
+          try {
+            const churches = await fetchChurchesFromOSM(region.lat, region.lon, region.radius);
+            for (const church of churches) {
+              const cleanName = sanitizeInput(church.name);
+              if (!cleanName || !isValidChurchName(cleanName)) { totalSkipped++; continue; }
+              const city = sanitizeInput(church.city) || region.name;
+              const country = sanitizeInput(church.country) || region.country;
+
+              const { data: existing } = await sandboxedRead(ctx, 'global_churches', (from) =>
+                from.select('id').eq('name', cleanName).eq('city', city).eq('country', country).limit(1)
+              );
+              if (existing && existing.length > 0) { totalSkipped++; continue; }
+
+              const denom = sanitizeInput(church.denomination);
+              const normalizedDenom = denom && CHRISTIAN_DENOMINATIONS.includes(denom.toLowerCase())
+                ? denom.charAt(0).toUpperCase() + denom.slice(1) : denom || 'Christian';
+
+              await sandboxedInsert(ctx, 'global_churches', {
+                name: cleanName, denomination: normalizedDenom, address: sanitizeInput(church.address),
+                city, state_province: sanitizeInput(church.state_province), country,
+                website: sanitizeInput(church.website), phone: sanitizeInput(church.phone),
+                coordinates: church.lat && church.lon ? `(${church.lon},${church.lat})` : null,
+                verified: false, accepts_fiat: true,
+              });
+              totalSeeded++;
+            }
+            seededRegions.push(`${region.name} (${churches.length} found)`);
+            await new Promise(r => setTimeout(r, 2000));
+          } catch (err) {
+            console.error(`Error seeding ${region.name}:`, err);
+            seededRegions.push(`${region.name} (error)`);
+          }
+        }
+
+        return { mode: 'seed', churches_seeded: totalSeeded, churches_skipped: totalSkipped, regions_processed: seededRegions };
       }
-    }
+    );
 
-    console.log(`⛪ Church Seeder Agent: Seeded ${totalSeeded} churches from ${targetRegions.length} regions, skipped ${totalSkipped}`);
-
-    return new Response(JSON.stringify({
-      success: true,
-      agent: 'church-seeder-agent',
-      mode: 'seed',
-      churches_seeded: totalSeeded,
-      churches_skipped: totalSkipped,
-      regions_processed: seededRegions,
-    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ agent: 'church-seeder-agent', ...result }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('Church Seeder Agent error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
