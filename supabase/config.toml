@@ -44,3 +44,12 @@ verify_jwt = false
 
 [functions.basescan-history]
 verify_jwt = false
+
+[functions.scripture-financial-scanner]
+verify_jwt = false
+
+[functions.church-data-validator]
+verify_jwt = false
+
+[functions.defi-market-watchdog]
+verify_jwt = false
