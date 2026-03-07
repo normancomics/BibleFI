@@ -17,7 +17,9 @@ const Index = () => {
   const { toast } = useToast();
   const [churchCount, setChurchCount] = useState<number>(0);
   const [isSeeding, setIsSeeding] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    return localStorage.getItem('biblefi_skip_intro') !== 'true';
+  });
 
   useEffect(() => {
     // Check church count on load
