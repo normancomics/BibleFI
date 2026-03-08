@@ -44,9 +44,10 @@ export async function createAgentSandbox(config: SandboxConfig): Promise<AgentCo
     db: { schema: 'api' },
   });
 
-  // Public schema client for data operations
+  // Public data operations also go through api schema (PostgREST only exposes api)
   const supabasePublic = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    db: { schema: 'api' },
   });
 
   // Start the run via SECURITY DEFINER gateway
