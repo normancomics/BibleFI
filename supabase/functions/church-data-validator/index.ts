@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
         const { data: churches, error } = await sandboxedRead(ctx, 'global_churches', (from) =>
           from.select('*').range(offset, offset + batchSize - 1).order('updated_at', { ascending: true })
         );
-        if (error) throw error;
+        if (error) throw new Error(typeof error === 'object' ? (error.message || JSON.stringify(error)) : String(error));
 
         const validationResults: ValidationResult[] = [];
         let criticalCount = 0, warningCount = 0, actionsCount = 0;
