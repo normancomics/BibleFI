@@ -179,12 +179,12 @@ Deno.serve(async (req) => {
                 const name = r.display_name.split(',')[0].trim();
                 if (name.length < 4) continue;
 
-                const { data: existing } = await sandboxedRead(ctx, 'global_churches', (from) =>
+                const { data: existing } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
                   from.select('id').ilike('name', name).eq('city', city).limit(1)
                 );
                 if (existing && existing.length > 0) continue;
 
-                await sandboxedInsert(ctx, 'global_churches', {
+                await sandboxedInsert(ctx, 'global_churches_agent', {
                   name, city, country: region.country, state_province: r.address?.state || null,
                   address: r.display_name, denomination: null, verified: false, accepts_crypto: false, accepts_fiat: true,
                 });
@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
         }
 
         // Validate mode
-        const { data: churches, error } = await sandboxedRead(ctx, 'global_churches', (from) =>
+        const { data: churches, error } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
           from.select('*').range(offset, offset + batchSize - 1).order('updated_at', { ascending: true })
         );
         if (error) throw new Error(typeof error === 'object' ? (error.message || JSON.stringify(error)) : String(error));
@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
 
           if (severity === 'critical') {
             criticalCount++;
-            await sandboxedUpdate(ctx, 'global_churches', { verified: false, updated_at: new Date().toISOString() },
+            await sandboxedUpdate(ctx, 'global_churches_agent', { verified: false, updated_at: new Date().toISOString() },
               (q) => q.eq('id', church.id).select());
             actionTaken = 'Unverified due to security concern';
             actionsCount++;

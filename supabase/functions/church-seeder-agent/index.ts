@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
       { agentName: 'church-seeder-agent', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode } },
       async (ctx: AgentContext) => {
         if (mode === 'verify') {
-          const { data: churches } = await sandboxedRead(ctx, 'global_churches', (from) =>
+          const { data: churches } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
             from.select('id, name, website, email, phone, city, country').limit(100)
           );
           let flagged = 0;
@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
               const city = sanitizeInput(church.city) || region.name;
               const country = sanitizeInput(church.country) || region.country;
 
-              const { data: existing } = await sandboxedRead(ctx, 'global_churches', (from) =>
+              const { data: existing } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
                 from.select('id').eq('name', cleanName).eq('city', city).eq('country', country).limit(1)
               );
               if (existing && existing.length > 0) { totalSkipped++; continue; }
@@ -198,7 +198,7 @@ Deno.serve(async (req) => {
               const normalizedDenom = denom && CHRISTIAN_DENOMINATIONS.includes(denom.toLowerCase())
                 ? denom.charAt(0).toUpperCase() + denom.slice(1) : denom || 'Christian';
 
-              await sandboxedInsert(ctx, 'global_churches', {
+              await sandboxedInsert(ctx, 'global_churches_agent', {
                 name: cleanName, denomination: normalizedDenom, address: sanitizeInput(church.address),
                 city, state_province: sanitizeInput(church.state_province), country,
                 website: sanitizeInput(church.website), phone: sanitizeInput(church.phone),
