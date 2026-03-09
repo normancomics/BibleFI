@@ -50,7 +50,7 @@ const StreamlinedDefiHub: React.FC = () => {
 
       {/* Main DeFi Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 bg-black/30">
+        <TabsList className="grid grid-cols-5 bg-black/30">
           <TabsTrigger value="swap" className="data-[state=active]:bg-blue-600/30">
             <ArrowUpDown className="w-4 h-4 mr-2" />
             Swap
@@ -62,6 +62,11 @@ const StreamlinedDefiHub: React.FC = () => {
           <TabsTrigger value="pools" className="data-[state=active]:bg-purple-600/30">
             <TrendingUp className="w-4 h-4 mr-2" />
             Pools
+          </TabsTrigger>
+          <TabsTrigger value="opportunities" className="data-[state=active]:bg-secondary/30">
+            <Activity className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Opportunities</span>
+            <span className="sm:hidden">Opps</span>
           </TabsTrigger>
           <TabsTrigger value="analytics" className="data-[state=active]:bg-orange-600/30">
             <PieChart className="w-4 h-4 mr-2" />
