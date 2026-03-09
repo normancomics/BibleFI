@@ -304,7 +304,44 @@ async function fetchProtocolYields(): Promise<{ protocol: string; type: string; 
     ...BASE_PROTOCOLS.cdp.map(p => ({ ...p, type: 'cdp' })),
   ];
 
-  // Use bulk protocols endpoint instead of individual calls (much faster)
+  // Manual slug mapping for protocols whose DeFiLlama slug doesn't match our naming
+  const SLUG_OVERRIDES: Record<string, string> = {
+    'aerodrome-v2': 'aerodrome-v1',
+    'uniswap-v3-base': 'uniswap',
+    'sushi-base': 'sushi',
+    'pancakeswap-amm-v3-base': 'pancakeswap-amm-v3',
+    'balancer-v2-base': 'balancer-v2',
+    'maverick-v2-base': 'maverick-v2',
+    'curve-dex-base': 'curve-dex',
+    'dodo-base': 'dodo',
+    'woofi-base': 'woofi',
+    'kyberswap-elastic-base': 'kyberswap-elastic',
+    'rocketswap-base': 'rocketswap',
+    'scale-base': 'scale',
+    'equalizer-base': 'equalizer-exchange',
+    'aave-v3-base': 'aave-v3',
+    'compound-v3-base': 'compound-v3',
+    'morpho-blue-base': 'morpho-blue',
+    'silo-finance-base': 'silo-finance',
+    'fluid-base': 'fluid',
+    'euler-v2-base': 'euler',
+    'overnight-base': 'overnight-finance',
+    'yearn-finance-base': 'yearn-finance',
+    'harvest-finance-base': 'harvest-finance',
+    'gamma-base': 'gamma',
+    'convex-finance-base': 'convex-finance',
+    'pendle-base': 'pendle',
+    'aura-base': 'aura',
+    'stargate-base': 'stargate',
+    'synthetix-v3-base': 'synthetix',
+    'lyra-v2-base': 'lyra-v2',
+    'bmx-base': 'bmx',
+    'angle-base': 'angle',
+  };
+
+  // Fuzzy match: normalize a name for comparison
+  const normalize = (s: string) => s.toLowerCase().replace(/[\s\-_\.()v234]+/g, '').replace(/finance|protocol|exchange|swap/g, '');
+
   try {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 15000);
@@ -312,21 +349,45 @@ async function fetchProtocolYields(): Promise<{ protocol: string; type: string; 
     if (!resp.ok) throw new Error('Failed to fetch protocols');
     const allDefiProtocols = await resp.json();
 
-    // Build slug -> data map
-    const slugMap = new Map<string, any>();
+    // Build multiple lookup indexes for maximum match rate
+    const bySlug = new Map<string, any>();
+    const byNorm = new Map<string, any>();
     for (const p of allDefiProtocols) {
-      if (p.slug) slugMap.set(p.slug, p);
-      // Also try matching by name lowercase
-      if (p.name) slugMap.set(p.name.toLowerCase().replace(/\s+/g, '-'), p);
+      if (p.slug) bySlug.set(p.slug, p);
+      if (p.name) byNorm.set(normalize(p.name), p);
     }
 
+    let matched = 0;
     for (const protocol of allProtocols) {
-      const data = slugMap.get(protocol.slug);
-      if (!data) continue;
-      const tvl = data.chainTvls?.Base || data.tvl || 0;
-      const change = data.change_1d || 0;
-      results.push({ protocol: protocol.name, type: protocol.type, tvl, change_1d: change });
+      // 1. Try exact slug
+      let data = bySlug.get(protocol.slug);
+      // 2. Try override slug
+      if (!data && SLUG_OVERRIDES[protocol.slug]) {
+        data = bySlug.get(SLUG_OVERRIDES[protocol.slug]);
+      }
+      // 3. Try fuzzy name match
+      if (!data) {
+        data = byNorm.get(normalize(protocol.name));
+      }
+      // 4. Try partial slug match (find any slug containing our key term)
+      if (!data) {
+        const core = protocol.name.toLowerCase().split(/[\s\-]/)[0]; // first word e.g. "aerodrome"
+        for (const [slug, pData] of bySlug) {
+          if (slug.includes(core) && (pData.chains?.includes('Base') || pData.chain === 'Base')) {
+            data = pData;
+            break;
+          }
+        }
+      }
+
+      if (data) {
+        matched++;
+        const tvl = data.chainTvls?.Base || data.tvl || 0;
+        const change = data.change_1d || 0;
+        results.push({ protocol: protocol.name, type: protocol.type, tvl, change_1d: change });
+      }
     }
+    console.log(`Protocol matching: ${matched}/${allProtocols.length} matched`);
   } catch (e) {
     console.error('Bulk protocol fetch failed, using fallback:', e);
   }
