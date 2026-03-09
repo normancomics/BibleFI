@@ -184,34 +184,30 @@ Deno.serve(async (req) => {
 
     // Read-only modes are safe for unauthenticated access
     if (mode === 'status' || mode === 'audit_readonly') {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      // Try direct REST API call to bypass schema config issue
-      const restUrl = `${supabaseUrl}/rest/v1/biblical_knowledge_base?select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}`;
-      const restResp = await fetch(restUrl, {
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Accept': 'application/json',
-        },
-      });
-      const storedVerses = restResp.ok ? await restResp.json() : [];
-      console.log('[audit] REST direct query:', storedVerses?.length, 'verses, status:', restResp.status);
-      if (!restResp.ok) {
-        const errText = await restResp.text().catch(() => '');
-        console.log('[audit] REST error:', errText);
-      }
+      const sbUrl = Deno.env.get('SUPABASE_URL')!;
+      const sbKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+      // Direct REST API queries (bypasses JS client schema config)
+      const restQuery = async (table: string, params: string) => {
+        const resp = await fetch(`${sbUrl}/rest/v1/${table}?${params}`, {
+          headers: { 'apikey': sbKey, 'Authorization': `Bearer ${sbKey}`, 'Accept': 'application/json', 'Prefer': 'count=exact' },
+        });
+        const countHeader = resp.headers.get('content-range');
+        const count = countHeader ? parseInt(countHeader.split('/')[1] || '0') : 0;
+        const data = resp.ok ? await resp.json() : [];
+        return { data, count, ok: resp.ok };
+      };
 
       if (mode === 'status') {
-        const { count: kbCount } = await supabase.from('biblical_knowledge_base').select('*', { count: 'exact', head: true });
-        const { count: ctCount } = await supabase.from('comprehensive_biblical_texts').select('*', { count: 'exact', head: true });
-        const { count: origCount } = await supabase.from('biblical_original_texts').select('*', { count: 'exact', head: true });
+        const { count: kbCount } = await restQuery('biblical_knowledge_base', 'select=id&limit=0');
+        const { count: ctCount } = await restQuery('comprehensive_biblical_texts', 'select=id&limit=0');
+        const { count: origCount } = await restQuery('biblical_original_texts', 'select=id&limit=0');
         return new Response(JSON.stringify({
           success: true, agent: 'scripture-integrity-validator',
           status: {
-            knowledge_base_entries: kbCount || 0,
-            comprehensive_texts: ctCount || 0,
-            original_language_texts: origCount || 0,
+            knowledge_base_entries: kbCount,
+            comprehensive_texts: ctCount,
+            original_language_texts: origCount,
             hebrew_lemmas_tracked: Object.keys(HEBREW_FINANCIAL_LEMMAS).length,
             greek_lemmas_tracked: Object.keys(GREEK_FINANCIAL_LEMMAS).length,
             validation_modes: ['validate_kjv', 'validate_references', 'validate_originals', 'full_audit', 'audit_readonly'],
@@ -220,95 +216,54 @@ Deno.serve(async (req) => {
         }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
-      // audit_readonly: validate KJV text + references without writing fixes
-      const { data: storedVerses, error: queryError } = await supabase.from('biblical_knowledge_base')
-        .select('id, reference, verse_text')
-        .not('verse_text', 'is', null)
-        .order('created_at', { ascending: true })
-        .limit(batchSize);
+      // audit_readonly mode
+      const { data: auditVerses } = await restQuery(
+        'biblical_knowledge_base',
+        `select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}`
+      );
+      console.log('[audit_readonly] Fetched', auditVerses?.length, 'verses for validation');
 
-      console.log('[audit_readonly] Query result:', storedVerses?.length, 'verses, error:', queryError?.message || 'none');
+      const auditResults: ValidationResult[] = [];
+      let auditValid = 0, auditMismatch = 0, auditError = 0;
 
-      const validations: ValidationResult[] = [];
-      let validCount = 0;
-      let mismatchCount = 0;
-      let errorCount = 0;
-
-      for (const stored of (storedVerses || [])) {
-        // Reference validation
+      for (const stored of (auditVerses || [])) {
         const refIssues = validateReference(stored.reference);
         if (refIssues.length > 0) {
-          validations.push({
-            reference: stored.reference, status: 'mismatch',
-            stored_text: stored.verse_text?.substring(0, 80) || '',
-            issues: refIssues,
-          });
-          mismatchCount++;
+          auditResults.push({ reference: stored.reference, status: 'mismatch', stored_text: stored.verse_text?.substring(0, 80) || '', issues: refIssues });
+          auditMismatch++;
           continue;
         }
-
-        // KJV text validation
         try {
           const sourceText = await fetchKJVVerse(stored.reference);
           if (!sourceText) {
-            validations.push({
-              reference: stored.reference, status: 'not_found',
-              stored_text: stored.verse_text?.substring(0, 80) || '',
-              issues: ['Could not fetch from KJV source API'],
-            });
-            errorCount++;
+            auditResults.push({ reference: stored.reference, status: 'not_found', stored_text: stored.verse_text?.substring(0, 80) || '', issues: ['Could not fetch from KJV source API'] });
+            auditError++;
             continue;
           }
-
-          const similarity = calculateSimilarity(stored.verse_text, sourceText);
-          if (similarity >= 0.85) {
-            validCount++;
-            if (similarity < 1.0) {
-              validations.push({
-                reference: stored.reference, status: 'valid',
-                stored_text: stored.verse_text?.substring(0, 80) || '',
-                source_text: sourceText.substring(0, 80),
-                similarity,
-                issues: [`Minor variation (${(similarity * 100).toFixed(1)}% match) - auto-fixable`],
-              });
+          const sim = calculateSimilarity(stored.verse_text, sourceText);
+          if (sim >= 0.85) {
+            auditValid++;
+            if (sim < 1.0) {
+              auditResults.push({ reference: stored.reference, status: 'valid', stored_text: stored.verse_text?.substring(0, 80) || '', source_text: sourceText.substring(0, 80), similarity: sim, issues: [`Minor variation (${(sim * 100).toFixed(1)}% match)`] });
             }
           } else {
-            validations.push({
-              reference: stored.reference, status: 'mismatch',
-              stored_text: stored.verse_text?.substring(0, 100) || '',
-              source_text: sourceText.substring(0, 100),
-              similarity,
-              issues: [`Text similarity ${(similarity * 100).toFixed(1)}% - below 85% threshold`],
-            });
-            mismatchCount++;
+            auditResults.push({ reference: stored.reference, status: 'mismatch', stored_text: stored.verse_text?.substring(0, 100) || '', source_text: sourceText.substring(0, 100), similarity: sim, issues: [`Text similarity ${(sim * 100).toFixed(1)}% - below 85% threshold`] });
+            auditMismatch++;
           }
-
-          await new Promise(r => setTimeout(r, 300)); // Rate limit
+          await new Promise(r => setTimeout(r, 300));
         } catch (err) {
-          errorCount++;
-          validations.push({
-            reference: stored.reference, status: 'error',
-            stored_text: stored.verse_text?.substring(0, 80) || '',
-            issues: [err instanceof Error ? err.message : String(err)],
-          });
+          auditError++;
+          auditResults.push({ reference: stored.reference, status: 'error', stored_text: stored.verse_text?.substring(0, 80) || '', issues: [err instanceof Error ? err.message : String(err)] });
         }
       }
 
-      const integrityScore = validCount + mismatchCount + errorCount > 0
-        ? ((validCount / (validCount + mismatchCount + errorCount)) * 100).toFixed(1) + '%'
-        : 'N/A';
-
+      const auditTotal = auditValid + auditMismatch + auditError;
       return new Response(JSON.stringify({
-        success: true,
-        agent: 'scripture-integrity-validator',
-        mode: 'audit_readonly',
-        total_checked: validCount + mismatchCount + errorCount,
-        valid: validCount,
-        mismatches: mismatchCount,
-        errors: errorCount,
-        integrity_score: integrityScore,
-        validation_issues: validations.filter(v => v.status !== 'valid').slice(0, 20),
-        valid_with_minor_variations: validations.filter(v => v.status === 'valid').slice(0, 10),
+        success: true, agent: 'scripture-integrity-validator', mode: 'audit_readonly',
+        total_checked: auditTotal, valid: auditValid, mismatches: auditMismatch, errors: auditError,
+        integrity_score: auditTotal > 0 ? ((auditValid / auditTotal) * 100).toFixed(1) + '%' : 'N/A',
+        validation_issues: auditResults.filter(v => v.status !== 'valid').slice(0, 20),
+        valid_with_minor_variations: auditResults.filter(v => v.status === 'valid').slice(0, 10),
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
