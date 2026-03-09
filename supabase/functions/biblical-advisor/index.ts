@@ -358,10 +358,9 @@ Respond with comprehensive Biblical financial guidance grounded in the retrieved
     });
   } catch (error) {
     console.error("[biblical-advisor] Error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
       JSON.stringify({
-        error: message,
+        error: "An unexpected error occurred. Please try again.",
         biblicalPrinciple:
           "Trust in the LORD with all your heart (Proverbs 3:5-6). We encountered a technical issue — please try again.",
         scriptureReferences: [

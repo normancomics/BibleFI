@@ -1369,6 +1369,48 @@ export type Database = {
         }
         Relationships: []
       }
+      public_church_reviews: {
+        Row: {
+          church_id: string | null
+          created_at: string | null
+          helpful_count: number | null
+          id: string | null
+          rating: number | null
+          review_text: string | null
+        }
+        Insert: {
+          church_id?: string | null
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string | null
+          rating?: number | null
+          review_text?: string | null
+        }
+        Update: {
+          church_id?: string | null
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string | null
+          rating?: number | null
+          review_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "church_reviews_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "global_churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "church_reviews_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "public_church_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_agent_permission: {
