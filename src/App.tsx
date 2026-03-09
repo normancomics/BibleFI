@@ -113,6 +113,7 @@ const App = () => (
               <Route path="/builder-score" element={<BuilderScorePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
+              <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
