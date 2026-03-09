@@ -46,7 +46,7 @@ export class LiveChurchSearchService {
   static async searchChurches(params: LiveChurchSearchParams): Promise<LiveChurchResult[]> {
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*');
 
       // Text search across multiple fields
