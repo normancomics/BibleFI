@@ -205,11 +205,13 @@ Deno.serve(async (req) => {
       }
 
       // audit_readonly: validate KJV text + references without writing fixes
-      const { data: storedVerses } = await supabase.from('biblical_knowledge_base')
+      const { data: storedVerses, error: queryError } = await supabase.from('biblical_knowledge_base')
         .select('id, reference, verse_text')
         .not('verse_text', 'is', null)
         .order('created_at', { ascending: true })
         .limit(batchSize);
+
+      console.log('[audit_readonly] Query result:', storedVerses?.length, 'verses, error:', queryError?.message || 'none');
 
       const validations: ValidationResult[] = [];
       let validCount = 0;
