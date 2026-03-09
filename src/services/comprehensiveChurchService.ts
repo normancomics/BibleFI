@@ -135,7 +135,7 @@ export class ComprehensiveChurchService {
         accepts_crypto: church.accepts_crypto,
         accepts_fiat: church.accepts_fiat,
         accepts_cards: church.accepts_cards,
-        crypto_address: church.crypto_address,
+        crypto_address: church.masked_crypto_address || null,
         crypto_networks: church.crypto_networks,
         verified: church.verified,
         rating: church.rating,
