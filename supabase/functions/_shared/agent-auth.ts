@@ -40,8 +40,17 @@ export async function requireAgentAuth(req: Request): Promise<AgentAuthResult> {
     return { authorized: false, method: null, error: 'Invalid cron secret' };
   }
 
-  // Method 2: Admin JWT
+  // Method 2: Service Role Key (for internal/tooling calls)
   const authHeader = req.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.replace('Bearer ', '');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (serviceRoleKey && token === serviceRoleKey) {
+      return { authorized: true, method: 'cron' }; // treat as trusted internal call
+    }
+  }
+
+  // Method 3: Admin JWT
   if (!authHeader?.startsWith('Bearer ')) {
     return { authorized: false, method: null, error: 'Authentication required' };
   }

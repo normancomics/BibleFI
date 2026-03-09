@@ -304,24 +304,31 @@ async function fetchProtocolYields(): Promise<{ protocol: string; type: string; 
     ...BASE_PROTOCOLS.cdp.map(p => ({ ...p, type: 'cdp' })),
   ];
 
-  // Batch fetch in groups of 5 to respect rate limits
-  for (let i = 0; i < allProtocols.length; i += 5) {
-    const batch = allProtocols.slice(i, i + 5);
-    const batchResults = await Promise.allSettled(
-      batch.map(async (p) => {
-        const resp = await fetch(`https://api.llama.fi/protocol/${p.slug}`);
-        if (!resp.ok) { await resp.text(); return null; }
-        const data = await resp.json();
-        const tvl = data.currentChainTvls?.Base || data.tvl?.[data.tvl.length - 1]?.totalLiquidityUSD || 0;
-        const prevTvl = data.tvl?.[data.tvl.length - 2]?.totalLiquidityUSD || tvl;
-        const change = prevTvl > 0 ? ((tvl - prevTvl) / prevTvl) * 100 : 0;
-        return { protocol: p.name, type: p.type, tvl, change_1d: change };
-      })
-    );
-    for (const r of batchResults) {
-      if (r.status === 'fulfilled' && r.value) results.push(r.value);
+  // Use bulk protocols endpoint instead of individual calls (much faster)
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 15000);
+    const resp = await fetch('https://api.llama.fi/protocols', { signal: controller.signal });
+    if (!resp.ok) throw new Error('Failed to fetch protocols');
+    const allDefiProtocols = await resp.json();
+
+    // Build slug -> data map
+    const slugMap = new Map<string, any>();
+    for (const p of allDefiProtocols) {
+      if (p.slug) slugMap.set(p.slug, p);
+      // Also try matching by name lowercase
+      if (p.name) slugMap.set(p.name.toLowerCase().replace(/\s+/g, '-'), p);
     }
-    await new Promise(r => setTimeout(r, 500));
+
+    for (const protocol of allProtocols) {
+      const data = slugMap.get(protocol.slug);
+      if (!data) continue;
+      const tvl = data.chainTvls?.Base || data.tvl || 0;
+      const change = data.change_1d || 0;
+      results.push({ protocol: protocol.name, type: protocol.type, tvl, change_1d: change });
+    }
+  } catch (e) {
+    console.error('Bulk protocol fetch failed, using fallback:', e);
   }
 
   return results;
@@ -567,6 +574,44 @@ Deno.serve(async (req) => {
           defi_knowledge_entries: defiCount || 0,
           last_run: new Date().toISOString(),
         }
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Dry run mode: fetches live data and generates signals without persisting (read-only, no auth needed)
+    if (mode === 'dry_run') {
+      const [prices, protocols, yieldPools] = await Promise.all([
+        fetchPricesWithChanges(),
+        fetchProtocolYields(),
+        fetchYieldPools(),
+      ]);
+      const signals = generateSignals(prices, protocols, yieldPools);
+      const actionableSignals = signals.filter(s => s.actionable);
+      const byType: Record<string, OpportunitySignal[]> = {};
+      for (const s of signals) {
+        if (!byType[s.type]) byType[s.type] = [];
+        byType[s.type].push(s);
+      }
+      return new Response(JSON.stringify({
+        success: true, agent: 'defi-opportunity-scanner', mode: 'dry_run',
+        scan_timestamp: new Date().toISOString(),
+        total_signals: signals.length,
+        actionable_signals: actionableSignals.length,
+        tokens_tracked: Object.keys(KEY_TOKENS).length,
+        prices_fetched: Object.keys(prices).length,
+        protocols_scanned: protocols.length,
+        yield_pools_found: yieldPools.length,
+        prices,
+        protocols: protocols.slice(0, 20),
+        yield_pools: yieldPools.slice(0, 10),
+        signals_by_type: Object.fromEntries(
+          Object.entries(byType).map(([type, sigs]) => [type, { count: sigs.length, top: sigs.slice(0, 3) }])
+        ),
+        top_opportunities: actionableSignals
+          .sort((a, b) => {
+            const strength = { strong: 3, moderate: 2, weak: 1 };
+            return strength[b.signal_strength] - strength[a.signal_strength];
+          })
+          .slice(0, 10),
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
