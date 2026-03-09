@@ -305,7 +305,7 @@ export class GlobalChurchCrawlerService {
   static async getCryptoEnabledChurches(): Promise<GlobalChurchData[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('accepts_crypto', true)
         .order('verified', { ascending: false });
