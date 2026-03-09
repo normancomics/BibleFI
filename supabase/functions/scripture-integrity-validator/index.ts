@@ -202,6 +202,12 @@ Deno.serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // All write modes require auth
+    const auth = await requireAgentAuth(req);
+    if (!auth.authorized) {
+      return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
+    }
+
     const result = await withAgentSandbox(
       { agentName: 'scripture-integrity-validator', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode, batchSize } },
       async (ctx: AgentContext) => {
