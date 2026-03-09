@@ -120,13 +120,23 @@ export class RealSuperfluidClient {
       },
       logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
     },
-    'BIBLEx': {
-      name: 'Super BIBLE',
-      symbol: 'BIBLEx',
-      address: ZeroAddress,
+    'BIBLEFIx': {
+      name: 'Super BIBLEFI',
+      symbol: 'BIBLEFIx',
+      address: ZeroAddress, // Deploy pending — governance token
       underlyingToken: {
-        symbol: 'BIBLE',
-        address: this.BIBLE_TOKEN_ADDRESS
+        symbol: 'BIBLEFI',
+        address: ZeroAddress // Deploy pending
+      },
+      logoURI: '/bible-fi-preview.png'
+    },
+    'WISDOMx': {
+      name: 'Super WISDOM',
+      symbol: 'WISDOMx',
+      address: ZeroAddress, // Deploy pending — rewards token
+      underlyingToken: {
+        symbol: 'WISDOM',
+        address: ZeroAddress // Deploy pending
       },
       logoURI: '/bible-fi-preview.png'
     }
