@@ -54,6 +54,7 @@ const BiblicalFinanceEncyclopediaPage = lazy(() => import("./pages/BiblicalFinan
 const BuilderScorePage = lazy(() => import("./pages/BuilderScorePage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -110,6 +111,7 @@ const App = () => (
               <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
               <Route path="/builder-score" element={<BuilderScorePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
