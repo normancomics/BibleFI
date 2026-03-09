@@ -101,6 +101,10 @@ const DefiOpportunitiesDashboard: React.FC = () => {
               {lastRefresh.toLocaleTimeString()}
             </span>
           )}
+          <Badge variant="outline" className="text-[10px] font-mono border-secondary/30 gap-1">
+            <RefreshCw className="w-2.5 h-2.5" />
+            {Math.floor(secondsUntilRefresh / 60)}:{(secondsUntilRefresh % 60).toString().padStart(2, '0')}
+          </Badge>
           <Button
             onClick={handleRefresh}
             variant="outline"
