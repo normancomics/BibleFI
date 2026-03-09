@@ -10,48 +10,20 @@ export async function searchChurches(query: string): Promise<Church[]> {
       return [];
     }
 
-    // Search both churches and global_churches tables
-    const [churchesResult, globalChurchesResult] = await Promise.all([
-      supabase
-        .from('churches')
-        .select('*')
-        .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state.ilike.%${query}%`)
-        .limit(10),
-      supabaseApi
-        .from('global_churches')
-        .select('*')
-        .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
-        .limit(10)
-    ]);
-    
-    if (churchesResult.error) {
-      console.error("Error searching churches:", churchesResult.error);
-    }
+    // Search global_churches via api schema (churches table is deprecated)
+    const globalChurchesResult = await supabaseApi
+      .from('global_churches')
+      .select('*')
+      .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
+      .limit(20);
     
     if (globalChurchesResult.error) {
       console.error("Error searching global churches:", globalChurchesResult.error);
+      return [];
     }
     
-    // Transform churches table results
-    const transformedLocal = churchesResult.data?.map(church => ({
-      id: church.id,
-      name: church.name,
-      denomination: church.denomination,
-      location: `${church.city}, ${church.state}, ${church.country}`,
-      address: church.address,
-      city: church.city,
-      state: church.state,
-      country: church.country,
-      website: church.website,
-      acceptsCrypto: church.accepts_crypto,
-      payment_methods: church.payment_methods,
-      verified: church.verified,
-      created_at: church.created_at,
-      created_by: church.created_by
-    })) || [];
-
     // Transform global_churches table results
-    const transformedGlobal = globalChurchesResult.data?.map(church => ({
+    const results: Church[] = (globalChurchesResult.data || []).map((church: any) => ({
       id: church.id,
       name: church.name,
       denomination: church.denomination,
@@ -65,21 +37,9 @@ export async function searchChurches(query: string): Promise<Church[]> {
       payment_methods: church.accepts_fiat ? ['cash'] : [],
       verified: church.verified,
       created_at: church.created_at,
-      created_by: church.created_by
-    })) || [];
+    }));
     
-    // Combine results
-    const allChurches = [...transformedLocal, ...transformedGlobal];
-    
-    // Deduplicate by name and city
-    const uniqueChurches = allChurches.filter((church, index, self) => 
-      index === self.findIndex(c => 
-        c.name.toLowerCase() === church.name.toLowerCase() && 
-        c.city.toLowerCase() === church.city.toLowerCase()
-      )
-    );
-    
-    return uniqueChurches.slice(0, 20);
+    return results;
   } catch (error) {
     console.error("Error in searchChurches:", error);
     return [];
