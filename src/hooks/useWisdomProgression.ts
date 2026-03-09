@@ -6,6 +6,7 @@ import {
   WisdomAchievement,
   WISDOM_LEVELS 
 } from '@/types/wisdomProgression';
+import { secureStorage } from '@/utils/securityUtils';
 
 const BIBLICAL_MILESTONES: BiblicalMilestone[] = [
   {
@@ -218,28 +219,27 @@ export const useWisdomProgression = () => {
   const [milestones, setMilestones] = useState<BiblicalMilestone[]>(BIBLICAL_MILESTONES);
   const [achievements, setAchievements] = useState<WisdomAchievement[]>(WISDOM_ACHIEVEMENTS);
 
-  // Load saved progress from localStorage
+  // Load saved progress from secureStorage
   useEffect(() => {
-    const saved = localStorage.getItem('bible-fi-wisdom-progress');
+    const saved = secureStorage.getItem('bible-fi-wisdom-progress');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
-        setProgress(parsed.progress || progress);
-        setMilestones(parsed.milestones || BIBLICAL_MILESTONES);
-        setAchievements(parsed.achievements || WISDOM_ACHIEVEMENTS);
+        setProgress(saved.progress || progress);
+        setMilestones(saved.milestones || BIBLICAL_MILESTONES);
+        setAchievements(saved.achievements || WISDOM_ACHIEVEMENTS);
       } catch (e) {
         console.error('Failed to load wisdom progress:', e);
       }
     }
   }, []);
 
-  // Save progress to localStorage
+  // Save progress to secureStorage
   const saveProgress = useCallback(() => {
-    localStorage.setItem('bible-fi-wisdom-progress', JSON.stringify({
+    secureStorage.setItem('bible-fi-wisdom-progress', {
       progress,
       milestones,
       achievements
-    }));
+    });
   }, [progress, milestones, achievements]);
 
   const addPoints = useCallback((points: number, reason?: string) => {

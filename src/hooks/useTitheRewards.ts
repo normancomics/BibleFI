@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useWisdomProgression } from './useWisdomProgression';
 import { useToast } from './use-toast';
+import { secureStorage } from '@/utils/securityUtils';
 
 // Points awarded for different tithing actions
 const TITHE_REWARDS = {
@@ -54,18 +55,17 @@ export const useTitheRewards = () => {
 
   // Load tithe history on mount
   useEffect(() => {
-    const saved = localStorage.getItem('bible-fi-tithe-history');
+    const saved = secureStorage.getItem('bible-fi-tithe-history');
     if (saved) {
-      const parsed = JSON.parse(saved);
       setTitheHistory({
-        ...parsed,
-        firstTitheDate: parsed.firstTitheDate ? new Date(parsed.firstTitheDate) : null,
+        ...saved,
+        firstTitheDate: saved.firstTitheDate ? new Date(saved.firstTitheDate) : null,
       });
     }
   }, []);
 
   const saveTitheHistory = useCallback((history: TithingHistory) => {
-    localStorage.setItem('bible-fi-tithe-history', JSON.stringify(history));
+    secureStorage.setItem('bible-fi-tithe-history', history);
     setTitheHistory(history);
   }, []);
 
@@ -216,8 +216,8 @@ export const useTitheRewards = () => {
   }, [addPoints, updateAchievementProgress, saveProgress, toast, checkAndAwardWeeklyStreak, titheHistory]);
 
   const checkFirstTithe = useCallback((): boolean => {
-    // Check localStorage for tithe history
-    const history = localStorage.getItem('bible-fi-tithe-history');
+    // Check secureStorage for tithe history
+    const history = secureStorage.getItem('bible-fi-tithe-history');
     if (!history) {
       const newHistory: TithingHistory = {
         count: 1,
