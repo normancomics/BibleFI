@@ -322,6 +322,7 @@ export type Database = {
           id: string
           joined_at: string | null
           primary_church: boolean | null
+          status: string
           user_id: string
         }
         Insert: {
@@ -329,6 +330,7 @@ export type Database = {
           id?: string
           joined_at?: string | null
           primary_church?: boolean | null
+          status?: string
           user_id: string
         }
         Update: {
@@ -336,6 +338,7 @@ export type Database = {
           id?: string
           joined_at?: string | null
           primary_church?: boolean | null
+          status?: string
           user_id?: string
         }
         Relationships: [
