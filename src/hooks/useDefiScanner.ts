@@ -62,7 +62,11 @@ export function useDefiScanner(autoRefreshMs = 60000) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(Math.floor(autoRefreshMs / 1000));
+  const [newSignals, setNewSignals] = useState<OpportunitySignal[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevSignalCountRef = useRef<number>(0);
 
   const fetchScan = useCallback(async () => {
     try {
@@ -84,24 +88,45 @@ export function useDefiScanner(autoRefreshMs = 60000) {
 
       if (!res.ok) throw new Error(`Scanner returned ${res.status}`);
       const result: ScanResult = await res.json();
+
+      // Detect new signals
+      const prevCount = prevSignalCountRef.current;
+      if (prevCount > 0 && result.total_signals > prevCount) {
+        const allNew = result.top_opportunities.slice(0, result.total_signals - prevCount);
+        setNewSignals(allNew);
+      } else {
+        setNewSignals([]);
+      }
+      prevSignalCountRef.current = result.total_signals;
+
       setData(result);
       setLastRefresh(new Date());
+      setSecondsUntilRefresh(Math.floor(autoRefreshMs / 1000));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch scan data');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [autoRefreshMs]);
 
   useEffect(() => {
     fetchScan();
     if (autoRefreshMs > 0) {
       intervalRef.current = setInterval(fetchScan, autoRefreshMs);
+      countdownRef.current = setInterval(() => {
+        setSecondsUntilRefresh(prev => (prev <= 1 ? Math.floor(autoRefreshMs / 1000) : prev - 1));
+      }, 1000);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, [fetchScan, autoRefreshMs]);
 
-  return { data, loading, error, lastRefresh, refresh: fetchScan };
+  const refresh = useCallback(async () => {
+    setSecondsUntilRefresh(Math.floor(autoRefreshMs / 1000));
+    await fetchScan();
+  }, [fetchScan, autoRefreshMs]);
+
+  return { data, loading, error, lastRefresh, secondsUntilRefresh, newSignals, refresh };
 }

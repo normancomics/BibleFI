@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDefiScanner } from '@/hooks/useDefiScanner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import {
   Coins, BarChart3, Zap, Shield, Activity, ArrowUpRight, ArrowDownRight,
   Timer, Wheat, Landmark, Globe, Star
 } from 'lucide-react';
+import { toast } from 'sonner';
 import TokenPriceGrid from './TokenPriceGrid';
 import ProtocolTVLTable from './ProtocolTVLTable';
 import YieldPoolCards from './YieldPoolCards';
@@ -17,8 +18,20 @@ import SignalFeed from './SignalFeed';
 import MarketOverviewBar from './MarketOverviewBar';
 
 const DefiOpportunitiesDashboard: React.FC = () => {
-  const { data, loading, error, lastRefresh, refresh } = useDefiScanner(120000);
+  const { data, loading, error, lastRefresh, secondsUntilRefresh, newSignals, refresh } = useDefiScanner(120000);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Toast notifications for new signals
+  useEffect(() => {
+    if (newSignals.length > 0) {
+      newSignals.forEach((sig) => {
+        toast(`📡 New ${sig.type} signal`, {
+          description: `${sig.protocol} • ${sig.asset}: ${sig.details}`,
+          duration: 6000,
+        });
+      });
+    }
+  }, [newSignals]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
