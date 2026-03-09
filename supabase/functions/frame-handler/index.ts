@@ -17,11 +17,11 @@ serve(async (req) => {
     // Rate limiting - 30 requests per minute for frames (higher for interactive use)
     const clientIP = getClientIP(req);
     const rateLimitKey = `frame-handler:${clientIP}`;
-    const isAllowed = await checkRateLimit(rateLimitKey, 30, 60000);
+    const isAllowed = checkRateLimit(rateLimitKey, 30, 60000);
     
-    if (!isAllowed) {
+    if (!isAllowed.allowed) {
       console.warn(`Rate limit exceeded for IP: ${clientIP}`);
-      return rateLimitResponse(corsHeaders);
+      return rateLimitResponse(isAllowed.resetAt, corsHeaders);
     }
 
     if (req.method !== 'POST') {

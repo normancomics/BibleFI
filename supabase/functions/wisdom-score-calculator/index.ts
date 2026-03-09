@@ -43,11 +43,11 @@ serve(async (req) => {
     
     const rateLimitKey = user ? `wisdom-score:user:${user.id}` : `wisdom-score:ip:${clientIP}`;
     const rateLimit = user ? 30 : 10; // 30/min for authenticated, 10/min for anonymous
-    const isAllowed = await checkRateLimit(rateLimitKey, rateLimit, 60000);
+    const isAllowed = checkRateLimit(rateLimitKey, rateLimit, 60000);
     
-    if (!isAllowed) {
+    if (!isAllowed.allowed) {
       console.warn(`Rate limit exceeded for ${user ? 'user: ' + user.id : 'IP: ' + clientIP}`);
-      return rateLimitResponse(corsHeaders);
+      return rateLimitResponse(isAllowed.resetAt, corsHeaders);
     }
 
     // Validate request method
