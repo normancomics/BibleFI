@@ -100,7 +100,26 @@ function calculateRelevance(keywords: string[], categories: string[]): number {
   return Math.min(keywords.length * 8 + categories.length * 12, 100);
 }
 
-// Key financial passages to scan (book:chapter ranges)
+// ALL 66 books for systematic full-Bible scanning
+const ALL_BIBLE_BOOKS = [
+  // OT
+  'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
+  'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings',
+  '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther',
+  'Job', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon',
+  'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel',
+  'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah',
+  'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi',
+  // NT
+  'Matthew', 'Mark', 'Luke', 'John', 'Acts',
+  'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians',
+  'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians',
+  '1 Timothy', '2 Timothy', 'Titus', 'Philemon',
+  'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John',
+  'Jude', 'Revelation',
+];
+
+// Key financial passages to scan (known high-value references)
 const FINANCIAL_PASSAGES = [
   // Torah economic laws
   'Genesis 14:18-20', 'Genesis 41:33-36', 'Genesis 47:23-26',
@@ -148,6 +167,18 @@ const FINANCIAL_PASSAGES = [
   '1 John 3:17-18',
   'Revelation 3:17-18', 'Revelation 18:11-19',
 ];
+
+// Systematic chapter scanning for full Bible coverage
+async function fetchFullChapter(book: string, chapter: number): Promise<any[] | null> {
+  try {
+    const resp = await fetch(`${BIBLE_API_URL}/${encodeURIComponent(`${book} ${chapter}`)}?translation=kjv`);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.verses || [];
+  } catch {
+    return null;
+  }
+}
 
 async function fetchVerse(reference: string): Promise<{ text: string; verses: any[] } | null> {
   try {
