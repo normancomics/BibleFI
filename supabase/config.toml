@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.market-wisdom-correlator]
 verify_jwt = false
+
+[functions.check-admin-role]
+verify_jwt = false

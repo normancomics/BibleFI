@@ -133,9 +133,38 @@ function isValidChurchName(name: string): boolean {
   return true;
 }
 
+function unauthorized(msg = 'Authentication required') {
+  return new Response(JSON.stringify({ error: msg }), {
+    status: 401,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // --- Auth gate: require valid JWT or cron secret ---
+  const cronSecret = req.headers.get('x-cron-secret');
+  const authHeader = req.headers.get('Authorization');
+  if (cronSecret) {
+    if (cronSecret !== Deno.env.get('CRON_SECRET')) {
+      return unauthorized('Invalid cron secret');
+    }
+  } else if (authHeader?.startsWith('Bearer ')) {
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return unauthorized('Invalid or expired token');
+    }
+  } else {
+    return unauthorized();
   }
 
   try {
