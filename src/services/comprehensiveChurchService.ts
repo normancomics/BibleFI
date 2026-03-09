@@ -203,7 +203,7 @@ export class ComprehensiveChurchService {
   async findChurchByNameAndLocation(name: string, city: string, state?: string): Promise<Church | null> {
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .ilike('name', `%${name}%`)
         .ilike('city', `%${city}%`);
