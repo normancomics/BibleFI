@@ -165,6 +165,12 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // SECURITY: Require admin or cron-secret authentication
+  const auth = await requireAgentAuth(req);
+  if (!auth.authorized) {
+    return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
     const mode = body.mode || 'correlate';
