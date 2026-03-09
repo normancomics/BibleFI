@@ -55,6 +55,7 @@ const BuilderScorePage = lazy(() => import("./pages/BuilderScorePage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const DefiOpportunitiesPage = lazy(() => import("./pages/DefiOpportunitiesPage"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
