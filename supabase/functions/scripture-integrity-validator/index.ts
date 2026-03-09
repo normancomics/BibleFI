@@ -250,7 +250,7 @@ Deno.serve(async (req) => {
             auditResults.push({ reference: stored.reference, status: 'mismatch', stored_text: stored.verse_text?.substring(0, 100) || '', source_text: sourceText.substring(0, 100), similarity: sim, issues: [`Text similarity ${(sim * 100).toFixed(1)}% - below 85% threshold`] });
             auditMismatch++;
           }
-          await new Promise(r => setTimeout(r, 300));
+          await new Promise(r => setTimeout(r, 500));
         } catch (err) {
           auditError++;
           auditResults.push({ reference: stored.reference, status: 'error', stored_text: stored.verse_text?.substring(0, 80) || '', issues: [err instanceof Error ? err.message : String(err)] });
