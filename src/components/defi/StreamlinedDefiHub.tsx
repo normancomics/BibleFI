@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,12 +8,15 @@ import {
   TrendingUp, 
   Shield,
   DollarSign,
-  PieChart
+  PieChart,
+  Activity
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SimpleSwapForm from './SimpleSwapForm';
 import StakingForm from '../staking/StakingForm';
 import RealPortfolioBalance from './RealPortfolioBalance';
+
+const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
 
 const StreamlinedDefiHub: React.FC = () => {
   const { toast } = useToast();
@@ -47,7 +50,7 @@ const StreamlinedDefiHub: React.FC = () => {
 
       {/* Main DeFi Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 bg-black/30">
+        <TabsList className="grid grid-cols-5 bg-black/30">
           <TabsTrigger value="swap" className="data-[state=active]:bg-blue-600/30">
             <ArrowUpDown className="w-4 h-4 mr-2" />
             Swap
@@ -59,6 +62,11 @@ const StreamlinedDefiHub: React.FC = () => {
           <TabsTrigger value="pools" className="data-[state=active]:bg-purple-600/30">
             <TrendingUp className="w-4 h-4 mr-2" />
             Pools
+          </TabsTrigger>
+          <TabsTrigger value="opportunities" className="data-[state=active]:bg-secondary/30">
+            <Activity className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Opportunities</span>
+            <span className="sm:hidden">Opps</span>
           </TabsTrigger>
           <TabsTrigger value="analytics" className="data-[state=active]:bg-orange-600/30">
             <PieChart className="w-4 h-4 mr-2" />
@@ -133,6 +141,16 @@ const StreamlinedDefiHub: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="opportunities" className="space-y-6">
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <DefiOpportunitiesDashboard />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
