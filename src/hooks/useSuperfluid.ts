@@ -334,8 +334,25 @@ export const useSuperfluid = () => {
     deleteFlow,
     createTithingStream, // Legacy
     
+    // Balance & Upgrade (new)
+    getUnderlyingBalance: (tokenSymbol: string) => {
+      if (!isConnected) return Promise.resolve({ balance: 0n, formatted: '0', decimals: 18 });
+      return getProvider().then(p => p.getSigner()).then(s => realSuperfluidClient.getUnderlyingBalance(s, tokenSymbol));
+    },
+    getSuperTokenBalance: (tokenSymbol: string) => {
+      if (!isConnected) return Promise.resolve({ balance: 0n, formatted: '0' });
+      return getProvider().then(p => p.getSigner()).then(s => realSuperfluidClient.getSuperTokenBalance(s, tokenSymbol));
+    },
+    upgradeToSuperToken: async (tokenSymbol: string, amount: bigint) => {
+      if (!isConnected) return { success: false, error: 'Not connected' };
+      const provider = await getProvider();
+      const signer = await provider.getSigner();
+      return realSuperfluidClient.upgradeToSuperToken(signer, tokenSymbol, amount);
+    },
+    
     // Utilities
     getAvailableTokens: () => realSuperfluidClient.getAvailableTokens(),
+    getDeployedTokens: () => realSuperfluidClient.getDeployedTokens(),
     getToken: (symbol: string) => realSuperfluidClient.getToken(symbol),
     calculateFlowRate: (amount: number, decimals?: number) => 
       realSuperfluidClient.calculateFlowRate(amount, decimals),
