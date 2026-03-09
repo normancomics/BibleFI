@@ -10,9 +10,9 @@ export async function searchChurches(query: string): Promise<Church[]> {
       return [];
     }
 
-    // Use the public_church_directory view which masks sensitive PII (email, phone, crypto_address)
-    // This is safe for anonymous/unauthenticated access
-    const { data, error } = await supabase
+    // Use the api schema's public_church_directory view which masks sensitive PII
+    // PostgREST only exposes the 'api' schema, so we must use supabaseApi
+    const { data, error } = await supabaseApi
       .from('public_church_directory')
       .select('*')
       .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
