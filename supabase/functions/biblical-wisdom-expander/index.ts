@@ -1,9 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
+import { requireAgentAuth, unauthorizedResponse } from '../_shared/agent-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
 // Extended financial term taxonomy for deep scripture mining
@@ -112,6 +113,12 @@ async function fetchChapterVerses(book: string, chapter: number): Promise<any[] 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // SECURITY: Require admin or cron-secret authentication
+  const auth = await requireAgentAuth(req);
+  if (!auth.authorized) {
+    return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
   }
 
   try {

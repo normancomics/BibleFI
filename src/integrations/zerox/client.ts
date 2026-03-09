@@ -1,9 +1,11 @@
 
 /**
- * 0x Protocol API Integration
- * Documentation: https://0x.org/docs/introduction/0x-api-specification
+ * 0x Protocol API Integration (Secure Proxy Version)
+ * All API calls are proxied through a Supabase Edge Function
+ * to protect the API key server-side.
  */
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // Types for 0x API responses
 export interface PriceResponse {
@@ -97,41 +99,43 @@ export function parseTokenAmount(amount: string | number, decimals: number): str
   return (amountNum * multiplier).toFixed(0);
 }
 
-// Create a client to interact with 0x API
+/**
+ * Secure client that proxies requests through edge function
+ * to keep API key server-side only.
+ */
 export class ZeroXClient {
-  private apiKey: string;
-  private baseUrl: string;
-  private chainId: number;
-  
-  constructor(apiKey: string, chainId = BASE_CHAIN_ID) {
-    this.apiKey = apiKey;
-    this.chainId = chainId;
-    this.baseUrl = "https://api.0x.org";
+  constructor() {
+    // No client-side API key needed - requests go through edge function
   }
-  
+
+  private async invokeProxy(payload: Record<string, unknown>): Promise<any> {
+    const { data, error } = await supabase.functions.invoke('zerox-proxy', {
+      body: payload,
+    });
+
+    if (error) {
+      console.error('[ZeroXClient] Proxy error:', error);
+      throw new Error(error.message || 'Failed to fetch from 0x API');
+    }
+
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+
+    return data;
+  }
+
   // Get supported token list
   async getSupportedTokens(): Promise<Token[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/swap/v1/tokens?chainId=${this.chainId}`, {
-        headers: {
-          "0x-api-key": this.apiKey
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("Error fetching tokens:", error);
-        return Object.values(BASE_TOKENS); // Fallback to predefined tokens
-      }
-      
-      const data = await response.json();
-      return data.records;
+      const data = await this.invokeProxy({ endpoint: 'tokens' });
+      return data.records || Object.values(BASE_TOKENS);
     } catch (error) {
       console.error("Failed to fetch supported tokens:", error);
       return Object.values(BASE_TOKENS); // Fallback to predefined tokens
     }
   }
-  
+
   // Get price quote for token swap
   async getQuote(
     sellToken: string,
@@ -139,32 +143,18 @@ export class ZeroXClient {
     sellAmount: string
   ): Promise<PriceResponse | null> {
     try {
-      const params = new URLSearchParams({
+      return await this.invokeProxy({
+        endpoint: 'price',
         sellToken,
         buyToken,
         sellAmount,
-        chainId: this.chainId.toString()
       });
-      
-      const response = await fetch(`${this.baseUrl}/swap/v1/price?${params}`, {
-        headers: {
-          "0x-api-key": this.apiKey
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("Error fetching price:", error);
-        return null;
-      }
-      
-      return await response.json();
     } catch (error) {
       console.error("Failed to fetch price quote:", error);
       return null;
     }
   }
-  
+
   // Get swap quote with transaction data
   async getSwapQuote(
     sellToken: string,
@@ -173,30 +163,13 @@ export class ZeroXClient {
     takerAddress?: string
   ): Promise<SwapQuoteResponse | null> {
     try {
-      const params = new URLSearchParams({
+      return await this.invokeProxy({
+        endpoint: 'quote',
         sellToken,
         buyToken,
         sellAmount,
-        chainId: this.chainId.toString()
+        takerAddress,
       });
-      
-      if (takerAddress) {
-        params.append("takerAddress", takerAddress);
-      }
-      
-      const response = await fetch(`${this.baseUrl}/swap/v1/quote?${params}`, {
-        headers: {
-          "0x-api-key": this.apiKey
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("Error fetching swap quote:", error);
-        return null;
-      }
-      
-      return await response.json();
     } catch (error) {
       console.error("Failed to fetch swap quote:", error);
       return null;
@@ -204,15 +177,13 @@ export class ZeroXClient {
   }
 }
 
-// Hook to use 0x API with BibleFi customizations
+// Hook to use 0x API with BibleFi customizations (via secure proxy)
 export function useZeroX() {
   const { toast } = useToast();
-  
-  // Access the API key from server environment
-  // This key is stored securely in Supabase Edge Functions
-  const apiKey = "62f2a1b5-ee27-4423-962f-e84a2d40badb"; // This will be replaced with secure access
-  const client = new ZeroXClient(apiKey);
-  
+
+  // No API key on client side - all requests go through edge function
+  const client = new ZeroXClient();
+
   const getTokenPrice = async (tokenSymbol: string): Promise<number | null> => {
     try {
       // Get price of token in USDC
@@ -220,7 +191,7 @@ export function useZeroX() {
       if (!token) {
         throw new Error(`Token ${tokenSymbol} not supported`);
       }
-      
+
       // Use 1 unit of the token as sell amount
       const sellAmount = parseTokenAmount("1", token.decimals);
       const quote = await client.getQuote(
@@ -228,11 +199,11 @@ export function useZeroX() {
         BASE_TOKENS.USDC.address,
         sellAmount
       );
-      
+
       if (!quote) {
         return null;
       }
-      
+
       // Format price as USD
       return parseFloat(formatTokenAmount(quote.price, BASE_TOKENS.USDC.decimals));
     } catch (error) {
@@ -245,7 +216,7 @@ export function useZeroX() {
       return null;
     }
   };
-  
+
   return {
     client,
     getTokenPrice,

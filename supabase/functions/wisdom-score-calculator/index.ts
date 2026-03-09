@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { checkRateLimit, getClientIP, validateInput, getOptionalUser, errorResponse, rateLimitResponse } from '../_shared/auth.ts';
+import { checkRateLimit, getClientIP, validateInput, errorResponse, rateLimitResponse } from '../_shared/auth.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -37,16 +37,32 @@ serve(async (req) => {
   }
 
   try {
-    // Rate limiting - different limits for auth vs unauth
-    const clientIP = getClientIP(req);
-    const user = await getOptionalUser(req, supabase);
-    
-    const rateLimitKey = user ? `wisdom-score:user:${user.id}` : `wisdom-score:ip:${clientIP}`;
-    const rateLimit = user ? 30 : 10; // 30/min for authenticated, 10/min for anonymous
-    const isAllowed = checkRateLimit(rateLimitKey, rateLimit, 60000);
-    
+    // SECURITY FIX: Require authentication and use verified user ID from JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return errorResponse('Authentication required', 401, corsHeaders);
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const anonClient = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_ANON_KEY')!
+    );
+
+    const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
+    if (authError || !user) {
+      return errorResponse('Invalid authentication token', 401, corsHeaders);
+    }
+
+    // Use verified user ID from JWT - NEVER trust body-supplied userId
+    const verifiedUserId = user.id;
+
+    // Rate limiting based on verified user
+    const rateLimitKey = `wisdom-score:user:${verifiedUserId}`;
+    const isAllowed = checkRateLimit(rateLimitKey, 30, 60000);
+
     if (!isAllowed.allowed) {
-      console.warn(`Rate limit exceeded for ${user ? 'user: ' + user.id : 'IP: ' + clientIP}`);
+      console.warn(`Rate limit exceeded for user: ${verifiedUserId}`);
       return rateLimitResponse(isAllowed.resetAt, corsHeaders);
     }
 
@@ -56,17 +72,8 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { userId, factors } = body;
-
-    // Validate userId format (UUID)
-    const validation = validateInput(userId || '', 'userId', { 
-      maxLength: 36, 
-      pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i 
-    });
-    
-    if (!validation.valid) {
-      return errorResponse(validation.error || 'Invalid userId', 400, corsHeaders);
-    }
+    const { factors } = body;
+    // Note: body.userId is IGNORED for security - we use verifiedUserId instead
 
     // Validate factors object
     if (!factors || typeof factors !== 'object') {
@@ -134,11 +141,11 @@ serve(async (req) => {
       .limit(1)
       .single();
 
-    // Store wisdom score using parameterized query
+    // Store wisdom score using VERIFIED user ID from JWT
     const { data: wisdomScore, error: insertError } = await supabase
       .from('wisdom_scores')
       .insert({
-        user_id: userId,
+        user_id: verifiedUserId, // SECURE: Uses JWT-verified user ID
         score: Math.min(score, maxScore),
         factors: sanitizedFactors,
         biblical_verse_id: relevantVerse?.id || null
@@ -182,8 +189,10 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    const err = error as Error;
-    console.error('Error calculating wisdom score:', err);
-    return errorResponse(err?.message || 'Unknown error', 500, corsHeaders);
+    console.error('Error calculating wisdom score:', error);
+    return new Response(
+      JSON.stringify({ error: 'An unexpected error occurred. Please try again.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
 });
