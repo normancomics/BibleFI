@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,12 +8,15 @@ import {
   TrendingUp, 
   Shield,
   DollarSign,
-  PieChart
+  PieChart,
+  Activity
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SimpleSwapForm from './SimpleSwapForm';
 import StakingForm from '../staking/StakingForm';
 import RealPortfolioBalance from './RealPortfolioBalance';
+
+const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
 
 const StreamlinedDefiHub: React.FC = () => {
   const { toast } = useToast();
