@@ -304,24 +304,31 @@ async function fetchProtocolYields(): Promise<{ protocol: string; type: string; 
     ...BASE_PROTOCOLS.cdp.map(p => ({ ...p, type: 'cdp' })),
   ];
 
-  // Batch fetch in groups of 5 to respect rate limits
-  for (let i = 0; i < allProtocols.length; i += 5) {
-    const batch = allProtocols.slice(i, i + 5);
-    const batchResults = await Promise.allSettled(
-      batch.map(async (p) => {
-        const resp = await fetch(`https://api.llama.fi/protocol/${p.slug}`);
-        if (!resp.ok) { await resp.text(); return null; }
-        const data = await resp.json();
-        const tvl = data.currentChainTvls?.Base || data.tvl?.[data.tvl.length - 1]?.totalLiquidityUSD || 0;
-        const prevTvl = data.tvl?.[data.tvl.length - 2]?.totalLiquidityUSD || tvl;
-        const change = prevTvl > 0 ? ((tvl - prevTvl) / prevTvl) * 100 : 0;
-        return { protocol: p.name, type: p.type, tvl, change_1d: change };
-      })
-    );
-    for (const r of batchResults) {
-      if (r.status === 'fulfilled' && r.value) results.push(r.value);
+  // Use bulk protocols endpoint instead of individual calls (much faster)
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 15000);
+    const resp = await fetch('https://api.llama.fi/protocols', { signal: controller.signal });
+    if (!resp.ok) throw new Error('Failed to fetch protocols');
+    const allDefiProtocols = await resp.json();
+
+    // Build slug -> data map
+    const slugMap = new Map<string, any>();
+    for (const p of allDefiProtocols) {
+      if (p.slug) slugMap.set(p.slug, p);
+      // Also try matching by name lowercase
+      if (p.name) slugMap.set(p.name.toLowerCase().replace(/\s+/g, '-'), p);
     }
-    await new Promise(r => setTimeout(r, 500));
+
+    for (const protocol of allProtocols) {
+      const data = slugMap.get(protocol.slug);
+      if (!data) continue;
+      const tvl = data.chainTvls?.Base || data.tvl || 0;
+      const change = data.change_1d || 0;
+      results.push({ protocol: protocol.name, type: protocol.type, tvl, change_1d: change });
+    }
+  } catch (e) {
+    console.error('Bulk protocol fetch failed, using fallback:', e);
   }
 
   return results;
