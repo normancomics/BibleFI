@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,9 +20,27 @@ import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
 import WisdomScoreNavbar from '@/components/ui/WisdomScoreNavbar';
 import NetworkStatusIndicator from '@/components/wallet/NetworkStatusIndicator';
+import { supabase } from '@/integrations/supabase/client';
 
 const NavBar: React.FC = () => {
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setIsAdmin(false); return; }
+      try {
+        const { data } = await supabase.functions.invoke('check-admin-role', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        setIsAdmin(!!data?.isAdmin);
+      } catch { setIsAdmin(false); }
+    };
+    checkAdmin();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => checkAdmin());
+    return () => subscription.unsubscribe();
+  }, []);
   
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
@@ -38,7 +56,7 @@ const NavBar: React.FC = () => {
     { path: '/taxes', label: 'Taxes', icon: Calculator },
     { path: '/live-data', label: 'Live Data', icon: TrendingUp, badge: 'LIVE' },
     { path: '/analytics', label: 'Analytics', icon: Shield, badge: 'AI' },
-    { path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' },
+    ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' }] : []),
     { path: '/builder-score', label: 'Builder', icon: Trophy, badge: 'REP' },
     { path: '/security', label: 'Security', icon: Shield },
   ];
