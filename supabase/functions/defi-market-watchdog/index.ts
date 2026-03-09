@@ -143,23 +143,41 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // --- Auth gate: require valid JWT or cron secret ---
+  // --- Auth gate: require valid JWT with admin role, or cron secret ---
   const cronSecret = req.headers.get('x-cron-secret');
   const authHeader = req.headers.get('Authorization');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
   if (cronSecret) {
     if (cronSecret !== Deno.env.get('CRON_SECRET')) {
       return unauthorized('Invalid cron secret');
     }
   } else if (authHeader?.startsWith('Bearer ')) {
     const supabaseAuth = createClient(
-      Deno.env.get('SUPABASE_URL')!,
+      supabaseUrl,
       Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
       return unauthorized('Invalid or expired token');
+    }
+
+    // Verify admin role
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: roleData } = await adminClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: 'Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
   } else {
     return unauthorized();
