@@ -158,18 +158,27 @@ function validateReference(ref: string): string[] {
   return issues;
 }
 
-async function fetchKJVVerse(reference: string): Promise<string | null> {
-  try {
-    const resp = await fetch(`${BIBLE_API_URL}/${encodeURIComponent(reference)}?translation=kjv`);
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    if (data.verses && data.verses.length > 0) {
-      return data.verses[0].text?.trim() || data.text?.trim() || null;
+async function fetchKJVVerse(reference: string, retries = 2): Promise<string | null> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const resp = await fetch(`${BIBLE_API_URL}/${encodeURIComponent(reference)}?translation=kjv`);
+      if (resp.status === 429 || resp.status >= 500) {
+        await resp.text(); // consume body
+        if (attempt < retries) { await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); continue; }
+        return null;
+      }
+      if (!resp.ok) { await resp.text(); return null; }
+      const data = await resp.json();
+      if (data.verses && data.verses.length > 0) {
+        return data.verses[0].text?.trim() || data.text?.trim() || null;
+      }
+      return data.text?.trim() || null;
+    } catch {
+      if (attempt < retries) { await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); continue; }
+      return null;
     }
-    return data.text?.trim() || null;
-  } catch {
-    return null;
   }
+  return null;
 }
 
 Deno.serve(async (req) => {
