@@ -65,7 +65,7 @@ export const useTitheRewards = () => {
   }, []);
 
   const saveTitheHistory = useCallback((history: TithingHistory) => {
-    localStorage.setItem('bible-fi-tithe-history', JSON.stringify(history));
+    secureStorage.setItem('bible-fi-tithe-history', history);
     setTitheHistory(history);
   }, []);
 
