@@ -44,7 +44,7 @@ export class BiblicalDefiStrategies {
   private quantumSigner: QuantumResistantSigner;
 
   constructor() {
-    this.zeroXClient = new ZeroXClient(process.env.ZEROX_API_KEY || 'demo-key');
+    this.zeroXClient = new ZeroXClient();
     this.quantumSigner = new QuantumResistantSigner();
   }
 
