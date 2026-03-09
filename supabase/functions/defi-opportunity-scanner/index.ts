@@ -455,6 +455,79 @@ function generateSignals(
     });
   }
 
+  // === PERPETUALS SIGNALS ===
+  const perpProtocols = protocols.filter(p => p.type === 'perpetual');
+  for (const pp of perpProtocols) {
+    if (pp.tvl > 5_000_000) {
+      signals.push({
+        type: 'perpetual', protocol: pp.protocol, asset: 'ETH/BTC perps',
+        signal_strength: pp.change_1d > 10 ? 'strong' : pp.change_1d > 5 ? 'moderate' : 'weak',
+        details: `${pp.protocol} perpetuals: $${(pp.tvl / 1e6).toFixed(1)}M TVL (${pp.change_1d > 0 ? '+' : ''}${pp.change_1d.toFixed(1)}% 24h)`,
+        biblical_wisdom: OPPORTUNITY_WISDOM.perpetuals_warning,
+        metrics: { tvl: pp.tvl, tvl_change_1d: pp.change_1d },
+        timestamp: new Date().toISOString(), actionable: true,
+      });
+    }
+  }
+
+  // === BRIDGE INCENTIVE SIGNALS ===
+  const bridgeProtocols = protocols.filter(p => p.type === 'bridge');
+  for (const bp of bridgeProtocols) {
+    if (bp.change_1d > 5) {
+      signals.push({
+        type: 'bridge', protocol: bp.protocol, asset: 'Cross-chain',
+        signal_strength: bp.change_1d > 15 ? 'strong' : 'moderate',
+        details: `${bp.protocol} bridge volume surging ${bp.change_1d.toFixed(1)}% — potential incentive program`,
+        biblical_wisdom: OPPORTUNITY_WISDOM.bridge_opportunity,
+        metrics: { tvl: bp.tvl, tvl_change_1d: bp.change_1d },
+        timestamp: new Date().toISOString(), actionable: true,
+      });
+    }
+  }
+
+  // === NEW/GROWING PROTOCOL SIGNALS ===
+  const growingProtocols = protocols.filter(p => p.tvl > 500_000 && p.tvl < 10_000_000 && p.change_1d > 15);
+  for (const gp of growingProtocols) {
+    signals.push({
+      type: 'new_protocol', protocol: gp.protocol, asset: 'Various',
+      signal_strength: gp.change_1d > 30 ? 'strong' : 'moderate',
+      details: `🆕 ${gp.protocol} rapidly growing: $${(gp.tvl / 1e6).toFixed(1)}M TVL (+${gp.change_1d.toFixed(1)}% 24h) — early opportunity`,
+      biblical_wisdom: OPPORTUNITY_WISDOM.new_protocol,
+      metrics: { tvl: gp.tvl, tvl_change_1d: gp.change_1d },
+      timestamp: new Date().toISOString(), actionable: true,
+    });
+  }
+
+  // === TOKEN-SPECIFIC SIGNALS for all tracked tokens ===
+  for (const [symbol, data] of Object.entries(prices)) {
+    if (symbol === 'ETH') continue; // Already handled above
+    const tokenInfo = KEY_TOKENS[symbol];
+    if (!tokenInfo || tokenInfo.category === 'stablecoin' || tokenInfo.category === 'supertoken') continue;
+
+    // Strong dip entry signal
+    if (data.change_24h < -8) {
+      signals.push({
+        type: 'entry', protocol: 'Base Chain', asset: symbol,
+        signal_strength: data.change_24h < -15 ? 'strong' : 'moderate',
+        details: `${symbol} dropped ${Math.abs(data.change_24h).toFixed(1)}% in 24h ($${data.usd.toFixed(4)}) — potential DCA entry`,
+        biblical_wisdom: OPPORTUNITY_WISDOM.market_dip,
+        metrics: { price: data.usd, change_24h: data.change_24h, category: tokenInfo.category },
+        timestamp: new Date().toISOString(), actionable: true,
+      });
+    }
+    // Strong pump exit signal
+    if (data.change_24h > 15) {
+      signals.push({
+        type: 'exit', protocol: 'Base Chain', asset: symbol,
+        signal_strength: data.change_24h > 25 ? 'strong' : 'moderate',
+        details: `${symbol} surged ${data.change_24h.toFixed(1)}% in 24h ($${data.usd.toFixed(4)}) — consider taking profits`,
+        biblical_wisdom: OPPORTUNITY_WISDOM.market_peak,
+        metrics: { price: data.usd, change_24h: data.change_24h, category: tokenInfo.category },
+        timestamp: new Date().toISOString(), actionable: true,
+      });
+    }
+  }
+
   return signals;
 }
 
