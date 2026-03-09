@@ -544,13 +544,25 @@ Deno.serve(async (req) => {
     if (mode === 'status') {
       const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
       const { count: defiCount } = await supabase.from('defi_knowledge_base').select('*', { count: 'exact', head: true });
+      const tokensByCategory: Record<string, number> = {};
+      for (const t of Object.values(KEY_TOKENS)) {
+        tokensByCategory[t.category] = (tokensByCategory[t.category] || 0) + 1;
+      }
+      const totalProtocols = BASE_PROTOCOLS.dexes.length + BASE_PROTOCOLS.lending.length +
+        BASE_PROTOCOLS.yield.length + BASE_PROTOCOLS.perpetuals.length +
+        BASE_PROTOCOLS.bridges.length + BASE_PROTOCOLS.cdp.length;
       return new Response(JSON.stringify({
         success: true, agent: 'defi-opportunity-scanner',
         status: {
+          total_protocols_monitored: totalProtocols,
           monitored_dexes: BASE_PROTOCOLS.dexes.length,
           monitored_lending: BASE_PROTOCOLS.lending.length,
           monitored_yield: BASE_PROTOCOLS.yield.length,
+          monitored_perpetuals: BASE_PROTOCOLS.perpetuals.length,
+          monitored_bridges: BASE_PROTOCOLS.bridges.length,
+          monitored_cdp: BASE_PROTOCOLS.cdp.length,
           tracked_tokens: Object.keys(KEY_TOKENS).length,
+          tokens_by_category: tokensByCategory,
           opportunity_types: Object.keys(OPPORTUNITY_WISDOM).length,
           defi_knowledge_entries: defiCount || 0,
           last_run: new Date().toISOString(),
