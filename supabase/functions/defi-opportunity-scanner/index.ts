@@ -295,21 +295,33 @@ async function fetchPricesWithChanges(): Promise<Record<string, { usd: number; c
 
 async function fetchProtocolYields(): Promise<{ protocol: string; type: string; tvl: number; apy?: number; change_1d: number }[]> {
   const results: { protocol: string; type: string; tvl: number; apy?: number; change_1d: number }[] = [];
-  const allProtocols = [...BASE_PROTOCOLS.dexes, ...BASE_PROTOCOLS.lending, ...BASE_PROTOCOLS.yield];
+  const allProtocols = [
+    ...BASE_PROTOCOLS.dexes.map(p => ({ ...p, type: 'dex' })),
+    ...BASE_PROTOCOLS.lending.map(p => ({ ...p, type: 'lending' })),
+    ...BASE_PROTOCOLS.yield.map(p => ({ ...p, type: 'yield' })),
+    ...BASE_PROTOCOLS.perpetuals.map(p => ({ ...p, type: 'perpetual' })),
+    ...BASE_PROTOCOLS.bridges.map(p => ({ ...p, type: 'bridge' })),
+    ...BASE_PROTOCOLS.cdp.map(p => ({ ...p, type: 'cdp' })),
+  ];
 
-  for (const p of allProtocols) {
-    try {
-      const resp = await fetch(`https://api.llama.fi/protocol/${p.slug}`);
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      const tvl = data.currentChainTvls?.Base || data.tvl?.[data.tvl.length - 1]?.totalLiquidityUSD || 0;
-      const prevTvl = data.tvl?.[data.tvl.length - 2]?.totalLiquidityUSD || tvl;
-      const change = prevTvl > 0 ? ((tvl - prevTvl) / prevTvl) * 100 : 0;
-      const type = BASE_PROTOCOLS.dexes.some(d => d.slug === p.slug) ? 'dex'
-        : BASE_PROTOCOLS.lending.some(l => l.slug === p.slug) ? 'lending' : 'yield';
-      results.push({ protocol: p.name, type, tvl, change_1d: change });
-      await new Promise(r => setTimeout(r, 300));
-    } catch { /* skip */ }
+  // Batch fetch in groups of 5 to respect rate limits
+  for (let i = 0; i < allProtocols.length; i += 5) {
+    const batch = allProtocols.slice(i, i + 5);
+    const batchResults = await Promise.allSettled(
+      batch.map(async (p) => {
+        const resp = await fetch(`https://api.llama.fi/protocol/${p.slug}`);
+        if (!resp.ok) { await resp.text(); return null; }
+        const data = await resp.json();
+        const tvl = data.currentChainTvls?.Base || data.tvl?.[data.tvl.length - 1]?.totalLiquidityUSD || 0;
+        const prevTvl = data.tvl?.[data.tvl.length - 2]?.totalLiquidityUSD || tvl;
+        const change = prevTvl > 0 ? ((tvl - prevTvl) / prevTvl) * 100 : 0;
+        return { protocol: p.name, type: p.type, tvl, change_1d: change };
+      })
+    );
+    for (const r of batchResults) {
+      if (r.status === 'fulfilled' && r.value) results.push(r.value);
+    }
+    await new Promise(r => setTimeout(r, 500));
   }
 
   return results;
