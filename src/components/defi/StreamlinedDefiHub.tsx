@@ -143,6 +143,16 @@ const StreamlinedDefiHub: React.FC = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="opportunities" className="space-y-6">
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <DefiOpportunitiesDashboard />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="analytics" className="space-y-6">
           <Card className="bg-card/50 border-border/50">
             <CardHeader>
