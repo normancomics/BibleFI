@@ -226,9 +226,10 @@ Deno.serve(async (req) => {
       }
 
       // audit_readonly mode
+      const offset = body.offset || 0;
       const { data: auditVerses } = await restQuery(
         'biblical_knowledge_base',
-        `select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}`
+        `select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}&offset=${offset}`
       );
       console.log('[audit_readonly] Fetched', auditVerses?.length, 'verses for validation');
 
