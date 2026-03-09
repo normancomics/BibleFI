@@ -184,7 +184,10 @@ Deno.serve(async (req) => {
 
     // Read-only modes are safe for unauthenticated access
     if (mode === 'status' || mode === 'audit_readonly') {
-      const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { db: { schema: 'public' } });
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      console.log('[audit] URL prefix:', supabaseUrl?.substring(0, 30), 'key prefix:', supabaseKey?.substring(0, 10));
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       if (mode === 'status') {
         const { count: kbCount } = await supabase.from('biblical_knowledge_base').select('*', { count: 'exact', head: true });
