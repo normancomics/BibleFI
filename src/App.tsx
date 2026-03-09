@@ -111,6 +111,7 @@ const App = () => (
               <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
               <Route path="/builder-score" element={<BuilderScorePage />} />
               <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
