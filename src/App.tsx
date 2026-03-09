@@ -8,6 +8,7 @@ import { SecurityProvider } from "@/contexts/SecurityContext";
 import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
 import { useFarcasterFrame } from "@/hooks/useFarcasterFrame";
 import Index from "./pages/Index";
+import AdminGuard from "./components/auth/AdminGuard";
 import "./App.css";
 
 // Farcaster Frame auto-connect initializer (runs inside WalletProvider)
@@ -90,7 +91,7 @@ const App = () => (
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/token" element={<TokenPage />} />
               <Route path="/wisdom-token" element={<WisdomTokenPage />} />
-              <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/admin" element={<AdminGuard><AdminDashboardPage /></AdminGuard>} />
               <Route path="/deployment" element={<DeploymentPage />} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
               <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
