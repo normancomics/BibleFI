@@ -347,6 +347,12 @@ Deno.serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // All write/scan modes require auth
+    const auth = await requireAgentAuth(req);
+    if (!auth.authorized) {
+      return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
+    }
+
     const result = await withAgentSandbox(
       { agentName: 'defi-opportunity-scanner', runMode: body.manual ? 'manual' : 'scheduled', metadata: { mode } },
       async (ctx: AgentContext) => {
