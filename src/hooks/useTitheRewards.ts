@@ -216,8 +216,8 @@ export const useTitheRewards = () => {
   }, [addPoints, updateAchievementProgress, saveProgress, toast, checkAndAwardWeeklyStreak, titheHistory]);
 
   const checkFirstTithe = useCallback((): boolean => {
-    // Check localStorage for tithe history
-    const history = localStorage.getItem('bible-fi-tithe-history');
+    // Check secureStorage for tithe history
+    const history = secureStorage.getItem('bible-fi-tithe-history');
     if (!history) {
       const newHistory: TithingHistory = {
         count: 1,
