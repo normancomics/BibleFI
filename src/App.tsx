@@ -91,7 +91,7 @@ const App = () => (
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/token" element={<TokenPage />} />
               <Route path="/wisdom-token" element={<WisdomTokenPage />} />
-              <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/admin" element={<AdminGuard><AdminDashboardPage /></AdminGuard>} />
               <Route path="/deployment" element={<DeploymentPage />} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
               <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
