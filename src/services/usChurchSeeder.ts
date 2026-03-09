@@ -567,7 +567,7 @@ export class USChurchSeederService {
       try {
         // Check if church already exists
         const { data: existing } = await supabaseApi
-          .from('global_churches')
+          .from('public_church_directory')
           .select('id')
           .eq('name', church.name)
           .eq('city', church.city)
