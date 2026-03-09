@@ -77,5 +77,127 @@ export const baseTokens: Record<string, TokenInfo> = {
     decimals: 6,
     address: "0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA",
     logoURI: "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png?1547042389"
+  },
+  // Superfluid tokens
+  SUP: {
+    name: "Superfluid",
+    symbol: "SUP",
+    decimals: 18,
+    address: "0x2740267Ef48ED3a8F2E9FA6A5De7F0e7E66e250c",
+    logoURI: "https://assets.coingecko.com/coins/images/21597/small/superfluid.png"
+  },
+  USDCx: {
+    name: "Super USDC",
+    symbol: "USDCx",
+    decimals: 18,
+    address: "0x4dd8db0c491c475f1335e0eaa58ab8601f26c86f",
+    logoURI: "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png"
+  },
+  ETHx: {
+    name: "Super ETH",
+    symbol: "ETHx",
+    decimals: 18,
+    address: "0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93",
+    logoURI: "https://assets.coingecko.com/coins/images/279/small/ethereum.png"
+  },
+  DAIx: {
+    name: "Super DAI",
+    symbol: "DAIx",
+    decimals: 18,
+    address: "0x708169c8C87563Ce904E0a7F3BFC1F3b0b767f41",
+    logoURI: "https://assets.coingecko.com/coins/images/9956/small/4943.png"
+  },
+  // Veil.cash
+  VEIL: {
+    name: "Veil Cash",
+    symbol: "VEIL",
+    decimals: 18,
+    address: "0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8",
+    logoURI: "https://assets.coingecko.com/coins/images/18723/small/veil-logo.png"
+  },
+  // Base ecosystem tokens
+  AERO: {
+    name: "Aerodrome Finance",
+    symbol: "AERO",
+    decimals: 18,
+    address: "0x940181a94A35A4569E4529A3CDfB74e38FD98631",
+    logoURI: "https://assets.coingecko.com/coins/images/31745/small/token.png"
+  },
+  DEGEN: {
+    name: "Degen",
+    symbol: "DEGEN",
+    decimals: 18,
+    address: "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+    logoURI: "https://assets.coingecko.com/coins/images/34515/small/degen-logo.png"
+  },
+  BRETT: {
+    name: "Brett",
+    symbol: "BRETT",
+    decimals: 18,
+    address: "0x532f27101965dd16442E59d40670FaF5eBB142E4",
+    logoURI: "https://assets.coingecko.com/coins/images/35529/small/brett-logo.png"
+  },
+  TOSHI: {
+    name: "Toshi",
+    symbol: "TOSHI",
+    decimals: 18,
+    address: "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4",
+    logoURI: "https://assets.coingecko.com/coins/images/31126/small/toshi.png"
+  },
+  HIGHER: {
+    name: "Higher",
+    symbol: "HIGHER",
+    decimals: 18,
+    address: "0x0578d8A44db98B23BF096A382e016e29a5Ce0ffe",
+    logoURI: "https://assets.coingecko.com/coins/images/36063/small/higher-logo.png"
+  },
+  rETH: {
+    name: "Rocket Pool ETH",
+    symbol: "rETH",
+    decimals: 18,
+    address: "0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c",
+    logoURI: "https://assets.coingecko.com/coins/images/20764/small/reth.png"
+  },
+  wstETH: {
+    name: "Wrapped stETH",
+    symbol: "wstETH",
+    decimals: 18,
+    address: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+    logoURI: "https://assets.coingecko.com/coins/images/18834/small/wstETH.png"
+  },
+  COMP: {
+    name: "Compound",
+    symbol: "COMP",
+    decimals: 18,
+    address: "0x9e1028F5F1D5eDE59748FFceE5532509976840E0",
+    logoURI: "https://assets.coingecko.com/coins/images/10775/small/COMP.png"
+  },
+  SNX: {
+    name: "Synthetix",
+    symbol: "SNX",
+    decimals: 18,
+    address: "0x22e6966B799c4D5B13BE962E1D117b56327FDa66",
+    logoURI: "https://assets.coingecko.com/coins/images/3406/small/SNX.png"
+  },
+  AAVE: {
+    name: "Aave",
+    symbol: "AAVE",
+    decimals: 18,
+    address: "0x18709E89BD403F470088aBDAcEbE86CC60dda12e",
+    logoURI: "https://assets.coingecko.com/coins/images/12645/small/AAVE.png"
+  },
+  UNI: {
+    name: "Uniswap",
+    symbol: "UNI",
+    decimals: 18,
+    address: "0xc3De830EA07524a0761646a6a4e4be0e114a3C83",
+    logoURI: "https://assets.coingecko.com/coins/images/12504/small/uni.jpg"
+  },
+  SUSHI: {
+    name: "SushiSwap",
+    symbol: "SUSHI",
+    decimals: 18,
+    address: "0x7D49a065D17d6d4a55dc13649901fdBB98B2AFBA",
+    logoURI: "https://assets.coingecko.com/coins/images/12271/small/512x512_Logo_no_chop.png"
   }
 };

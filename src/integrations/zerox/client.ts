@@ -83,6 +83,174 @@ export const BASE_TOKENS: Record<string, Token> = {
     decimals: 18,
     logoURI: "https://assets.coingecko.com/coins/images/2518/small/weth.png",
     chainId: BASE_CHAIN_ID
+  },
+  WBTC: {
+    symbol: "WBTC",
+    name: "Wrapped Bitcoin",
+    address: "0x1ceA84203673764244E05693e42E6Ace62bE9BA5",
+    decimals: 8,
+    logoURI: "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png",
+    chainId: BASE_CHAIN_ID
+  },
+  cbBTC: {
+    symbol: "cbBTC",
+    name: "Coinbase Wrapped Bitcoin",
+    address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+    decimals: 8,
+    logoURI: "https://assets.coingecko.com/coins/images/33052/small/cbBTC_icon_yellowgradient.png",
+    chainId: BASE_CHAIN_ID
+  },
+  cbETH: {
+    symbol: "cbETH",
+    name: "Coinbase Wrapped Ethereum",
+    address: "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/27008/small/cbeth.png",
+    chainId: BASE_CHAIN_ID
+  },
+  FRAX: {
+    symbol: "FRAX",
+    name: "Frax",
+    address: "0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/13422/small/frax_logo.png",
+    chainId: BASE_CHAIN_ID
+  },
+  SUP: {
+    symbol: "SUP",
+    name: "Superfluid",
+    address: "0x2740267Ef48ED3a8F2E9FA6A5De7F0e7E66e250c",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/21597/small/superfluid.png",
+    chainId: BASE_CHAIN_ID
+  },
+  USDCx: {
+    symbol: "USDCx",
+    name: "Super USDC",
+    address: "0x4dd8db0c491c475f1335e0eaa58ab8601f26c86f",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png",
+    chainId: BASE_CHAIN_ID
+  },
+  ETHx: {
+    symbol: "ETHx",
+    name: "Super ETH",
+    address: "0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/279/small/ethereum.png",
+    chainId: BASE_CHAIN_ID
+  },
+  DAIx: {
+    symbol: "DAIx",
+    name: "Super DAI",
+    address: "0x708169c8C87563Ce904E0a7F3BFC1F3b0b767f41",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png",
+    chainId: BASE_CHAIN_ID
+  },
+  VEIL: {
+    symbol: "VEIL",
+    name: "Veil Cash",
+    address: "0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/18723/small/veil-logo.png",
+    chainId: BASE_CHAIN_ID
+  },
+  AERO: {
+    symbol: "AERO",
+    name: "Aerodrome Finance",
+    address: "0x940181a94A35A4569E4529A3CDfB74e38FD98631",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/31745/small/token.png",
+    chainId: BASE_CHAIN_ID
+  },
+  DEGEN: {
+    symbol: "DEGEN",
+    name: "Degen",
+    address: "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/34515/small/degen-logo.png",
+    chainId: BASE_CHAIN_ID
+  },
+  BRETT: {
+    symbol: "BRETT",
+    name: "Brett",
+    address: "0x532f27101965dd16442E59d40670FaF5eBB142E4",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/35529/small/brett-logo.png",
+    chainId: BASE_CHAIN_ID
+  },
+  TOSHI: {
+    symbol: "TOSHI",
+    name: "Toshi",
+    address: "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/31126/small/toshi.png",
+    chainId: BASE_CHAIN_ID
+  },
+  HIGHER: {
+    symbol: "HIGHER",
+    name: "Higher",
+    address: "0x0578d8A44db98B23BF096A382e016e29a5Ce0ffe",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/36063/small/higher-logo.png",
+    chainId: BASE_CHAIN_ID
+  },
+  rETH: {
+    symbol: "rETH",
+    name: "Rocket Pool ETH",
+    address: "0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/20764/small/reth.png",
+    chainId: BASE_CHAIN_ID
+  },
+  wstETH: {
+    symbol: "wstETH",
+    name: "Wrapped stETH",
+    address: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/18834/small/wstETH.png",
+    chainId: BASE_CHAIN_ID
+  },
+  AAVE: {
+    symbol: "AAVE",
+    name: "Aave",
+    address: "0x18709E89BD403F470088aBDAcEbE86CC60dda12e",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/12645/small/AAVE.png",
+    chainId: BASE_CHAIN_ID
+  },
+  COMP: {
+    symbol: "COMP",
+    name: "Compound",
+    address: "0x9e1028F5F1D5eDE59748FFceE5532509976840E0",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/10775/small/COMP.png",
+    chainId: BASE_CHAIN_ID
+  },
+  UNI: {
+    symbol: "UNI",
+    name: "Uniswap",
+    address: "0xc3De830EA07524a0761646a6a4e4be0e114a3C83",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/12504/small/uni.jpg",
+    chainId: BASE_CHAIN_ID
+  },
+  SNX: {
+    symbol: "SNX",
+    name: "Synthetix",
+    address: "0x22e6966B799c4D5B13BE962E1D117b56327FDa66",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/3406/small/SNX.png",
+    chainId: BASE_CHAIN_ID
+  },
+  SUSHI: {
+    symbol: "SUSHI",
+    name: "SushiSwap",
+    address: "0x7D49a065D17d6d4a55dc13649901fdBB98B2AFBA",
+    decimals: 18,
+    logoURI: "https://assets.coingecko.com/coins/images/12271/small/512x512_Logo_no_chop.png",
+    chainId: BASE_CHAIN_ID
   }
 };
 
