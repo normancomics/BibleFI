@@ -254,7 +254,7 @@ export class ComprehensiveChurchService {
   async getCryptoEnabledChurches(limit: number = 100): Promise<Church[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('accepts_crypto', true)
         .order('verified', { ascending: false })
