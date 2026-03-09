@@ -257,7 +257,7 @@ const KEY_TOKENS: Record<string, { coingecko: string; address: string; category:
 };
 
 interface OpportunitySignal {
-  type: 'entry' | 'exit' | 'arbitrage' | 'staking' | 'farming' | 'whale' | 'warning' | 'liquidation';
+  type: 'entry' | 'exit' | 'arbitrage' | 'staking' | 'farming' | 'whale' | 'warning' | 'liquidation' | 'perpetual' | 'bridge' | 'new_protocol';
   protocol: string;
   asset: string;
   signal_strength: 'weak' | 'moderate' | 'strong';
