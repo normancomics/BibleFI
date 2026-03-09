@@ -145,8 +145,8 @@ const ComprehensiveTithingHub: React.FC = () => {
 
     setIsSearching(true);
     try {
-      // STEP 1: Search local database first
-      let query = supabaseApi.from('global_churches').select('*');
+      // STEP 1: Search local database first (use public_church_directory view for masked PII access)
+      let query = supabaseApi.from('public_church_directory').select('*');
 
       if (searchQuery.trim()) {
         query = query.or(`name.ilike.%${searchQuery}%,denomination.ilike.%${searchQuery}%`);
