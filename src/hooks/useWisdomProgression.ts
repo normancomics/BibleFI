@@ -233,13 +233,13 @@ export const useWisdomProgression = () => {
     }
   }, []);
 
-  // Save progress to localStorage
+  // Save progress to secureStorage
   const saveProgress = useCallback(() => {
-    localStorage.setItem('bible-fi-wisdom-progress', JSON.stringify({
+    secureStorage.setItem('bible-fi-wisdom-progress', {
       progress,
       milestones,
       achievements
-    }));
+    });
   }, [progress, milestones, achievements]);
 
   const addPoints = useCallback((points: number, reason?: string) => {
