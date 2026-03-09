@@ -68,3 +68,9 @@ verify_jwt = false
 
 [functions.zerox-proxy]
 verify_jwt = false
+
+[functions.scripture-integrity-validator]
+verify_jwt = false
+
+[functions.defi-opportunity-scanner]
+verify_jwt = false

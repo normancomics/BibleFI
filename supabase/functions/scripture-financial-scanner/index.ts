@@ -100,7 +100,26 @@ function calculateRelevance(keywords: string[], categories: string[]): number {
   return Math.min(keywords.length * 8 + categories.length * 12, 100);
 }
 
-// Key financial passages to scan (book:chapter ranges)
+// ALL 66 books for systematic full-Bible scanning
+const ALL_BIBLE_BOOKS = [
+  // OT
+  'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
+  'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel', '1 Kings', '2 Kings',
+  '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah', 'Esther',
+  'Job', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon',
+  'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel',
+  'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah',
+  'Nahum', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi',
+  // NT
+  'Matthew', 'Mark', 'Luke', 'John', 'Acts',
+  'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians',
+  'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians',
+  '1 Timothy', '2 Timothy', 'Titus', 'Philemon',
+  'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John',
+  'Jude', 'Revelation',
+];
+
+// Key financial passages to scan (known high-value references)
 const FINANCIAL_PASSAGES = [
   // Torah economic laws
   'Genesis 14:18-20', 'Genesis 41:33-36', 'Genesis 47:23-26',
@@ -149,6 +168,18 @@ const FINANCIAL_PASSAGES = [
   'Revelation 3:17-18', 'Revelation 18:11-19',
 ];
 
+// Systematic chapter scanning for full Bible coverage
+async function fetchFullChapter(book: string, chapter: number): Promise<any[] | null> {
+  try {
+    const resp = await fetch(`${BIBLE_API_URL}/${encodeURIComponent(`${book} ${chapter}`)}?translation=kjv`);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.verses || [];
+  } catch {
+    return null;
+  }
+}
+
 async function fetchVerse(reference: string): Promise<{ text: string; verses: any[] } | null> {
   try {
     const resp = await fetch(`${BIBLE_API_URL}/${encodeURIComponent(reference)}?translation=kjv`);
@@ -192,58 +223,85 @@ Deno.serve(async (req) => {
       async (ctx: AgentContext) => {
         const results: VerseResult[] = [];
         const errors: string[] = [];
-        const shuffled = [...FINANCIAL_PASSAGES].sort(() => Math.random() - 0.5);
-        const batch = shuffled.slice(0, batchSize);
 
-        for (const ref of batch) {
-          try {
-            const data = await fetchVerse(ref);
-            if (!data) { errors.push(`Failed to fetch: ${ref}`); continue; }
+        // Helper to process verses from any source
+        const processVerses = async (verses: any[], fallbackBook: string, fallbackChapter: number) => {
+          for (const v of verses) {
+            const text = v.text?.trim();
+            if (!text) continue;
+            const keywords = extractFinancialKeywords(text);
+            const categories = categorizeVerse(keywords);
+            const defiRelevance = getDefiRelevance(keywords);
+            const relevance = calculateRelevance(keywords, categories);
+            if (keywords.length === 0) continue;
 
-            if (data.verses && data.verses.length > 0) {
-              for (const v of data.verses) {
-                const text = v.text?.trim();
-                if (!text) continue;
-                const keywords = extractFinancialKeywords(text);
-                const categories = categorizeVerse(keywords);
-                const defiRelevance = getDefiRelevance(keywords);
-                const relevance = calculateRelevance(keywords, categories);
-                if (keywords.length === 0) continue;
+            const verseResult: VerseResult = {
+              book: v.book_name || fallbackBook,
+              chapter: v.chapter || fallbackChapter,
+              verse: v.verse || 1, text, financial_keywords: keywords,
+              topic_categories: categories, defi_relevance: defiRelevance, financial_relevance: relevance,
+            };
+            results.push(verseResult);
 
-                const verseResult: VerseResult = {
-                  book: v.book_name || ref.split(' ')[0],
-                  chapter: v.chapter || parseInt(ref.split(':')[0]?.split(' ').pop() || '1'),
-                  verse: v.verse || 1, text, financial_keywords: keywords,
-                  topic_categories: categories, defi_relevance: defiRelevance, financial_relevance: relevance,
-                };
-                results.push(verseResult);
+            await sandboxedInsert(ctx, 'biblical_knowledge_base', {
+              reference: `${verseResult.book} ${verseResult.chapter}:${verseResult.verse}`,
+              verse_text: text, category: categories[0] || 'general_finance',
+              principle: `Financial wisdom: ${keywords.slice(0, 3).join(', ')}`,
+              application: defiRelevance || 'Biblical financial stewardship principle',
+              defi_relevance: defiRelevance, financial_keywords: keywords,
+            }, { onConflict: 'reference' });
 
-                // Sandboxed upsert into biblical_knowledge_base
-                await sandboxedInsert(ctx, 'biblical_knowledge_base', {
-                  reference: `${verseResult.book} ${verseResult.chapter}:${verseResult.verse}`,
-                  verse_text: text, category: categories[0] || 'general_finance',
-                  principle: `Financial wisdom: ${keywords.slice(0, 3).join(', ')}`,
-                  application: defiRelevance || 'Biblical financial stewardship principle',
-                  defi_relevance: defiRelevance, financial_keywords: keywords,
-                }, { onConflict: 'reference' });
+            await sandboxedInsert(ctx, 'comprehensive_biblical_texts', {
+              book: verseResult.book, chapter: verseResult.chapter, verse: verseResult.verse,
+              kjv_text: text, financial_keywords: keywords, financial_relevance: relevance,
+            }, { onConflict: 'book,chapter,verse' });
+          }
+        };
 
-                // Sandboxed upsert into comprehensive_biblical_texts
-                await sandboxedInsert(ctx, 'comprehensive_biblical_texts', {
-                  book: verseResult.book, chapter: verseResult.chapter, verse: verseResult.verse,
-                  kjv_text: text, financial_keywords: keywords, financial_relevance: relevance,
-                }, { onConflict: 'book,chapter,verse' });
+        if (mode === 'full_bible') {
+          // FULL BIBLE SCAN: Systematically scan random chapters from random books
+          const shuffledBooks = [...ALL_BIBLE_BOOKS].sort(() => Math.random() - 0.5);
+          const booksToScan = shuffledBooks.slice(0, Math.min(batchSize, 5));
+
+          for (const book of booksToScan) {
+            const chaptersPerBook = 3;
+            const randomChapters = Array.from({ length: chaptersPerBook }, () => Math.floor(Math.random() * 50) + 1);
+
+            for (const chapter of randomChapters) {
+              try {
+                const verses = await fetchFullChapter(book, chapter);
+                if (!verses || verses.length === 0) continue;
+                await processVerses(verses, book, chapter);
+                await new Promise(r => setTimeout(r, 300));
+              } catch (err) {
+                errors.push(`${book} ${chapter}: ${err instanceof Error ? err.message : String(err)}`);
               }
             }
-            await new Promise(r => setTimeout(r, 200));
-          } catch (err) {
-            errors.push(`Error processing ${ref}: ${err instanceof Error ? err.message : String(err)}`);
+          }
+        } else {
+          // TARGETED SCAN: Known financial passages
+          const shuffled = [...FINANCIAL_PASSAGES].sort(() => Math.random() - 0.5);
+          const batch = shuffled.slice(0, batchSize);
+
+          for (const ref of batch) {
+            try {
+              const data = await fetchVerse(ref);
+              if (!data) { errors.push(`Failed to fetch: ${ref}`); continue; }
+              if (data.verses && data.verses.length > 0) {
+                await processVerses(data.verses, ref.split(' ')[0], parseInt(ref.split(':')[0]?.split(' ').pop() || '1'));
+              }
+              await new Promise(r => setTimeout(r, 200));
+            } catch (err) {
+              errors.push(`Error processing ${ref}: ${err instanceof Error ? err.message : String(err)}`);
+            }
           }
         }
 
         return {
-          processed: batch.length, financial_verses_found: results.length,
+          mode, processed: mode === 'full_bible' ? 'systematic_scan' : 'targeted_passages',
+          financial_verses_found: results.length,
           errors: errors.length, error_details: errors.slice(0, 5),
-          sample_results: results.slice(0, 3).map(r => ({
+          sample_results: results.slice(0, 5).map(r => ({
             reference: `${r.book} ${r.chapter}:${r.verse}`, keywords: r.financial_keywords,
             defi_relevance: r.defi_relevance, relevance_score: r.financial_relevance,
           })),
