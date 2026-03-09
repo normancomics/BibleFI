@@ -86,7 +86,9 @@ export class RealSuperfluidClient {
   private provider: Provider | null = null;
   private readonly BASE_CHAIN_ID = 8453;
   private readonly BASE_RPC_URL = "https://mainnet.base.org";
-  private readonly BIBLE_TOKEN_ADDRESS = ZeroAddress;
+  // $BIBLEFI (governance) and $WISDOM (rewards) — deploy pending
+  private readonly BIBLEFI_TOKEN_ADDRESS = ZeroAddress;
+  private readonly WISDOM_TOKEN_ADDRESS = ZeroAddress;
 
   // Real Base chain Super Tokens
   private tokens: Record<string, SuperfluidToken> = {
