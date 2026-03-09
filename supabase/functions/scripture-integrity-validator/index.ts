@@ -186,8 +186,21 @@ Deno.serve(async (req) => {
     if (mode === 'status' || mode === 'audit_readonly') {
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      console.log('[audit] Full URL:', supabaseUrl);
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      // Try direct REST API call to bypass schema config issue
+      const restUrl = `${supabaseUrl}/rest/v1/biblical_knowledge_base?select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}`;
+      const restResp = await fetch(restUrl, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Accept': 'application/json',
+        },
+      });
+      const storedVerses = restResp.ok ? await restResp.json() : [];
+      console.log('[audit] REST direct query:', storedVerses?.length, 'verses, status:', restResp.status);
+      if (!restResp.ok) {
+        const errText = await restResp.text().catch(() => '');
+        console.log('[audit] REST error:', errText);
+      }
 
       if (mode === 'status') {
         const { count: kbCount } = await supabase.from('biblical_knowledge_base').select('*', { count: 'exact', head: true });
