@@ -226,9 +226,10 @@ Deno.serve(async (req) => {
       }
 
       // audit_readonly mode
+      const offset = body.offset || 0;
       const { data: auditVerses } = await restQuery(
         'biblical_knowledge_base',
-        `select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}`
+        `select=id,reference,verse_text&verse_text=not.is.null&order=created_at.asc&limit=${batchSize}&offset=${offset}`
       );
       console.log('[audit_readonly] Fetched', auditVerses?.length, 'verses for validation');
 
@@ -259,7 +260,7 @@ Deno.serve(async (req) => {
             auditResults.push({ reference: stored.reference, status: 'mismatch', stored_text: stored.verse_text?.substring(0, 100) || '', source_text: sourceText.substring(0, 100), similarity: sim, issues: [`Text similarity ${(sim * 100).toFixed(1)}% - below 85% threshold`] });
             auditMismatch++;
           }
-          await new Promise(r => setTimeout(r, 500));
+          await new Promise(r => setTimeout(r, 200));
         } catch (err) {
           auditError++;
           auditResults.push({ reference: stored.reference, status: 'error', stored_text: stored.verse_text?.substring(0, 80) || '', issues: [err instanceof Error ? err.message : String(err)] });
