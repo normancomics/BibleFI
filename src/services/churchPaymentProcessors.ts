@@ -97,7 +97,7 @@ export class ChurchPaymentProcessorService {
       name: 'Superfluid Streams',
       type: 'superfluid',
       apiEndpoint: 'https://api.superfluid.finance',
-      supportedCurrencies: ['USDCx', 'ETHx', 'DAIx', 'BIBLEx'],
+      supportedCurrencies: ['USDCx', 'ETHx', 'DAIx', 'BIBLEFIx', 'WISDOMx'],
       supportedMethods: ['stream', 'continuous_payment'],
       fees: { crypto: 0.1 },
       features: ['money_streaming', 'continuous_payments', 'automated_giving', 'real_time_finance'],

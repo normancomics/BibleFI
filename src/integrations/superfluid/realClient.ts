@@ -86,7 +86,9 @@ export class RealSuperfluidClient {
   private provider: Provider | null = null;
   private readonly BASE_CHAIN_ID = 8453;
   private readonly BASE_RPC_URL = "https://mainnet.base.org";
-  private readonly BIBLE_TOKEN_ADDRESS = ZeroAddress;
+  // $BIBLEFI (governance) and $WISDOM (rewards) — deploy pending
+  private readonly BIBLEFI_TOKEN_ADDRESS = ZeroAddress;
+  private readonly WISDOM_TOKEN_ADDRESS = ZeroAddress;
 
   // Real Base chain Super Tokens
   private tokens: Record<string, SuperfluidToken> = {
@@ -120,13 +122,23 @@ export class RealSuperfluidClient {
       },
       logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
     },
-    'BIBLEx': {
-      name: 'Super BIBLE',
-      symbol: 'BIBLEx',
-      address: ZeroAddress,
+    'BIBLEFIx': {
+      name: 'Super BIBLEFI',
+      symbol: 'BIBLEFIx',
+      address: ZeroAddress, // Deploy pending — governance token
       underlyingToken: {
-        symbol: 'BIBLE',
-        address: this.BIBLE_TOKEN_ADDRESS
+        symbol: 'BIBLEFI',
+        address: ZeroAddress // Deploy pending
+      },
+      logoURI: '/bible-fi-preview.png'
+    },
+    'WISDOMx': {
+      name: 'Super WISDOM',
+      symbol: 'WISDOMx',
+      address: ZeroAddress, // Deploy pending — rewards token
+      underlyingToken: {
+        symbol: 'WISDOM',
+        address: ZeroAddress // Deploy pending
       },
       logoURI: '/bible-fi-preview.png'
     }
