@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useWisdomProgression } from './useWisdomProgression';
 import { useToast } from './use-toast';
+import { secureStorage } from '@/utils/securityUtils';
 
 // Points awarded for different tithing actions
 const TITHE_REWARDS = {
