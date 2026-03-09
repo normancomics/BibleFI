@@ -275,7 +275,7 @@ export class GlobalChurchCrawlerService {
   ): Promise<GlobalChurchData[]> {
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('country', country);
 
