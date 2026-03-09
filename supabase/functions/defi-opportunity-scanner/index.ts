@@ -570,6 +570,44 @@ Deno.serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // Dry run mode: fetches live data and generates signals without persisting (read-only, no auth needed)
+    if (mode === 'dry_run') {
+      const [prices, protocols, yieldPools] = await Promise.all([
+        fetchPricesWithChanges(),
+        fetchProtocolYields(),
+        fetchYieldPools(),
+      ]);
+      const signals = generateSignals(prices, protocols, yieldPools);
+      const actionableSignals = signals.filter(s => s.actionable);
+      const byType: Record<string, OpportunitySignal[]> = {};
+      for (const s of signals) {
+        if (!byType[s.type]) byType[s.type] = [];
+        byType[s.type].push(s);
+      }
+      return new Response(JSON.stringify({
+        success: true, agent: 'defi-opportunity-scanner', mode: 'dry_run',
+        scan_timestamp: new Date().toISOString(),
+        total_signals: signals.length,
+        actionable_signals: actionableSignals.length,
+        tokens_tracked: Object.keys(KEY_TOKENS).length,
+        prices_fetched: Object.keys(prices).length,
+        protocols_scanned: protocols.length,
+        yield_pools_found: yieldPools.length,
+        prices,
+        protocols: protocols.slice(0, 20),
+        yield_pools: yieldPools.slice(0, 10),
+        signals_by_type: Object.fromEntries(
+          Object.entries(byType).map(([type, sigs]) => [type, { count: sigs.length, top: sigs.slice(0, 3) }])
+        ),
+        top_opportunities: actionableSignals
+          .sort((a, b) => {
+            const strength = { strong: 3, moderate: 2, weak: 1 };
+            return strength[b.signal_strength] - strength[a.signal_strength];
+          })
+          .slice(0, 10),
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     // All write/scan modes require auth
     const auth = await requireAgentAuth(req);
     if (!auth.authorized) {
