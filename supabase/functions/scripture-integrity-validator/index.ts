@@ -177,16 +177,12 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const auth = await requireAgentAuth(req);
-  if (!auth.authorized) {
-    return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
-  }
-
   try {
     const body = await req.json().catch(() => ({}));
     const mode = body.mode || 'validate_kjv';
     const batchSize = body.batchSize || 20;
 
+    // Status mode is read-only and safe for unauthenticated access
     if (mode === 'status') {
       const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
       const { count: kbCount } = await supabase.from('biblical_knowledge_base').select('*', { count: 'exact', head: true });
@@ -204,6 +200,12 @@ Deno.serve(async (req) => {
           last_run: new Date().toISOString(),
         }
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // All write modes require auth
+    const auth = await requireAgentAuth(req);
+    if (!auth.authorized) {
+      return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
     }
 
     const result = await withAgentSandbox(
