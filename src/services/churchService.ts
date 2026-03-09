@@ -10,20 +10,21 @@ export async function searchChurches(query: string): Promise<Church[]> {
       return [];
     }
 
-    // Search global_churches via api schema (churches table is deprecated)
-    const globalChurchesResult = await supabaseApi
-      .from('global_churches')
+    // Use the public_church_directory view which masks sensitive PII (email, phone, crypto_address)
+    // This is safe for anonymous/unauthenticated access
+    const { data, error } = await supabase
+      .from('public_church_directory')
       .select('*')
       .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
       .limit(20);
     
-    if (globalChurchesResult.error) {
-      console.error("Error searching global churches:", globalChurchesResult.error);
+    if (error) {
+      console.error("Error searching churches:", error);
       return [];
     }
     
-    // Transform global_churches table results
-    const results: Church[] = (globalChurchesResult.data || []).map((church: any) => ({
+    // Transform public_church_directory view results
+    const results: Church[] = (data || []).map((church: any) => ({
       id: church.id,
       name: church.name,
       denomination: church.denomination,
