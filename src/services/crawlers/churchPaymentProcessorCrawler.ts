@@ -34,7 +34,7 @@ class ChurchPaymentProcessorCrawler {
     
     // Fetch churches from database
     const { data: churches } = await supabaseApi
-      .from('global_churches')
+      .from('public_church_directory')
       .select('*')
       .eq('accepts_crypto', true)
       .limit(100);

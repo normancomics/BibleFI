@@ -275,7 +275,7 @@ export class GlobalChurchCrawlerService {
   ): Promise<GlobalChurchData[]> {
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('country', country);
 
@@ -305,7 +305,7 @@ export class GlobalChurchCrawlerService {
   static async getCryptoEnabledChurches(): Promise<GlobalChurchData[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('accepts_crypto', true)
         .order('verified', { ascending: false });
@@ -327,7 +327,7 @@ export class GlobalChurchCrawlerService {
   static async getAllChurches(): Promise<GlobalChurchData[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .order('name', { ascending: true })
         .limit(1000);

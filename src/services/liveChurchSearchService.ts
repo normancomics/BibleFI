@@ -46,7 +46,7 @@ export class LiveChurchSearchService {
   static async searchChurches(params: LiveChurchSearchParams): Promise<LiveChurchResult[]> {
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*');
 
       // Text search across multiple fields
@@ -132,7 +132,7 @@ export class LiveChurchSearchService {
   static async getVerifiedChurches(): Promise<LiveChurchResult[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('verified', true)
         .order('rating', { ascending: false, nullsFirst: false })

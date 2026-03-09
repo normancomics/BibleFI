@@ -567,7 +567,7 @@ export class USChurchSeederService {
       try {
         // Check if church already exists
         const { data: existing } = await supabaseApi
-          .from('global_churches')
+          .from('public_church_directory')
           .select('id')
           .eq('name', church.name)
           .eq('city', church.city)
@@ -618,7 +618,7 @@ export class USChurchSeederService {
 
   static async getChurchCount(): Promise<number> {
     const { count } = await supabaseApi
-      .from('global_churches')
+      .from('public_church_directory')
       .select('*', { count: 'exact', head: true });
     return count || 0;
   }

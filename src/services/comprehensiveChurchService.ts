@@ -64,13 +64,13 @@ export class ComprehensiveChurchService {
     
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*');
 
       // Text search across multiple fields
       if (params.query) {
         const searchTerms = params.query.toLowerCase();
-        query = query.or(`name.ilike.%${searchTerms}%,city.ilike.%${searchTerms}%,denomination.ilike.%${searchTerms}%,pastor_name.ilike.%${searchTerms}%`);
+        query = query.or(`name.ilike.%${searchTerms}%,city.ilike.%${searchTerms}%,denomination.ilike.%${searchTerms}%`);
       }
 
       // Location filters
@@ -129,13 +129,13 @@ export class ComprehensiveChurchService {
         country: church.country,
         postal_code: church.postal_code,
         website: church.website,
-        phone: church.phone,
-        email: church.email,
-        pastor_name: church.pastor_name,
+        phone: church.masked_phone || null,
+        email: church.masked_email || null,
+        pastor_name: null,
         accepts_crypto: church.accepts_crypto,
         accepts_fiat: church.accepts_fiat,
         accepts_cards: church.accepts_cards,
-        crypto_address: church.crypto_address,
+        crypto_address: church.masked_crypto_address || null,
         crypto_networks: church.crypto_networks,
         verified: church.verified,
         rating: church.rating,
@@ -203,7 +203,7 @@ export class ComprehensiveChurchService {
   async findChurchByNameAndLocation(name: string, city: string, state?: string): Promise<Church | null> {
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .ilike('name', `%${name}%`)
         .ilike('city', `%${city}%`);
@@ -228,13 +228,13 @@ export class ComprehensiveChurchService {
         country: data.country,
         postal_code: data.postal_code,
         website: data.website,
-        phone: data.phone,
-        email: data.email,
-        pastor_name: data.pastor_name,
+        phone: data.masked_phone || null,
+        email: data.masked_email || null,
+        pastor_name: null,
         accepts_crypto: data.accepts_crypto,
         accepts_fiat: data.accepts_fiat,
         accepts_cards: data.accepts_cards,
-        crypto_address: data.crypto_address,
+        crypto_address: data.masked_crypto_address || null,
         crypto_networks: data.crypto_networks,
         verified: data.verified,
         rating: data.rating,
@@ -254,7 +254,7 @@ export class ComprehensiveChurchService {
   async getCryptoEnabledChurches(limit: number = 100): Promise<Church[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('accepts_crypto', true)
         .order('verified', { ascending: false })
@@ -275,13 +275,13 @@ export class ComprehensiveChurchService {
         country: church.country,
         postal_code: church.postal_code,
         website: church.website,
-        phone: church.phone,
-        email: church.email,
-        pastor_name: church.pastor_name,
+        phone: church.masked_phone || null,
+        email: church.masked_email || null,
+        pastor_name: null,
         accepts_crypto: church.accepts_crypto,
         accepts_fiat: church.accepts_fiat,
         accepts_cards: church.accepts_cards,
-        crypto_address: church.crypto_address,
+        crypto_address: church.masked_crypto_address || null,
         crypto_networks: church.crypto_networks,
         verified: church.verified,
         rating: church.rating,

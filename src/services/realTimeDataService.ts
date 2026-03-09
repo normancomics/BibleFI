@@ -56,7 +56,7 @@ export class RealTimeDataService {
         wisdomResult,
         versesResult
       ] = await Promise.allSettled([
-        supabaseApi.from('global_churches').select('id, accepts_crypto', { count: 'exact' }),
+        supabaseApi.from('public_church_directory').select('id, accepts_crypto', { count: 'exact' }),
         supabase.from('superfluid_streams').select('id, status', { count: 'exact' }),
         supabase.from('wisdom_scores').select('score'),
         supabase.from('bible_verses').select('financial_relevance').gt('financial_relevance', 0)
@@ -114,7 +114,7 @@ export class RealTimeDataService {
   async getChurchGrowthData(): Promise<ChurchGrowthData[]> {
     try {
       const { data: churches, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('created_at, accepts_crypto, verified')
         .order('created_at');
 
