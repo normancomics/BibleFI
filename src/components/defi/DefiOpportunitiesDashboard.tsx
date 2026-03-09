@@ -20,19 +20,72 @@ import MarketOverviewBar from './MarketOverviewBar';
 
 const DefiOpportunitiesDashboard: React.FC = () => {
   const { data, loading, error, lastRefresh, secondsUntilRefresh, newSignals, refresh } = useDefiScanner(120000);
+  const { playSound, isSoundEnabled } = useSound();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Toast notifications for new signals
+  // Warning signal types that should play a warning tone
+  const WARNING_TYPES = ['warning', 'exit', 'error'];
+
+  // Play a subtle chime (high pitch) for opportunity signals
+  const playSignalChime = useCallback(() => {
+    if (!isSoundEnabled) return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1800, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    } catch { /* silent fail */ }
+  }, [isSoundEnabled]);
+
+  // Play a warning tone (low descending) for risk alerts
+  const playWarningTone = useCallback(() => {
+    if (!isSoundEnabled) return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(500, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(250, ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.35);
+    } catch { /* silent fail */ }
+  }, [isSoundEnabled]);
+
+  // Toast notifications + sound effects for new signals
   useEffect(() => {
-    if (newSignals.length > 0) {
-      newSignals.forEach((sig) => {
-        toast(`📡 New ${sig.type} signal`, {
-          description: `${sig.protocol} • ${sig.asset}: ${sig.details}`,
-          duration: 6000,
-        });
+    if (newSignals.length === 0) return;
+
+    let hasWarning = false;
+    let hasOpportunity = false;
+
+    newSignals.forEach((sig) => {
+      const isWarning = WARNING_TYPES.includes(sig.type);
+      if (isWarning) hasWarning = true;
+      else hasOpportunity = true;
+
+      toast(`📡 New ${sig.type} signal`, {
+        description: `${sig.protocol} • ${sig.asset}: ${sig.details}`,
+        duration: 6000,
       });
-    }
-  }, [newSignals]);
+    });
+
+    // Play appropriate sound (one per batch to avoid spam)
+    if (hasWarning) playWarningTone();
+    else if (hasOpportunity) playSignalChime();
+  }, [newSignals, playSignalChime, playWarningTone]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
