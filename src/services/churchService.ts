@@ -17,9 +17,9 @@ export async function searchChurches(query: string): Promise<Church[]> {
         .select('*')
         .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state.ilike.%${query}%`)
         .limit(10),
-      supabase
+      supabaseApi
         .from('global_churches')
-        .select('id, name, denomination, city, state_province, country, address, website, accepts_crypto, accepts_fiat, verified, created_at, created_by')
+        .select('*')
         .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
         .limit(10)
     ]);
