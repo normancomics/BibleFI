@@ -55,12 +55,11 @@ export const useTitheRewards = () => {
 
   // Load tithe history on mount
   useEffect(() => {
-    const saved = localStorage.getItem('bible-fi-tithe-history');
+    const saved = secureStorage.getItem('bible-fi-tithe-history');
     if (saved) {
-      const parsed = JSON.parse(saved);
       setTitheHistory({
-        ...parsed,
-        firstTitheDate: parsed.firstTitheDate ? new Date(parsed.firstTitheDate) : null,
+        ...saved,
+        firstTitheDate: saved.firstTitheDate ? new Date(saved.firstTitheDate) : null,
       });
     }
   }, []);
