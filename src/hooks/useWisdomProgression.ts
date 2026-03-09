@@ -6,6 +6,7 @@ import {
   WisdomAchievement,
   WISDOM_LEVELS 
 } from '@/types/wisdomProgression';
+import { secureStorage } from '@/utils/securityUtils';
 
 const BIBLICAL_MILESTONES: BiblicalMilestone[] = [
   {
