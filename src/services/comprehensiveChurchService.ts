@@ -64,13 +64,13 @@ export class ComprehensiveChurchService {
     
     try {
       let query = supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*');
 
       // Text search across multiple fields
       if (params.query) {
         const searchTerms = params.query.toLowerCase();
-        query = query.or(`name.ilike.%${searchTerms}%,city.ilike.%${searchTerms}%,denomination.ilike.%${searchTerms}%,pastor_name.ilike.%${searchTerms}%`);
+        query = query.or(`name.ilike.%${searchTerms}%,city.ilike.%${searchTerms}%,denomination.ilike.%${searchTerms}%`);
       }
 
       // Location filters
