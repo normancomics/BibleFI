@@ -94,16 +94,16 @@ const App = () => (
               <Route path="/token" element={<TokenPage />} />
               <Route path="/wisdom-token" element={<WisdomTokenPage />} />
               <Route path="/admin" element={<AdminGuard><AdminDashboardPage /></AdminGuard>} />
-              <Route path="/deployment" element={<DeploymentPage />} />
+              <Route path="/deployment" element={<AdminGuard><DeploymentPage /></AdminGuard>} />
               <Route path="/biblical-defi" element={<BiblicalDefiPage />} />
               <Route path="/biblical-strategies" element={<BiblicalStrategiesPage />} />
               <Route path="/quantum-security" element={<QuantumSecurityPage />} />
               <Route path="/system-check" element={<SystemCheckPage />} />
               <Route path="/churches" element={<ChurchesPage />} />
-              <Route path="/live-data" element={<LiveDataPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/data-crawler" element={<DataCrawlerPage />} />
-              <Route path="/launch-plan" element={<LaunchActionPlanPage />} />
+              <Route path="/live-data" element={<AdminGuard><LiveDataPage /></AdminGuard>} />
+              <Route path="/analytics" element={<AdminGuard><AnalyticsPage /></AdminGuard>} />
+              <Route path="/data-crawler" element={<AdminGuard><DataCrawlerPage /></AdminGuard>} />
+              <Route path="/launch-plan" element={<AdminGuard><LaunchActionPlanPage /></AdminGuard>} />
               <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/compliance" element={<CompliancePage />} />
