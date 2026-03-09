@@ -327,7 +327,7 @@ export class GlobalChurchCrawlerService {
   static async getAllChurches(): Promise<GlobalChurchData[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .order('name', { ascending: true })
         .limit(1000);

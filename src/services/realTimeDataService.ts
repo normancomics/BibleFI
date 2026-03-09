@@ -114,7 +114,7 @@ export class RealTimeDataService {
   async getChurchGrowthData(): Promise<ChurchGrowthData[]> {
     try {
       const { data: churches, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('created_at, accepts_crypto, verified')
         .order('created_at');
 

@@ -132,7 +132,7 @@ export class LiveChurchSearchService {
   static async getVerifiedChurches(): Promise<LiveChurchResult[]> {
     try {
       const { data, error } = await supabaseApi
-        .from('global_churches')
+        .from('public_church_directory')
         .select('*')
         .eq('verified', true)
         .order('rating', { ascending: false, nullsFirst: false })
