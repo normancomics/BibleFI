@@ -156,48 +156,48 @@ export const baseTokens: Record<string, TokenInfo> = {
     symbol: "rETH",
     decimals: 18,
     address: "0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c",
-    logoURI: "https://assets.coingecko.com/coins/images/20764/small/reth.png"
+    logoURI: "https://assets.coingecko.com/coins/images/20764/standard/reth.png?1696520456"
   },
   wstETH: {
     name: "Wrapped stETH",
     symbol: "wstETH",
     decimals: 18,
     address: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
-    logoURI: "https://assets.coingecko.com/coins/images/18834/small/wstETH.png"
+    logoURI: "https://assets.coingecko.com/coins/images/18834/standard/wstETH.png?1696518295"
   },
   COMP: {
     name: "Compound",
     symbol: "COMP",
     decimals: 18,
     address: "0x9e1028F5F1D5eDE59748FFceE5532509976840E0",
-    logoURI: "https://assets.coingecko.com/coins/images/10775/small/COMP.png"
+    logoURI: "https://assets.coingecko.com/coins/images/10775/standard/COMP.png?1696510737"
   },
   SNX: {
     name: "Synthetix",
     symbol: "SNX",
     decimals: 18,
     address: "0x22e6966B799c4D5B13BE962E1D117b56327FDa66",
-    logoURI: "https://assets.coingecko.com/coins/images/3406/small/SNX.png"
+    logoURI: "https://assets.coingecko.com/coins/images/3406/standard/SNX.png?1696504103"
   },
   AAVE: {
     name: "Aave",
     symbol: "AAVE",
     decimals: 18,
     address: "0x18709E89BD403F470088aBDAcEbE86CC60dda12e",
-    logoURI: "https://assets.coingecko.com/coins/images/12645/small/AAVE.png"
+    logoURI: "https://assets.coingecko.com/coins/images/12645/standard/aave-token-round.png?1720472354"
   },
   UNI: {
     name: "Uniswap",
     symbol: "UNI",
     decimals: 18,
     address: "0xc3De830EA07524a0761646a6a4e4be0e114a3C83",
-    logoURI: "https://assets.coingecko.com/coins/images/12504/small/uni.jpg"
+    logoURI: "https://assets.coingecko.com/coins/images/12504/standard/uni.jpg?1696512319"
   },
   SUSHI: {
     name: "SushiSwap",
     symbol: "SUSHI",
     decimals: 18,
     address: "0x7D49a065D17d6d4a55dc13649901fdBB98B2AFBA",
-    logoURI: "https://assets.coingecko.com/coins/images/12271/small/512x512_Logo_no_chop.png"
+    logoURI: "https://assets.coingecko.com/coins/images/12271/standard/512x512_Logo_no_chop.png?1696512101"
   }
 };
