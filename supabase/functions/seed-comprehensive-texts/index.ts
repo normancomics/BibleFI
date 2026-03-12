@@ -1100,23 +1100,37 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // One-time seeder - uses service role key directly
+  // One-time seeder - uses direct REST to bypass schema restriction
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-  const supabase = createClient(supabaseUrl, serviceKey);
 
-  try {
-    // 1. Get all verses from biblical_knowledge_base
-    const { data: bkbVerses, error: bkbErr } = await supabase
-      .from('biblical_knowledge_base')
-      .select('reference, verse_text, category');
-    if (bkbErr) throw bkbErr;
+  const restHeaders = {
+    'apikey': serviceKey,
+    'Authorization': `Bearer ${serviceKey}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal',
+  };
 
-    // 2. Get existing comprehensive texts
-    const { data: existing, error: existErr } = await supabase
-      .from('comprehensive_biblical_texts')
-      .select('book, chapter, verse');
-    if (existErr) throw existErr;
+  async function restSelect(table: string, query: string) {
+    const res = await fetch(`${supabaseUrl}/rest/v1/${table}?${query}`, {
+      headers: { ...restHeaders, 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`SELECT ${table}: ${await res.text()}`);
+    return res.json();
+  }
+
+  async function restInsert(table: string, row: Record<string, unknown>) {
+    const res = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: restHeaders,
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`INSERT ${table}: ${txt}`);
+    }
+    return true;
+  }
 
     const existingSet = new Set(
       (existing || []).map(e => `${e.book}|${e.chapter}|${e.verse}`)
