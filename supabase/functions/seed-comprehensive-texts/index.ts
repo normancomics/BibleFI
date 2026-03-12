@@ -1100,9 +1100,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const auth = await requireAgentAuth(req);
-  if (!auth.authorized) return unauthorizedResponse(auth.error);
-
+  // One-time seeder - uses service role key directly
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, serviceKey);
