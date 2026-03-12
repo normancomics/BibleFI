@@ -56,6 +56,7 @@ const SwapPage = lazy(() => import("./pages/SwapPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const DefiOpportunitiesPage = lazy(() => import("./pages/DefiOpportunitiesPage"));
+const ScriptureIntegrityPage = lazy(() => import("./pages/ScriptureIntegrityPage"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
