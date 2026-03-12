@@ -1131,9 +1131,15 @@ Deno.serve(async (req) => {
     }
     return true;
   }
+  try {
+    // 1. Get all verses from biblical_knowledge_base
+    const bkbVerses = await restSelect('biblical_knowledge_base', 'select=reference,verse_text,category');
+
+    // 2. Get existing comprehensive texts
+    const existing = await restSelect('comprehensive_biblical_texts', 'select=book,chapter,verse');
 
     const existingSet = new Set(
-      (existing || []).map(e => `${e.book}|${e.chapter}|${e.verse}`)
+      (existing || []).map((e: any) => `${e.book}|${e.chapter}|${e.verse}`)
     );
 
     // 3. Get original language data
@@ -1169,10 +1175,8 @@ Deno.serve(async (req) => {
       const lang = langData[ref];
       if (!lang) {
         noData++;
-        // Insert with just KJV text
-        const { error: insErr } = await supabase
-          .from('comprehensive_biblical_texts')
-          .insert({
+        try {
+          await restInsert('comprehensive_biblical_texts', {
             book: parsed.book,
             chapter: parsed.chapter,
             verse: parsed.verse,
@@ -1180,19 +1184,17 @@ Deno.serve(async (req) => {
             financial_keywords: [verse.category],
             financial_relevance: 5,
           });
-        if (!insErr) {
           inserted++;
           existingSet.add(key);
           details.push({ reference: ref, status: 'inserted_kjv_only' });
-        } else {
-          details.push({ reference: ref, status: `insert_error: ${insErr.message}` });
+        } catch (e: any) {
+          details.push({ reference: ref, status: `insert_error: ${e.message}` });
         }
         continue;
       }
 
-      const { error: insErr } = await supabase
-        .from('comprehensive_biblical_texts')
-        .insert({
+      try {
+        await restInsert('comprehensive_biblical_texts', {
           book: parsed.book,
           chapter: parsed.chapter,
           verse: parsed.verse,
@@ -1205,13 +1207,11 @@ Deno.serve(async (req) => {
           financial_keywords: lang.financial_keywords,
           financial_relevance: lang.financial_relevance,
         });
-
-      if (!insErr) {
         inserted++;
         existingSet.add(key);
         details.push({ reference: ref, status: 'inserted_full' });
-      } else {
-        details.push({ reference: ref, status: `insert_error: ${insErr.message}` });
+      } catch (e: any) {
+        details.push({ reference: ref, status: `insert_error: ${e.message}` });
       }
     }
 
