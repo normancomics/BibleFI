@@ -115,6 +115,7 @@ const App = () => (
               <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
+              <Route path="/scripture-integrity" element={<AdminGuard><ScriptureIntegrityPage /></AdminGuard>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
