@@ -1122,12 +1122,25 @@ Deno.serve(async (req) => {
   async function restInsert(table: string, row: Record<string, unknown>) {
     const res = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
       method: 'POST',
-      headers: restHeaders,
+      headers: { ...restHeaders, 'Prefer': 'return=minimal,resolution=merge-duplicates' },
       body: JSON.stringify(row),
     });
     if (!res.ok) {
       const txt = await res.text();
       throw new Error(`INSERT ${table}: ${txt}`);
+    }
+    return true;
+  }
+
+  async function restUpdate(table: string, matchParams: string, updates: Record<string, unknown>) {
+    const res = await fetch(`${supabaseUrl}/rest/v1/${table}?${matchParams}`, {
+      method: 'PATCH',
+      headers: restHeaders,
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`UPDATE ${table}: ${txt}`);
     }
     return true;
   }
