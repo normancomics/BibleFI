@@ -1180,8 +1180,28 @@ Deno.serve(async (req) => {
 
       const key = `${parsed.book}|${parsed.chapter}|${parsed.verse}`;
       if (existingSet.has(key)) {
+        // Update existing row with original language data if available
+        const lang = langData[ref];
+        if (lang) {
+          try {
+            const matchParams = `book=eq.${encodeURIComponent(parsed.book)}&chapter=eq.${parsed.chapter}&verse=eq.${parsed.verse}`;
+            await restUpdate('comprehensive_biblical_texts', matchParams, {
+              hebrew_text: lang.hebrew_text || null,
+              greek_text: lang.greek_text || null,
+              aramaic_text: lang.aramaic_text || null,
+              strong_numbers: lang.strong_numbers,
+              original_words: lang.original_words,
+              financial_keywords: lang.financial_keywords,
+              financial_relevance: lang.financial_relevance,
+            });
+            details.push({ reference: ref, status: 'updated_existing' });
+          } catch (e: any) {
+            details.push({ reference: ref, status: `update_error: ${e.message}` });
+          }
+        } else {
+          details.push({ reference: ref, status: 'already_exists_no_lang_data' });
+        }
         skipped++;
-        details.push({ reference: ref, status: 'already_exists' });
         continue;
       }
 
