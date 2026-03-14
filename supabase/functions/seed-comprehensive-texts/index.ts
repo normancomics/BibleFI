@@ -1092,6 +1092,167 @@ function getOriginalLanguageData(): Record<string, {
       financial_keywords: ['deceive', 'empty words', 'fraud', 'warning'],
       financial_relevance: 6,
     },
+
+    // ═══════════════════════════════════════════════════════
+    // ADDITIONAL FINANCIAL WISDOM (14 more to reach 108)
+    // ═══════════════════════════════════════════════════════
+    'Matthew 6:24': {
+      greek_text: 'Οὐδεὶς δύναται δυσὶ κυρίοις δουλεύειν· ἢ γὰρ τὸν ἕνα μισήσει καὶ τὸν ἕτερον ἀγαπήσει, ἢ ἑνὸς ἀνθέξεται καὶ τοῦ ἑτέρου καταφρονήσει. οὐ δύνασθε θεῷ δουλεύειν καὶ μαμωνᾷ.',
+      strong_numbers: ['G3762', 'G1410', 'G1417', 'G2962', 'G1398', 'G3404', 'G25', 'G472', 'G2706', 'G2316', 'G3126'],
+      original_words: [
+        { word: 'μαμωνᾶς', strongs: 'G3126', meaning: 'mammon, riches', lang: 'greek' },
+        { word: 'δουλεύω', strongs: 'G1398', meaning: 'to serve, be a slave', lang: 'greek' },
+        { word: 'κύριος', strongs: 'G2962', meaning: 'lord, master', lang: 'greek' },
+      ],
+      financial_keywords: ['mammon', 'serve', 'God', 'master', 'money'],
+      financial_relevance: 10,
+    },
+    'Matthew 6:19': {
+      greek_text: 'Μὴ θησαυρίζετε ὑμῖν θησαυροὺς ἐπὶ τῆς γῆς, ὅπου σὴς καὶ βρῶσις ἀφανίζει καὶ ὅπου κλέπται διορύσσουσιν καὶ κλέπτουσιν·',
+      strong_numbers: ['G2343', 'G2344', 'G1093', 'G4597', 'G1035', 'G853', 'G2812', 'G1358', 'G2813'],
+      original_words: [
+        { word: 'θησαυρίζω', strongs: 'G2343', meaning: 'to store up treasure', lang: 'greek' },
+        { word: 'θησαυρός', strongs: 'G2344', meaning: 'treasure', lang: 'greek' },
+        { word: 'κλέπτης', strongs: 'G2812', meaning: 'thief', lang: 'greek' },
+      ],
+      financial_keywords: ['treasure', 'earth', 'moth', 'thieves', 'store'],
+      financial_relevance: 10,
+    },
+    'Matthew 6:33': {
+      greek_text: 'ζητεῖτε δὲ πρῶτον τὴν βασιλείαν τοῦ θεοῦ καὶ τὴν δικαιοσύνην αὐτοῦ, καὶ ταῦτα πάντα προστεθήσεται ὑμῖν.',
+      strong_numbers: ['G2212', 'G4412', 'G932', 'G2316', 'G1343', 'G3956', 'G4369'],
+      original_words: [
+        { word: 'ζητέω', strongs: 'G2212', meaning: 'to seek', lang: 'greek' },
+        { word: 'βασιλεία', strongs: 'G932', meaning: 'kingdom', lang: 'greek' },
+        { word: 'δικαιοσύνη', strongs: 'G1343', meaning: 'righteousness', lang: 'greek' },
+        { word: 'προστίθημι', strongs: 'G4369', meaning: 'to add, provide', lang: 'greek' },
+      ],
+      financial_keywords: ['seek', 'kingdom', 'righteousness', 'provision', 'priority'],
+      financial_relevance: 9,
+    },
+    'Philippians 4:19': {
+      greek_text: 'ὁ δὲ θεός μου πληρώσει πᾶσαν χρείαν ὑμῶν κατὰ τὸ πλοῦτος αὐτοῦ ἐν δόξῃ ἐν Χριστῷ Ἰησοῦ.',
+      strong_numbers: ['G2316', 'G4137', 'G3956', 'G5532', 'G4149', 'G1391', 'G5547', 'G2424'],
+      original_words: [
+        { word: 'πληρόω', strongs: 'G4137', meaning: 'to fill, supply', lang: 'greek' },
+        { word: 'χρεία', strongs: 'G5532', meaning: 'need, necessity', lang: 'greek' },
+        { word: 'πλοῦτος', strongs: 'G4149', meaning: 'riches, wealth', lang: 'greek' },
+      ],
+      financial_keywords: ['supply', 'need', 'riches', 'glory', 'provision'],
+      financial_relevance: 9,
+    },
+    'Deuteronomy 8:18': {
+      hebrew_text: 'וְזָכַרְתָּ֙ אֶת־יְהוָ֣ה אֱלֹהֶ֔יךָ כִּ֣י ה֗וּא הַנֹּתֵ֥ן לְךָ֛ כֹּ֖חַ לַעֲשׂ֣וֹת חָ֑יִל',
+      strong_numbers: ['H2142', 'H3068', 'H430', 'H5414', 'H3581', 'H6213', 'H2428'],
+      original_words: [
+        { word: 'זָכַר', strongs: 'H2142', meaning: 'to remember', lang: 'hebrew' },
+        { word: 'כֹּחַ', strongs: 'H3581', meaning: 'power, ability', lang: 'hebrew' },
+        { word: 'חַיִל', strongs: 'H2428', meaning: 'wealth, strength', lang: 'hebrew' },
+      ],
+      financial_keywords: ['remember', 'God', 'power', 'wealth', 'ability'],
+      financial_relevance: 10,
+    },
+    'Haggai 2:8': {
+      hebrew_text: 'לִ֥י הַכֶּ֖סֶף וְלִ֣י הַזָּהָ֑ב נְאֻ֖ם יְהוָ֥ה צְבָאֽוֹת',
+      strong_numbers: ['H3701', 'H2091', 'H5002', 'H3068', 'H6635'],
+      original_words: [
+        { word: 'כֶּסֶף', strongs: 'H3701', meaning: 'silver', lang: 'hebrew' },
+        { word: 'זָהָב', strongs: 'H2091', meaning: 'gold', lang: 'hebrew' },
+        { word: 'צְבָאוֹת', strongs: 'H6635', meaning: 'hosts, armies', lang: 'hebrew' },
+      ],
+      financial_keywords: ['silver', 'gold', 'God', 'ownership', 'sovereignty'],
+      financial_relevance: 10,
+    },
+    'Psalm 24:1': {
+      hebrew_text: 'לַיהוָ֣ה הָ֭אָרֶץ וּמְלוֹאָ֑הּ תֵּ֝בֵ֗ל וְיֹ֣שְׁבֵי בָֽהּ',
+      strong_numbers: ['H3068', 'H776', 'H4393', 'H8398', 'H3427'],
+      original_words: [
+        { word: 'אֶרֶץ', strongs: 'H776', meaning: 'earth, land', lang: 'hebrew' },
+        { word: 'מְלוֹאָהּ', strongs: 'H4393', meaning: 'fullness thereof', lang: 'hebrew' },
+        { word: 'תֵּבֵל', strongs: 'H8398', meaning: 'world', lang: 'hebrew' },
+      ],
+      financial_keywords: ['earth', 'fullness', 'ownership', 'God', 'stewardship'],
+      financial_relevance: 8,
+    },
+    'Proverbs 10:4': {
+      hebrew_text: 'רָ֗אשׁ עֹ֭שֶׂה כַף־רְמִיָּ֑ה וְיַ֖ד חָרוּצִ֣ים תַּעֲשִֽׁיר',
+      strong_numbers: ['H7326', 'H6213', 'H3709', 'H7423', 'H3027', 'H2742', 'H6238'],
+      original_words: [
+        { word: 'רְמִיָּה', strongs: 'H7423', meaning: 'slack, idle hand', lang: 'hebrew' },
+        { word: 'חָרוּץ', strongs: 'H2742', meaning: 'diligent', lang: 'hebrew' },
+        { word: 'עָשַׁר', strongs: 'H6238', meaning: 'to become rich', lang: 'hebrew' },
+      ],
+      financial_keywords: ['poor', 'slack', 'diligent', 'rich', 'hand'],
+      financial_relevance: 9,
+    },
+    'Proverbs 11:24': {
+      hebrew_text: 'יֵ֣שׁ מְ֭פַזֵּר וְנוֹסָ֣ף ע֑וֹד וְחוֹשֵׂ֥ךְ מִ֝יֹּ֗שֶׁר אַךְ־לְמַחְסֽוֹר',
+      strong_numbers: ['H3426', 'H6340', 'H3254', 'H5750', 'H2820', 'H3476', 'H4270'],
+      original_words: [
+        { word: 'מְפַזֵּר', strongs: 'H6340', meaning: 'to scatter, distribute', lang: 'hebrew' },
+        { word: 'נוֹסָף', strongs: 'H3254', meaning: 'increased, added', lang: 'hebrew' },
+        { word: 'מַחְסוֹר', strongs: 'H4270', meaning: 'want, lack', lang: 'hebrew' },
+      ],
+      financial_keywords: ['scatter', 'increase', 'withhold', 'poverty', 'generosity'],
+      financial_relevance: 9,
+    },
+    'Proverbs 14:23': {
+      hebrew_text: 'בְּכׇל־עֶ֭צֶב יִהְיֶ֣ה מוֹתָ֑ר וּדְבַר־שְׂ֝פָתַ֗יִם אַךְ־לְמַחְסֽוֹר',
+      strong_numbers: ['H3605', 'H6089', 'H1961', 'H4195', 'H1697', 'H8193', 'H4270'],
+      original_words: [
+        { word: 'עֶצֶב', strongs: 'H6089', meaning: 'labor, toil', lang: 'hebrew' },
+        { word: 'מוֹתָר', strongs: 'H4195', meaning: 'profit, advantage', lang: 'hebrew' },
+        { word: 'מַחְסוֹר', strongs: 'H4270', meaning: 'want, poverty', lang: 'hebrew' },
+      ],
+      financial_keywords: ['labor', 'profit', 'talk', 'poverty', 'work'],
+      financial_relevance: 9,
+    },
+    'Proverbs 28:20': {
+      hebrew_text: 'אִ֣ישׁ אֱ֭מוּנוֹת רַב־בְּרָכ֑וֹת וְאָ֥ץ לְ֝הַעֲשִׁ֗יר לֹ֣א יִנָּקֶֽה',
+      strong_numbers: ['H376', 'H530', 'H7227', 'H1293', 'H213', 'H6238', 'H5352'],
+      original_words: [
+        { word: 'אֱמוּנוֹת', strongs: 'H530', meaning: 'faithfulness', lang: 'hebrew' },
+        { word: 'בְּרָכוֹת', strongs: 'H1293', meaning: 'blessings', lang: 'hebrew' },
+        { word: 'עָשַׁר', strongs: 'H6238', meaning: 'to be rich', lang: 'hebrew' },
+      ],
+      financial_keywords: ['faithful', 'blessings', 'haste', 'rich', 'punishment'],
+      financial_relevance: 9,
+    },
+    'Proverbs 22:4': {
+      hebrew_text: 'עֵ֣קֶב עֲ֭נָוָה יִרְאַ֣ת יְהוָ֑ה עֹ֖שֶׁר וְכָב֣וֹד וְחַיִּֽים',
+      strong_numbers: ['H6118', 'H6038', 'H3374', 'H3068', 'H6239', 'H3519', 'H2416'],
+      original_words: [
+        { word: 'עֲנָוָה', strongs: 'H6038', meaning: 'humility', lang: 'hebrew' },
+        { word: 'יִרְאָה', strongs: 'H3374', meaning: 'fear, reverence', lang: 'hebrew' },
+        { word: 'עֹשֶׁר', strongs: 'H6239', meaning: 'riches, wealth', lang: 'hebrew' },
+        { word: 'כָּבוֹד', strongs: 'H3519', meaning: 'honor, glory', lang: 'hebrew' },
+      ],
+      financial_keywords: ['humility', 'fear of LORD', 'riches', 'honor', 'life'],
+      financial_relevance: 9,
+    },
+    'Luke 16:11': {
+      greek_text: 'εἰ οὖν ἐν τῷ ἀδίκῳ μαμωνᾷ πιστοὶ οὐκ ἐγένεσθε, τὸ ἀληθινὸν τίς ὑμῖν πιστεύσει;',
+      strong_numbers: ['G94', 'G3126', 'G4103', 'G1096', 'G228', 'G4100'],
+      original_words: [
+        { word: 'μαμωνᾶς', strongs: 'G3126', meaning: 'mammon, wealth', lang: 'greek' },
+        { word: 'πιστός', strongs: 'G4103', meaning: 'faithful, trustworthy', lang: 'greek' },
+        { word: 'ἀληθινός', strongs: 'G228', meaning: 'true, genuine', lang: 'greek' },
+      ],
+      financial_keywords: ['mammon', 'faithful', 'true riches', 'stewardship'],
+      financial_relevance: 10,
+    },
+    'Proverbs 3:5': {
+      hebrew_text: 'בְּטַ֣ח אֶל־יְ֭הוָה בְּכׇל־לִבֶּ֑ךָ וְאֶל־בִּ֥ינָתְךָ֗ אַל־תִּשָּׁעֵֽן',
+      strong_numbers: ['H982', 'H3068', 'H3605', 'H3820', 'H998', 'H8172'],
+      original_words: [
+        { word: 'בָּטַח', strongs: 'H982', meaning: 'to trust, rely on', lang: 'hebrew' },
+        { word: 'לֵב', strongs: 'H3820', meaning: 'heart', lang: 'hebrew' },
+        { word: 'בִּינָה', strongs: 'H998', meaning: 'understanding', lang: 'hebrew' },
+        { word: 'שָׁעַן', strongs: 'H8172', meaning: 'to lean on, rely', lang: 'hebrew' },
+      ],
+      financial_keywords: ['trust', 'LORD', 'heart', 'understanding', 'wisdom'],
+      financial_relevance: 8,
+    },
   };
 }
 
