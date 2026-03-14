@@ -1409,7 +1409,24 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Phase 2: Insert verses from original language data that aren't in BKB
+    // KJV texts for verses not in BKB
+    const kjvTexts: Record<string, string> = {
+      'Matthew 6:24': 'No man can serve two masters: for either he will hate the one, and love the other; or else he will hold to the one, and despise the other. Ye cannot serve God and mammon.',
+      'Matthew 6:19': 'Lay not up for yourselves treasures upon earth, where moth and rust doth corrupt, and where thieves break through and steal:',
+      'Matthew 6:33': 'But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.',
+      'Philippians 4:19': 'But my God shall supply all your need according to his riches in glory by Christ Jesus.',
+      'Deuteronomy 8:18': 'But thou shalt remember the LORD thy God: for it is he that giveth thee power to get wealth, that he may establish his covenant which he sware unto thy fathers, as it is this day.',
+      'Haggai 2:8': 'The silver is mine, and the gold is mine, saith the LORD of hosts.',
+      'Psalm 24:1': 'The earth is the LORD\'s, and the fulness thereof; the world, and they that dwell therein.',
+      'Proverbs 10:4': 'He becometh poor that dealeth with a slack hand: but the hand of the diligent maketh rich.',
+      'Proverbs 11:24': 'There is that scattereth, and yet increaseth; and there is that withholdeth more than is meet, but it tendeth to poverty.',
+      'Proverbs 14:23': 'In all labour there is profit: but the talk of the lips tendeth only to penury.',
+      'Proverbs 28:20': 'A faithful man shall abound with blessings: but he that maketh haste to be rich shall not be innocent.',
+      'Proverbs 22:4': 'By humility and the fear of the LORD are riches, and honour, and life.',
+      'Luke 16:11': 'If therefore ye have not been faithful in the unrighteous mammon, who will commit to your trust the true riches?',
+      'Proverbs 3:5': 'Trust in the LORD with all thine heart; and lean not unto thine own understanding.',
+    };
+
     let langOnlyInserted = 0;
     for (const [ref, lang] of Object.entries(langData)) {
       const parsed = parseReference(ref);
@@ -1417,13 +1434,13 @@ Deno.serve(async (req) => {
       const key = `${parsed.book}|${parsed.chapter}|${parsed.verse}`;
       if (existingSet.has(key)) continue;
 
-      // These verses have original language data but aren't in BKB - insert with KJV placeholder
+      const kjvText = kjvTexts[ref] || `[${ref}]`;
       try {
         await restInsert('comprehensive_biblical_texts', {
           book: parsed.book,
           chapter: parsed.chapter,
           verse: parsed.verse,
-          kjv_text: `[KJV text for ${ref}]`, // placeholder
+          kjv_text: kjvText,
           hebrew_text: lang.hebrew_text || null,
           greek_text: lang.greek_text || null,
           aramaic_text: lang.aramaic_text || null,
