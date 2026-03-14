@@ -1409,12 +1409,44 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Phase 2: Insert verses from original language data that aren't in BKB
+    let langOnlyInserted = 0;
+    for (const [ref, lang] of Object.entries(langData)) {
+      const parsed = parseReference(ref);
+      if (!parsed) continue;
+      const key = `${parsed.book}|${parsed.chapter}|${parsed.verse}`;
+      if (existingSet.has(key)) continue;
+
+      // These verses have original language data but aren't in BKB - insert with KJV placeholder
+      try {
+        await restInsert('comprehensive_biblical_texts', {
+          book: parsed.book,
+          chapter: parsed.chapter,
+          verse: parsed.verse,
+          kjv_text: `[KJV text for ${ref}]`, // placeholder
+          hebrew_text: lang.hebrew_text || null,
+          greek_text: lang.greek_text || null,
+          aramaic_text: lang.aramaic_text || null,
+          strong_numbers: lang.strong_numbers,
+          original_words: lang.original_words,
+          financial_keywords: lang.financial_keywords,
+          financial_relevance: lang.financial_relevance,
+        });
+        langOnlyInserted++;
+        existingSet.add(key);
+        details.push({ reference: ref, status: 'inserted_from_lang_data' });
+      } catch (e: any) {
+        details.push({ reference: ref, status: `lang_insert_error: ${e.message}` });
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true,
       totalInBKB: uniqueRefs.size,
       inserted,
       skipped,
       noOriginalData: noData,
+      langOnlyInserted,
       details,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
