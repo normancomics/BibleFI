@@ -163,26 +163,60 @@ function validateReference(ref: string): string[] {
   return issues;
 }
 
+// Multiple URL format strategies for bible-api.com
+function getBibleApiUrls(reference: string): string[] {
+  const urls: string[] = [];
+  // Strategy 1: Direct encoding
+  urls.push(`${BIBLE_API_URL}/${encodeURIComponent(reference)}?translation=kjv`);
+  // Strategy 2: Plus-separated (bible-api.com prefers this for some refs)
+  const plusRef = reference.replace(/\s+/g, '+');
+  urls.push(`${BIBLE_API_URL}/${plusRef}?translation=kjv`);
+  // Strategy 3: Lowercase
+  urls.push(`${BIBLE_API_URL}/${encodeURIComponent(reference.toLowerCase())}?translation=kjv`);
+  return [...new Set(urls)]; // dedupe
+}
+
 async function fetchKJVVerse(reference: string, retries = 2): Promise<string | null> {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      const resp = await fetch(`${BIBLE_API_URL}/${encodeURIComponent(reference)}?translation=kjv`);
-      if (resp.status === 429 || resp.status >= 500) {
-        await resp.text(); // consume body
-        if (attempt < retries) { await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); continue; }
-        return null;
+  // Handle range references — fetch first verse only for comparison
+  const parsed = parseReference(reference);
+  const singleRef = parsed ? `${parsed.book} ${parsed.chapter}:${parsed.verse}` : reference;
+
+  const urlStrategies = getBibleApiUrls(singleRef);
+
+  for (const url of urlStrategies) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const resp = await fetch(url);
+        if (resp.status === 429 || resp.status >= 500) {
+          await resp.text();
+          if (attempt < retries) { await new Promise(r => setTimeout(r, 1200 * (attempt + 1))); continue; }
+          break; // try next URL strategy
+        }
+        if (!resp.ok) { await resp.text(); break; }
+        const data = await resp.json();
+        if (data.verses && data.verses.length > 0) {
+          return data.verses[0].text?.trim() || data.text?.trim() || null;
+        }
+        return data.text?.trim() || null;
+      } catch {
+        if (attempt < retries) { await new Promise(r => setTimeout(r, 1200 * (attempt + 1))); continue; }
+        break;
       }
-      if (!resp.ok) { await resp.text(); return null; }
-      const data = await resp.json();
-      if (data.verses && data.verses.length > 0) {
-        return data.verses[0].text?.trim() || data.text?.trim() || null;
-      }
-      return data.text?.trim() || null;
-    } catch {
-      if (attempt < retries) { await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); continue; }
-      return null;
     }
   }
+
+  // Backup: try labs.bible.org API
+  try {
+    if (parsed) {
+      const labsUrl = `https://labs.bible.org/api/?passage=${encodeURIComponent(singleRef)}&type=text&formatting=plain`;
+      const resp = await fetch(labsUrl);
+      if (resp.ok) {
+        const text = await resp.text();
+        if (text && text.length > 10 && !text.includes('<')) return text.trim();
+      }
+    }
+  } catch { /* backup failed silently */ }
+
   return null;
 }
 
