@@ -128,11 +128,16 @@ function calculateSimilarity(a: string, b: string): number {
   return intersection.size / union.size;
 }
 
-function parseReference(ref: string): { book: string; chapter: number; verse: number } | null {
-  // Match patterns like "Proverbs 3:5", "1 Kings 10:14", "Song of Solomon 1:1"
-  const match = ref.match(/^(\d?\s*\w[\w\s]*?)\s+(\d+):(\d+)$/);
+function parseReference(ref: string): { book: string; chapter: number; verse: number; endVerse?: number } | null {
+  // Match patterns like "Proverbs 3:5", "Proverbs 6:1-2", "1 Kings 10:14", "Song of Solomon 1:1"
+  const match = ref.match(/^(\d?\s*\w[\w\s]*?)\s+(\d+):(\d+)(?:-(\d+))?$/);
   if (!match) return null;
-  return { book: match[1].trim(), chapter: parseInt(match[2]), verse: parseInt(match[3]) };
+  return {
+    book: match[1].trim(),
+    chapter: parseInt(match[2]),
+    verse: parseInt(match[3]),
+    endVerse: match[4] ? parseInt(match[4]) : undefined,
+  };
 }
 
 function validateReference(ref: string): string[] {
