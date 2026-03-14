@@ -1280,10 +1280,13 @@ Deno.serve(async (req) => {
     return res.json();
   }
 
-  async function restInsert(table: string, row: Record<string, unknown>) {
+  async function restInsert(table: string, row: Record<string, unknown>, upsert = false) {
+    const headers = upsert
+      ? { ...restHeaders, 'Prefer': 'return=minimal,resolution=merge-duplicates' }
+      : { ...restHeaders, 'Prefer': 'return=minimal' };
     const res = await fetch(`${supabaseUrl}/rest/v1/${table}`, {
       method: 'POST',
-      headers: { ...restHeaders, 'Prefer': 'return=minimal,resolution=merge-duplicates' },
+      headers,
       body: JSON.stringify(row),
     });
     if (!res.ok) {
