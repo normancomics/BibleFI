@@ -74,3 +74,9 @@ verify_jwt = false
 
 [functions.defi-opportunity-scanner]
 verify_jwt = false
+
+[functions.sync-knowledge-base]
+verify_jwt = false
+
+[functions.seed-comprehensive-texts]
+verify_jwt = false
