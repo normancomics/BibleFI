@@ -442,3 +442,27 @@
   -webkit-font-smoothing: none;
   font-smooth: never;
 }
+
+/* BibleFi animated glow */
+@keyframes biblefi-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 10px hsl(45 100% 55% / 0.6),
+      0 0 20px hsl(45 100% 55% / 0.4),
+      0 0 40px hsl(45 100% 55% / 0.2),
+      0 0 60px hsl(280 100% 65% / 0.15);
+    filter: brightness(1);
+  }
+  50% {
+    text-shadow:
+      0 0 15px hsl(45 100% 55% / 0.8),
+      0 0 30px hsl(45 100% 55% / 0.6),
+      0 0 60px hsl(45 100% 55% / 0.4),
+      0 0 90px hsl(280 100% 65% / 0.3);
+    filter: brightness(1.15);
+  }
+}
+
+.biblefi-glow {
+  animation: biblefi-glow 3s ease-in-out infinite;
+}
