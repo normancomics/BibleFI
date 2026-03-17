@@ -48,12 +48,12 @@ const ScriptureIntegrityPage: React.FC = () => {
     let totalValidated = 0, totalMismatches = 0, totalErrors = 0, totalVerses = 0;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseApi.auth.getSession();
       if (!session) throw new Error('Admin authentication required');
 
       const batchSize = 25;
       for (let offset = 0; offset < 200; offset += batchSize) {
-        const { data, error: fnErr } = await supabase.functions.invoke('scripture-integrity-validator', {
+        const { data, error: fnErr } = await supabaseApi.functions.invoke('scripture-integrity-validator', {
           headers: { Authorization: `Bearer ${session.access_token}` },
           body: { mode: 'audit_readonly', batchSize, offset },
         });
