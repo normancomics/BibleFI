@@ -1,3 +1,5 @@
+import { requireAgentAuth, unauthorizedResponse } from '../_shared/agent-auth.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
@@ -138,6 +140,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth check
+    const auth = await requireAgentAuth(req);
+    if (!auth.authorized) {
+      return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
+    }
+
     const url = new URL(req.url);
     const mode = url.searchParams.get('mode') || 'sync';
 
