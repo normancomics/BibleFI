@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, CheckCircle, AlertTriangle, XCircle, RefreshCw, BookOpen, Database } from 'lucide-react';
 import NavBar from '@/components/NavBar';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 interface AuditResult {
   totalVerses: number;
@@ -30,7 +30,7 @@ const ScriptureIntegrityPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchDbStats = useCallback(async () => {
-    const { data, error: err } = await supabase
+    const { data, error: err } = await supabaseApi
       .from('biblical_knowledge_base')
       .select('id, category');
     if (err) return;
@@ -48,12 +48,12 @@ const ScriptureIntegrityPage: React.FC = () => {
     let totalValidated = 0, totalMismatches = 0, totalErrors = 0, totalVerses = 0;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await supabaseApi.auth.getSession();
       if (!session) throw new Error('Admin authentication required');
 
       const batchSize = 25;
       for (let offset = 0; offset < 200; offset += batchSize) {
-        const { data, error: fnErr } = await supabase.functions.invoke('scripture-integrity-validator', {
+        const { data, error: fnErr } = await supabaseApi.functions.invoke('scripture-integrity-validator', {
           headers: { Authorization: `Bearer ${session.access_token}` },
           body: { mode: 'audit_readonly', batchSize, offset },
         });
