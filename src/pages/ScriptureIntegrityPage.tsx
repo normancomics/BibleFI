@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, CheckCircle, AlertTriangle, XCircle, RefreshCw, BookOpen, Database } from 'lucide-react';
 import NavBar from '@/components/NavBar';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/integrations/supabase/apiClient';
 
 interface AuditResult {
   totalVerses: number;
