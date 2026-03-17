@@ -140,6 +140,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth check
+    const auth = await requireAgentAuth(req);
+    if (!auth.authorized) {
+      return unauthorizedResponse(auth.error || 'Unauthorized', corsHeaders);
+    }
+
     const url = new URL(req.url);
     const mode = url.searchParams.get('mode') || 'sync';
 
