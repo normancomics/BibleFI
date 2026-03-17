@@ -30,7 +30,7 @@ const ScriptureIntegrityPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchDbStats = useCallback(async () => {
-    const { data, error: err } = await supabase
+    const { data, error: err } = await supabaseApi
       .from('biblical_knowledge_base')
       .select('id, category');
     if (err) return;
