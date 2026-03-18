@@ -61,7 +61,7 @@ const Index = () => {
             className="text-center mb-8"
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-4 font-scroll">
-              <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent biblefi-glow">
+              <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent">
                 BibleFi
               </span>
             </h1>
