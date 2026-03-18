@@ -122,6 +122,8 @@ const Index = () => {
                 key={item.path}
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
                 transition={{ delay: 0.4 + i * 0.15, duration: 0.5, ease: "easeOut" }}
               >
                 <Button
