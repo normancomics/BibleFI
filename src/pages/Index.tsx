@@ -60,11 +60,16 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-8"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 font-scroll">
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-5xl md:text-6xl font-bold mb-4 font-scroll"
+            >
               <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent">
                 BibleFi
               </span>
-            </h1>
+            </motion.h1>
             <p className="text-xl text-white/80 mb-2">
               Biblical DeFi: Tithing First, Prosperity Through Obedience
             </p>
