@@ -112,42 +112,30 @@ const Index = () => {
           </motion.div>
 
           {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            <Button
-              onClick={() => navigate('/biblical-finance')}
-              className="h-24 bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              <div className="flex flex-col items-center gap-2">
-                <BookOpen className="w-8 h-8" />
-                <span className="text-sm">Biblical Finance Encyclopedia</span>
-              </div>
-            </Button>
-
-            <Button
-              onClick={() => navigate('/defi')}
-              className="h-24 bg-gradient-to-br from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700"
-            >
-              <div className="flex flex-col items-center gap-2">
-                <TrendingUp className="w-8 h-8" />
-                <span className="text-sm">DeFi Hub</span>
-              </div>
-            </Button>
-
-            <Button
-              onClick={() => navigate('/tithe')}
-              className="h-24 bg-gradient-to-br from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700"
-            >
-              <div className="flex flex-col items-center gap-2">
-                <Heart className="w-8 h-8" />
-                <span className="text-sm">Full Tithing Interface</span>
-              </div>
-            </Button>
-          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { path: '/biblical-finance', icon: <BookOpen className="w-8 h-8" />, label: 'Biblical Finance Encyclopedia', gradient: 'from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' },
+              { path: '/defi', icon: <TrendingUp className="w-8 h-8" />, label: 'DeFi Hub', gradient: 'from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700' },
+              { path: '/tithe', icon: <Heart className="w-8 h-8" />, label: 'Full Tithing Interface', gradient: 'from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700' },
+            ].map((item, i) => (
+              <motion.div
+                key={item.path}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + i * 0.15, duration: 0.5, ease: "easeOut" }}
+              >
+                <Button
+                  onClick={() => navigate(item.path)}
+                  className={`h-24 w-full bg-gradient-to-br ${item.gradient}`}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    {item.icon}
+                    <span className="text-sm">{item.label}</span>
+                  </div>
+                </Button>
+              </motion.div>
+            ))}
+          </div>
         </main>
       </div>
     </SoundSystemManager>
