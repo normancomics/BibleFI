@@ -272,8 +272,11 @@ const DigitalTithingForm: React.FC = () => {
       </Card>
 
       {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-0 max-w-md w-full max-h-[90vh] overflow-auto">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowPaymentModal(false)}>
+          <div 
+            className="bg-background rounded-lg p-0 max-w-md w-full max-h-[90vh] overflow-auto shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             {paymentType === "crypto" ? (
               <div className="p-6">
                 <h3 className="text-xl font-bold mb-4 font-scroll">Complete Your Tithe</h3>
