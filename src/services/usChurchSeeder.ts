@@ -17,6 +17,7 @@ interface ChurchSeedData {
   address?: string;
   website?: string;
   phone?: string;
+  email?: string;
   accepts_crypto: boolean;
   accepts_fiat: boolean;
   accepts_cards: boolean;
