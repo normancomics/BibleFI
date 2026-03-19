@@ -107,7 +107,7 @@ const COLORADO_CHURCHES: ChurchSeedData[] = [
   { name: "First United Methodist Church Boulder", denomination: "Methodist", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80302", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   
   // City on the Hill (Boulder)
-  { name: "City on the Hill Church", denomination: "Non-denominational", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80303", address: "4341 Prado Dr, Boulder, CO 80303", website: "https://cityonthehillboulder.com", phone: "(303) 440-3873", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "City on the Hill Church", denomination: "Non-denominational", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80303", address: "7483 Arapahoe Rd, Boulder, CO 80303", website: "https://cityonthehillboulder.com", phone: "(303) 440-3873", email: "coth@cityonthehill.com", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   
   // Lafayette (Suburb)
   { name: "Flatirons Community Church", denomination: "Non-denominational", city: "Lafayette", state_province: "Colorado", country: "United States", postal_code: "80026", website: "https://flatironschurch.com", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
