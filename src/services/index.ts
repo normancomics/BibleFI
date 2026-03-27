@@ -10,6 +10,9 @@ export * from './bwsp';
 export { bwspEngine } from './bwsp/engine';
 export { bwspSovereignAgent } from './bwsp/sovereignAgent';
 export { bwspRetriever } from './bwsp/retriever';
+export { bwspAgentLoop } from './bwsp/agentLoop';
+export { marketWisdomCorrelator } from './bwsp/marketWisdomCorrelator';
+export { wisdomScoreTracker } from './bwsp/wisdomScoreTracker';
 
 // BWTYA – Biblical-Wisdom-To-Yield-Algorithm
 export * from './bwtya';
@@ -17,3 +20,4 @@ export { bwtyaAlgorithm } from './bwtya/algorithm';
 export { bwtyaScorer } from './bwtya/scorer';
 export { bwtyaRanker } from './bwtya/ranker';
 export { bwtyaStrategyMapper } from './bwtya/strategyMapper';
+export { bwtyaYieldOptimizer } from './bwtya/yieldOptimizer';

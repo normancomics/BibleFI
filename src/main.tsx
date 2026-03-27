@@ -10,6 +10,7 @@ import { config } from '@/config/wagmi';
 import { SoundProvider } from '@/contexts/SoundContext';
 import { WalletProvider } from '@/contexts/WalletContext';
 import { WalletErrorBoundary } from '@/components/wallet/WalletErrorBoundary';
+import { SovereignAgentProvider } from '@/contexts/SovereignAgentContext';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import App from "./App";
@@ -35,7 +36,8 @@ const authKitConfig = {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthKitProvider config={authKitConfig}>
+      <SovereignAgentProvider>
+        <AuthKitProvider config={authKitConfig}>
         <WagmiProvider config={config}>
           <BrowserRouter>
             <SoundProvider>
@@ -48,6 +50,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           </BrowserRouter>
         </WagmiProvider>
       </AuthKitProvider>
+      </SovereignAgentProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

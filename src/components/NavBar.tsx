@@ -59,6 +59,7 @@ const NavBar: React.FC = () => {
     { path: '/analytics', label: 'Analytics', icon: Shield, badge: 'AI' },
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' }] : []),
     { path: '/builder-score', label: 'Builder', icon: Trophy, badge: 'REP' },
+    { path: '/bwsp-dashboard', label: 'BWSP', icon: BookOpen, badge: 'AI' },
     { path: '/security', label: 'Security', icon: Shield },
   ];
 

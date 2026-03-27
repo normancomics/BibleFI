@@ -5,3 +5,4 @@ export * from './scorer';
 export * from './ranker';
 export * from './strategyMapper';
 export * from './algorithm';
+export * from './yieldOptimizer';
