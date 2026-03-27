@@ -116,3 +116,35 @@ export interface AgentStep {
   output?: string;
   error?: string;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 2 types
+// ---------------------------------------------------------------------------
+
+export interface BWSPLoopResult {
+  iterations: number;
+  totalTokensUsed: number;
+  reflectionNotes: string[];
+  finalResponse: BWSPResponse;
+}
+
+export interface WisdomCorrelation {
+  marketSignal: string;
+  biblicalPrinciple: string;
+  scripture: string;
+  verseRef: string;
+  actionRecommendation: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  wisdomAlignment: number; // 0–1
+}
+
+export type StewardshipLevel = 'Novice' | 'Apprentice' | 'Steward' | 'Elder' | 'Solomon';
+
+export interface WisdomScore {
+  walletAddress: string;
+  totalQueries: number;
+  avgConfidenceScore: number;
+  dominantIntent: BWSPQueryIntent;
+  stewardshipLevel: StewardshipLevel;
+  lastQueryAt: string | null;
+}
