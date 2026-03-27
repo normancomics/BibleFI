@@ -169,6 +169,39 @@ export class RealSuperfluidClient {
       },
       logoURI: '/bible-fi-preview.png',
       deployed: false
+    },
+    // ── BibleFi Superfluid-native super tokens ───────────────────────────────
+    // $xBIBLEFI: Superfluid Super Token wrapping $BIBLEFI for DAO treasury
+    // streaming and real-time governance distributions.
+    // Deployed via XBibleFiDeployer.deployXBIBLEFI(biblefiAddress)
+    'xBIBLEFI': {
+      name: 'BibleFi Governance Super Token',
+      symbol: 'xBIBLEFI',
+      address: ZeroAddress, // Updated after XBibleFiDeployer.deployXBIBLEFI()
+      decimals: 18,
+      underlyingToken: {
+        symbol: 'BIBLEFI',
+        address: ZeroAddress, // Updated after BibleFiGovernanceToken deployment
+        decimals: 18
+      },
+      logoURI: '/bible-fi-preview.png',
+      deployed: false
+    },
+    // $xWISDOM: Superfluid Super Token wrapping $WISDOM — VIP LP token for
+    // loyal $WISDOM holders with tiered streaming rewards (Bronze → Solomon).
+    // Deployed via XWisdomDeployer.deployXWISDOM(wisdomAddress)
+    'xWISDOM': {
+      name: 'BibleFi Wisdom Super Token',
+      symbol: 'xWISDOM',
+      address: ZeroAddress, // Updated after XWisdomDeployer.deployXWISDOM()
+      decimals: 18,
+      underlyingToken: {
+        symbol: 'WISDOM',
+        address: ZeroAddress, // Updated after WisdomRewardsToken deployment
+        decimals: 18
+      },
+      logoURI: '/bible-fi-preview.png',
+      deployed: false
     }
   };
 
