@@ -57,6 +57,7 @@ const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const DefiOpportunitiesPage = lazy(() => import("./pages/DefiOpportunitiesPage"));
 const ScriptureIntegrityPage = lazy(() => import("./pages/ScriptureIntegrityPage"));
+const SuperfluidTokensPage = lazy(() => import("./pages/SuperfluidTokensPage"));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -116,6 +117,7 @@ const App = () => (
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
               <Route path="/scripture-integrity" element={<AdminGuard><ScriptureIntegrityPage /></AdminGuard>} />
+              <Route path="/superfluid-tokens" element={<SuperfluidTokensPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

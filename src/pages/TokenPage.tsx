@@ -4,6 +4,7 @@ import BibleTokenDashboard from '@/components/token/BibleTokenDashboard';
 import LaunchStrategy from '@/components/token/LaunchStrategy';
 import TokenDeploymentWizard from '@/components/token/TokenDeploymentWizard';
 import EarlyTokenLaunch from '@/components/token/EarlyTokenLaunch';
+import SuperfluidTokenLaunch from '@/components/token/SuperfluidTokenLaunch';
 import ProductionDefiHub from '@/components/defi/ProductionDefiHub';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -23,12 +24,18 @@ const TokenPage: React.FC = () => {
         </div>
 
         <Tabs defaultValue="launch" className="space-y-6">
-          <TabsList className="grid grid-cols-5 w-full max-w-3xl mx-auto bg-scripture/40 border border-ancient-gold/30 p-1">
+          <TabsList className="grid grid-cols-6 w-full max-w-4xl mx-auto bg-scripture/40 border border-ancient-gold/30 p-1">
             <TabsTrigger 
               value="launch" 
               className="data-[state=active]:bg-ancient-gold/20 data-[state=active]:text-ancient-gold text-white hover:text-ancient-gold"
             >
               🚀 Launch Now
+            </TabsTrigger>
+            <TabsTrigger
+              value="superfluid"
+              className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-300 text-white hover:text-blue-300"
+            >
+              ⚡ Superfluid
             </TabsTrigger>
             <TabsTrigger 
               value="defi"
@@ -58,6 +65,10 @@ const TokenPage: React.FC = () => {
 
           <TabsContent value="launch">
             <EarlyTokenLaunch />
+          </TabsContent>
+
+          <TabsContent value="superfluid">
+            <SuperfluidTokenLaunch />
           </TabsContent>
 
           <TabsContent value="defi">
