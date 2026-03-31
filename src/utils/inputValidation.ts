@@ -71,7 +71,7 @@ export const UserInputSchemas = {
       .trim()
       .min(1, "Church name required")
       .max(200, "Church name too long")
-      .refine(val => !/[<>\"'&]/.test(val), {
+      .refine(val => !/[<>"'&]/.test(val), {
         message: "Invalid characters in church name"
       }),
     denomination: z.string().trim().max(100).optional(),

@@ -72,7 +72,7 @@ serve(async (req) => {
     // Search for relevant biblical knowledge with parameterized query
     const searchTerms = sanitizedQuery
       .split(' ')
-      .filter(term => term.length > 2 && !/[<>\"'&]/.test(term))
+      .filter(term => term.length > 2 && !/[<>"'&]/.test(term))
       .slice(0, 10) // Limit search terms
       .join(' | ');
 

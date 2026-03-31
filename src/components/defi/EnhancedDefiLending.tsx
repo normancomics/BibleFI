@@ -146,9 +146,10 @@ const EnhancedDefiLending: React.FC = () => {
           return parseFloat(b.supplyAPY) - parseFloat(a.supplyAPY);
         case 'tvl':
           return parseFloat(b.totalSupplied.replace(/,/g, '')) - parseFloat(a.totalSupplied.replace(/,/g, ''));
-        case 'risk':
+        case 'risk': {
           const riskOrder = { 'low': 0, 'medium': 1, 'high': 2 };
           return riskOrder[a.risk] - riskOrder[b.risk];
+        }
         default:
           return 0;
       }

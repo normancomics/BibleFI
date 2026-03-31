@@ -340,7 +340,7 @@ async function fetchProtocolYields(): Promise<{ protocol: string; type: string; 
   };
 
   // Fuzzy match: normalize a name for comparison
-  const normalize = (s: string) => s.toLowerCase().replace(/[\s\-_\.()v234]+/g, '').replace(/finance|protocol|exchange|swap/g, '');
+  const normalize = (s: string) => s.toLowerCase().replace(/[\s\-_.()v234]+/g, '').replace(/finance|protocol|exchange|swap/g, '');
 
   try {
     const controller = new AbortController();
@@ -371,7 +371,7 @@ async function fetchProtocolYields(): Promise<{ protocol: string; type: string; 
       }
       // 4. Try partial slug match (find any slug containing our key term)
       if (!data) {
-        const core = protocol.name.toLowerCase().split(/[\s\-]/)[0]; // first word e.g. "aerodrome"
+        const core = protocol.name.toLowerCase().split(/[\s-]/)[0];
         for (const [slug, pData] of bySlug) {
           if (slug.includes(core) && (pData.chains?.includes('Base') || pData.chain === 'Base')) {
             data = pData;
