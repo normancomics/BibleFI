@@ -38,6 +38,25 @@ const SignupPage: React.FC = () => {
       return;
     }
 
+    if (!/[A-Z]/.test(password) || !/[0-9!@#$%^&*]/.test(password)) {
+      toast({
+        title: 'Password too weak',
+        description: 'Password must include at least one uppercase letter and one number or special character.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      toast({
+        title: 'Invalid email',
+        description: 'Please enter a valid email address.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signUp({ email, password });
@@ -118,7 +137,7 @@ const SignupPage: React.FC = () => {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Minimum 8 characters"
+                    placeholder="Min 8 chars, 1 uppercase, 1 number/symbol"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required

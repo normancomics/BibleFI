@@ -37,7 +37,7 @@ const geocodeLocation = async (query: string): Promise<{ lat: number; lng: numbe
     const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
     const data = await res.json();
     if (data?.[0]) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-  } catch {}
+  } catch { /* geocoding failure is non-fatal; return null */ }
   return null;
 };
 

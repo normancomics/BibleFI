@@ -83,7 +83,7 @@ serve(async (req) => {
     const endpointValidation = validateInput(endpoint, {
       maxLength: 200,
       fieldName: 'Endpoint',
-      allowedPattern: /^[a-zA-Z0-9\-_\/\?=&.]+$/
+      allowedPattern: /^[a-zA-Z0-9\-_/?=&.]+$/
     });
     
     if (!endpointValidation.valid) {

@@ -197,33 +197,31 @@ export const detectSuspiciousActivity = (
   
   // Implement basic heuristics for suspicious activities
   switch(activityType) {
-    case 'transaction':
-      const { amount, destination } = details;
-      // Flag unusually large transactions
+    case 'transaction': {
+      const { amount } = details;
       if (amount > 1000) {
         securityMonitor.logEvent('large_transaction', SecurityLogLevel.WARNING, details);
         return true;
       }
       break;
-      
-    case 'login':
-      const { location, device, time } = details;
-      // Flag logins from unusual locations or at unusual times
+    }
+    case 'login': {
+      const { time } = details;
       const hour = new Date(time).getHours();
       if (hour >= 0 && hour <= 5) {
         securityMonitor.logEvent('unusual_login_time', SecurityLogLevel.WARNING, details);
         return true;
       }
       break;
-      
-    case 'api_usage':
-      const { frequency, endpoints } = details;
-      // Flag rapid API calls
+    }
+    case 'api_usage': {
+      const { frequency } = details;
       if (frequency > 10) {
         securityMonitor.logEvent('api_rate_limit', SecurityLogLevel.WARNING, details);
         return true;
       }
       break;
+    }
   }
   
   return false;
