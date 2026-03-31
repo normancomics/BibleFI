@@ -5,7 +5,7 @@
  * - All 50 states coverage
  */
 
-import { supabaseApi } from '@/integrations/supabase/apiClient';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ChurchSeedData {
   name: string;
@@ -14,9 +14,9 @@ interface ChurchSeedData {
   state_province: string;
   country: string;
   postal_code: string;
-  address?: string;
   website?: string;
   phone?: string;
+  address?: string;
   email?: string;
   accepts_crypto: boolean;
   accepts_fiat: boolean;
@@ -106,9 +106,7 @@ const COLORADO_CHURCHES: ChurchSeedData[] = [
   { name: "St. John's Episcopal Church Boulder", denomination: "Episcopal", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80302", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   { name: "Sacred Heart of Mary Catholic Church", denomination: "Catholic", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80303", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   { name: "First United Methodist Church Boulder", denomination: "Methodist", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80302", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  
-  // City on the Hill (Boulder)
-  { name: "City on the Hill Church", denomination: "Non-denominational", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80303", address: "7483 Arapahoe Rd, Boulder, CO 80303", website: "https://cityonthehillboulder.com", phone: "(303) 440-3873", email: "coth@cityonthehill.com", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "City on the Hill", denomination: "Non-denominational", city: "Boulder", state_province: "Colorado", country: "United States", postal_code: "80303", website: "https://cityonthehillboulder.org", phone: "(303) 555-0123", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true, address: "7483 Arapahoe Rd" },
   
   // Lafayette (Suburb)
   { name: "Flatirons Community Church", denomination: "Non-denominational", city: "Lafayette", state_province: "Colorado", country: "United States", postal_code: "80026", website: "https://flatironschurch.com", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
@@ -417,44 +415,25 @@ const OTHER_STATES_CHURCHES: ChurchSeedData[] = [
   { name: "First Baptist Church Ruidoso", denomination: "Baptist", city: "Ruidoso", state_province: "New Mexico", country: "United States", postal_code: "88345", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
   
   // Alaska
-  { name: "First Baptist Church Anchorage", denomination: "Baptist", city: "Anchorage", state_province: "Alaska", country: "United States", postal_code: "99501", address: "901 W Northern Lights Blvd, Anchorage, AK 99503", website: "https://fbcanchorage.com", phone: "(907) 272-3622", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First United Methodist Fairbanks", denomination: "Methodist", city: "Fairbanks", state_province: "Alaska", country: "United States", postal_code: "99701", address: "725 1st Ave, Fairbanks, AK 99701", website: "https://fumcfairbanks.com", phone: "(907) 456-1186", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Baptist Church Juneau", denomination: "Baptist", city: "Juneau", state_province: "Alaska", country: "United States", postal_code: "99801", address: "535 6th St, Juneau, AK 99801", phone: "(907) 586-1623", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Changepoint Church", denomination: "Non-denominational", city: "Anchorage", state_province: "Alaska", country: "United States", postal_code: "99507", address: "6689 Changepoint Dr, Anchorage, AK 99507", website: "https://prior.prior-changepoint.com", phone: "(907) 344-1070", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Northland Bible Church", denomination: "Non-denominational", city: "Wasilla", state_province: "Alaska", country: "United States", postal_code: "99654", address: "1001 W Evergreen Ave, Palmer, AK 99645", phone: "(907) 745-3939", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Holy Family Cathedral", denomination: "Catholic", city: "Anchorage", state_province: "Alaska", country: "United States", postal_code: "99501", address: "800 Cordova St, Anchorage, AK 99501", website: "https://holyfamilycathedral.org", phone: "(907) 276-3455", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Presbyterian Church Sitka", denomination: "Presbyterian", city: "Sitka", state_province: "Alaska", country: "United States", postal_code: "99835", address: "501 Sawmill Creek Rd, Sitka, AK 99835", phone: "(907) 747-3222", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
-  { name: "Ketchikan First Baptist Church", denomination: "Baptist", city: "Ketchikan", state_province: "Alaska", country: "United States", postal_code: "99901", address: "501 Main St, Ketchikan, AK 99901", phone: "(907) 225-3540", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
+  { name: "First Baptist Church Anchorage", denomination: "Baptist", city: "Anchorage", state_province: "Alaska", country: "United States", postal_code: "99501", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First United Methodist Fairbanks", denomination: "Methodist", city: "Fairbanks", state_province: "Alaska", country: "United States", postal_code: "99701", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First Baptist Church Juneau", denomination: "Baptist", city: "Juneau", state_province: "Alaska", country: "United States", postal_code: "99801", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   
   // Hawaii
-  { name: "New Hope Oahu", denomination: "Non-denominational", city: "Honolulu", state_province: "Hawaii", country: "United States", postal_code: "96814", address: "290 Sand Island Access Rd, Honolulu, HI 96819", website: "https://enewhope.org", phone: "(808) 842-4242", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Baptist Church Maui", denomination: "Baptist", city: "Kahului", state_province: "Hawaii", country: "United States", postal_code: "96732", address: "330 Lono Ave, Kahului, HI 96732", phone: "(808) 877-0718", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First United Methodist Kona", denomination: "Methodist", city: "Kailua-Kona", state_province: "Hawaii", country: "United States", postal_code: "96740", address: "74-4960 Palani Rd, Kailua-Kona, HI 96740", phone: "(808) 329-1530", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Central Union Church", denomination: "United Church of Christ", city: "Honolulu", state_province: "Hawaii", country: "United States", postal_code: "96822", address: "1660 S Beretania St, Honolulu, HI 96826", website: "https://centralunionchurch.org", phone: "(808) 941-0957", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Hope Chapel Kaneohe Bay", denomination: "Non-denominational", city: "Kaneohe", state_province: "Hawaii", country: "United States", postal_code: "96744", address: "45-815 Po'okela St, Kaneohe, HI 96744", website: "https://hopechapel.com", phone: "(808) 235-5814", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Calvary Chapel Pearl Harbor", denomination: "Calvary Chapel", city: "Pearl City", state_province: "Hawaii", country: "United States", postal_code: "96782", address: "98-1016 Komo Mai Dr, Aiea, HI 96701", phone: "(808) 488-2028", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Koloa Church", denomination: "United Church of Christ", city: "Koloa", state_province: "Hawaii", country: "United States", postal_code: "96756", address: "3289 Poipu Rd, Koloa, HI 96756", phone: "(808) 742-6622", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
-  { name: "Waimea United Church of Christ", denomination: "United Church of Christ", city: "Waimea", state_province: "Hawaii", country: "United States", postal_code: "96796", address: "9901 Kaumualii Hwy, Waimea, HI 96796", phone: "(808) 338-1340", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
+  { name: "New Hope Oahu", denomination: "Non-denominational", city: "Honolulu", state_province: "Hawaii", country: "United States", postal_code: "96814", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First Baptist Church Maui", denomination: "Baptist", city: "Kahului", state_province: "Hawaii", country: "United States", postal_code: "96732", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First United Methodist Kona", denomination: "Methodist", city: "Kailua-Kona", state_province: "Hawaii", country: "United States", postal_code: "96740", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   
   // Maine
-  { name: "First Baptist Church Portland", denomination: "Baptist", city: "Portland", state_province: "Maine", country: "United States", postal_code: "04101", address: "360 Canco Rd, Portland, ME 04103", website: "https://firstbaptistportland.org", phone: "(207) 773-3123", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Congregational Church Camden", denomination: "Congregational", city: "Camden", state_province: "Maine", country: "United States", postal_code: "04843", address: "55 Elm St, Camden, ME 04843", phone: "(207) 236-4821", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Baptist Church Bar Harbor", denomination: "Baptist", city: "Bar Harbor", state_province: "Maine", country: "United States", postal_code: "04609", address: "120 Main St, Bar Harbor, ME 04609", phone: "(207) 288-3286", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First United Methodist Kennebunkport", denomination: "Methodist", city: "Kennebunkport", state_province: "Maine", country: "United States", postal_code: "04046", address: "1 North St, Kennebunkport, ME 04046", phone: "(207) 967-4360", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Bangor Baptist Church", denomination: "Baptist", city: "Bangor", state_province: "Maine", country: "United States", postal_code: "04401", address: "1476 Broadway, Bangor, ME 04401", website: "https://bangorbaptist.com", phone: "(207) 947-3209", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "South Freeport Congregational Church", denomination: "Congregational", city: "Freeport", state_province: "Maine", country: "United States", postal_code: "04078", address: "98 South Freeport Rd, Freeport, ME 04078", phone: "(207) 865-4012", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Universalist Church Auburn", denomination: "Unitarian Universalist", city: "Auburn", state_province: "Maine", country: "United States", postal_code: "04210", address: "169 Pleasant St, Auburn, ME 04210", phone: "(207) 783-0461", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
-  { name: "Bethel Community Church", denomination: "Non-denominational", city: "Bethel", state_province: "Maine", country: "United States", postal_code: "04217", address: "22 Broad St, Bethel, ME 04217", phone: "(207) 824-3586", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
+  { name: "First Baptist Church Portland", denomination: "Baptist", city: "Portland", state_province: "Maine", country: "United States", postal_code: "04101", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First Congregational Church Camden", denomination: "Congregational", city: "Camden", state_province: "Maine", country: "United States", postal_code: "04843", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First Baptist Church Bar Harbor", denomination: "Baptist", city: "Bar Harbor", state_province: "Maine", country: "United States", postal_code: "04609", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First United Methodist Kennebunkport", denomination: "Methodist", city: "Kennebunkport", state_province: "Maine", country: "United States", postal_code: "04046", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   
   // Vermont
-  { name: "First Baptist Church Burlington", denomination: "Baptist", city: "Burlington", state_province: "Vermont", country: "United States", postal_code: "05401", address: "81 St Paul St, Burlington, VT 05401", website: "https://fbcburlingtonvt.org", phone: "(802) 862-6337", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Congregational Church Stowe", denomination: "Congregational", city: "Stowe", state_province: "Vermont", country: "United States", postal_code: "05672", address: "115 Main St, Stowe, VT 05672", phone: "(802) 253-7045", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First United Methodist Woodstock", denomination: "Methodist", city: "Woodstock", state_province: "Vermont", country: "United States", postal_code: "05091", address: "20 Church St, Woodstock, VT 05091", phone: "(802) 457-1400", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Grace Baptist Church Montpelier", denomination: "Baptist", city: "Montpelier", state_province: "Vermont", country: "United States", postal_code: "05602", address: "100 State St, Montpelier, VT 05602", phone: "(802) 223-3771", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Congregational Church Manchester", denomination: "Congregational", city: "Manchester", state_province: "Vermont", country: "United States", postal_code: "05254", address: "3624 Main St, Manchester, VT 05254", phone: "(802) 362-2709", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "North Avenue Alliance Church", denomination: "Christian & Missionary Alliance", city: "Burlington", state_province: "Vermont", country: "United States", postal_code: "05408", address: "360 North Ave, Burlington, VT 05401", website: "https://naachurch.org", phone: "(802) 864-0880", accepts_crypto: true, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "Rutland United Methodist Church", denomination: "Methodist", city: "Rutland", state_province: "Vermont", country: "United States", postal_code: "05701", address: "60 Strongs Ave, Rutland, VT 05701", phone: "(802) 773-2460", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
-  { name: "First Baptist Church Brattleboro", denomination: "Baptist", city: "Brattleboro", state_province: "Vermont", country: "United States", postal_code: "05301", address: "190 Main St, Brattleboro, VT 05301", phone: "(802) 254-4379", accepts_crypto: false, accepts_fiat: true, accepts_cards: false, accepts_checks: true },
+  { name: "First Baptist Church Burlington", denomination: "Baptist", city: "Burlington", state_province: "Vermont", country: "United States", postal_code: "05401", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First Congregational Church Stowe", denomination: "Congregational", city: "Stowe", state_province: "Vermont", country: "United States", postal_code: "05672", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
+  { name: "First United Methodist Woodstock", denomination: "Methodist", city: "Woodstock", state_province: "Vermont", country: "United States", postal_code: "05091", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
   
   // New Hampshire
   { name: "First Baptist Church Concord", denomination: "Baptist", city: "Concord", state_province: "New Hampshire", country: "United States", postal_code: "03301", accepts_crypto: false, accepts_fiat: true, accepts_cards: true, accepts_checks: true },
@@ -567,8 +546,8 @@ export class USChurchSeederService {
     for (const church of ALL_US_CHURCHES) {
       try {
         // Check if church already exists
-        const { data: existing } = await supabaseApi
-          .from('public_church_directory')
+        const { data: existing } = await supabase
+          .from('global_churches')
           .select('id')
           .eq('name', church.name)
           .eq('city', church.city)
@@ -581,10 +560,9 @@ export class USChurchSeederService {
           continue;
         }
 
-        const { error } = await supabaseApi.from('global_churches').insert({
+        const { error } = await supabase.from('global_churches').insert({
           name: church.name,
           denomination: church.denomination,
-          address: church.address,
           city: church.city,
           state_province: church.state_province,
           country: church.country,
@@ -618,8 +596,8 @@ export class USChurchSeederService {
   }
 
   static async getChurchCount(): Promise<number> {
-    const { count } = await supabaseApi
-      .from('public_church_directory')
+    const { count } = await supabase
+      .from('global_churches')
       .select('*', { count: 'exact', head: true });
     return count || 0;
   }

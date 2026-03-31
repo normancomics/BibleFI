@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Support normancomics.eth | BibleFi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=VT323&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --gold:#c9a84c;--gold2:#f0d080;--gold3:#7a5c1e;
+  --btc:#f7931a;--btc2:#fbb24a;
+  --base:#2563eb;--base2:#60a5fa;
+  --sf:#7c3aed;--sf2:#a78bfa;
+  --fc:#8b5cf6;--fc2:#c4b5fd;
+  --green:#10b981;--green2:#6ee7b7;
+  --red:#ef4444;
+  --dark:#07070f;--dark2:#0d0d1a;--dark3:#111127;
+  --surface:#13132b;--surface2:#1a1a35;--surface3:#21213f;
+  --border:#252550;--border2:#333368;
+  --text:#e8e4d4;--muted:#7070a0;--muted2:#9090b8;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+
+body{
+background:var(–dark);
+color:var(–text);
+font-family:‘Raleway’,sans-serif;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+/* BACKGROUND */
+body::before{
+content:’’;position:fixed;inset:0;
+background-image:
+linear-gradient(rgba(201,168,76,.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(201,168,76,.03) 1px,transparent 1px);
+background-size:48px 48px;
+pointer-events:none;z-index:0;
+}
+.orb{
+position:fixed;border-radius:50%;filter:blur(140px);
+pointer-events:none;z-index:0;
+}
+.orb1{width:500px;height:500px;background:rgba(201,168,76,.07);top:-150px;left:-100px;}
+.orb2{width:400px;height:400px;background:rgba(124,58,237,.07);bottom:-100px;right:-80px;}
+.orb3{width:300px;height:300px;background:rgba(37,99,235,.05);top:50%;left:50%;transform:translate(-50%,-50%);}
+
+/* LAYOUT */
+.wrap{
+position:relative;z-index:1;
+max-width:720px;margin:0 auto;
+padding:0 1.25rem 5rem;
+}
+
+/* HEADER */
+header{
+text-align:center;
+padding:3.5rem 0 2rem;
+}
+.logo-cross{
+display:inline-block;
+font-size:2.8rem;color:var(–gold);
+margin-bottom:.75rem;
+animation:holy-glow 4s ease-in-out infinite;
+}
+@keyframes holy-glow{
+0%,100%{text-shadow:0 0 12px rgba(201,168,76,.5);}
+50%{text-shadow:0 0 40px rgba(201,168,76,1),0 0 80px rgba(201,168,76,.3);}
+}
+header h1{
+font-family:‘Cinzel’,serif;
+font-size:clamp(1.4rem,5vw,2.2rem);
+font-weight:900;
+color:var(–gold);
+letter-spacing:.06em;
+line-height:1.2;
+}
+header h1 span{color:var(–text);font-weight:400;}
+.header-sub{
+font-family:‘VT323’,monospace;
+font-size:1.1rem;
+color:var(–muted2);
+letter-spacing:.18em;
+margin-top:.6rem;
+}
+
+/* PROFILE TABS */
+.profile-tabs{
+display:flex;gap:.5rem;
+margin:2rem 0 1.25rem;
+}
+.ptab{
+flex:1;padding:.9rem 1rem;
+background:var(–surface);
+border:1px solid var(–border);
+border-radius:var(–radius);
+color:var(–muted2);
+font-family:‘VT323’,monospace;
+font-size:1.15rem;
+letter-spacing:.15em;
+cursor:pointer;
+transition:all .2s;
+text-align:center;
+}
+.ptab:hover{border-color:var(–border2);color:var(–text);}
+.ptab.active{
+background:var(–surface2);
+border-color:var(–gold);
+color:var(–gold);
+box-shadow:0 0 20px rgba(201,168,76,.15);
+}
+
+/* CHAIN TABS */
+.chain-tabs{
+display:flex;gap:.4rem;
+margin-bottom:1.25rem;
+flex-wrap:wrap;
+}
+.ctab{
+padding:.5rem 1rem;
+background:var(–surface);
+border:1px solid var(–border);
+border-radius:20px;
+color:var(–muted);
+font-family:‘VT323’,monospace;
+font-size:1rem;
+letter-spacing:.12em;
+cursor:pointer;
+transition:all .2s;
+}
+.ctab:hover{border-color:var(–border2);color:var(–text);}
+.ctab.active.evm{border-color:var(–base2);color:var(–base2);background:rgba(37,99,235,.1);}
+.ctab.active.btc{border-color:var(–btc);color:var(–btc);background:rgba(247,147,26,.1);}
+
+/* CARD */
+.card{
+background:var(–surface);
+border:1px solid var(–border);
+border-radius:var(–radius);
+padding:1.5rem;
+margin-bottom:1rem;
+transition:border-color .2s;
+}
+.card:hover{border-color:var(–border2);}
+.card-title{
+font-family:‘VT323’,monospace;
+font-size:1rem;
+color:var(–gold);
+letter-spacing:.18em;
+margin-bottom:1rem;
+display:flex;align-items:center;gap:.75rem;
+}
+.card-title::after{content:’’;flex:1;height:1px;background:var(–border);}
+
+/* IDENTITY DROPDOWN SECTION */
+.identity-group{margin-bottom:1.25rem;}
+.identity-group:last-child{margin-bottom:0;}
+
+.id-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:.7rem .9rem;
+background:var(–surface2);
+border:1px solid var(–border2);
+border-radius:8px;
+cursor:pointer;
+transition:all .2s;
+user-select:none;
+}
+.id-header:hover{border-color:var(–gold3);background:var(–surface3);}
+.id-header.open{
+border-color:var(–gold);
+border-bottom-left-radius:0;border-bottom-right-radius:0;
+}
+.id-header-left{display:flex;align-items:center;gap:.75rem;}
+.id-badge{
+width:34px;height:34px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-size:1rem;font-weight:700;flex-shrink:0;
+}
+.id-badge.nc{background:rgba(201,168,76,.15);color:var(–gold);}
+.id-badge.bf{background:rgba(37,99,235,.15);color:var(–base2);}
+.id-name{
+font-family:‘VT323’,monospace;
+font-size:1.15rem;letter-spacing:.1em;color:var(–text);
+}
+.id-sub{font-size:.7rem;color:var(–muted);margin-top:.1rem;}
+.id-arrow{
+color:var(–muted);font-size:1rem;
+transition:transform .25s;
+}
+.id-header.open .id-arrow{transform:rotate(180deg);color:var(–gold);}
+
+.id-dropdown{
+display:none;
+border:1px solid var(–gold3);
+border-top:none;
+border-bottom-left-radius:8px;border-bottom-right-radius:8px;
+overflow:hidden;
+background:var(–dark3);
+}
+.id-dropdown.open{display:block;}
+
+.addr-row{
+display:flex;align-items:center;gap:.75rem;
+padding:.65rem .9rem;
+border-bottom:1px solid var(–border);
+cursor:pointer;
+transition:background .15s;
+}
+.addr-row:last-child{border-bottom:none;}
+.addr-row:hover{background:rgba(201,168,76,.05);}
+.addr-row.selected{background:rgba(201,168,76,.08);}
+
+.addr-type-dot{
+width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.dot-ens{background:var(–base2);}
+.dot-base{background:var(–green2);}
+.dot-sf{background:var(–sf2);}
+.dot-fc{background:var(–fc2);}
+.dot-btc-native{background:var(–btc);}
+.dot-btc-taproot{background:#ff6b6b;}
+.dot-btc-legacy{background:#ffd700;}
+
+.addr-info{flex:1;min-width:0;}
+.addr-main{
+font-family:‘VT323’,monospace;
+font-size:.95rem;color:var(–text);
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.addr-tag{
+font-size:.65rem;color:var(–muted);
+font-family:‘Raleway’,sans-serif;
+margin-top:.1rem;
+}
+.copy-btn{
+background:transparent;
+border:1px solid var(–border);
+color:var(–muted);
+padding:.2rem .55rem;
+border-radius:4px;
+font-family:‘VT323’,monospace;
+font-size:.85rem;letter-spacing:.05em;
+cursor:pointer;
+transition:all .15s;
+flex-shrink:0;
+}
+.copy-btn:hover{border-color:var(–gold);color:var(–gold);}
+.copy-btn.ok{border-color:var(–green);color:var(–green);}
+
+/* BTC SECTION */
+.btc-card{
+background:linear-gradient(135deg,rgba(247,147,26,.05),rgba(247,147,26,.02));
+border:1px solid rgba(247,147,26,.25);
+}
+.btc-card:hover{border-color:rgba(247,147,26,.5);}
+.btc-card .card-title{color:var(–btc);}
+
+/* GENERATOR */
+.gen-card{margin-top:.5rem;}
+
+.field-label{
+font-family:‘VT323’,monospace;
+font-size:.85rem;color:var(–muted2);
+letter-spacing:.15em;text-transform:uppercase;
+margin-bottom:.4rem;margin-top:1rem;
+}
+.field-label:first-child{margin-top:0;}
+
+select,input[type=number],input[type=text]{
+width:100%;
+background:var(–surface2);
+border:1px solid var(–border2);
+color:var(–text);
+padding:.65rem .8rem;
+border-radius:6px;
+font-family:‘VT323’,monospace;
+font-size:.95rem;letter-spacing:.05em;
+outline:none;
+transition:border-color .15s;
+appearance:none;-webkit-appearance:none;
+}
+select:focus,input:focus{border-color:var(–gold);}
+select option{background:var(–dark2);}
+input::placeholder{color:var(–muted);}
+
+.row2{display:grid;grid-template-columns:1fr 140px;gap:.5rem;}
+
+.preset-row{
+display:grid;grid-template-columns:repeat(5,1fr);
+gap:.4rem;margin-bottom:.75rem;
+}
+.preset{
+padding:.5rem .25rem;
+background:var(–surface2);
+border:1px solid var(–border);
+border-radius:6px;
+color:var(–muted2);
+font-family:‘VT323’,monospace;
+font-size:.95rem;
+cursor:pointer;
+transition:all .15s;
+text-align:center;
+}
+.preset:hover,.preset.on{border-color:var(–gold);color:var(–gold);background:rgba(201,168,76,.08);}
+
+.gen-btn{
+width:100%;margin-top:1.25rem;
+padding:1rem;
+background:linear-gradient(90deg,var(–gold3),var(–gold),var(–gold2),var(–gold),var(–gold3));
+background-size:300% 100%;
+border:none;border-radius:8px;
+color:var(–dark);
+font-family:‘Cinzel’,serif;
+font-weight:700;
+font-size:.95rem;letter-spacing:.12em;
+cursor:pointer;
+transition:all .4s;
+text-transform:uppercase;
+}
+.gen-btn:hover{
+background-position:right;
+box-shadow:0 0 35px rgba(201,168,76,.5);
+transform:translateY(-1px);
+}
+
+/* OUTPUT */
+.output-box{
+display:none;
+margin-top:1rem;
+background:var(–dark2);
+border:1px solid var(–gold3);
+border-radius:8px;
+overflow:hidden;
+animation:slideIn .3s ease;
+}
+.output-box.show{display:block;}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.output-header{
+background:rgba(201,168,76,.08);
+padding:.6rem 1rem;
+font-family:‘VT323’,monospace;
+font-size:.85rem;color:var(–gold);
+letter-spacing:.15em;
+border-bottom:1px solid var(–gold3);
+}
+.output-uri{
+font-family:‘VT323’,monospace;
+font-size:.82rem;color:var(–text);
+padding:1rem;
+word-break:break-all;
+line-height:1.6;
+border-bottom:1px solid var(–border);
+}
+.output-actions{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:0;
+}
+.out-btn{
+padding:.65rem .5rem;
+background:transparent;
+border:none;
+border-right:1px solid var(–border);
+color:var(–muted2);
+font-family:‘VT323’,monospace;
+font-size:.85rem;letter-spacing:.05em;
+cursor:pointer;
+transition:all .15s;
+text-align:center;
+}
+.out-btn:last-child{border-right:none;}
+.out-btn:hover{background:rgba(201,168,76,.07);color:var(–gold);}
+
+/* EMBED WIDGET */
+.widget-card{margin-top:1rem;}
+.widget-preview{
+border:2px dashed var(–border2);
+border-radius:8px;
+padding:1.25rem;
+margin-top:.75rem;
+text-align:center;
+background:var(–dark2);
+}
+.widget-preview p{font-size:.8rem;color:var(–muted);margin-bottom:.75rem;font-family:‘VT323’,monospace;letter-spacing:.1em;}
+
+.embed-badge{
+display:inline-flex;align-items:center;gap:.5rem;
+padding:.55rem 1.1rem;
+background:linear-gradient(135deg,var(–gold3),rgba(201,168,76,.15));
+border:1px solid var(–gold);
+border-radius:6px;
+color:var(–gold2);
+font-family:‘Cinzel’,serif;
+font-size:.8rem;font-weight:600;
+letter-spacing:.08em;
+text-decoration:none;
+transition:all .2s;
+margin:.25rem;
+}
+.embed-badge:hover{box-shadow:0 0 20px rgba(201,168,76,.4);}
+.embed-badge.btc{
+background:linear-gradient(135deg,rgba(247,147,26,.2),rgba(247,147,26,.05));
+border-color:var(–btc);color:var(–btc2);
+}
+.embed-badge.btc:hover{box-shadow:0 0 20px rgba(247,147,26,.4);}
+
+.code-block{
+background:var(–dark);
+border:1px solid var(–border2);
+border-radius:6px;
+padding:.85rem 1rem;
+font-family:‘VT323’,monospace;
+font-size:.78rem;
+color:var(–muted2);
+word-break:break-all;
+line-height:1.7;
+margin-top:.75rem;
+position:relative;
+white-space:pre-wrap;
+}
+.code-copy{
+position:absolute;top:.5rem;right:.5rem;
+background:var(–surface);
+border:1px solid var(–border2);
+color:var(–muted);
+padding:.2rem .5rem;
+border-radius:4px;
+font-family:‘VT323’,monospace;
+font-size:.75rem;cursor:pointer;
+transition:all .15s;
+}
+.code-copy:hover{border-color:var(–gold);color:var(–gold);}
+
+/* SCRIPTURE */
+.scripture{
+background:linear-gradient(135deg,rgba(201,168,76,.06),rgba(201,168,76,.02));
+border:1px solid rgba(201,168,76,.2);
+border-left:3px solid var(–gold);
+border-radius:var(–radius);
+padding:1rem 1.25rem;
+margin:1.5rem 0;
+font-style:italic;
+font-size:.85rem;
+color:var(–muted2);
+line-height:1.7;
+}
+.scripture cite{
+display:block;margin-top:.4rem;
+font-style:normal;font-size:.75rem;
+color:var(–gold);
+font-family:‘VT323’,monospace;
+letter-spacing:.1em;
+}
+
+/* NOTICE */
+.notice{
+background:rgba(16,185,129,.05);
+border:1px solid rgba(16,185,129,.2);
+border-radius:8px;
+padding:.85rem 1rem;
+font-size:.75rem;
+color:var(–muted2);
+line-height:1.7;
+margin-top:1rem;
+font-family:‘VT323’,monospace;
+letter-spacing:.05em;
+}
+.notice strong{color:var(–green2);}
+
+footer{
+text-align:center;padding:2.5rem 0 1rem;
+border-top:1px solid var(–border);
+margin-top:2rem;
+color:var(–muted);
+font-size:.78rem;line-height:1.8;
+font-family:‘VT323’,monospace;
+letter-spacing:.1em;
+}
+footer .gold{color:var(–gold);}
+
+/* PANELS */
+.chain-panel{display:none;}
+.chain-panel.active{display:block;}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+.preset-row{grid-template-columns:repeat(3,1fr);}
+.output-actions{grid-template-columns:repeat(2,1fr);}
+.out-btn{border-bottom:1px solid var(–border);}
+.row2{grid-template-columns:1fr;}
+}
+</style>
+
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="wrap">
+
+  <header>
+    <span class="logo-cross">✝</span>
+    <h1>SUPPORT <span>&amp;</span> DONATE</h1>
+    <div class="header-sub">NORMANCOMICS.ETH &nbsp;·&nbsp; BIBLEFI.ETH &nbsp;·&nbsp; BASE CHAIN &nbsp;·&nbsp; BITCOIN</div>
+  </header>
+
+  <div class="scripture">
+    "But my God shall supply all your need according to his riches in glory by Christ Jesus."
+    <cite>— PHILIPPIANS 4:19</cite>
+  </div>
+
+  <!-- PROFILE TABS -->
+
+  <div class="profile-tabs">
+    <button class="ptab active" onclick="switchProfile('nc',this)">NORMANCOMICS</button>
+    <button class="ptab" onclick="switchProfile('bf',this)">BIBLEFI</button>
+  </div>
+
+  <!-- CHAIN TABS -->
+
+  <div class="chain-tabs">
+    <button class="ctab active evm" onclick="switchChain('evm',this)">⬟ EVM / BASE</button>
+    <button class="ctab btc" onclick="switchChain('btc',this)">₿ BITCOIN</button>
+  </div>
+
+  <!-- ======= EVM PANEL ======= -->
+
+  <div class="chain-panel active" id="panel-evm">
+
+```
+<!-- NORMANCOMICS IDENTITIES -->
+<div class="card" id="nc-evm-card">
+  <div class="card-title">NORMANCOMICS — IDENTITIES</div>
+
+  <div class="identity-group">
+    <div class="id-header" onclick="toggleDrop(this)">
+      <div class="id-header-left">
+        <div class="id-badge nc">N</div>
+        <div>
+          <div class="id-name">normancomics.eth</div>
+          <div class="id-sub">ENS · resolves on all EVM chains</div>
+        </div>
+      </div>
+      <span class="id-arrow">▾</span>
+    </div>
+    <div class="id-dropdown">
+      <div class="addr-row" onclick="selectRecipient('normancomics.eth')">
+        <div class="addr-type-dot dot-ens"></div>
+        <div class="addr-info">
+          <div class="addr-main">normancomics.eth</div>
+          <div class="addr-tag">ENS — cross-chain L1/L2</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'normancomics.eth')">COPY</button>
+      </div>
+      <div class="addr-row" onclick="selectRecipient('normancomics.base.eth')">
+        <div class="addr-type-dot dot-base"></div>
+        <div class="addr-info">
+          <div class="addr-main">normancomics.base.eth</div>
+          <div class="addr-tag">Base Basename — native Base Chain</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'normancomics.base.eth')">COPY</button>
+      </div>
+      <div class="addr-row" onclick="selectRecipient('normancomics.reserve.superfluid.eth')">
+        <div class="addr-type-dot dot-sf"></div>
+        <div class="addr-info">
+          <div class="addr-main">normancomics.reserve.superfluid.eth</div>
+          <div class="addr-tag">Superfluid Reserve — real-time streaming</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'normancomics.reserve.superfluid.eth')">COPY</button>
+      </div>
+      <div class="addr-row" onclick="selectRecipient('normancomics [Farcaster]')">
+        <div class="addr-type-dot dot-fc"></div>
+        <div class="addr-info">
+          <div class="addr-main">normancomics (Farcaster)</div>
+          <div class="addr-tag">Warpcast / Farcaster custody address</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'normancomics [Farcaster]')">COPY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BIBLEFI IDENTITIES -->
+<div class="card" id="bf-evm-card" style="display:none">
+  <div class="card-title">BIBLEFI — IDENTITIES</div>
+
+  <div class="identity-group">
+    <div class="id-header" onclick="toggleDrop(this)">
+      <div class="id-header-left">
+        <div class="id-badge bf">B</div>
+        <div>
+          <div class="id-name">biblefi.eth</div>
+          <div class="id-sub">ENS · resolves on all EVM chains</div>
+        </div>
+      </div>
+      <span class="id-arrow">▾</span>
+    </div>
+    <div class="id-dropdown">
+      <div class="addr-row" onclick="selectRecipient('biblefi.eth')">
+        <div class="addr-type-dot dot-ens"></div>
+        <div class="addr-info">
+          <div class="addr-main">biblefi.eth</div>
+          <div class="addr-tag">ENS — cross-chain L1/L2</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'biblefi.eth')">COPY</button>
+      </div>
+      <div class="addr-row" onclick="selectRecipient('biblefi.base.eth')">
+        <div class="addr-type-dot dot-base"></div>
+        <div class="addr-info">
+          <div class="addr-main">biblefi.base.eth</div>
+          <div class="addr-tag">Base Basename — native Base Chain</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'biblefi.base.eth')">COPY</button>
+      </div>
+      <div class="addr-row" onclick="selectRecipient('biblefi.reserve.superfluid.eth')">
+        <div class="addr-type-dot dot-sf"></div>
+        <div class="addr-info">
+          <div class="addr-main">biblefi.reserve.superfluid.eth</div>
+          <div class="addr-tag">Superfluid Reserve — streaming / tithing</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'biblefi.reserve.superfluid.eth')">COPY</button>
+      </div>
+      <div class="addr-row" onclick="selectRecipient('biblefi [Farcaster]')">
+        <div class="addr-type-dot dot-fc"></div>
+        <div class="addr-info">
+          <div class="addr-main">biblefi (Farcaster)</div>
+          <div class="addr-tag">Warpcast / Farcaster custody address</div>
+        </div>
+        <button class="copy-btn" onclick="cp(event,'biblefi [Farcaster]')">COPY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVM GENERATOR -->
+<div class="card gen-card">
+  <div class="card-title">GENERATE EIP-681 PAYMENT LINK</div>
+
+  <div class="field-label">RECIPIENT</div>
+  <select id="recipientSel">
+    <optgroup label="── NORMANCOMICS ──">
+      <option value="normancomics.eth">normancomics.eth</option>
+      <option value="normancomics.base.eth">normancomics.base.eth</option>
+      <option value="normancomics.reserve.superfluid.eth">normancomics.reserve.superfluid.eth</option>
+    </optgroup>
+    <optgroup label="── BIBLEFI ──">
+      <option value="biblefi.eth">biblefi.eth</option>
+      <option value="biblefi.base.eth">biblefi.base.eth</option>
+      <option value="biblefi.reserve.superfluid.eth">biblefi.reserve.superfluid.eth</option>
+    </optgroup>
+  </select>
+
+  <div class="field-label">TOKEN</div>
+  <select id="tokenSel" onchange="onTokenChange()">
+    <option value="USDC" data-contract="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" data-dec="6">USDC (Base)</option>
+    <option value="USDbC" data-contract="0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA" data-dec="6">USDbC — Bridged USDC</option>
+    <option value="DAI" data-contract="0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb" data-dec="18">DAI (Base)</option>
+    <option value="WETH" data-contract="0x4200000000000000000000000000000000000006" data-dec="18">WETH (Base)</option>
+    <option value="ETH" data-contract="" data-dec="18">ETH (native)</option>
+    <option value="BIBLEFI" data-contract="" data-dec="18">$BIBLEFI (add contract)</option>
+    <option value="WISDOM" data-contract="" data-dec="18">$WISDOM (add contract)</option>
+    <option value="CUSTOM" data-contract="" data-dec="18">Custom ERC-20...</option>
+  </select>
+
+  <div id="customContractRow" style="display:none;margin-top:.5rem;">
+    <input type="text" id="customContract" placeholder="0x... ERC-20 contract address on Base"/>
+  </div>
+
+  <div class="field-label">AMOUNT — QUICK SELECT</div>
+  <div class="preset-row">
+    <button class="preset" onclick="setAmt(5,this)">$5</button>
+    <button class="preset" onclick="setAmt(10,this)">$10</button>
+    <button class="preset" onclick="setAmt(25,this)">$25</button>
+    <button class="preset" onclick="setAmt(50,this)">$50</button>
+    <button class="preset" onclick="setAmt(100,this)">$100</button>
+  </div>
+  <div class="row2">
+    <input type="number" id="amtInput" placeholder="Custom amount (optional)" min="0" step="any"/>
+    <select id="denomSel">
+      <option>USDC</option>
+      <option>USD</option>
+      <option>ETH</option>
+    </select>
+  </div>
+
+  <button class="gen-btn" onclick="genEVM()">⚡ GENERATE PAYMENT LINK</button>
+
+  <div class="output-box" id="evmOutput">
+    <div class="output-header">// EIP-681 URI · BASE CHAIN (8453)</div>
+    <div class="output-uri" id="evmUri"></div>
+    <div class="output-actions">
+      <button class="out-btn" onclick="copyOut('evmUri','copy')">📋 COPY</button>
+      <button class="out-btn" onclick="openOut()">↗ OPEN</button>
+      <button class="out-btn" onclick="copyMd()">{ } MD</button>
+      <button class="out-btn" onclick="copyHtml()">‹/› HTML</button>
+    </div>
+  </div>
+</div>
+```
+
+  </div><!-- /evm panel -->
+
+  <!-- ======= BITCOIN PANEL ======= -->
+
+  <div class="chain-panel" id="panel-btc">
+
+```
+<!-- NC BTC -->
+<div class="card btc-card" id="nc-btc-card">
+  <div class="card-title">NORMANCOMICS — BITCOIN ADDRESSES</div>
+  <div class="addr-row" onclick="selectBtc('bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm')">
+    <div class="addr-type-dot dot-btc-native"></div>
+    <div class="addr-info">
+      <div class="addr-main">bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm</div>
+      <div class="addr-tag">Native SegWit (bech32) — recommended</div>
+    </div>
+    <button class="copy-btn" onclick="cp(event,'bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm')">COPY</button>
+  </div>
+  <div class="addr-row" onclick="selectBtc('bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp')">
+    <div class="addr-type-dot dot-btc-taproot"></div>
+    <div class="addr-info">
+      <div class="addr-main" style="font-size:.8rem;">bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp</div>
+      <div class="addr-tag">Taproot (bech32m) — silent payments compatible</div>
+    </div>
+    <button class="copy-btn" onclick="cp(event,'bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp')">COPY</button>
+  </div>
+  <div class="addr-row" onclick="selectBtc('1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg')">
+    <div class="addr-type-dot dot-btc-legacy"></div>
+    <div class="addr-info">
+      <div class="addr-main">1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg</div>
+      <div class="addr-tag">Legacy (P2PKH) — broad wallet compat</div>
+    </div>
+    <button class="copy-btn" onclick="cp(event,'1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg')">COPY</button>
+  </div>
+</div>
+
+<!-- BF BTC (same addresses — update if separate) -->
+<div class="card btc-card" id="bf-btc-card" style="display:none">
+  <div class="card-title">BIBLEFI — BITCOIN ADDRESSES</div>
+  <div class="addr-row" onclick="selectBtc('bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm')">
+    <div class="addr-type-dot dot-btc-native"></div>
+    <div class="addr-info">
+      <div class="addr-main">bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm</div>
+      <div class="addr-tag">Native SegWit (bech32)</div>
+    </div>
+    <button class="copy-btn" onclick="cp(event,'bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm')">COPY</button>
+  </div>
+  <div class="addr-row" onclick="selectBtc('bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp')">
+    <div class="addr-type-dot dot-btc-taproot"></div>
+    <div class="addr-info">
+      <div class="addr-main" style="font-size:.8rem;">bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp</div>
+      <div class="addr-tag">Taproot (bech32m)</div>
+    </div>
+    <button class="copy-btn" onclick="cp(event,'bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp')">COPY</button>
+  </div>
+  <div class="addr-row" onclick="selectBtc('1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg')">
+    <div class="addr-type-dot dot-btc-legacy"></div>
+    <div class="addr-info">
+      <div class="addr-main">1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg</div>
+      <div class="addr-tag">Legacy (P2PKH)</div>
+    </div>
+    <button class="copy-btn" onclick="cp(event,'1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg')">COPY</button>
+  </div>
+</div>
+
+<!-- BTC GENERATOR -->
+<div class="card gen-card">
+  <div class="card-title">GENERATE BIP-21 BITCOIN PAYMENT LINK</div>
+
+  <div class="field-label">ADDRESS</div>
+  <select id="btcAddrSel">
+    <option value="bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm">Native SegWit — bc1qx0c7p...</option>
+    <option value="bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp">Taproot — bc1pfwtr0...</option>
+    <option value="1GAk8S9f6U48JfSVDhmeV4K9pPLc3rurCg">Legacy — 1GAk8S9...</option>
+  </select>
+
+  <div class="field-label">AMOUNT BTC (optional)</div>
+  <div class="preset-row">
+    <button class="preset" onclick="setBtcAmt(0.0001,this)">1k sat</button>
+    <button class="preset" onclick="setBtcAmt(0.001,this)">100k</button>
+    <button class="preset" onclick="setBtcAmt(0.01,this)">1M</button>
+    <button class="preset" onclick="setBtcAmt(0.1,this)">10M</button>
+    <button class="preset" onclick="setBtcAmt('',this)">ANY</button>
+  </div>
+  <input type="number" id="btcAmt" placeholder="Amount in BTC (e.g. 0.001)" min="0" step="any"/>
+
+  <div class="field-label">LABEL / MESSAGE (optional)</div>
+  <input type="text" id="btcLabel" placeholder="e.g. BibleFi Donation"/>
+
+  <button class="gen-btn" style="background:linear-gradient(90deg,#7a3a00,var(--btc),var(--btc2),var(--btc),#7a3a00);background-size:300% 100%;" onclick="genBTC()">₿ GENERATE BTC LINK</button>
+
+  <div class="output-box" id="btcOutput">
+    <div class="output-header">// BIP-21 URI · BITCOIN</div>
+    <div class="output-uri" id="btcUri"></div>
+    <div class="output-actions">
+      <button class="out-btn" onclick="copyOut('btcUri','copy')">📋 COPY</button>
+      <button class="out-btn" onclick="openBtcOut()">↗ OPEN</button>
+      <button class="out-btn" onclick="copyBtcMd()">{ } MD</button>
+      <button class="out-btn" onclick="copyBtcHtml()">‹/› HTML</button>
+    </div>
+  </div>
+</div>
+```
+
+  </div><!-- /btc panel -->
+
+  <!-- EMBED WIDGET SECTION -->
+
+  <div class="card widget-card">
+    <div class="card-title">EMBEDDABLE BUTTONS / WIDGET</div>
+
+```
+<div class="widget-preview">
+  <p>// PREVIEW — COPY CODE BELOW TO EMBED</p>
+  <a class="embed-badge" href="ethereum:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913@8453/transfer?address=normancomics.base.eth" target="_blank">
+    ⬟ Donate USDC on Base
+  </a>
+  <a class="embed-badge" href="ethereum:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913@8453/transfer?address=biblefi.base.eth" target="_blank">
+    ✝ Support BibleFi
+  </a>
+  <a class="embed-badge btc" href="bitcoin:bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm" target="_blank">
+    ₿ Donate Bitcoin
+  </a>
+</div>
+
+<div style="position:relative;">
+  <div class="code-block" id="embedCode"><!-- USDC on Base → normancomics -->
+```
+
+<a href=“ethereum:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913@8453/transfer?address=normancomics.base.eth”>
+Donate USDC to normancomics.base.eth
+</a>
+
+<!– USDC on Base → biblefi –>
+<a href=“ethereum:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913@8453/transfer?address=biblefi.base.eth”>
+Donate USDC to BibleFi
+</a>
+
+<!– Bitcoin (SegWit) –>
+<a href=“bitcoin:bc1qx0c7pje8m9thu4atecp7uasqhflvdu08sx9rlm”>
+Donate Bitcoin
+</a>
+
+<!– Bitcoin (Taproot) –>
+<a href=“bitcoin:bc1pfwtr0wp7v649vly3khvm6t3s68qmtnmr2wur8mjvqntw0ps3lueszuspcp”>
+Donate Bitcoin (Taproot)
+</a></div>
+<button class="code-copy" onclick="copyBlockCode()">COPY</button>
+</div>
+
+  </div>
+
+  <div class="notice">
+    <strong>// CHAIN INFO</strong> — All EVM links target Base (chainId: 8453).
+    USDC: <strong>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</strong>
+    ENS names use CCIP-Read L2 resolution. BTC links use BIP-21 URI scheme.
+    Zero custody · Zero intermediary · Peer-to-peer · Soli Deo Gloria.
+  </div>
+
+  <footer>
+    <div class="gold">✝ NORMANCOMICS.ETH &nbsp;|&nbsp; BIBLEFI.ETH &nbsp;|&nbsp; BASE CHAIN &nbsp;|&nbsp; BITCOIN</div>
+    <div style="margin-top:.5rem;">"For where your treasure is, there will your heart be also." — Matthew 6:21</div>
+    <div style="margin-top:.5rem;color:var(--muted);">Built on Base · terminally on-chain · normancomics.eth</div>
+  </footer>
+</div>
+
+<script>
+// ─── STATE ───
+let currentEVM = '';
+let currentBTC = '';
+let activeProfile = 'nc';
+
+// ─── PROFILE TOGGLE ───
+function switchProfile(p, btn) {
+  activeProfile = p;
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const show = (id, vis) => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = vis ? 'block' : 'none';
+  };
+  show('nc-evm-card', p==='nc');
+  show('bf-evm-card', p==='bf');
+  show('nc-btc-card', p==='nc');
+  show('bf-btc-card', p==='bf');
+
+  // update recipient default
+  const sel = document.getElementById('recipientSel');
+  const prefix = p === 'nc' ? 'normancomics' : 'biblefi';
+  for(let i=0;i<sel.options.length;i++){
+    if(sel.options[i].value.startsWith(prefix)){
+      sel.selectedIndex = i; break;
+    }
+  }
+}
+
+// ─── CHAIN TOGGLE ───
+function switchChain(c, btn) {
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.chain-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + c).classList.add('active');
+}
+
+// ─── IDENTITY DROPDOWN ───
+function toggleDrop(header) {
+  const isOpen = header.classList.contains('open');
+  // close all
+  document.querySelectorAll('.id-header').forEach(h => h.classList.remove('open'));
+  document.querySelectorAll('.id-dropdown').forEach(d => d.classList.remove('open'));
+  if(!isOpen) {
+    header.classList.add('open');
+    header.nextElementSibling.classList.add('open');
+  }
+}
+
+function selectRecipient(val) {
+  const sel = document.getElementById('recipientSel');
+  for(let i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===val){sel.selectedIndex=i;break;}
+  }
+}
+
+function selectBtc(addr) {
+  const sel = document.getElementById('btcAddrSel');
+  for(let i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===addr){sel.selectedIndex=i;break;}
+  }
+}
+
+// ─── COPY UTILITY ───
+function cp(e, text) {
+  e.stopPropagation();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = e.target;
+    const orig = btn.textContent;
+    btn.textContent = '✓ OK';
+    btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent=orig;btn.classList.remove('ok');},2000);
+  });
+}
+
+// ─── TOKEN CHANGE ───
+function onTokenChange() {
+  const sel = document.getElementById('tokenSel');
+  document.getElementById('customContractRow').style.display =
+    sel.value === 'CUSTOM' ? 'block' : 'none';
+}
+
+// ─── AMOUNT PRESETS ───
+function setAmt(v, btn) {
+  document.querySelectorAll('.preset-row .preset').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(v==='') document.getElementById('amtInput').value='';
+  else document.getElementById('amtInput').value = v;
+}
+function setBtcAmt(v, btn) {
+  document.querySelectorAll('#panel-btc .preset-row .preset').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('btcAmt').value = v;
+}
+
+// ─── EVM GENERATOR ───
+function genEVM() {
+  const tokenSel = document.getElementById('tokenSel');
+  const token = tokenSel.value;
+  const selectedOpt = tokenSel.options[tokenSel.selectedIndex];
+  const recipient = document.getElementById('recipientSel').value;
+  const amtRaw = document.getElementById('amtInput').value;
+  const chainId = 8453;
+
+  let contractAddr = selectedOpt.getAttribute('data-contract');
+  let decimals = parseInt(selectedOpt.getAttribute('data-dec') || '18');
+
+  if(token === 'CUSTOM' || token === 'BIBLEFI' || token === 'WISDOM') {
+    contractAddr = document.getElementById('customContract').value.trim();
+    if(!contractAddr && (token==='CUSTOM'||token==='BIBLEFI'||token==='WISDOM')) {
+      alert('Please enter the token contract address.');return;
+    }
+  }
+
+  let uri = '';
+  if(!contractAddr || token==='ETH') {
+    if(amtRaw) {
+      const wei = BigInt(Math.round(parseFloat(amtRaw)*1e18)).toString();
+      uri = `ethereum:${recipient}@${chainId}?value=${wei}`;
+    } else {
+      uri = `ethereum:${recipient}@${chainId}`;
+    }
+  } else {
+    if(amtRaw) {
+      const raw = BigInt(Math.round(parseFloat(amtRaw)*Math.pow(10,decimals))).toString();
+      uri = `ethereum:${contractAddr}@${chainId}/transfer?address=${recipient}&uint256=${raw}`;
+    } else {
+      uri = `ethereum:${contractAddr}@${chainId}/transfer?address=${recipient}`;
+    }
+  }
+  currentEVM = uri;
+  document.getElementById('evmUri').textContent = uri;
+  const box = document.getElementById('evmOutput');
+  box.classList.add('show');
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ─── BTC GENERATOR ───
+function genBTC() {
+  const addr = document.getElementById('btcAddrSel').value;
+  const amt = document.getElementById('btcAmt').value;
+  const label = document.getElementById('btcLabel').value.trim();
+  let uri = `bitcoin:${addr}`;
+  const params = [];
+  if(amt) params.push(`amount=${parseFloat(amt).toFixed(8)}`);
+  if(label) params.push(`label=${encodeURIComponent(label)}`);
+  if(params.length) uri += '?' + params.join('&');
+  currentBTC = uri;
+  document.getElementById('btcUri').textContent = uri;
+  const box = document.getElementById('btcOutput');
+  box.classList.add('show');
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ─── OUTPUT ACTIONS ───
+function copyOut(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    event.target.textContent='✓ OK';
+    setTimeout(()=>event.target.textContent='📋 COPY',2000);
+  });
+}
+function openOut(){window.location.href=currentEVM;}
+function openBtcOut(){window.location.href=currentBTC;}
+
+function copyMd(){
+  const rec = document.getElementById('recipientSel').value;
+  const tok = document.getElementById('tokenSel').value;
+  const md = `[![Donate ${tok} on Base](https://img.shields.io/badge/Donate-${tok}_on_Base-gold?logo=ethereum&style=flat)](${currentEVM})`;
+  navigator.clipboard.writeText(md).then(()=>{
+    event.target.textContent='✓ OK';
+    setTimeout(()=>event.target.textContent='{ } MD',2000);
+  });
+}
+function copyHtml(){
+  const rec = document.getElementById('recipientSel').value;
+  const tok = document.getElementById('tokenSel').value;
+  const html = `<a href="${currentEVM}" target="_blank" rel="noopener noreferrer">Donate ${tok} to ${rec} on Base</a>`;
+  navigator.clipboard.writeText(html).then(()=>{
+    event.target.textContent='✓ OK';
+    setTimeout(()=>event.target.textContent='‹/› HTML',2000);
+  });
+}
+function copyBtcMd(){
+  const addr = document.getElementById('btcAddrSel').value.substring(0,12)+'...';
+  const md = `[![Donate Bitcoin](https://img.shields.io/badge/Donate-Bitcoin-orange?logo=bitcoin&style=flat)](${currentBTC})`;
+  navigator.clipboard.writeText(md).then(()=>{
+    event.target.textContent='✓ OK';
+    setTimeout(()=>event.target.textContent='{ } MD',2000);
+  });
+}
+function copyBtcHtml(){
+  const html = `<a href="${currentBTC}" target="_blank" rel="noopener noreferrer">Donate Bitcoin</a>`;
+  navigator.clipboard.writeText(html).then(()=>{
+    event.target.textContent='✓ OK';
+    setTimeout(()=>event.target.textContent='‹/› HTML',2000);
+  });
+}
+
+function copyBlockCode(){
+  const text = document.getElementById('embedCode').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    event.target.textContent='✓ OK';
+    setTimeout(()=>event.target.textContent='COPY',2000);
+  });
+}
+</script>
+
+</body>
+</html>

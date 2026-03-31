@@ -8,6 +8,16 @@
 export interface BiblicalFinanceVerse {
   reference: string;
   kjv: string;
+  {
+    reference: "Proverbs 3:9-10",
+    kjv: "Honour the LORD with thy substance, and with the firstfruits of all thine increase: So shall thy barns be filled with plenty, and thy presses shall burst out with new wine.",
+    hebrew: "כַּבֵּד אֶת־יְהוָה מֵרֹאשׁ וּמֵרֹאשׁ כָּל־תְּבוּאָתֶךָ",
+    strongsNumbers: ["H3513", "H801"],
+    category: "stewardship",
+    principle: "Honor God with firstfruits and resources; God provides abundance in return",
+    defiApplication: "Prioritize first-allocation of yields to charitable pools and church support",
+    importance: "primary"
+  },
   hebrew?: string;
   greek?: string;
   aramaic?: string;
@@ -81,6 +91,27 @@ export const TITHING_VERSES: BiblicalFinanceVerse[] = [
     category: "tithing",
     principle: "Tithing connects us to eternal priesthood - Christ receives our offerings",
     defiApplication: "ZK-proof anonymous tithing honors God while maintaining privacy and humility",
+    importance: "primary"
+  }
+  ,
+  {
+    reference: "2 Corinthians 9:6-7",
+    kjv: "But this I say, He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully. Every man according as he purposeth in his heart, so let him give; not grudgingly, or of necessity: for God loveth a cheerful giver.",
+    greek: "ὁ γὰρ σπείρων ὀκνηρῶς ὀκνηρῶς καὶ θερίσει",
+    strongsNumbers: ["G4698", "G2388"],
+    category: "generosity",
+    principle: "Generosity is proportional and should be cheerful, not coerced",
+    defiApplication: "Design donation and yield-sharing mechanics that encourage voluntary, cheerful giving",
+    importance: "primary"
+  },
+  {
+    reference: "Acts 20:35",
+    kjv: "I have shewed you all things, how that so labouring ye ought to support the weak, and to remember the words of the Lord Jesus, how he said, It is more blessed to give than to receive.",
+    greek: "μαῖνόν ἐστιν δοῦναι ἢ λαμβάνειν",
+    strongsNumbers: ["G1325"],
+    category: "generosity",
+    principle: "Giving blesses the giver and serves others; ministry includes support for the weak",
+    defiApplication: "Allocate protocol fees or grants to social-impact pools and poverty relief initiatives",
     importance: "primary"
   }
 ];
@@ -236,6 +267,27 @@ export const WEALTH_VERSES: BiblicalFinanceVerse[] = [
     category: "wealth",
     principle: "Life's value is not in possessions - avoid covetousness",
     defiApplication: "Focus on building lasting value, not just portfolio numbers",
+    importance: "primary"
+  }
+  ,
+  {
+    reference: "Luke 6:38",
+    kjv: "Give, and it shall be given unto you; good measure, pressed down, and shaken together, and running over, shall men give into your bosom: for with the same measure that ye mete withal it shall be measured to you again.",
+    greek: "δοτε καὶ δοθησεται υμιν μετρον καλα μετρημενον πυκνον προσηκυσμενον πεπληρωμενον",
+    strongsNumbers: ["G1325"],
+    category: "generosity",
+    principle: "Generous giving results in abundant return; reciprocity of giving",
+    defiApplication: "Design reward mechanisms for charitable donations and community reinvestment",
+    importance: "primary"
+  },
+  {
+    reference: "Malachi 3:8",
+    kjv: "Will a man rob God? Yet ye have robbed me. But ye say, Wherein have we robbed thee? In tithes and offerings.",
+    hebrew: "הֲיוֹסִיף אָדָם לִגְנוֹב אֶת־אֱלֹהִים וְאַתֶּם גּנַבְתֶּם מִמֶּנִּי וַתֹּאמְרוּ בּמָה׃ גַּם־בּמַעֲשָׂר וּבַמִּנְחָה",
+    strongsNumbers: ["H4643"],
+    category: "tithing",
+    principle: "Withholding tithes and offerings is equivalent to robbing God",
+    defiApplication: "Encourage transparent giving and reminders for tithes in apps",
     importance: "primary"
   }
 ];
