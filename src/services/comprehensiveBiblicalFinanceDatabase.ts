@@ -8,16 +8,6 @@
 export interface BiblicalFinanceVerse {
   reference: string;
   kjv: string;
-  {
-    reference: "Proverbs 3:9-10",
-    kjv: "Honour the LORD with thy substance, and with the firstfruits of all thine increase: So shall thy barns be filled with plenty, and thy presses shall burst out with new wine.",
-    hebrew: "כַּבֵּד אֶת־יְהוָה מֵרֹאשׁ וּמֵרֹאשׁ כָּל־תְּבוּאָתֶךָ",
-    strongsNumbers: ["H3513", "H801"],
-    category: "stewardship",
-    principle: "Honor God with firstfruits and resources; God provides abundance in return",
-    defiApplication: "Prioritize first-allocation of yields to charitable pools and church support",
-    importance: "primary"
-  },
   hebrew?: string;
   greek?: string;
   aramaic?: string;

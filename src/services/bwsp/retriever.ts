@@ -1,14 +1,9 @@
 // BWSP – Retriever
 // Semantic search via Supabase pgvector RPCs with offline fallback
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import { comprehensiveFinancialScriptures } from '@/data/comprehensiveFinancialScriptures';
 import type { ScriptureResult, DefiKnowledgeResult } from './types';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ---------------------------------------------------------------------------
 // Offline keyword fallback helpers

@@ -1,13 +1,8 @@
 // BWSP – Synthesizer
 // Calls the enhanced-biblical-advisor Supabase edge function with offline fallback synthesis
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 import type { BWSPContext, BWSPSynthesis, ScriptureResult } from './types';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ---------------------------------------------------------------------------
 // Offline fallback synthesis by intent
