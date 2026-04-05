@@ -45,8 +45,11 @@ const SEED_REGIONS = [
   { name: 'Paris', lat: 48.8566, lon: 2.3522, country: 'France', radius: 10000 },
   { name: 'Addis Ababa', lat: 9.0192, lon: 38.7525, country: 'Ethiopia', radius: 10000 },
   { name: 'Dar es Salaam', lat: -6.7924, lon: 39.2083, country: 'Tanzania', radius: 10000 },
-  // Florida historic cities
+  // Florida cities
   { name: 'St. Augustine', lat: 29.9012, lon: -81.3124, country: 'United States', radius: 10000 },
+  { name: 'Jacksonville', lat: 30.3322, lon: -81.6557, country: 'United States', radius: 15000 },
+  { name: 'Tampa', lat: 27.9506, lon: -82.4572, country: 'United States', radius: 12000 },
+  { name: 'Orlando', lat: 28.5383, lon: -81.3792, country: 'United States', radius: 12000 },
 ];
 
 // Christian denomination identifiers for OSM filtering

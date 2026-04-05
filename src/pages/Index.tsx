@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import bibleFiHero from '@/assets/biblefi-hero-badge.jpeg';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -58,21 +59,56 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8"
+          >
+            {/* Hero Badge Image - offset left */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="relative flex-shrink-0"
+            >
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-ancient-gold/30 via-purple-500/20 to-transparent blur-2xl scale-110" />
+              <motion.img
+                src={bibleFiHero}
+                alt="BibleFi"
+                className="relative w-36 h-36 md:w-48 md:h-48 rounded-3xl shadow-2xl shadow-purple-900/60 border-2 border-ancient-gold/20"
+                animate={{
+                  boxShadow: [
+                    '0 0 30px rgba(245, 158, 11, 0.2), 0 0 60px rgba(139, 92, 246, 0.15)',
+                    '0 0 40px rgba(245, 158, 11, 0.35), 0 0 80px rgba(139, 92, 246, 0.25)',
+                    '0 0 30px rgba(245, 158, 11, 0.2), 0 0 60px rgba(139, 92, 246, 0.15)',
+                  ]
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.div>
+
+            {/* Title + Subtitle */}
+            <div className="text-center md:text-left">
+              <motion.h1
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="text-5xl md:text-6xl font-bold mb-4 font-scroll"
+              >
+                <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent">
+                  BibleFi
+                </span>
+              </motion.h1>
+              <p className="text-xl text-white/80 mb-2">
+                Biblical DeFi: Tithing First, Prosperity Through Obedience
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Stats Bar */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
             className="text-center mb-8"
           >
-            <motion.h1
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="text-5xl md:text-6xl font-bold mb-4 font-scroll"
-            >
-              <span className="bg-gradient-to-r from-ancient-gold via-yellow-400 to-ancient-gold bg-clip-text text-transparent">
-                BibleFi
-              </span>
-            </motion.h1>
-            <p className="text-xl text-white/80 mb-2">
-              Biblical DeFi: Tithing First, Prosperity Through Obedience
-            </p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
               <Badge variant="secondary" className="bg-green-500/20 text-green-400">
                 <Church className="w-3 h-3 mr-1" />
