@@ -63,7 +63,7 @@ export class BWSPRetriever {
       const embedding: number[] = embedResponse.data.embedding;
 
       const { data, error } = await supabase.rpc('search_biblical_knowledge', {
-        query_embedding: embedding,
+        query_embedding: JSON.stringify(embedding),
         match_threshold: 0.5,
         match_count: limit,
       });
