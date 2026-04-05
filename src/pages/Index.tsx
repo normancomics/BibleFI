@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import bibleFiHero from '@/assets/biblefi-hero-badge.jpeg';
 
 const Index = () => {
   const navigate = useNavigate();
