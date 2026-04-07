@@ -100,7 +100,7 @@
     "lovable-tagger": "^1.1.8",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
-    "typescript": "5.6.4",
+    "typescript": "5.5.3",
     "typescript-eslint": "^8.0.1", 
     "@typescript-eslint/parser": "^8.11.0",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
