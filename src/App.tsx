@@ -89,6 +89,9 @@ const App = () => (
             <Route path="/biblical-finance" element={<BiblicalFinanceEncyclopediaPage />} />
             <Route path="/auth/signup" element={<SignupPage />} />
             <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/bwsp-agents" element={<BWSPAgentsPage />} />
+            <Route path="/bwtya-agents" element={<BWTYAAgentsPage />} />
+            <Route path="/mcp-network" element={<MCPNetworkPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
