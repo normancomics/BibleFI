@@ -4,45 +4,33 @@ import SoundSystemManager from '@/components/enhanced/SoundSystemManager';
 import DailyScripture from '@/components/home/DailyScripture';
 import ComprehensiveTithingHub from '@/components/tithe/ComprehensiveTithingHub';
 import IntroAnimation from '@/components/home/IntroAnimation';
-import { USChurchSeederService } from '@/services/usChurchSeeder';
 import { Button } from '@/components/ui/button';
-import { Heart, BookOpen, TrendingUp, Database, RefreshCw, Church } from 'lucide-react';
+import { Brain, TrendingUp, Network, Church } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import bibleFiHero from '@/assets/biblefi-hero-badge.jpeg';
+import { supabase } from '@/integrations/supabase/client';
+import bibleFiNavIcon from '@/assets/biblefi-nav-icon.png';
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [churchCount, setChurchCount] = useState<number>(0);
-  const [isSeeding, setIsSeeding] = useState(false);
   const [showIntro, setShowIntro] = useState(() => {
     return localStorage.getItem('biblefi_skip_intro') !== 'true';
   });
 
   useEffect(() => {
-    // Check church count on load
-    USChurchSeederService.getChurchCount().then(setChurchCount);
+    // Query the public view which doesn't require auth
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from('public_church_directory')
+        .select('*', { count: 'exact', head: true });
+      setChurchCount(count || 0);
+    };
+    fetchCount();
   }, []);
-
-  const handleSeedChurches = async () => {
-    setIsSeeding(true);
-    try {
-      const result = await USChurchSeederService.seedUSChurches();
-      toast({
-        title: "Churches Added!",
-        description: `Added ${result.added} churches to the database (${result.errors} errors)`,
-      });
-      const newCount = await USChurchSeederService.getChurchCount();
-      setChurchCount(newCount);
-    } catch (error) {
-      toast({ title: "Error seeding churches", variant: "destructive" });
-    } finally {
-      setIsSeeding(false);
-    }
-  };
 
   // Show intro animation first
   if (showIntro) {
@@ -55,13 +43,13 @@ const Index = () => {
         <NavBar />
         
         <main className="container mx-auto px-4 py-8 max-w-7xl">
-          {/* Hero Section - Tithing First */}
+          {/* Hero Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col md:flex-row items-center justify-center gap-8 mb-8"
           >
-            {/* Hero Badge Image - offset left */}
+            {/* Nav Icon as main logo */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
@@ -70,7 +58,7 @@ const Index = () => {
             >
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-ancient-gold/30 via-purple-500/20 to-transparent blur-2xl scale-110" />
               <motion.img
-                src={bibleFiHero}
+                src={bibleFiNavIcon}
                 alt="BibleFi"
                 className="relative w-36 h-36 md:w-48 md:h-48 rounded-3xl shadow-2xl shadow-purple-900/60 border-2 border-ancient-gold/20"
                 animate={{
@@ -114,45 +102,43 @@ const Index = () => {
                 <Church className="w-3 h-3 mr-1" />
                 {churchCount} Churches in Database
               </Badge>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleSeedChurches}
-                disabled={isSeeding}
-                className="text-xs"
-              >
-                <Database className="w-3 h-3 mr-1" />
-                {isSeeding ? <><RefreshCw className="w-3 h-3 mr-1 animate-spin" />Adding...</> : 'Add US Churches'}
-              </Button>
             </div>
           </motion.div>
 
-          {/* Daily Scripture - Top Priority */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-8"
-          >
+          {/* Daily Scripture */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8">
             <DailyScripture />
           </motion.div>
 
-          {/* Comprehensive Tithing Hub - Core Feature */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
+          {/* Comprehensive Tithing Hub */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-8">
             <ComprehensiveTithingHub />
           </motion.div>
 
-          {/* Quick Actions */}
+          {/* Quick Actions - BWSP / BWTYA / MCP Network */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { path: '/biblical-finance', icon: <BookOpen className="w-8 h-8" />, label: 'Biblical Finance Encyclopedia', gradient: 'from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' },
-              { path: '/defi', icon: <TrendingUp className="w-8 h-8" />, label: 'DeFi Hub', gradient: 'from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700' },
-              { path: '/tithe', icon: <Heart className="w-8 h-8" />, label: 'Full Tithing Interface', gradient: 'from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700' },
+              {
+                path: '/bwsp-agents',
+                icon: <Brain className="w-8 h-8" />,
+                label: 'BWSP Agents',
+                subtitle: 'Biblical Wisdom Synthesis Protocol',
+                gradient: 'from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700',
+              },
+              {
+                path: '/bwtya-agents',
+                icon: <TrendingUp className="w-8 h-8" />,
+                label: 'BWTYA Agents',
+                subtitle: 'Biblical-Wisdom-To-Yield-Algorithm',
+                gradient: 'from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700',
+              },
+              {
+                path: '/mcp-network',
+                icon: <Network className="w-8 h-8" />,
+                label: 'MCP Agent Network',
+                subtitle: 'Full Sovereign Agent Overview',
+                gradient: 'from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700',
+              },
             ].map((item, i) => (
               <motion.div
                 key={item.path}
@@ -166,9 +152,10 @@ const Index = () => {
                   onClick={() => navigate(item.path)}
                   className={`h-24 w-full bg-gradient-to-br ${item.gradient}`}
                 >
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-1">
                     {item.icon}
-                    <span className="text-sm">{item.label}</span>
+                    <span className="text-sm font-bold">{item.label}</span>
+                    <span className="text-[10px] opacity-70">{item.subtitle}</span>
                   </div>
                 </Button>
               </motion.div>
