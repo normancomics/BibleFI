@@ -41,6 +41,9 @@ import ZKMonitorPage from "./pages/ZKMonitorPage";
 import BiblicalFinanceEncyclopediaPage from "./pages/BiblicalFinanceEncyclopediaPage";
 import SignupPage from "./pages/auth/SignupPage";
 import LoginPage from "./pages/auth/LoginPage";
+import BWSPAgentsPage from "./pages/BWSPAgentsPage";
+import BWTYAAgentsPage from "./pages/BWTYAAgentsPage";
+import MCPNetworkPage from "./pages/MCPNetworkPage";
 import "./App.css";
 
 const App = () => (
