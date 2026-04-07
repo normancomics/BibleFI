@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import bibleFiLogo from '@/assets/bible-fi-main-logo.png';
+import bibleFiLogo from '@/assets/biblefi-nav-icon.png';
 import { 
   Home, 
   BookOpen, 

@@ -11,7 +11,7 @@ export const config = createConfig({
   chains: [base, mainnet],
   connectors: [
     // Farcaster Frame connector — auto-connects inside Warpcast/Farcaster frames
-    farcasterFrame(),
+    farcasterFrame() as any,
     // MetaMask / Browser Wallet
     injected({
       target: {

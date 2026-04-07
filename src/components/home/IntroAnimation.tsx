@@ -3,6 +3,7 @@ import { useSound } from "@/contexts/SoundContext";
 import { GlowingText } from "@/components/ui/tailwind-extensions";
 import { biblicalScenes } from "./biblicalScenesData";
 import StrongsTooltip from "./StrongsTooltip";
+import NeuralNetworkBackground from "./NeuralNetworkBackground";
 
 interface IntroAnimationProps {
   onComplete: () => void;
@@ -16,7 +17,6 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
 
   const line1 = "Loading Biblical-Wisdom...";
   const line2 = "Activating Biblical Wisdom Synthesis Protocol...";
-
 
   const handleSkip = useCallback(() => {
     setFadeOut(true);
@@ -42,7 +42,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
           setTimeout(() => {
             setPhase('scene');
             playSound("powerup");
-            setTimeout(() => handleSkip(), 2000);
+            setTimeout(() => handleSkip(), 3000);
           }, 500);
         }
       }
@@ -54,20 +54,27 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
 
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center z-50 bg-gradient-to-br from-purple-900/90 to-purple-800/70 transition-opacity duration-400 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-400 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
       onClick={handleSkip}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleSkip()}
+      style={{ background: '#050508' }}
     >
-      <div className="text-center max-w-3xl mx-auto p-8">
+      {/* 3D Neural Network Background */}
+      <NeuralNetworkBackground opacity={phase === 'scene' ? 0.7 : 0.3} paletteIndex={0} />
+
+      <div className="relative z-10 text-center max-w-3xl mx-auto p-8">
         {phase === 'scene' ? (
           <div className="mb-12 animate-entrance">
-            <div className="text-5xl md:text-7xl font-scroll font-bold mb-4">
+            <div className="text-5xl md:text-7xl font-scroll font-bold mb-2">
               <GlowingText color="yellow">BibleFi</GlowingText>
             </div>
-            <div className="text-xl font-scroll font-bold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
-              Biblical Wisdom Synthesis Protocol — Active
+            <div className="text-sm font-scroll font-bold text-ancient-gold mb-4" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8), 0 0 40px rgb(168 85 247 / 0.6)' }}>
+              BWSP & BWTYA Neural Network — Active
+            </div>
+            <div className="text-xl font-scroll font-bold text-ancient-gold" style={{ textShadow: '0 0 20px rgb(168 85 247 / 0.8)' }}>
+              Biblical Wisdom Synthesis Protocol — Online
             </div>
           </div>
         ) : (
@@ -78,7 +85,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
           </div>
         )}
 
-        <div className="border-2 border-ancient-gold/50 p-6 bg-purple-900/30 min-h-[200px] flex flex-col items-center justify-center rounded-lg">
+        <div className="border-2 border-ancient-gold/50 p-6 bg-black/60 backdrop-blur-sm min-h-[200px] flex flex-col items-center justify-center rounded-lg">
           {phase === 'scene' ? (
             <div className="space-y-4 animate-fade-in">
               <p className="text-lg md:text-xl font-scroll font-bold text-foreground leading-relaxed" style={{ textShadow: '0 0 12px rgba(255, 255, 255, 0.4)' }}>
