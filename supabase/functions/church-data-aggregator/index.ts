@@ -131,7 +131,7 @@ serve(async (req) => {
  * Discover new churches from OpenStreetMap for major cities worldwide.
  */
 async function discoverNewChurches(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   result: AggregatorResult,
   region?: string
 ) {
@@ -292,7 +292,7 @@ async function discoverNewChurches(
  * Verify existing church data by cross-referencing with OSM.
  */
 async function verifyExistingData(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   result: AggregatorResult
 ) {
   console.log('🔎 Verifying existing church data...');
@@ -333,7 +333,7 @@ async function verifyExistingData(
  * Enrich churches missing website/phone by searching OSM.
  */
 async function enrichMissingData(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   result: AggregatorResult
 ) {
   console.log('📝 Enriching churches with missing data...');
