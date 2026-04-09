@@ -39,24 +39,7 @@ const AGENT_NETWORK: AgentInfo[] = [
 ];
 
 const MCPNetworkPage: React.FC = () => {
-  const [agentStats, setAgentStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await supabase.rpc('get_agent_stats');
-        if (data) setAgentStats(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-    const interval = setInterval(fetchStats, 15000);
-    return () => clearInterval(interval);
-  }, []);
+  const { agentStats, loading, lastUpdate } = useAgentRealTime();
 
   const totalRuns = agentStats?.total_runs || 0;
   const completedRuns = agentStats?.completed_runs || 0;
