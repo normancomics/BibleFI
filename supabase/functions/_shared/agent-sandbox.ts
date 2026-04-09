@@ -13,8 +13,8 @@ import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-
 export interface AgentContext {
   agentName: string;
   runId: string | null;
-  supabase: SupabaseClient;      // api schema - for sandbox RPC calls
-  supabasePublic: SupabaseClient; // public schema - for data operations
+  supabase: SupabaseClient<any, any>;      // api schema - for sandbox RPC calls
+  supabasePublic: SupabaseClient<any, any>; // public schema - for data operations
   startTime: number;
   stats: {
     processed: number;
