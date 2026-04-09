@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import NavBar from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { Network, Activity, Database, Church, BookOpen, Shield, Brain, TrendingUp, Clock, Cpu } from 'lucide-react';
+import { useAgentRealTime } from '@/hooks/useAgentRealTime';
 import { motion } from 'framer-motion';
 import NeuralNetworkBackground from '@/components/home/NeuralNetworkBackground';
 

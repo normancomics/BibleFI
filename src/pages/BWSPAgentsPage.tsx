@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import NavBar from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
-import { Brain, Activity, CheckCircle, AlertCircle, Clock, Zap } from 'lucide-react';
+import { Brain, Activity, CheckCircle, Clock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import NeuralNetworkBackground from '@/components/home/NeuralNetworkBackground';
+import { useAgentRealTime } from '@/hooks/useAgentRealTime';
 
 interface AgentRun {
   agent_name: string;
@@ -31,24 +31,7 @@ const BWSP_AGENTS = [
 ];
 
 const BWSPAgentsPage: React.FC = () => {
-  const [agentStats, setAgentStats] = useState<{ recent_runs: AgentRun[]; agents: AgentPermission[] } | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await supabase.rpc('get_agent_stats');
-        if (data) setAgentStats(data as any);
-      } catch (e) {
-        console.error('Failed to fetch agent stats:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-    const interval = setInterval(fetchStats, 15000);
-    return () => clearInterval(interval);
-  }, []);
+  const { agentStats, loading, lastUpdate } = useAgentRealTime();
 
   const bwspRuns = agentStats?.recent_runs?.filter(r => 
     BWSP_AGENTS.some(a => r.agent_name?.includes(a))

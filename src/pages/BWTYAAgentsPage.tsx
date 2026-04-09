@@ -2,47 +2,34 @@ import React, { useEffect, useState } from 'react';
 import NavBar from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { TrendingUp, Activity, Shield, Coins, BarChart3, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import NeuralNetworkBackground from '@/components/home/NeuralNetworkBackground';
 import { bwtyaAlgorithm } from '@/services/bwtya/algorithm';
-import type { BWTYAResult, BWTYAStrategy } from '@/services/bwtya/types';
+import type { BWTYAResult } from '@/services/bwtya/types';
+import { useAgentRealTime } from '@/hooks/useAgentRealTime';
 
 const BWTYAAgentsPage: React.FC = () => {
-  const [agentStats, setAgentStats] = useState<any>(null);
+  const { agentStats, loading: statsLoading, lastUpdate } = useAgentRealTime();
   const [bwtyaResult, setBwtyaResult] = useState<BWTYAResult | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data } = await supabase.rpc('get_agent_stats');
-        if (data) setAgentStats(data);
-      } catch (e) {
-        console.error(e);
-      }
-
-      // Run BWTYA with sample data to show it's live
-      try {
-        const sampleOpportunities = [
-          { protocol: 'Aave', poolName: 'USDC Lending', tokenSymbol: 'USDC', chain: 'Base', apy: 4.2, tvlUsd: 500000000, riskScore: 15, category: 'Lending', biblicalAlignment: 'Faithful stewardship', isVerified: true, audited: true, transparent: true },
-          { protocol: 'Aerodrome', poolName: 'ETH/USDC', tokenSymbol: 'ETH', chain: 'Base', apy: 12.5, tvlUsd: 120000000, riskScore: 35, category: 'DEX LP', biblicalAlignment: 'Diversified sowing', isVerified: true, audited: true, transparent: true },
-          { protocol: 'Compound', poolName: 'ETH Supply', tokenSymbol: 'ETH', chain: 'Base', apy: 3.1, tvlUsd: 800000000, riskScore: 10, category: 'Lending', biblicalAlignment: 'Prudent saving', isVerified: true, audited: true, transparent: true },
-          { protocol: 'Moonwell', poolName: 'cbETH', tokenSymbol: 'cbETH', chain: 'Base', apy: 5.8, tvlUsd: 90000000, riskScore: 25, category: 'Lending', biblicalAlignment: 'Growth through patience', isVerified: true, audited: true, transparent: true },
-          { protocol: 'Morpho', poolName: 'USDC Vault', tokenSymbol: 'USDC', chain: 'Base', apy: 6.2, tvlUsd: 200000000, riskScore: 20, category: 'Vault', biblicalAlignment: 'Storing wisely', isVerified: true, audited: true, transparent: true },
-        ];
-        const result = bwtyaAlgorithm.run({ opportunities: sampleOpportunities, wisdomScore: 50, capitalUsd: 10000, riskTolerance: 'moderate' });
-        setBwtyaResult(result);
-      } catch (e) {
-        console.error('BWTYA error:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
+    try {
+      const sampleOpportunities = [
+        { protocol: 'Aave', poolName: 'USDC Lending', tokenSymbol: 'USDC', chain: 'Base', apy: 4.2, tvlUsd: 500000000, riskScore: 15, category: 'Lending', biblicalAlignment: 'Faithful stewardship', isVerified: true, audited: true, transparent: true },
+        { protocol: 'Aerodrome', poolName: 'ETH/USDC', tokenSymbol: 'ETH', chain: 'Base', apy: 12.5, tvlUsd: 120000000, riskScore: 35, category: 'DEX LP', biblicalAlignment: 'Diversified sowing', isVerified: true, audited: true, transparent: true },
+        { protocol: 'Compound', poolName: 'ETH Supply', tokenSymbol: 'ETH', chain: 'Base', apy: 3.1, tvlUsd: 800000000, riskScore: 10, category: 'Lending', biblicalAlignment: 'Prudent saving', isVerified: true, audited: true, transparent: true },
+        { protocol: 'Moonwell', poolName: 'cbETH', tokenSymbol: 'cbETH', chain: 'Base', apy: 5.8, tvlUsd: 90000000, riskScore: 25, category: 'Lending', biblicalAlignment: 'Growth through patience', isVerified: true, audited: true, transparent: true },
+        { protocol: 'Morpho', poolName: 'USDC Vault', tokenSymbol: 'USDC', chain: 'Base', apy: 6.2, tvlUsd: 200000000, riskScore: 20, category: 'Vault', biblicalAlignment: 'Storing wisely', isVerified: true, audited: true, transparent: true },
+      ];
+      const result = bwtyaAlgorithm.run({ opportunities: sampleOpportunities, wisdomScore: 50, capitalUsd: 10000, riskTolerance: 'moderate' });
+      setBwtyaResult(result);
+    } catch (e) {
+      console.error('BWTYA error:', e);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const gradeColor = (grade: string) => {
