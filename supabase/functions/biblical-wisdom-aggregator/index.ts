@@ -167,7 +167,7 @@ serve(async (req) => {
 });
 
 async function seedBiblicalWisdom(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   result: AggregatorResult,
   targetCategory?: string
 ) {
@@ -244,7 +244,7 @@ async function seedBiblicalWisdom(
 }
 
 async function createFinancialCrossReferences(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   result: AggregatorResult
 ) {
   console.log('🔗 Creating biblical-financial cross-references...');
