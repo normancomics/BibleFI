@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import NavBar from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
 import { Network, Activity, Database, Church, BookOpen, Shield, Brain, TrendingUp, Clock, Cpu } from 'lucide-react';
+import { useAgentRealTime } from '@/hooks/useAgentRealTime';
 import { motion } from 'framer-motion';
 import NeuralNetworkBackground from '@/components/home/NeuralNetworkBackground';
 
@@ -39,24 +39,7 @@ const AGENT_NETWORK: AgentInfo[] = [
 ];
 
 const MCPNetworkPage: React.FC = () => {
-  const [agentStats, setAgentStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await supabase.rpc('get_agent_stats');
-        if (data) setAgentStats(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-    const interval = setInterval(fetchStats, 15000);
-    return () => clearInterval(interval);
-  }, []);
+  const { agentStats, loading, lastUpdate } = useAgentRealTime();
 
   const totalRuns = agentStats?.total_runs || 0;
   const completedRuns = agentStats?.completed_runs || 0;
