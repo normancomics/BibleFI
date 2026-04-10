@@ -120,16 +120,35 @@ const BiblicalDeFiSwap: React.FC = () => {
     setIsLoading(true);
     playSound('click');
 
-    try {
-      const { data, error } = await supabase.functions.invoke('uniswap-quote', {
-        body: {
-          fromToken: fromToken.symbol,
-          toToken: toToken.symbol,
-          amount: fromAmount,
-          slippage: parseFloat(slippage),
-        },
-      });
+    // Fire spanDEX meta-aggregated quotes in parallel with Uniswap edge function
+    const spandexPromise = useSpandex
+      ? fetchSpandexQuote({
+          inputToken: fromToken.address as Address,
+          outputToken: toToken.address as Address,
+          inputAmount: BigInt(Math.floor(parseFloat(fromAmount) * 10 ** fromToken.decimals)),
+          slippageBps: Math.round(parseFloat(slippage) * 100),
+          swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
+          chainId: 8453,
+        }).catch((e) => {
+          console.warn('[spanDEX] Quote failed, falling back:', e);
+          return null;
+        })
+      : Promise.resolve(null);
 
+    try {
+      const [uniswapResult, spandexResult] = await Promise.all([
+        supabase.functions.invoke('uniswap-quote', {
+          body: {
+            fromToken: fromToken.symbol,
+            toToken: toToken.symbol,
+            amount: fromAmount,
+            slippage: parseFloat(slippage),
+          },
+        }),
+        spandexPromise,
+      ]);
+
+      const { data, error } = uniswapResult;
       if (error) throw error;
 
       const uniQuote: SwapQuote = {
@@ -144,9 +163,20 @@ const BiblicalDeFiSwap: React.FC = () => {
         source: data.source || 'estimate',
       };
 
+      // If spanDEX returned a better quote, use it
+      if (spandexResult && parseFloat(spandexResult.outputAmount) > parseFloat(uniQuote.toAmount)) {
+        uniQuote.toAmount = spandexResult.outputAmount;
+        uniQuote.dex = `spanDEX (${spandexResult.provider})`;
+        uniQuote.source = 'uniswap'; // Mark as live since spanDEX uses on-chain data
+        toast({
+          title: "🚀 Better Price Found!",
+          description: `spanDEX found a better rate via ${spandexResult.provider}`,
+        });
+      }
+
       setQuote(uniQuote);
 
-      if (data.source === 'estimate') {
+      if (data.source === 'estimate' && !spandexResult) {
         toast({
           title: "Estimated Quote",
           description: data.warning || "Using estimated pricing. Live quotes temporarily unavailable.",
