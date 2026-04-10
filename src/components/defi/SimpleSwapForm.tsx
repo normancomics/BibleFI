@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, Loader2 } from 'lucide-react';
+import { ArrowUpDown, Loader2, Zap, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/contexts/SoundContext';
 import { baseTokens } from '@/data/baseTokens';
+import { useSpandexQuote } from '@/hooks/useSpandexQuote';
+import { useAccount } from 'wagmi';
+import type { Address } from 'viem';
 
 const SimpleSwapForm: React.FC = () => {
   const [fromToken, setFromToken] = useState('ETH');
@@ -17,6 +20,17 @@ const SimpleSwapForm: React.FC = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { address: walletAddress } = useAccount();
+
+  const toTokenInfo = baseTokens[toToken];
+  const fromTokenInfo = baseTokens[fromToken];
+
+  const {
+    bestQuote: spandexBest,
+    allQuotes: spandexQuotes,
+    isLoading: spandexLoading,
+    fetchQuote: fetchSpandexQuote,
+  } = useSpandexQuote(toTokenInfo?.decimals ?? 6);
 
   const handleSwapTokens = () => {
     playSound('select');
@@ -46,6 +60,22 @@ const SimpleSwapForm: React.FC = () => {
   const handleFromAmountChange = (value: string) => {
     setFromAmount(value);
     setToAmount(calculateSwap(value));
+    
+    // Fire spanDEX quote in background for better pricing
+    if (value && parseFloat(value) > 0 && fromTokenInfo && toTokenInfo) {
+      fetchSpandexQuote({
+        inputToken: fromTokenInfo.address as Address,
+        outputToken: toTokenInfo.address as Address,
+        inputAmount: BigInt(Math.floor(parseFloat(value) * 10 ** fromTokenInfo.decimals)),
+        slippageBps: 100,
+        swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
+        chainId: 8453,
+      }).then((result) => {
+        if (result && parseFloat(result.outputAmount) > parseFloat(calculateSwap(value))) {
+          setToAmount(result.outputAmount);
+        }
+      }).catch(() => { /* fallback to local calc */ });
+    }
   };
 
   const handleSwap = async () => {
@@ -196,9 +226,36 @@ const SimpleSwapForm: React.FC = () => {
           )}
         </Button>
 
-        <div className="text-xs text-white/60 text-center">
+        <div className="text-xs text-muted-foreground text-center">
           Rate: 1 {fromToken} = {calculateSwap('1')} {toToken}
         </div>
+
+        {/* spanDEX Provider Quotes */}
+        {spandexQuotes.length > 0 && (
+          <div className="space-y-1.5 pt-2 border-t border-border/30">
+            <div className="flex items-center gap-1.5 text-xs text-ancient-gold font-medium">
+              <Zap className="h-3 w-3" />
+              spanDEX — {spandexQuotes.length} providers
+            </div>
+            {spandexQuotes.slice(0, 3).map((sq, i) => (
+              <div key={sq.provider} className={`flex justify-between text-xs px-2 py-1 rounded ${
+                i === 0 ? 'bg-eboy-green/10 text-eboy-green font-medium' : 'text-muted-foreground'
+              }`}>
+                <span className="flex items-center gap-1">
+                  {i === 0 && <Award className="h-3 w-3" />}
+                  {sq.provider}
+                </span>
+                <span className="font-mono">{sq.outputAmount}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {spandexLoading && (
+          <div className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            spanDEX searching best price...
+          </div>
+        )}
       </CardContent>
     </Card>
   );

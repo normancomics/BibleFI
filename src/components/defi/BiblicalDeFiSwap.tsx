@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, DollarSign, Info } from 'lucide-react';
+import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, DollarSign, Info, Zap, Award } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '@/contexts/SoundContext';
@@ -14,6 +14,9 @@ import { useSecurityContext } from '@/contexts/EnhancedSecurityContext';
 import EnhancedBiblicalTrading from '@/components/wisdom/EnhancedBiblicalTrading';
 import { supabase } from '@/integrations/supabase/client';
 import TokenSearchSelect from '@/components/swap/TokenSearchSelect';
+import { useSpandexQuote } from '@/hooks/useSpandexQuote';
+import { useAccount } from 'wagmi';
+import type { Address } from 'viem';
 
 interface Token {
   symbol: string;
@@ -40,6 +43,7 @@ interface SwapQuote {
 const BiblicalDeFiSwap: React.FC = () => {
   const { playSound } = useSound();
   const { validateTransaction, checkContentSecurity } = useSecurityContext();
+  const { address: walletAddress } = useAccount();
   const [fromSymbol, setFromSymbol] = useState('ETH');
   const [toSymbol, setToSymbol] = useState('USDC');
   const [fromAmount, setFromAmount] = useState('');
@@ -48,6 +52,16 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState('1.0');
   const [biblicalAnalysis, setBiblicalAnalysis] = useState(null);
+  const [useSpandex, setUseSpandex] = useState(true);
+
+  // spanDEX meta-aggregator hook
+  const {
+    bestQuote: spandexBest,
+    allQuotes: spandexQuotes,
+    isLoading: spandexLoading,
+    error: spandexError,
+    fetchQuote: fetchSpandexQuote,
+  } = useSpandexQuote(6); // default USDC 6 decimals
 
   // Base chain tokens
   const baseTokens: Record<string, Token> = {
@@ -106,16 +120,35 @@ const BiblicalDeFiSwap: React.FC = () => {
     setIsLoading(true);
     playSound('click');
 
-    try {
-      const { data, error } = await supabase.functions.invoke('uniswap-quote', {
-        body: {
-          fromToken: fromToken.symbol,
-          toToken: toToken.symbol,
-          amount: fromAmount,
-          slippage: parseFloat(slippage),
-        },
-      });
+    // Fire spanDEX meta-aggregated quotes in parallel with Uniswap edge function
+    const spandexPromise = useSpandex
+      ? fetchSpandexQuote({
+          inputToken: fromToken.address as Address,
+          outputToken: toToken.address as Address,
+          inputAmount: BigInt(Math.floor(parseFloat(fromAmount) * 10 ** fromToken.decimals)),
+          slippageBps: Math.round(parseFloat(slippage) * 100),
+          swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
+          chainId: 8453,
+        }).catch((e) => {
+          console.warn('[spanDEX] Quote failed, falling back:', e);
+          return null;
+        })
+      : Promise.resolve(null);
 
+    try {
+      const [uniswapResult, spandexResult] = await Promise.all([
+        supabase.functions.invoke('uniswap-quote', {
+          body: {
+            fromToken: fromToken.symbol,
+            toToken: toToken.symbol,
+            amount: fromAmount,
+            slippage: parseFloat(slippage),
+          },
+        }),
+        spandexPromise,
+      ]);
+
+      const { data, error } = uniswapResult;
       if (error) throw error;
 
       const uniQuote: SwapQuote = {
@@ -130,9 +163,20 @@ const BiblicalDeFiSwap: React.FC = () => {
         source: data.source || 'estimate',
       };
 
+      // If spanDEX returned a better quote, use it
+      if (spandexResult && parseFloat(spandexResult.outputAmount) > parseFloat(uniQuote.toAmount)) {
+        uniQuote.toAmount = spandexResult.outputAmount;
+        uniQuote.dex = `spanDEX (${spandexResult.provider})`;
+        uniQuote.source = 'uniswap'; // Mark as live since spanDEX uses on-chain data
+        toast({
+          title: "🚀 Better Price Found!",
+          description: `spanDEX found a better rate via ${spandexResult.provider}`,
+        });
+      }
+
       setQuote(uniQuote);
 
-      if (data.source === 'estimate') {
+      if (data.source === 'estimate' && !spandexResult) {
         toast({
           title: "Estimated Quote",
           description: data.warning || "Using estimated pricing. Live quotes temporarily unavailable.",
@@ -395,6 +439,64 @@ const BiblicalDeFiSwap: React.FC = () => {
           </AnimatePresence>
         </CardContent>
       </Card>
+
+      {/* spanDEX Provider Comparison */}
+      <AnimatePresence>
+        {spandexQuotes.length > 0 && quote && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <Card className="bg-card/60 backdrop-blur-sm border-ancient-gold/30">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm flex items-center gap-2 text-ancient-gold">
+                  <Zap className="h-4 w-4" />
+                  spanDEX Meta-Aggregator — {spandexQuotes.length} Provider{spandexQuotes.length > 1 ? 's' : ''} Compared
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-3 space-y-1.5">
+                {spandexQuotes.map((sq, i) => (
+                  <div
+                    key={sq.provider}
+                    className={`flex items-center justify-between p-2 rounded-md text-sm ${
+                      i === 0
+                        ? 'bg-eboy-green/10 border border-eboy-green/30'
+                        : 'bg-muted/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {i === 0 && <Award className="h-3.5 w-3.5 text-eboy-green" />}
+                      <span className={i === 0 ? 'font-semibold text-eboy-green' : 'text-muted-foreground'}>
+                        {sq.provider}
+                      </span>
+                    </div>
+                    <span className={i === 0 ? 'font-mono font-semibold' : 'font-mono text-muted-foreground'}>
+                      {sq.outputAmount} {toSymbol}
+                    </span>
+                  </div>
+                ))}
+                {spandexError && (
+                  <p className="text-xs text-destructive">{spandexError}</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* spanDEX Toggle */}
+      <div className="flex items-center justify-between px-1">
+        <label className="text-xs text-muted-foreground flex items-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={useSpandex}
+            onChange={(e) => setUseSpandex(e.target.checked)}
+            className="rounded border-border"
+          />
+          <Zap className="h-3 w-3 text-ancient-gold" />
+          spanDEX Meta-Aggregator
+        </label>
+        <span className="text-[10px] text-muted-foreground">
+          Fabric · Odos · KyberSwap · LI.FI
+        </span>
+      </div>
 
       {/* Enhanced Biblical Analysis */}
       {fromToken && toToken && fromAmount && (
