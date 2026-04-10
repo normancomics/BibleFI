@@ -93,13 +93,11 @@ export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteRet
           return null;
         }
 
+        const outputRaw = (single as any).simulation?.outputAmount ?? (single as any).outputAmount ?? 0n;
         const result: SpandexQuoteResult = {
           provider: single.provider,
-          outputAmount: formatOutputAmount(
-            single.simulation?.outputAmount ?? single.quote?.outputAmount ?? 0n,
-            outputDecimals
-          ),
-          outputAmountRaw: single.simulation?.outputAmount ?? single.quote?.outputAmount ?? 0n,
+          outputAmount: formatOutputAmount(outputRaw, outputDecimals),
+          outputAmountRaw: outputRaw,
         };
 
         setBestQuote(result);
@@ -107,14 +105,14 @@ export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteRet
         return result;
       }
 
-      const mapped: SpandexQuoteResult[] = quotes.map((q: any) => ({
-        provider: q.provider,
-        outputAmount: formatOutputAmount(
-          q.simulation?.outputAmount ?? q.quote?.outputAmount ?? 0n,
-          outputDecimals
-        ),
-        outputAmountRaw: q.simulation?.outputAmount ?? q.quote?.outputAmount ?? 0n,
-      }));
+      const mapped: SpandexQuoteResult[] = quotes.map((q: any) => {
+        const outRaw = q.simulation?.outputAmount ?? q.outputAmount ?? 0n;
+        return {
+          provider: q.provider,
+          outputAmount: formatOutputAmount(outRaw, outputDecimals),
+          outputAmountRaw: outRaw,
+        };
+      });
 
       // Sort by best output (highest first)
       mapped.sort((a, b) =>
