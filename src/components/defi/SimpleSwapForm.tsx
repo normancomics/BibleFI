@@ -60,6 +60,22 @@ const SimpleSwapForm: React.FC = () => {
   const handleFromAmountChange = (value: string) => {
     setFromAmount(value);
     setToAmount(calculateSwap(value));
+    
+    // Fire spanDEX quote in background for better pricing
+    if (value && parseFloat(value) > 0 && fromTokenInfo && toTokenInfo) {
+      fetchSpandexQuote({
+        inputToken: fromTokenInfo.address as Address,
+        outputToken: toTokenInfo.address as Address,
+        inputAmount: BigInt(Math.floor(parseFloat(value) * 10 ** fromTokenInfo.decimals)),
+        slippageBps: 100,
+        swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
+        chainId: 8453,
+      }).then((result) => {
+        if (result && parseFloat(result.outputAmount) > parseFloat(calculateSwap(value))) {
+          setToAmount(result.outputAmount);
+        }
+      }).catch(() => { /* fallback to local calc */ });
+    }
   };
 
   const handleSwap = async () => {
