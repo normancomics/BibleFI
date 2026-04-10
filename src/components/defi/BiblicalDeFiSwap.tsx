@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, DollarSign, Info } from 'lucide-react';
+import { ArrowUpDown, TrendingUp, Shield, Clock, AlertTriangle, CheckCircle, DollarSign, Info, Zap, Award } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '@/contexts/SoundContext';
@@ -14,6 +14,9 @@ import { useSecurityContext } from '@/contexts/EnhancedSecurityContext';
 import EnhancedBiblicalTrading from '@/components/wisdom/EnhancedBiblicalTrading';
 import { supabase } from '@/integrations/supabase/client';
 import TokenSearchSelect from '@/components/swap/TokenSearchSelect';
+import { useSpandexQuote } from '@/hooks/useSpandexQuote';
+import { useAccount } from 'wagmi';
+import type { Address } from 'viem';
 
 interface Token {
   symbol: string;
