@@ -440,6 +440,64 @@ const BiblicalDeFiSwap: React.FC = () => {
         </CardContent>
       </Card>
 
+      {/* spanDEX Provider Comparison */}
+      <AnimatePresence>
+        {spandexQuotes.length > 0 && quote && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <Card className="bg-card/60 backdrop-blur-sm border-ancient-gold/30">
+              <CardHeader className="py-3 px-4">
+                <CardTitle className="text-sm flex items-center gap-2 text-ancient-gold">
+                  <Zap className="h-4 w-4" />
+                  spanDEX Meta-Aggregator — {spandexQuotes.length} Provider{spandexQuotes.length > 1 ? 's' : ''} Compared
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 pb-3 space-y-1.5">
+                {spandexQuotes.map((sq, i) => (
+                  <div
+                    key={sq.provider}
+                    className={`flex items-center justify-between p-2 rounded-md text-sm ${
+                      i === 0
+                        ? 'bg-eboy-green/10 border border-eboy-green/30'
+                        : 'bg-muted/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {i === 0 && <Award className="h-3.5 w-3.5 text-eboy-green" />}
+                      <span className={i === 0 ? 'font-semibold text-eboy-green' : 'text-muted-foreground'}>
+                        {sq.provider}
+                      </span>
+                    </div>
+                    <span className={i === 0 ? 'font-mono font-semibold' : 'font-mono text-muted-foreground'}>
+                      {sq.outputAmount} {toSymbol}
+                    </span>
+                  </div>
+                ))}
+                {spandexError && (
+                  <p className="text-xs text-destructive">{spandexError}</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* spanDEX Toggle */}
+      <div className="flex items-center justify-between px-1">
+        <label className="text-xs text-muted-foreground flex items-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={useSpandex}
+            onChange={(e) => setUseSpandex(e.target.checked)}
+            className="rounded border-border"
+          />
+          <Zap className="h-3 w-3 text-ancient-gold" />
+          spanDEX Meta-Aggregator
+        </label>
+        <span className="text-[10px] text-muted-foreground">
+          Fabric · Odos · KyberSwap · LI.FI
+        </span>
+      </div>
+
       {/* Enhanced Biblical Analysis */}
       {fromToken && toToken && fromAmount && (
         <EnhancedBiblicalTrading
