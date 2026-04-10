@@ -226,9 +226,36 @@ const SimpleSwapForm: React.FC = () => {
           )}
         </Button>
 
-        <div className="text-xs text-white/60 text-center">
+        <div className="text-xs text-muted-foreground text-center">
           Rate: 1 {fromToken} = {calculateSwap('1')} {toToken}
         </div>
+
+        {/* spanDEX Provider Quotes */}
+        {spandexQuotes.length > 0 && (
+          <div className="space-y-1.5 pt-2 border-t border-border/30">
+            <div className="flex items-center gap-1.5 text-xs text-ancient-gold font-medium">
+              <Zap className="h-3 w-3" />
+              spanDEX — {spandexQuotes.length} providers
+            </div>
+            {spandexQuotes.slice(0, 3).map((sq, i) => (
+              <div key={sq.provider} className={`flex justify-between text-xs px-2 py-1 rounded ${
+                i === 0 ? 'bg-eboy-green/10 text-eboy-green font-medium' : 'text-muted-foreground'
+              }`}>
+                <span className="flex items-center gap-1">
+                  {i === 0 && <Award className="h-3 w-3" />}
+                  {sq.provider}
+                </span>
+                <span className="font-mono">{sq.outputAmount}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {spandexLoading && (
+          <div className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            spanDEX searching best price...
+          </div>
+        )}
       </CardContent>
     </Card>
   );
