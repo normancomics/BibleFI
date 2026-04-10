@@ -43,6 +43,7 @@ interface SwapQuote {
 const BiblicalDeFiSwap: React.FC = () => {
   const { playSound } = useSound();
   const { validateTransaction, checkContentSecurity } = useSecurityContext();
+  const { address: walletAddress } = useAccount();
   const [fromSymbol, setFromSymbol] = useState('ETH');
   const [toSymbol, setToSymbol] = useState('USDC');
   const [fromAmount, setFromAmount] = useState('');
@@ -51,6 +52,16 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState('1.0');
   const [biblicalAnalysis, setBiblicalAnalysis] = useState(null);
+  const [useSpandex, setUseSpandex] = useState(true);
+
+  // spanDEX meta-aggregator hook
+  const {
+    bestQuote: spandexBest,
+    allQuotes: spandexQuotes,
+    isLoading: spandexLoading,
+    error: spandexError,
+    fetchQuote: fetchSpandexQuote,
+  } = useSpandexQuote(6); // default USDC 6 decimals
 
   // Base chain tokens
   const baseTokens: Record<string, Token> = {
