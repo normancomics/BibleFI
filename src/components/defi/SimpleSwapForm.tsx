@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowUpDown, Loader2 } from 'lucide-react';
+import { ArrowUpDown, Loader2, Zap, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/contexts/SoundContext';
 import { baseTokens } from '@/data/baseTokens';
+import { useSpandexQuote } from '@/hooks/useSpandexQuote';
+import { useAccount } from 'wagmi';
+import type { Address } from 'viem';
 
 const SimpleSwapForm: React.FC = () => {
   const [fromToken, setFromToken] = useState('ETH');
@@ -17,6 +20,17 @@ const SimpleSwapForm: React.FC = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { address: walletAddress } = useAccount();
+
+  const toTokenInfo = baseTokens[toToken];
+  const fromTokenInfo = baseTokens[fromToken];
+
+  const {
+    bestQuote: spandexBest,
+    allQuotes: spandexQuotes,
+    isLoading: spandexLoading,
+    fetchQuote: fetchSpandexQuote,
+  } = useSpandexQuote(toTokenInfo?.decimals ?? 6);
 
   const handleSwapTokens = () => {
     playSound('select');
