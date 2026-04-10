@@ -45,6 +45,7 @@
         "@radix-ui/react-toggle-group": "^1.1.0",
         "@radix-ui/react-tooltip": "^1.1.4",
         "@rainbow-me/rainbowkit": "^2.2.8",
+        "@spandex/core": "^0.6.2",
         "@supabase/supabase-js": "^2.49.4",
         "@tanstack/react-query": "^5.85.9",
         "@types/crypto-js": "^4.2.1",
@@ -596,6 +597,8 @@
     "@solana/transactions": ["@solana/transactions@5.4.0", "", { "dependencies": { "@solana/addresses": "5.4.0", "@solana/codecs-core": "5.4.0", "@solana/codecs-data-structures": "5.4.0", "@solana/codecs-numbers": "5.4.0", "@solana/codecs-strings": "5.4.0", "@solana/errors": "5.4.0", "@solana/functional": "5.4.0", "@solana/instructions": "5.4.0", "@solana/keys": "5.4.0", "@solana/nominal-types": "5.4.0", "@solana/rpc-types": "5.4.0", "@solana/transaction-messages": "5.4.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-OuY4M4x/xna8KZQIrz8tSrI9EEul9Od97XejqFmGGkEjbRsUOfJW8705TveTW8jU3bd5RGecFYscPgS2F+m7jQ=="],
 
     "@solana/web3.js": ["@solana/web3.js@1.98.4", "", { "dependencies": { "@babel/runtime": "^7.25.0", "@noble/curves": "^1.4.2", "@noble/hashes": "^1.4.0", "@solana/buffer-layout": "^4.0.1", "@solana/codecs-numbers": "^2.1.0", "agentkeepalive": "^4.5.0", "bn.js": "^5.2.1", "borsh": "^0.7.0", "bs58": "^4.0.1", "buffer": "6.0.3", "fast-stable-stringify": "^1.0.0", "jayson": "^4.1.1", "node-fetch": "^2.7.0", "rpc-websockets": "^9.0.2", "superstruct": "^2.0.2" } }, "sha512-vv9lfnvjUsRiq//+j5pBdXig0IQdtzA0BRZ3bXEP4KaIyF1CcaydWqgyzQgfZMNIsWNWmG+AUHwPy4AHOD6gpw=="],
+
+    "@spandex/core": ["@spandex/core@0.6.2", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@spandex/core/-/core-0.6.2.tgz", { "dependencies": { "viem": "^2.40" }, "peerDependencies": { "typescript": ">=5.0.4" }, "optionalPeers": ["typescript"] }, "sha512-j30yMtxbLfWj0Cwzq6ywv/CxsZoztWXZmBWOwUFaNuWStZmCCAvfFyOuCH5sP3elm/j7Q03AlsEsWt7YJf6Fkw=="],
 
     "@spruceid/siwe-parser": ["@spruceid/siwe-parser@2.1.2", "", { "dependencies": { "@noble/hashes": "^1.1.2", "apg-js": "^4.3.0", "uri-js": "^4.4.1", "valid-url": "^1.0.9" } }, "sha512-d/r3S1LwJyMaRAKQ0awmo9whfXeE88Qt00vRj91q5uv5ATtWIQEGJ67Yr5eSZw5zp1/fZCXZYuEckt8lSkereQ=="],
 
