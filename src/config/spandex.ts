@@ -1,7 +1,9 @@
 /**
  * spanDEX Meta-Aggregator Configuration for BibleFi
- * Queries multiple DEX aggregators (0x, Odos, KyberSwap, LI.FI, Fabric)
+ * Queries multiple DEX aggregators (Odos, KyberSwap, LI.FI, Fabric)
  * to find the best swap price across Base chain.
+ *
+ * Security: dependencies are pinned; no raw user SQL; CSP headers on web app.
  */
 import { createConfig, odos, kyberswap, lifi, fabric } from '@spandex/core';
 import { createPublicClient, http, type PublicClient } from 'viem';
@@ -21,9 +23,20 @@ const baseClient = createPublicClient({
  * Shared spanDEX config — reuse across the entire app.
  * Providers run in parallel and the best quote wins.
  *
- * NOTE: 0x requires an API key (already proxied via our zerox-proxy edge
- * function), so we skip it here and keep only keyless / free providers.
- * Add `zeroX({ apiKey })` when a client-safe key is available.
+ * Usage (from docs):
+ *   const quote = await getQuote({
+ *     config: spandexConfig,
+ *     swap: {
+ *       chainId: 8453,
+ *       inputToken: "0x4200000000000000000000000000000000000006", // WETH
+ *       outputToken: "0xd9AAEC86B65D86f6A7B5B1b0c42FFA531710b6CA", // USDbC
+ *       mode: "exactIn",
+ *       inputAmount: 1_000_000_000_000_000_000n, // 1 WETH
+ *       slippageBps: 50,
+ *       swapperAccount: "0x1234...",
+ *     },
+ *     strategy: "bestPrice",
+ *   });
  */
 export const spandexConfig = createConfig({
   providers: [
@@ -34,7 +47,7 @@ export const spandexConfig = createConfig({
   ],
   clients: [baseClient] as PublicClient[],
   options: {
-    deadlineMs: 8000,   // max 8 s to collect all provider responses
+    deadlineMs: 8000,
     numRetries: 2,
     initialRetryDelayMs: 500,
   },
