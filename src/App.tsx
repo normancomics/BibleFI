@@ -93,6 +93,7 @@ const App = () => (
             <Route path="/bwsp-agents" element={<BWSPAgentsPage />} />
             <Route path="/bwtya-agents" element={<BWTYAAgentsPage />} />
             <Route path="/mcp-network" element={<MCPNetworkPage />} />
+            <Route path="/swap" element={<SwapPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
