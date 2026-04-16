@@ -44,6 +44,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import BWSPAgentsPage from "./pages/BWSPAgentsPage";
 import BWTYAAgentsPage from "./pages/BWTYAAgentsPage";
 import MCPNetworkPage from "./pages/MCPNetworkPage";
+import SwapPage from "./pages/SwapPage";
 import "./App.css";
 
 const App = () => (
