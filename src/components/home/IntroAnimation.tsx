@@ -37,16 +37,16 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
       } else {
         clearInterval(typingInterval);
         if (phase === 'line1') {
-          setTimeout(() => setPhase('line2'), 400);
+          setTimeout(() => setPhase('line2'), 600);
         } else {
           setTimeout(() => {
             setPhase('scene');
             playSound("powerup");
-            setTimeout(() => handleSkip(), 3000);
-          }, 500);
+            setTimeout(() => handleSkip(), 4000);
+          }, 700);
         }
       }
-    }, 30);
+    }, 45);
     return () => clearInterval(typingInterval);
   }, [phase, playSound, handleSkip]);
 
