@@ -22,13 +22,18 @@ const Index = () => {
   });
 
   useEffect(() => {
-    // Query the public view which doesn't require auth
     const fetchCount = async () => {
-      const { count } = await supabaseApi
+      const { data, count, error } = await supabaseApi
         .from('public_church_directory')
-        .select('*', { count: 'exact', head: true });
-      setChurchCount(count || 0);
+        .select('id', { count: 'exact' });
+
+      if (error) {
+        console.error('Error fetching church count:', error);
+      }
+
+      setChurchCount(count ?? data?.length ?? 0);
     };
+
     fetchCount();
   }, []);
 
