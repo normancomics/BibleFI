@@ -20,6 +20,7 @@ import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
 import WisdomScoreNavbar from '@/components/ui/WisdomScoreNavbar';
 import NetworkStatusIndicator from '@/components/wallet/NetworkStatusIndicator';
+import SuperfluidStatusPill from '@/components/SuperfluidStatusPill';
 import { supabase } from '@/integrations/supabase/client';
 
 const NavBar: React.FC = () => {
