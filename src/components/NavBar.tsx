@@ -114,6 +114,7 @@ const NavBar: React.FC = () => {
           <div className="flex items-center gap-2">
             <NetworkStatusIndicator showLabel className="hidden sm:flex" />
             <NetworkStatusIndicator className="sm:hidden" />
+            <SuperfluidStatusPill />
             <WisdomScoreNavbar />
             <WalletButton variant="outline" size="sm" />
             <SoundToggle />
