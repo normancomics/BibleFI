@@ -106,29 +106,31 @@ export const useSuperfluid = () => {
     return baseFlowRate;
   }, []);
 
-  // Initialize Superfluid on Base chain
+  // Initialize Superfluid (read-only) — runs once on mount, no wallet required.
+  // realSuperfluidClient.initialize() uses a public Base RPC and does not need
+  // a signer or a connected wallet. We intentionally do not surface toasts here
+  // because Superfluid readiness is a background concern; signer-bound actions
+  // (startTithingStream, etc.) handle their own connection errors.
   useEffect(() => {
+    let cancelled = false;
     const initializeSuperfluid = async () => {
-      if (isConnected && !isInitialized) {
-        try {
-          setIsLoading(true);
-          const provider = await getProvider();
-          const signer = await provider.getSigner();
-          await realSuperfluidClient.initialize(signer);
+      if (isInitialized) return;
+      try {
+        await realSuperfluidClient.initialize();
+        if (!cancelled) {
           setIsInitialized(true);
-          console.log('[BWSP] Superfluid initialized on Base chain');
-          toast.success('Superfluid initialized on Base chain');
-        } catch (error) {
-          console.error('[BWSP] Failed to initialize Superfluid:', error);
-          toast.error('Failed to initialize Superfluid. Please ensure you\'re connected to Base chain.');
-        } finally {
-          setIsLoading(false);
+          console.log('[BWSP] Superfluid read-only client initialized on Base chain');
         }
+      } catch (error) {
+        // Log only — never block the UI or alarm the user. Network blips here
+        // do not prevent wallet-bound actions from re-initializing later.
+        console.warn('[BWSP] Superfluid background init deferred:', error);
       }
     };
 
     initializeSuperfluid();
-  }, [isConnected, isInitialized, getProvider]);
+    return () => { cancelled = true; };
+  }, [isInitialized]);
 
   /**
    * Start a BWSP tithing stream (10% of profits)
