@@ -322,6 +322,28 @@ function runBiblicalCorrelatorSubAgent(
 // BWTYAAgent – main orchestrator
 // ---------------------------------------------------------------------------
 
+/**
+ * fetchFearGreedSubAgent – isolated helper so the Promise.all in BWTYAAgent.run()
+ * stays readable. Wraps getMarketSentiment() with a neutral offline fallback.
+ */
+async function fetchFearGreedSubAgent(step: SubAgentStep): Promise<{
+  s: { fearGreedIndex: number; label: string; biblicalWisdom: string };
+  step: SubAgentStep;
+}> {
+  try {
+    const s = await getMarketSentiment();
+    return {
+      s,
+      step: completeSubStep(step, `FGI=${s.fearGreedIndex} (${s.label})`),
+    };
+  } catch {
+    return {
+      s: { fearGreedIndex: 50, label: 'Neutral', biblicalWisdom: 'Proverbs 21:5' },
+      step: failSubStep(step, 'Sentiment unavailable – using neutral fallback'),
+    };
+  }
+}
+
 export class BWTYAAgent {
   /**
    * run() orchestrates all sub-agents in parallel where safe, sequentially where dependent.
@@ -341,13 +363,9 @@ export class BWTYAAgent {
     const step1 = startSubStep('MarketScannerSubAgent');
     const step1b = startSubStep('FearGreedSubAgent');
 
-    const [{ opportunities, step: s1 }, sentimentResult] = await Promise.all([
+    const [{ opportunities }, sentimentResult] = await Promise.all([
       runMarketScannerSubAgent(step1, steps),
-      getMarketSentiment().then((s) => ({ s, step: completeSubStep(step1b, `FGI=${s.fearGreedIndex} (${s.label})`) }))
-        .catch(() => ({
-          s: { fearGreedIndex: 50, label: 'Neutral', biblicalWisdom: 'Proverbs 21:5' },
-          step: failSubStep(step1b, 'Sentiment unavailable – using neutral fallback'),
-        })),
+      fetchFearGreedSubAgent(step1b),
     ]);
     steps.push(sentimentResult.step);
 

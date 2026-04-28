@@ -154,6 +154,8 @@ async function subAgentProtocolScanner(
         riskScore: tvl > 1_000_000_000 ? 15 : tvl > 100_000_000 ? 35 : 55,
         category: protocol.category,
         biblicalAlignment: protocol.audited
+          // Audited protocols earn "faithful stewardship" — Matthew 25:23 (faithful with much).
+          // Unaudited protocols receive a baseline "transparent" label only until an audit confirms trustworthiness.
           ? 'transparent, audited, faithful stewardship'
           : 'transparent',
         isVerified: tvl > 10_000_000,
