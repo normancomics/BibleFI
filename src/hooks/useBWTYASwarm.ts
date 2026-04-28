@@ -118,14 +118,17 @@ export function useBWTYASwarm(autoRun = false) {
   // ------------------------------------------------------------------
   // Lifecycle
   // ------------------------------------------------------------------
+  const autoRunFiredRef = useRef(false);
+
   useEffect(() => {
     mountedRef.current = true;
 
     // Always load DB scores on mount
     fetchDbScores();
 
-    // Auto-run swarm if requested
-    if (autoRun) {
+    // Auto-run swarm once if requested (guard prevents repeated execution)
+    if (autoRun && !autoRunFiredRef.current) {
+      autoRunFiredRef.current = true;
       run();
     }
 

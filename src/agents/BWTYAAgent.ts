@@ -376,11 +376,18 @@ export class BWTYAAgent {
     // Step 2: BWTYA Algorithm (depends on opportunities)
     // ------------------------------------------------------------------
     const step2 = startSubStep('BWTYAAlgorithmCore');
-    const bwtyaResult = bwtyaAlgorithm.run({ opportunities, wisdomScore, capitalUsd, riskTolerance });
-    steps.push(completeSubStep(
-      step2,
-      `Scored ${bwtyaResult.scoredOpportunities.length} opportunit(ies); strategy: ${bwtyaResult.recommendedStrategy.name}`,
-    ));
+    let bwtyaResult: import('@/services/bwtya/types').BWTYAResult;
+    try {
+      bwtyaResult = bwtyaAlgorithm.run({ opportunities, wisdomScore, capitalUsd, riskTolerance });
+      steps.push(completeSubStep(
+        step2,
+        `Scored ${bwtyaResult.scoredOpportunities.length} opportunit(ies); strategy: ${bwtyaResult.recommendedStrategy.name}`,
+      ));
+    } catch (err) {
+      steps.push(completeSubStep(step2, `BWTYA algorithm error: ${String(err)}`));
+      // Re-run with empty opportunities as a safe fallback
+      bwtyaResult = bwtyaAlgorithm.run({ opportunities: [], wisdomScore, capitalUsd, riskTolerance });
+    }
 
     // ------------------------------------------------------------------
     // Step 3: Swarm sub-agents (parallel, all depend on opportunities + FGI)

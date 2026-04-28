@@ -420,7 +420,7 @@ Deno.serve(async (req) => {
               transparency_score: s.transparencyScore,
               scored_at: new Date().toISOString(),
             })),
-            { onConflict: 'protocol_name' },
+            { onConflict: 'protocol_name,pool_name,chain' },
           );
         }
 

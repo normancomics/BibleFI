@@ -19,8 +19,8 @@ ALTER TABLE public.bwtya_opportunity_scores
   ADD COLUMN IF NOT EXISTS biblical_rationale   TEXT;
 
 -- 3. Add unique constraint on (protocol_name, pool_name, chain) matching
---    what the edge function uses for upsert conflict resolution
--- (drop the old one first to avoid collision; use IF EXISTS guard)
+--    what the edge function uses for upsert conflict resolution.
+--    We add it only if it doesn't exist to make the migration idempotent.
 DO $$
 BEGIN
   IF NOT EXISTS (

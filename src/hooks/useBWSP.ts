@@ -51,7 +51,10 @@ async function logBwspQuery(
       bwtya_strategy_id: bwtyaResult?.recommendedStrategy.id ?? null,
       bwtya_projected_apy: bwtyaResult?.projectedApy ?? null,
       tithe_amount: bwtyaResult?.titheAmount ?? null,
-    });
+    }).then(
+      () => { /* logged */ },
+      (err) => console.warn('[useBWSP] Query log failed silently:', err),
+    );
   } catch {
     // Never let logging failure surface to the user
   }
