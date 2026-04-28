@@ -61,6 +61,14 @@ export function useAgentRealTime() {
         { event: '*', schema: 'public', table: 'superfluid_streams' },
         () => fetchStats()
       )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'bwtya_opportunity_scores' },
+        () => fetchStats()
+      )
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'bwsp_query_log' },
+        () => fetchStats()
+      )
       .subscribe();
 
     // Fallback polling at 60s (much slower since WebSocket handles live updates)
