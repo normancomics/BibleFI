@@ -121,11 +121,17 @@ function deriveApyEquivalent(
     return profile.riskScore <= 15 ? 12 : profile.riskScore <= 25 ? 8 : 4;
   }
 
-  const amounts = allQuotes.map((q) => Number(q.outputAmountRaw));
-  const avg = amounts.reduce((s, v) => s + v, 0) / amounts.length;
-  if (avg === 0) return 5;
+  // Use BigInt arithmetic for sum to avoid precision loss on large token amounts,
+  // then convert to float for the ratio only (relative comparison; small precision
+  // loss in the ratio is acceptable for the 2–25% APY mapping).
+  const total = allQuotes.reduce((s, q) => s + q.outputAmountRaw, 0n);
+  const count = BigInt(allQuotes.length);
+  const avg = total / count; // integer division is fine for ranking purposes
+  if (avg === 0n) return 5;
 
-  const improvement = ((Number(quote.outputAmountRaw) - avg) / avg) * 100;
+  // Compute improvement as a ratio using Number only for the final division
+  const diff = quote.outputAmountRaw - avg;
+  const improvement = (Number(diff) / Number(avg)) * 100;
   // Map improvement ∈ [-100, +100] → APY-equivalent ∈ [2, 25]
   return Math.max(2, Math.min(25, 13 + improvement * 2));
 }

@@ -59,7 +59,7 @@ async function fetchSpandexQuotes(
   try {
     const allQuotes = await getQuotes({ config: spandexConfig, swap: swapParams });
     if (allQuotes && allQuotes.length > 0) {
-      return (allQuotes as any[]).map((q) => {
+      return (allQuotes as Array<{ provider: string; simulation?: { outputAmount?: bigint }; outputAmount?: bigint }>).map((q) => {
         const outRaw: bigint = q.simulation?.outputAmount ?? q.outputAmount ?? 0n;
         return {
           provider: q.provider,
@@ -145,14 +145,18 @@ export class SpandexSwapAgent {
 
         const bwtyaTopProvider = ranked[0]?.opportunity.protocol ?? null;
 
+        // Build a map from protocol name → ScoredOpportunity for reliable lookup
+        const rankedByProtocol = new Map(
+          ranked.map((r) => [r.opportunity.protocol, r]),
+        );
+
         const scoredQuotes: SpandexScoredQuote[] = rawQuotes.map((raw, i) => {
-          const scoredOpp =
-            ranked.find((r) => r.opportunity.protocol === opportunities[i]?.protocol) ??
-            ranked[i];
+          const opp = opportunities[i];
+          const scoredOpp = (opp && rankedByProtocol.get(opp.protocol)) ?? ranked[0];
 
           return {
             raw,
-            opportunity: opportunities[i],
+            opportunity: opp,
             scored: scoredOpp,
             isBWTYARecommended: scoredOpp?.opportunity.protocol === bwtyaTopProvider,
             isBestPrice: raw.provider === bestPriceRaw?.provider,

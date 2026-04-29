@@ -111,7 +111,10 @@ export async function withClientAgentSandbox<T extends Record<string, unknown>>(
   checkRateLimit(agentName, minIntervalMs);
   recordRun(agentName);
 
-  const runId = `${agentName}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const runId =
+    typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? `${agentName}-${crypto.randomUUID()}`
+      : `${agentName}-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
   const ctx: ClientAgentContext = {
     agentName,
     runId,

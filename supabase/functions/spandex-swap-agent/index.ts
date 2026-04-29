@@ -216,7 +216,14 @@ Deno.serve(async (req) => {
     },
   );
 
-  return new Response(JSON.stringify(result), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
+  return new Response(
+    JSON.stringify({
+      ...result,
+      // Sanitize internal error details before exposing to caller
+      error: result.success === false ? 'Advisory pipeline encountered an error. Please retry.' : undefined,
+    }),
+    {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    },
+  );
 });
