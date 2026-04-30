@@ -121,7 +121,8 @@ export class BWTYAStrategyMapper {
     return strategies;
   }
 
-  recommendBest(strategies: BWTYAStrategy[], wisdomScore = 0): BWTYAStrategy {
+  recommendBest(strategies: BWTYAStrategy[], wisdomScore = 0): BWTYAStrategy | null {
+    if (strategies.length === 0) return null;
     // Prefer the most sophisticated strategy the user's wisdom unlocks
     const eligible = [...strategies].sort((a, b) => b.minWisdomScore - a.minWisdomScore);
     return eligible.find((s) => wisdomScore >= s.minWisdomScore) ?? strategies[0];

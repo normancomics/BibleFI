@@ -81,8 +81,8 @@ function scoreBiblicalAlignment(o: YieldOpportunity): { score: number; flags: st
   score += Math.min(positiveMatches * 5, 20);
   score -= negativeMatches * 5;
 
-  // Category bonus: stablecoins and lending align well with biblical wealth preservation
-  const safeCats = ['stable', 'lending', 'savings', 'staking'];
+  // Category bonus: stablecoins, lending, and transparent DEX aggregators align with biblical wealth preservation
+  const safeCats = ['stable', 'lending', 'savings', 'staking', 'aggregator', 'dex'];
   if (safeCats.some((c) => o.category.toLowerCase().includes(c))) score += 5;
 
   if (negativeMatches > 0) {

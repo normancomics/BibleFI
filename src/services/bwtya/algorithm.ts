@@ -22,14 +22,15 @@ export class BWTYAAlgorithm {
     const recommendedStrategy = bwtyaStrategyMapper.recommendBest(strategies, wisdomScore);
 
     // 4. Compute aggregate projected APY from recommended strategy
-    const projectedApy =
-      recommendedStrategy.allocations.reduce(
-        (sum, a) => sum + (a.projectedApy * a.allocationPercent) / 100,
-        0,
-      );
+    const projectedApy = recommendedStrategy
+      ? recommendedStrategy.allocations.reduce(
+          (sum, a) => sum + (a.projectedApy * a.allocationPercent) / 100,
+          0,
+        )
+      : 0;
 
     // 5. Tithe and yield calculations
-    const titheReserve = recommendedStrategy.titheReservePercent / 100;
+    const titheReserve = (recommendedStrategy?.titheReservePercent ?? 10) / 100;
     const annualYield = capitalUsd * (projectedApy / 100);
     const titheAmount = annualYield * titheReserve;
     const yieldAfterTithe = annualYield - titheAmount;

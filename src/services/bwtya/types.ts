@@ -51,7 +51,7 @@ export interface BWTYAInput {
 export interface BWTYAResult {
   scoredOpportunities: ScoredOpportunity[];
   strategies: BWTYAStrategy[];
-  recommendedStrategy: BWTYAStrategy;
+  recommendedStrategy: BWTYAStrategy | null;
   titheAmount: number;
   yieldAfterTithe: number;
   projectedApy: number;
