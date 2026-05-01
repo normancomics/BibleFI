@@ -132,7 +132,11 @@ export interface MonteCarloResult {
  * Run a Monte Carlo simulation for a single scored opportunity.
  *
  * @param scored   The scored opportunity (uses apy, riskScore)
- * @param seed     Optional integer seed for reproducible results (default: apy × riskScore)
+ * @param seed     Optional integer seed for reproducible results.
+ *                 Defaults to a deterministic combination of apy×100 + riskScore×7 so that
+ *                 the same opportunity always produces the same distribution when no seed is
+ *                 provided — useful for SSR/hydration consistency and regression testing.
+ *                 Pass an explicit seed (e.g. Date.now()) when you want a fresh sample each call.
  */
 export function simulateOpportunity(
   scored: ScoredOpportunity,

@@ -154,7 +154,13 @@ export class BWTYARebalancer {
       });
     }
 
-    // Root-sum-square urgency
+    // Root-sum-square (RSS) urgency — preferred over sum of absolute drifts because:
+    //   1. It is a geometric measure: large individual drifts disproportionately inflate
+    //      the score, reflecting the non-linear danger of concentrated imbalance.
+    //   2. It maps directly to the Euclidean distance of the current allocation vector
+    //      from the Kelly-optimal target in allocation space — a natural portfolio metric.
+    // RSS is NOT divided by n (i.e. it is not RMS) so the urgency score grows with the
+    // number of positions, which is intentional: more drifted positions = more urgent.
     const urgencyScore = Math.sqrt(drifts.reduce((s, d) => s + d * d, 0));
 
     let urgencyGrade: UrgencyGrade;

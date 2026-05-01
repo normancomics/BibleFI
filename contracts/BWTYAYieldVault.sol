@@ -271,12 +271,12 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             rebalanceLockEnds: lockEnds
         });
 
-        hasDeposit[msg.sender] = true;
-
-        // Update global stats
+        // Update global stats — increment depositorCount before setting hasDeposit
         stats.totalDeposited += deployedAmount;
         stats.totalReserve   += reserveAmount;
-        if (!hasDeposit[msg.sender]) stats.depositorCount++;
+        stats.depositorCount++;        // only reached when hasDeposit was false (guarded above)
+
+        hasDeposit[msg.sender] = true;
 
         emit Deposited(msg.sender, amount, reserveAmount, deployedAmount);
     }
