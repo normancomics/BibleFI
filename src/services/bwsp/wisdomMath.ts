@@ -354,3 +354,215 @@ export function compositeConfidence(
 
   return Math.min(1, Math.max(0, intentWeight + resonanceWeight + marketWeight + wisdomWeight));
 }
+
+// ---------------------------------------------------------------------------
+// 7. Bayesian Wisdom Belief Updater  (Proverbs 18:15)
+// ---------------------------------------------------------------------------
+
+/**
+ * A user's wisdom score is uncertain — any single observation (a query, a
+ * tithe, a BWTYA session) provides noisy evidence about their true underlying
+ * wisdom level.  The Bayesian framework treats the wisdom score as a Beta-
+ * distributed random variable:
+ *
+ *   Prior:      WisdomLevel ~ Beta(α₀, β₀)
+ *   Likelihood: P(observation | WisdomLevel) = WisdomLevel^obs × (1-WisdomLevel)^(1-obs)
+ *   Posterior:  Beta(α₀ + obs, β₀ + 1 - obs)   (conjugate update)
+ *
+ * We normalise the 0–100 wisdom score to [0, 1] before applying the update,
+ * then convert the posterior mean back to the 0–100 scale.
+ *
+ * Parameters
+ * ──────────
+ *   α₀  – prior "successes" (starts at 2 for new users — mild optimism)
+ *   β₀  – prior "failures"  (starts at 2 — symmetric uncertainty)
+ *
+ * Each new wisdom observation nudges α and β, producing a posterior that
+ * converges toward the true wisdom level as evidence accumulates — exactly
+ * as a growing steward is shaped by increasingly rich experience.
+ *
+ * "The heart of the discerning acquires knowledge,
+ *  for the ears of the wise seek it out." — Proverbs 18:15
+ */
+export interface BayesianWisdomBelief {
+  /** Beta distribution α parameter (accumulated "successes") */
+  alpha: number;
+  /** Beta distribution β parameter (accumulated "failures") */
+  beta: number;
+  /** Posterior mean wisdom score (0–100) */
+  posteriorMean: number;
+  /** 95 % credible interval lower bound (0–100) */
+  credibleLow: number;
+  /** 95 % credible interval upper bound (0–100) */
+  credibleHigh: number;
+  /** Uncertainty: half-width of credible interval in score points */
+  uncertainty: number;
+}
+
+/**
+ * Initialise a prior belief for a user.
+ *
+ * @param priorWisdomScore  Starting wisdom score (0–100), or 50 for unknown users
+ * @param certainty         How strongly to weight the prior (1 = weak, 10 = strong)
+ */
+export function initWisdomBelief(
+  priorWisdomScore: number,
+  certainty = 2,
+): BayesianWisdomBelief {
+  const mu = Math.max(0.01, Math.min(0.99, priorWisdomScore / 100));
+  // Parameterise Beta(α, β) from mean μ and strength:
+  //   α = μ × certainty,  β = (1-μ) × certainty
+  const alpha = mu * certainty;
+  const beta_ = (1 - mu) * certainty;
+  return buildBelief(alpha, beta_);
+}
+
+/**
+ * Update a wisdom belief with a new observation.
+ *
+ * @param belief          Current Bayesian belief
+ * @param observedScore   New wisdom score observation (0–100)
+ * @param weight          Observation weight (1 = single data point; higher = stronger evidence)
+ */
+export function updateWisdomBelief(
+  belief: BayesianWisdomBelief,
+  observedScore: number,
+  weight = 1,
+): BayesianWisdomBelief {
+  const obs = Math.max(0.001, Math.min(0.999, observedScore / 100));
+  // Beta conjugate update:
+  //   α' = α + obs × weight
+  //   β' = β + (1 - obs) × weight
+  const newAlpha = belief.alpha + obs * weight;
+  const newBeta  = belief.beta  + (1 - obs) * weight;
+  return buildBelief(newAlpha, newBeta);
+}
+
+/**
+ * Build the summary statistics for a Beta(α, β) distribution.
+ *
+ * Posterior mean:  E[X] = α / (α + β)
+ * Posterior variance: Var[X] = αβ / ((α+β)²(α+β+1))
+ *
+ * 95 % credible interval approximation using:
+ *   mode ± 1.96 × std_dev   (valid when α,β > 1)
+ */
+function buildBelief(alpha: number, beta_: number): BayesianWisdomBelief {
+  const ab = alpha + beta_;
+  const mean = alpha / ab;
+  const variance = (alpha * beta_) / (ab * ab * (ab + 1));
+  const std = Math.sqrt(variance);
+
+  const low  = Math.max(0, mean - 1.96 * std);
+  const high = Math.min(1, mean + 1.96 * std);
+
+  return {
+    alpha,
+    beta: beta_,
+    posteriorMean: Math.round(mean * 100),
+    credibleLow: Math.round(low * 100),
+    credibleHigh: Math.round(high * 100),
+    uncertainty: Math.round((high - low) * 50), // half-width in score points
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 8. Authority-Weighted Scripture Resonance  (2 Timothy 3:16)
+// ---------------------------------------------------------------------------
+
+/**
+ * Different biblical books carry different authority weights for financial
+ * and wisdom guidance.  An answer drawn from Proverbs (the quintessential
+ * biblical finance manual) should be trusted more than one from a genealogy.
+ *
+ * The authority weight multiplies the raw cosine-resonance score, boosting
+ * guidance confidence when the most authoritative financial scriptures are cited.
+ *
+ * "All scripture is God-breathed and is useful for teaching, rebuking,
+ *  correcting and training in righteousness." — 2 Timothy 3:16
+ * (All scripture has authority; these weights reflect *domain relevance*.)
+ *
+ * Weight scale: 1.0 = baseline, 2.0 = strongest financial authority.
+ */
+const BOOK_AUTHORITY_WEIGHTS: Record<string, number> = {
+  // Wisdom & financial instruction (highest)
+  proverbs: 2.0,
+  ecclesiastes: 1.9,
+  'song of solomon': 1.1,
+  job: 1.3,
+  psalms: 1.2,
+
+  // New Testament financial parables (very high)
+  matthew: 1.8,  // Parable of the Talents
+  luke: 1.7,     // Parable of the Minas, Prodigal Son
+  james: 1.6,    // Warning about wealth
+
+  // Prophetic financial instruction
+  malachi: 1.8,  // Tithing (Malachi 3:10)
+  haggai: 1.5,   // Financial priorities
+  zechariah: 1.3,
+
+  // Torah economic law
+  deuteronomy: 1.6, // Economic Sabbath, gleaning laws
+  leviticus: 1.5,   // Jubilee, debt
+  numbers: 1.2,
+
+  // Historical wisdom
+  genesis: 1.4,  // Joseph's economic plan (Gen 41)
+  '1 kings': 1.4, // Solomon's wealth
+  '2 chronicles': 1.3,
+
+  // New Testament doctrine
+  '1 timothy': 1.4, // "love of money is a root of all evil"
+  '2 corinthians': 1.5, // Generous giving
+  philippians: 1.3,
+  hebrews: 1.2,
+  romans: 1.2,
+
+  // Default for unlisted books
+  _default: 1.0,
+};
+
+/**
+ * Extract the book name from a scripture reference string.
+ * Handles formats like "Proverbs 3:9", "1 Kings 3:12", "Ecclesiastes 11:2".
+ */
+function extractBookName(reference: string): string {
+  // Match optional leading number + word(s) before chapter:verse
+  const match = reference.match(/^(\d+\s+)?([A-Za-z\s]+?)(?:\s+\d+[:]\d+|$)/);
+  return match ? match[0].replace(/\s*\d+[:]\d+.*$/, '').toLowerCase().trim() : '_default';
+}
+
+/**
+ * Returns the canonical authority weight for a scripture reference.
+ */
+export function getBookAuthorityWeight(scriptureReference: string): number {
+  const bookName = extractBookName(scriptureReference);
+  // Check for partial match (e.g. "matthew" in "matthew 25:14")
+  for (const [book, weight] of Object.entries(BOOK_AUTHORITY_WEIGHTS)) {
+    if (book !== '_default' && bookName.includes(book)) {
+      return weight;
+    }
+  }
+  return BOOK_AUTHORITY_WEIGHTS['_default'];
+}
+
+/**
+ * Authority-weighted scripture resonance: raw cosine resonance × book authority.
+ *
+ * Result is re-normalised to [0, 1] so it remains a valid probability-like score.
+ * A Proverbs verse with 0.7 raw resonance scores: 0.7 × 2.0 / 2.0 = 0.7 (unchanged max)
+ * A genealogy verse with 0.7 raw resonance scores: 0.7 × 1.0 / 2.0 = 0.35
+ *
+ * MAX_AUTHORITY = 2.0 (Proverbs, the highest-authority financial book).
+ */
+const MAX_AUTHORITY = 2.0;
+
+export function authorityWeightedResonance(
+  rawResonance: number,
+  scriptureReference: string,
+): number {
+  const authority = getBookAuthorityWeight(scriptureReference);
+  return Math.min(1, Math.max(0, (rawResonance * authority) / MAX_AUTHORITY));
+}
+

@@ -2,6 +2,11 @@
 
 import type { YieldOpportunity } from '../bwsp/types';
 
+import type { MonteCarloResult, PortfolioSimulationResult } from './simulator';
+import type { RebalanceSignal } from './rebalancer';
+
+export type { MonteCarloResult, PortfolioSimulationResult, RebalanceSignal };
+
 export type { YieldOpportunity };
 
 export type StewardshipGrade = 'A' | 'B' | 'C' | 'D' | 'F';
@@ -53,6 +58,8 @@ export interface BWTYAInput {
   wisdomScore?: number;
   capitalUsd?: number;
   riskTolerance?: 'conservative' | 'moderate' | 'aggressive';
+  /** Current portfolio allocation percents (matches opportunities order). Supply to get rebalance signal. */
+  currentAllocs?: number[];
 }
 
 export interface BWTYAResult {
@@ -62,5 +69,15 @@ export interface BWTYAResult {
   titheAmount: number;
   yieldAfterTithe: number;
   projectedApy: number;
+  // Monte Carlo simulation output
+  simulation: PortfolioSimulationResult | null;
+  /** Projected APY at 10th percentile (bad scenario) */
+  projectedApyP10: number;
+  /** Projected APY at 90th percentile (good scenario) */
+  projectedApyP90: number;
+  /** Probability any position suffers a capital loss */
+  probabilityOfLoss: number;
+  // Rebalancing signal (only populated when currentAllocs supplied)
+  rebalanceSignal: RebalanceSignal | null;
   timestamp: string;
 }

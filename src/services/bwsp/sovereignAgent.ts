@@ -6,6 +6,7 @@ import { bwspContextAssembler } from './contextAssembler';
 import { bwspRetriever } from './retriever';
 import { bwspSynthesizer } from './synthesizer';
 import {
+  authorityWeightedResonance,
   compositeConfidence,
   detectIntentWithConfidence,
   marketSentimentAlignment,
@@ -192,14 +193,18 @@ export class BWSPSovereignAgent {
     const TITHE_STREAK_MONTHS_FALLBACK = 0;
     const intentResult = detectIntentWithConfidence(query.text);
     const primaryScriptureText = synthesis.primaryScripture?.text ?? '';
+    const primaryScriptureRef  = synthesis.primaryScripture?.reference ?? '';
     const resonance = scriptureResonanceScore(query.text, primaryScriptureText);
+    // Authority-weighted resonance: boost confidence when Proverbs/Matthew/Malachi cited
+    const authResonance = authorityWeightedResonance(resonance, primaryScriptureRef);
     const sentimentAlign = marketSentimentAlignment(
       marketContext.fearGreedIndex,
       query.intent ?? 'general_wisdom',
     );
+    // Use authority-weighted resonance in composite confidence (replaces raw resonance)
     const compositeConf = compositeConfidence(
       intentResult.primaryConfidence,
-      resonance,
+      authResonance,
       sentimentAlign.adjustment,
       query.wisdomScore ?? 0,
     );
@@ -214,9 +219,13 @@ export class BWSPSovereignAgent {
       ...synthesis,
       confidenceScore: Math.max(synthesis.confidenceScore, compositeConf),
       resonanceScore: resonance,
+      authorityWeightedResonance: authResonance,
       wisdomDecayFactor: decayFactor,
       titheBlessingMultiplier,
     };
+
+    // Authority-weighted confidence exposed at response level
+    const authorityWeightedConfidence = compositeConf;
 
     return {
       query,
@@ -235,6 +244,7 @@ export class BWSPSovereignAgent {
       // Intent analysis
       intentConfidence: intentResult.primaryConfidence,
       secondaryIntent: intentResult.secondary,
+      authorityWeightedConfidence,
     };
   }
 }

@@ -89,9 +89,10 @@ export interface BWSPSynthesis {
   protocol: string;
   tokenCount?: number;
   // Advanced BWSP math outputs
-  resonanceScore: number;     // 0–1 offline scripture resonance (cosine-like)
-  wisdomDecayFactor: number;  // 0–1 how much the user's wisdom has decayed
-  titheBlessingMultiplier: number; // 1.0–1.5 consecutive tithe months blessing
+  resonanceScore: number;                // 0–1 offline scripture resonance (cosine-like)
+  authorityWeightedResonance: number;    // 0–1 resonance adjusted by biblical book authority
+  wisdomDecayFactor: number;             // 0–1 how much the user's wisdom has decayed
+  titheBlessingMultiplier: number;       // 1.0–1.5 consecutive tithe months blessing
 }
 
 export interface BWSPResponse {
@@ -111,6 +112,8 @@ export interface BWSPResponse {
   // Intent analysis
   intentConfidence: number;   // TF-IDF confidence for detected intent (0–1)
   secondaryIntent: BWSPQueryIntent | null;
+  // Authority-weighted confidence (book-weighted resonance used in final score)
+  authorityWeightedConfidence: number; // 0–1
 }
 
 export interface AgentStep {
