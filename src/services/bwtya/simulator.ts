@@ -61,7 +61,15 @@ function impliedVolatility(riskScore: number): number {
 // Box-Muller transform – standard normal samples without external libs
 // ---------------------------------------------------------------------------
 
-/** Deterministic PRNG seeded per-call for reproducibility across calls with same seed */
+/**
+ * Mulberry32 — a fast 32-bit PRNG with excellent statistical properties.
+ * Used instead of Math.random() so Monte Carlo runs are deterministic and
+ * reproducible given the same seed — critical for SSR/hydration consistency
+ * and for regression-testing algorithm changes without flaky results.
+ *
+ * Reference: Tommy Ettinger, "Mulberry32 PRNG" (2017),
+ * https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+ */
 function mulberry32(seed: number): () => number {
   let s = seed;
   return () => {

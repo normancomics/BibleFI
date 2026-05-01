@@ -46,6 +46,7 @@ import BWTYAAgentsPage from "./pages/BWTYAAgentsPage";
 import MCPNetworkPage from "./pages/MCPNetworkPage";
 import SpandexAdvisoryPage from "./pages/SpandexAdvisoryPage";
 import SwapPage from "./pages/SwapPage";
+import TechGraphsPage from "./pages/TechGraphsPage";
 import "./App.css";
 
 const App = () => (
@@ -96,6 +97,7 @@ const App = () => (
             <Route path="/mcp-network" element={<MCPNetworkPage />} />
             <Route path="/swap" element={<SwapPage />} />
             <Route path="/spandex-advisory" element={<SpandexAdvisoryPage />} />
+            <Route path="/tech-graphs" element={<TechGraphsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>

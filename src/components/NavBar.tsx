@@ -58,6 +58,7 @@ const NavBar: React.FC = () => {
     { path: '/taxes', label: 'Taxes', icon: Calculator },
     { path: '/live-data', label: 'Live Data', icon: TrendingUp, badge: 'LIVE' },
     { path: '/analytics', label: 'Analytics', icon: Shield, badge: 'AI' },
+    { path: '/tech-graphs', label: 'Tech Graphs', icon: TrendingUp, badge: 'NEW' },
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' }] : []),
     { path: '/builder-score', label: 'Builder', icon: Trophy, badge: 'REP' },
     { path: '/security', label: 'Security', icon: Shield },

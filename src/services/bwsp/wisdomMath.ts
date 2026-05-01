@@ -528,7 +528,10 @@ const BOOK_AUTHORITY_WEIGHTS: Record<string, number> = {
  * Handles formats like "Proverbs 3:9", "1 Kings 3:12", "Ecclesiastes 11:2".
  */
 function extractBookName(reference: string): string {
-  // Match optional leading number + word(s) before chapter:verse
+  // Pattern breakdown:
+  //   (\d+\s+)?    – optional leading book number (e.g. "1 " in "1 Kings")
+  //   ([A-Za-z\s]+?)  – book name words (non-greedy to stop before chapter)
+  //   (?:\s+\d+[:]\d+|$)  – chapter:verse anchor or end-of-string
   const match = reference.match(/^(\d+\s+)?([A-Za-z\s]+?)(?:\s+\d+[:]\d+|$)/);
   return match ? match[0].replace(/\s*\d+[:]\d+.*$/, '').toLowerCase().trim() : '_default';
 }
