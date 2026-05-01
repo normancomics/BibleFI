@@ -69,6 +69,12 @@ library BWTYAMath {
     uint256 internal constant DIM3_MAX = 25; // Biblical Alignment
     uint256 internal constant DIM4_MAX = 20; // Transparency
 
+    /// @dev Precision scaling factor used in intermediate sqrt calculations.
+    ///      fruitSustainabilityCurve and convictionScore use sqrt on WAD-scaled
+    ///      values.  Multiplying by SQRT_PRECISION before sqrt and dividing after
+    ///      recovers the required decimal places without overflow on uint256.
+    uint256 internal constant SQRT_PRECISION = 1e9;
+
     // ============================================================
     // 1. Fruit Sustainability Curve  (John 15:16)
     // ============================================================
@@ -113,9 +119,9 @@ library BWTYAMath {
 
         // High APY: inverse power law — 30 × (1200 / apy)^1.5
         // Integer approximation: score ≈ 30 × (peak/apy) × sqrt(peak/apy)
-        uint256 ratio   = (APY_PEAK_BPS * WAD) / apyBps;               // WAD
-        uint256 sqrtRat = babylonianSqrt(ratio * WAD) / 1e9;            // WAD (approx)
-        uint256 raw     = (30 * ratio * sqrtRat) / (WAD * WAD / 1e9);   // pts
+        uint256 ratio   = (APY_PEAK_BPS * WAD) / apyBps;                          // WAD
+        uint256 sqrtRat = babylonianSqrt(ratio * WAD) / SQRT_PRECISION;            // WAD (approx)
+        uint256 raw     = (30 * ratio * sqrtRat) / (WAD * WAD / SQRT_PRECISION);   // pts
         return raw > 30 ? 0 : raw; // ultra-high APY → near zero
     }
 
@@ -288,8 +294,8 @@ library BWTYAMath {
 
         // 4th root: sqrt(sqrt(prod × WAD)) / sqrt(WAD)
         uint256 sqrt1 = babylonianSqrt(prod * WAD);
-        uint256 sqrt2 = babylonianSqrt(sqrt1 * 1e9); // scale up for precision
-        uint256 denom = babylonianSqrt(WAD * 1e9);
+        uint256 sqrt2 = babylonianSqrt(sqrt1 * SQRT_PRECISION); // scale up for precision
+        uint256 denom = babylonianSqrt(WAD * SQRT_PRECISION);
 
         if (denom == 0) return 0;
         conviction = (100 * sqrt2) / denom;

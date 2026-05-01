@@ -19,12 +19,9 @@
 // Constants
 // ---------------------------------------------------------------------------
 
-const LN2 = 0.693_147_180_559_945;
-
-/** Natural log approximation (Taylor series, accurate to ±1e-9 for x > 0) */
+/** Natural log — thin wrapper so call-sites read consistently */
 function ln(x: number): number {
   if (x <= 0) return -Infinity;
-  // Use Math.log which is native and IEEE-754 compliant
   return Math.log(x);
 }
 

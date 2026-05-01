@@ -256,7 +256,7 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
      */
     function resetTitheStreak(address user) external onlyOracle {
         profiles[user].consecutiveTitheMonths = 0;
-        emit TitheStreakUpdated(user, 0, BWTYAMath.WAD /* 1.0× */);
+        emit TitheStreakUpdated(user, 0, BWTYAMath.WAD /* WAD = 1.0× multiplier — no active streak */);
     }
 
     /**

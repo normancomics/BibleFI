@@ -185,6 +185,11 @@ export class BWSPSovereignAgent {
     const processingTimeMs = Date.now() - startTime;
 
     // ── Advanced BWSP math metrics ───────────────────────────────────────
+    // Decay projection: estimate score after DECAY_PROJECTION_DAYS of inactivity
+    const DECAY_PROJECTION_DAYS = 30;
+    // Tithe streak: 0 consecutive months until BWSPCore/BWSPWisdomRegistry
+    // feeds the real streak value via extended query context (future integration point)
+    const TITHE_STREAK_MONTHS_FALLBACK = 0;
     const intentResult = detectIntentWithConfidence(query.text);
     const primaryScriptureText = synthesis.primaryScripture?.text ?? '';
     const resonance = scriptureResonanceScore(query.text, primaryScriptureText);
@@ -198,12 +203,11 @@ export class BWSPSovereignAgent {
       sentimentAlign.adjustment,
       query.wisdomScore ?? 0,
     );
-    // Wisdom decay: if wisdomScore provided, show what it would decay to after 30 days
+    // Wisdom decay: show what the score decays to after DECAY_PROJECTION_DAYS
     const decayFactor = query.wisdomScore
-      ? wisdomDecay(query.wisdomScore, 30) / Math.max(1, query.wisdomScore)
+      ? wisdomDecay(query.wisdomScore, DECAY_PROJECTION_DAYS) / Math.max(1, query.wisdomScore)
       : 1;
-    // Tithe blessing: placeholder consecutive months = 0 unless extended via context
-    const titheBlessingMultiplier = titheConsistencyBlessing(0);
+    const titheBlessingMultiplier = titheConsistencyBlessing(TITHE_STREAK_MONTHS_FALLBACK);
 
     // Patch synthesis with advanced metrics (take the higher of edge-fn confidence or composite)
     const enrichedSynthesis: BWSPSynthesis = {
