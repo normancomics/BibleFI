@@ -88,6 +88,10 @@ export interface BWSPSynthesis {
   synthesisMethod: 'rag_vector' | 'offline_fallback' | 'hybrid';
   protocol: string;
   tokenCount?: number;
+  // Advanced BWSP math outputs
+  resonanceScore: number;     // 0–1 offline scripture resonance (cosine-like)
+  wisdomDecayFactor: number;  // 0–1 how much the user's wisdom has decayed
+  titheBlessingMultiplier: number; // 1.0–1.5 consecutive tithe months blessing
 }
 
 export interface BWSPResponse {
@@ -104,6 +108,9 @@ export interface BWSPResponse {
   primaryScripture: ScriptureResult;
   supportingScriptures: ScriptureResult[];
   confidenceScore: number;
+  // Intent analysis
+  intentConfidence: number;   // TF-IDF confidence for detected intent (0–1)
+  secondaryIntent: BWSPQueryIntent | null;
 }
 
 export interface AgentStep {

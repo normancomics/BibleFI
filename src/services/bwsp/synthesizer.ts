@@ -93,6 +93,9 @@ function buildOfflineSynthesis(context: BWSPContext): BWSPSynthesis {
     confidenceScore: 0.72,
     synthesisMethod: 'offline_fallback',
     protocol: 'BWSP-v1.0',
+    resonanceScore: 0,
+    wisdomDecayFactor: 1,
+    titheBlessingMultiplier: 1,
   };
 }
 
@@ -134,6 +137,10 @@ export class BWSPSynthesizer {
         synthesisMethod: (data.synthesisMethod as BWSPSynthesis['synthesisMethod']) ?? 'rag_vector',
         protocol: data.protocol ?? 'BWSP-v1.0',
         tokenCount: data.tokenCount,
+        // Advanced metrics — computed by sovereignAgent after this returns
+        resonanceScore: 0,
+        wisdomDecayFactor: 1,
+        titheBlessingMultiplier: 1,
       };
     } catch {
       return buildOfflineSynthesis(context);

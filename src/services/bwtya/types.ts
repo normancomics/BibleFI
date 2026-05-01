@@ -9,12 +9,16 @@ export type StewardshipGrade = 'A' | 'B' | 'C' | 'D' | 'F';
 export interface ScoredOpportunity {
   opportunity: YieldOpportunity;
   // Raw dimension scores
-  fruitBearingScore: number;      // John 15:16  – 0–30
+  fruitBearingScore: number;      // John 15:16    – 0–30  (log-normal APY curve)
   faithfulnessScore: number;      // Matthew 25:14 – 0–25
   biblicalAlignmentScore: number; // Proverbs 3:9  – 0–25
-  transparencyScore: number;      // Luke 16:10   – 0–20
-  // Composite
-  bwtyaScore: number;             // 0–100
+  transparencyScore: number;      // Luke 16:10    – 0–20
+  // Composite & advanced metrics
+  bwtyaScore: number;             // 0–100  arithmetic sum of dimensions
+  convictionScore: number;        // 0–100  geometric mean – penalises spikiness
+  riskAdjustedYield: number;      // APY / (1 + risk)^1.5 – Sharpe-analogue
+  kellyWeight: number;            // 0–0.35 Kelly Criterion fractional allocation
+  paretoKept: boolean;            // false if another opportunity dominates on all dims
   stewardshipGrade: StewardshipGrade;
   warningFlags: string[];
   biblicalRationale: string;
@@ -39,6 +43,9 @@ export interface BWTYAStrategy {
   minWisdomScore: number;
   titheReservePercent: number;
   allocations: StrategyAllocation[];
+  // Advanced risk metrics
+  maxDrawdownEstimate: number;         // % estimated max drawdown
+  ecclesiastesDiversificationScore: number; // 0–1 HHI-based diversification health
 }
 
 export interface BWTYAInput {

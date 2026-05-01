@@ -5,10 +5,19 @@ import { fetchBaseDeFiTVL, getMarketSentiment } from '@/services/liveMarketDataS
 import { bwspContextAssembler } from './contextAssembler';
 import { bwspRetriever } from './retriever';
 import { bwspSynthesizer } from './synthesizer';
+import {
+  compositeConfidence,
+  detectIntentWithConfidence,
+  marketSentimentAlignment,
+  scriptureResonanceScore,
+  titheConsistencyBlessing,
+  wisdomDecay,
+} from './wisdomMath';
 import type {
   AgentStep,
   BWSPContext,
   BWSPQuery,
+  BWSPQueryIntent,
   BWSPResponse,
   BWSPSynthesis,
   MarketContext,
@@ -162,6 +171,9 @@ export class BWSPSovereignAgent {
         confidenceScore: 0.5,
         synthesisMethod: 'offline_fallback',
         protocol: 'BWSP-v1.0',
+        resonanceScore: 0,
+        wisdomDecayFactor: 1,
+        titheBlessingMultiplier: 1,
       };
       step5 = failStep(step5, String(err));
     }
@@ -172,20 +184,53 @@ export class BWSPSovereignAgent {
     // -----------------------------------------------------------------------
     const processingTimeMs = Date.now() - startTime;
 
+    // ── Advanced BWSP math metrics ───────────────────────────────────────
+    const intentResult = detectIntentWithConfidence(query.text);
+    const primaryScriptureText = synthesis.primaryScripture?.text ?? '';
+    const resonance = scriptureResonanceScore(query.text, primaryScriptureText);
+    const sentimentAlign = marketSentimentAlignment(
+      marketContext.fearGreedIndex,
+      query.intent ?? 'general_wisdom',
+    );
+    const compositeConf = compositeConfidence(
+      intentResult.primaryConfidence,
+      resonance,
+      sentimentAlign.adjustment,
+      query.wisdomScore ?? 0,
+    );
+    // Wisdom decay: if wisdomScore provided, show what it would decay to after 30 days
+    const decayFactor = query.wisdomScore
+      ? wisdomDecay(query.wisdomScore, 30) / Math.max(1, query.wisdomScore)
+      : 1;
+    // Tithe blessing: placeholder consecutive months = 0 unless extended via context
+    const titheBlessingMultiplier = titheConsistencyBlessing(0);
+
+    // Patch synthesis with advanced metrics (take the higher of edge-fn confidence or composite)
+    const enrichedSynthesis: BWSPSynthesis = {
+      ...synthesis,
+      confidenceScore: Math.max(synthesis.confidenceScore, compositeConf),
+      resonanceScore: resonance,
+      wisdomDecayFactor: decayFactor,
+      titheBlessingMultiplier,
+    };
+
     return {
       query,
       context,
-      synthesis,
+      synthesis: enrichedSynthesis,
       agentSteps: steps,
       processingTimeMs,
       timestamp: new Date().toISOString(),
       // Convenience fields
-      wisdomGuidance: synthesis.guidance,
-      financialPrinciple: synthesis.principle,
-      actionableInsight: synthesis.action,
-      primaryScripture: synthesis.primaryScripture,
-      supportingScriptures: synthesis.supportingScriptures,
-      confidenceScore: synthesis.confidenceScore,
+      wisdomGuidance: enrichedSynthesis.guidance,
+      financialPrinciple: enrichedSynthesis.principle,
+      actionableInsight: enrichedSynthesis.action,
+      primaryScripture: enrichedSynthesis.primaryScripture,
+      supportingScriptures: enrichedSynthesis.supportingScriptures,
+      confidenceScore: enrichedSynthesis.confidenceScore,
+      // Intent analysis
+      intentConfidence: intentResult.primaryConfidence,
+      secondaryIntent: intentResult.secondary,
     };
   }
 }
