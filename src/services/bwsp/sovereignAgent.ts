@@ -5,10 +5,20 @@ import { fetchBaseDeFiTVL, getMarketSentiment } from '@/services/liveMarketDataS
 import { bwspContextAssembler } from './contextAssembler';
 import { bwspRetriever } from './retriever';
 import { bwspSynthesizer } from './synthesizer';
+import {
+  authorityWeightedResonance,
+  compositeConfidence,
+  detectIntentWithConfidence,
+  marketSentimentAlignment,
+  scriptureResonanceScore,
+  titheConsistencyBlessing,
+  wisdomDecay,
+} from './wisdomMath';
 import type {
   AgentStep,
   BWSPContext,
   BWSPQuery,
+  BWSPQueryIntent,
   BWSPResponse,
   BWSPSynthesis,
   MarketContext,
@@ -162,6 +172,9 @@ export class BWSPSovereignAgent {
         confidenceScore: 0.5,
         synthesisMethod: 'offline_fallback',
         protocol: 'BWSP-v1.0',
+        resonanceScore: 0,
+        wisdomDecayFactor: 1,
+        titheBlessingMultiplier: 1,
       };
       step5 = failStep(step5, String(err));
     }
@@ -172,20 +185,66 @@ export class BWSPSovereignAgent {
     // -----------------------------------------------------------------------
     const processingTimeMs = Date.now() - startTime;
 
+    // ── Advanced BWSP math metrics ───────────────────────────────────────
+    // Decay projection: estimate score after DECAY_PROJECTION_DAYS of inactivity
+    const DECAY_PROJECTION_DAYS = 30;
+    // Tithe streak: 0 consecutive months until BWSPCore/BWSPWisdomRegistry
+    // feeds the real streak value via extended query context (future integration point)
+    const TITHE_STREAK_MONTHS_FALLBACK = 0;
+    const intentResult = detectIntentWithConfidence(query.text);
+    const primaryScriptureText = synthesis.primaryScripture?.text ?? '';
+    const primaryScriptureRef  = synthesis.primaryScripture?.reference ?? '';
+    const resonance = scriptureResonanceScore(query.text, primaryScriptureText);
+    // Authority-weighted resonance: boost confidence when Proverbs/Matthew/Malachi cited
+    const authResonance = authorityWeightedResonance(resonance, primaryScriptureRef);
+    const sentimentAlign = marketSentimentAlignment(
+      marketContext.fearGreedIndex,
+      query.intent ?? 'general_wisdom',
+    );
+    // Use authority-weighted resonance in composite confidence (replaces raw resonance)
+    const compositeConf = compositeConfidence(
+      intentResult.primaryConfidence,
+      authResonance,
+      sentimentAlign.adjustment,
+      query.wisdomScore ?? 0,
+    );
+    // Wisdom decay: show what the score decays to after DECAY_PROJECTION_DAYS
+    const decayFactor = query.wisdomScore
+      ? wisdomDecay(query.wisdomScore, DECAY_PROJECTION_DAYS) / Math.max(1, query.wisdomScore)
+      : 1;
+    const titheBlessingMultiplier = titheConsistencyBlessing(TITHE_STREAK_MONTHS_FALLBACK);
+
+    // Patch synthesis with advanced metrics (take the higher of edge-fn confidence or composite)
+    const enrichedSynthesis: BWSPSynthesis = {
+      ...synthesis,
+      confidenceScore: Math.max(synthesis.confidenceScore, compositeConf),
+      resonanceScore: resonance,
+      authorityWeightedResonance: authResonance,
+      wisdomDecayFactor: decayFactor,
+      titheBlessingMultiplier,
+    };
+
+    // Authority-weighted confidence exposed at response level
+    const authorityWeightedConfidence = compositeConf;
+
     return {
       query,
       context,
-      synthesis,
+      synthesis: enrichedSynthesis,
       agentSteps: steps,
       processingTimeMs,
       timestamp: new Date().toISOString(),
       // Convenience fields
-      wisdomGuidance: synthesis.guidance,
-      financialPrinciple: synthesis.principle,
-      actionableInsight: synthesis.action,
-      primaryScripture: synthesis.primaryScripture,
-      supportingScriptures: synthesis.supportingScriptures,
-      confidenceScore: synthesis.confidenceScore,
+      wisdomGuidance: enrichedSynthesis.guidance,
+      financialPrinciple: enrichedSynthesis.principle,
+      actionableInsight: enrichedSynthesis.action,
+      primaryScripture: enrichedSynthesis.primaryScripture,
+      supportingScriptures: enrichedSynthesis.supportingScriptures,
+      confidenceScore: enrichedSynthesis.confidenceScore,
+      // Intent analysis
+      intentConfidence: intentResult.primaryConfidence,
+      secondaryIntent: intentResult.secondary,
+      authorityWeightedConfidence,
     };
   }
 }

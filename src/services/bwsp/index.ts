@@ -6,3 +6,4 @@ export * from './retriever';
 export * from './contextAssembler';
 export * from './synthesizer';
 export * from './sovereignAgent';
+export * from './wisdomMath';

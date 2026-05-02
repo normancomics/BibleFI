@@ -1,13 +1,20 @@
 // BWTYA – Strategy Mapper
-// Maps ranked scored opportunities to 3 named biblical strategies
+// Maps ranked scored opportunities to 3 named biblical strategies using
+// Kelly Criterion allocation weights and Ecclesiastes diversification scoring.
 
+import {
+  ecclesiastesDiversificationScore,
+  kellyFraction,
+  maxDrawdownEstimate,
+  normaliseKellyAllocations,
+} from './mathEngine';
 import type { BWTYAStrategy, ScoredOpportunity, StrategyAllocation } from './types';
 
 // ---------------------------------------------------------------------------
 // Strategy definitions
 // ---------------------------------------------------------------------------
 
-const STRATEGY_TEMPLATES: Omit<BWTYAStrategy, 'allocations'>[] = [
+const STRATEGY_TEMPLATES: Omit<BWTYAStrategy, 'allocations' | 'maxDrawdownEstimate' | 'ecclesiastesDiversificationScore'>[] = [
   {
     id: 'josephs_storehouse',
     name: "Joseph's Storehouse",
@@ -47,45 +54,82 @@ const STRATEGY_TEMPLATES: Omit<BWTYAStrategy, 'allocations'>[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Allocation builder helpers
+// Kelly-based allocation builder
 // ---------------------------------------------------------------------------
 
-function toAllocation(scored: ScoredOpportunity, allocationPercent: number): StrategyAllocation {
-  return {
-    opportunityId: `${scored.opportunity.protocol}::${scored.opportunity.poolName}`,
-    protocol: scored.opportunity.protocol,
-    poolName: scored.opportunity.poolName,
-    allocationPercent,
-    projectedApy: scored.opportunity.apy,
-    projectedYieldAfterTithe: scored.opportunity.apy * 0.9, // 10% tithe reserved
-    stewardshipGrade: scored.stewardshipGrade,
-  };
+/**
+ * Builds allocations for a set of top-ranked opportunities using Kelly Criterion
+ * weights, capped and normalised to sum to 100 %.
+ *
+ * For conservative strategies, raw Kelly weights are halved (half-Kelly) to
+ * further reduce concentration risk as recommended by biblical prudence:
+ * "The wise store up choice food and olive oil" (Proverbs 21:20).
+ */
+function buildKellyAllocations(
+  top: ScoredOpportunity[],
+  halfKelly = false,
+): StrategyAllocation[] {
+  if (top.length === 0) return [];
+
+  const fractions = top.map((s) => {
+    const f = kellyFraction(s.bwtyaScore, s.opportunity.apy);
+    return halfKelly ? f * 0.5 : f;
+  });
+
+  const percents = normaliseKellyAllocations(fractions);
+
+  return top.map((s, i) => ({
+    opportunityId: `${s.opportunity.protocol}::${s.opportunity.poolName}`,
+    protocol: s.opportunity.protocol,
+    poolName: s.opportunity.poolName,
+    allocationPercent: percents[i] ?? 0,
+    projectedApy: s.opportunity.apy,
+    projectedYieldAfterTithe: s.opportunity.apy * 0.9, // 10 % tithe reserved
+    stewardshipGrade: s.stewardshipGrade,
+  }));
 }
 
-function buildConservativeAllocations(top: ScoredOpportunity[]): StrategyAllocation[] {
-  // Take up to 3 lowest-risk, grade A/B opportunities; equal weight
-  const safe = top.filter((s) => s.stewardshipGrade === 'A' || s.stewardshipGrade === 'B');
-  const picks = safe.slice(0, 3);
-  if (picks.length === 0) return top.slice(0, 1).map((s) => toAllocation(s, 100));
+// ---------------------------------------------------------------------------
+// Per-strategy allocation builders
+// ---------------------------------------------------------------------------
 
-  const weight = Math.floor(100 / picks.length);
-  const remainder = 100 - weight * picks.length;
-  return picks.map((s, i) => toAllocation(s, i === 0 ? weight + remainder : weight));
+function buildConservativeAllocations(top: ScoredOpportunity[]): StrategyAllocation[] {
+  // Only take grade A/B picks; fall back to top-1 if none qualify
+  const safe = top.filter((s) => s.stewardshipGrade === 'A' || s.stewardshipGrade === 'B');
+  const picks = (safe.length > 0 ? safe : top).slice(0, 3);
+  // Half-Kelly for maximum capital preservation
+  return buildKellyAllocations(picks, true);
 }
 
 function buildModerateAllocations(top: ScoredOpportunity[]): StrategyAllocation[] {
-  // 60 / 30 / 10 split across top 3
-  const picks = top.slice(0, 3);
-  const weights = [60, 30, 10];
-  return picks.map((s, i) => toAllocation(s, weights[i] ?? 10));
+  // Full Kelly across top 3 — balanced growth and safety
+  return buildKellyAllocations(top.slice(0, 3), false);
 }
 
 function buildAdvancedAllocations(top: ScoredOpportunity[]): StrategyAllocation[] {
-  // Up to 5 positions; roughly equal split
-  const picks = top.slice(0, 5);
-  const base = Math.floor(100 / picks.length);
-  const remainder = 100 - base * picks.length;
-  return picks.map((s, i) => toAllocation(s, i === 0 ? base + remainder : base));
+  // Full Kelly across top 5 — maximum Ecclesiastes diversification
+  return buildKellyAllocations(top.slice(0, 5), false);
+}
+
+// ---------------------------------------------------------------------------
+// Risk metrics helper
+// ---------------------------------------------------------------------------
+
+function computeStrategyMetrics(
+  allocations: StrategyAllocation[],
+  scored: ScoredOpportunity[],
+): { maxDrawdown: number; ecc: number } {
+  const percents = allocations.map((a) => a.allocationPercent);
+  const risks = allocations.map((a) => {
+    const match = scored.find(
+      (s) => `${s.opportunity.protocol}::${s.opportunity.poolName}` === a.opportunityId,
+    );
+    return match?.opportunity.riskScore ?? 50;
+  });
+  return {
+    maxDrawdown: maxDrawdownEstimate(percents, risks),
+    ecc: ecclesiastesDiversificationScore(percents),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -97,31 +141,44 @@ export class BWTYAStrategyMapper {
     const strategies: BWTYAStrategy[] = [];
 
     // Joseph's Storehouse (always available)
+    const conservativeAllocs = buildConservativeAllocations(ranked);
+    const conservativeMetrics = computeStrategyMetrics(conservativeAllocs, ranked);
     strategies.push({
       ...STRATEGY_TEMPLATES[0],
-      allocations: buildConservativeAllocations(ranked),
+      allocations: conservativeAllocs,
+      maxDrawdownEstimate: conservativeMetrics.maxDrawdown,
+      ecclesiastesDiversificationScore: conservativeMetrics.ecc,
     });
 
     // Talents Multiplied (wisdom ≥ 30)
     if (wisdomScore >= 30) {
+      const moderateAllocs = buildModerateAllocations(ranked);
+      const moderateMetrics = computeStrategyMetrics(moderateAllocs, ranked);
       strategies.push({
         ...STRATEGY_TEMPLATES[1],
-        allocations: buildModerateAllocations(ranked),
+        allocations: moderateAllocs,
+        maxDrawdownEstimate: moderateMetrics.maxDrawdown,
+        ecclesiastesDiversificationScore: moderateMetrics.ecc,
       });
     }
 
     // Solomon's Portfolio (wisdom ≥ 70)
     if (wisdomScore >= 70) {
+      const advancedAllocs = buildAdvancedAllocations(ranked);
+      const advancedMetrics = computeStrategyMetrics(advancedAllocs, ranked);
       strategies.push({
         ...STRATEGY_TEMPLATES[2],
-        allocations: buildAdvancedAllocations(ranked),
+        allocations: advancedAllocs,
+        maxDrawdownEstimate: advancedMetrics.maxDrawdown,
+        ecclesiastesDiversificationScore: advancedMetrics.ecc,
       });
     }
 
     return strategies;
   }
 
-  recommendBest(strategies: BWTYAStrategy[], wisdomScore = 0): BWTYAStrategy {
+  recommendBest(strategies: BWTYAStrategy[], wisdomScore = 0): BWTYAStrategy | null {
+    if (strategies.length === 0) return null;
     // Prefer the most sophisticated strategy the user's wisdom unlocks
     const eligible = [...strategies].sort((a, b) => b.minWisdomScore - a.minWisdomScore);
     return eligible.find((s) => wisdomScore >= s.minWisdomScore) ?? strategies[0];

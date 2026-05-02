@@ -1,6 +1,15 @@
 // BWTYA – Scorer
-// Evaluates each YieldOpportunity on 4 biblical dimensions
+// Evaluates each YieldOpportunity on 4 biblical dimensions using the
+// advanced mathematical curves defined in mathEngine.ts
 
+import {
+  clamp,
+  convictionScore,
+  fruitSustainabilityCurve,
+  kellyFraction,
+  riskAdjustedReturn,
+  tvlDepthScore,
+} from './mathEngine';
 import type { ScoredOpportunity, StewardshipGrade, YieldOpportunity } from './types';
 
 // ---------------------------------------------------------------------------
@@ -9,33 +18,16 @@ import type { ScoredOpportunity, StewardshipGrade, YieldOpportunity } from './ty
 
 /**
  * Dimension 1 – Fruit-bearing (John 15:16) · max 30 pts
- * Measures yield sustainability and positive impact.
+ *
+ * Uses the log-normal Fruit Sustainability Curve (peak 12 % APY) from
+ * mathEngine rather than the previous linear bracket.  A 12 % APY scores the
+ * full 30 pts; 60 % APY scores ~9 pts; 200 % scores ~1 pt.
  */
 function scoreFruitBearing(o: YieldOpportunity): { score: number; flags: string[] } {
   const flags: string[] = [];
-  let score = 0;
-
-  // APY reasonableness (0–15 pts): 5–25% APY is the "sustainable orchard" range
-  if (o.apy >= 5 && o.apy <= 25) {
-    score += 15;
-  } else if (o.apy > 25 && o.apy <= 60) {
-    score += 8;
-    flags.push('⚠️ Elevated APY – verify sustainability (John 15:16)');
-  } else if (o.apy > 60) {
-    score += 3;
-    flags.push('🚩 Extremely high APY – potential unsustainability risk');
-  } else if (o.apy > 0) {
-    score += 5; // Low but positive
-  }
-
-  // TVL depth (0–15 pts): higher TVL = more established fruit
-  if (o.tvlUsd >= 100_000_000) score += 15;
-  else if (o.tvlUsd >= 10_000_000) score += 10;
-  else if (o.tvlUsd >= 1_000_000) score += 6;
-  else if (o.tvlUsd >= 100_000) score += 3;
-  else flags.push('⚠️ Low TVL – limited market depth');
-
-  return { score: Math.min(score, 30), flags };
+  const apyScore = fruitSustainabilityCurve(o.apy, flags);
+  const tvlScore = tvlDepthScore(o.tvlUsd, flags);
+  return { score: clamp(apyScore + tvlScore, 0, 30), flags };
 }
 
 /**
@@ -57,7 +49,7 @@ function scoreFaithfulStewardship(o: YieldOpportunity): { score: number; flags: 
   // Verified project (0–3 pts)
   if (o.isVerified) score += 3;
 
-  return { score: Math.min(score, 25), flags };
+  return { score: clamp(score, 0, 25), flags };
 }
 
 /**
@@ -81,15 +73,15 @@ function scoreBiblicalAlignment(o: YieldOpportunity): { score: number; flags: st
   score += Math.min(positiveMatches * 5, 20);
   score -= negativeMatches * 5;
 
-  // Category bonus: stablecoins and lending align well with biblical wealth preservation
-  const safeCats = ['stable', 'lending', 'savings', 'staking'];
+  // Category bonus: stablecoins, lending, and transparent DEX aggregators align with biblical wealth preservation
+  const safeCats = ['stable', 'lending', 'savings', 'staking', 'aggregator', 'dex'];
   if (safeCats.some((c) => o.category.toLowerCase().includes(c))) score += 5;
 
   if (negativeMatches > 0) {
     flags.push('⚠️ Protocol description contains concerning language');
   }
 
-  return { score: Math.max(0, Math.min(score, 25)), flags };
+  return { score: clamp(score, 0, 25), flags };
 }
 
 /**
@@ -106,7 +98,7 @@ function scoreTransparency(o: YieldOpportunity): { score: number; flags: string[
   if (o.audited) score += 5;
   if (o.isVerified) score += 5;
 
-  return { score: Math.min(score, 20), flags };
+  return { score: clamp(score, 0, 20), flags };
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +113,7 @@ function toGrade(score: number): StewardshipGrade {
   return 'F';
 }
 
-function buildRationale(o: YieldOpportunity, score: number, grade: StewardshipGrade): string {
+function buildRationale(o: YieldOpportunity, score: number, grade: StewardshipGrade, conviction: number): string {
   const gradeDescriptions: Record<StewardshipGrade, string> = {
     A: 'Excellent alignment with biblical stewardship principles.',
     B: 'Good protocol with minor areas for improvement.',
@@ -130,8 +122,8 @@ function buildRationale(o: YieldOpportunity, score: number, grade: StewardshipGr
     F: 'Not recommended – fails core stewardship criteria.',
   };
   return (
-    `${o.protocol} (${o.poolName}) scored ${score}/100 – ${gradeDescriptions[grade]} ` +
-    `APY ${o.apy.toFixed(1)}% on ${o.chain}.`
+    `${o.protocol} (${o.poolName}) scored ${score}/100 (conviction ${conviction.toFixed(0)}/100) ` +
+    `– ${gradeDescriptions[grade]} APY ${o.apy.toFixed(1)}% on ${o.chain}.`
   );
 }
 
@@ -150,6 +142,11 @@ export class BWTYAScorer {
     const grade = toGrade(bwtyaScore);
     const allFlags = [...d1.flags, ...d2.flags, ...d3.flags, ...d4.flags];
 
+    // Advanced metrics
+    const conviction = convictionScore(d1.score, d2.score, d3.score, d4.score);
+    const rar = riskAdjustedReturn(opportunity.apy, opportunity.riskScore);
+    const kelly = kellyFraction(bwtyaScore, opportunity.apy);
+
     return {
       opportunity,
       fruitBearingScore: d1.score,
@@ -157,9 +154,13 @@ export class BWTYAScorer {
       biblicalAlignmentScore: d3.score,
       transparencyScore: d4.score,
       bwtyaScore,
+      convictionScore: conviction,
+      riskAdjustedYield: rar,
+      kellyWeight: kelly,
+      paretoKept: true, // set by BWTYARanker after cross-opportunity analysis
       stewardshipGrade: grade,
       warningFlags: allFlags,
-      biblicalRationale: buildRationale(opportunity, bwtyaScore, grade),
+      biblicalRationale: buildRationale(opportunity, bwtyaScore, grade, conviction),
     };
   }
 

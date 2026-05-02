@@ -15,6 +15,8 @@ import EnhancedBiblicalTrading from '@/components/wisdom/EnhancedBiblicalTrading
 import { supabase } from '@/integrations/supabase/client';
 import TokenSearchSelect from '@/components/swap/TokenSearchSelect';
 import { useSpandexQuote } from '@/hooks/useSpandexQuote';
+import { useSpandexBWTYA } from '@/hooks/useSpandexBWTYA';
+import SpandexBWTYAAdvisor from '@/components/defi/SpandexBWTYAAdvisor';
 import { useAccount } from 'wagmi';
 import type { Address } from 'viem';
 import { parseUnits } from 'viem';
@@ -63,6 +65,14 @@ const BiblicalDeFiSwap: React.FC = () => {
     error: spandexError,
     fetchQuote: fetchSpandexQuote,
   } = useSpandexQuote(6); // default fallback; per-call decimals are passed below
+
+  // BWTYA advisory hook — scores all spanDEX providers + synthesises BWSP wisdom
+  const {
+    advisory: bwtyaAdvisory,
+    isLoading: bwtyaLoading,
+    runAdvisory,
+    reset: resetAdvisory,
+  } = useSpandexBWTYA();
 
   // Base chain tokens
   const baseTokens: Record<string, Token> = {
@@ -120,13 +130,15 @@ const BiblicalDeFiSwap: React.FC = () => {
 
     setIsLoading(true);
     playSound('click');
+    resetAdvisory();
 
     // Fire spanDEX meta-aggregated quotes in parallel with Uniswap edge function
+    const inputAmountRaw = BigInt(Math.floor(parseFloat(fromAmount) * 10 ** fromToken.decimals));
     const spandexPromise = useSpandex
       ? fetchSpandexQuote({
           inputToken: fromToken.address as Address,
           outputToken: toToken.address as Address,
-          inputAmount: BigInt(Math.floor(parseFloat(fromAmount) * 10 ** fromToken.decimals)),
+          inputAmount: inputAmountRaw,
           slippageBps: Math.round(parseFloat(slippage) * 100),
           swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
           chainId: 8453,
@@ -184,6 +196,21 @@ const BiblicalDeFiSwap: React.FC = () => {
       }
 
       setQuote(uniQuote);
+
+      // Launch BWTYA advisory (async, non-blocking – shown once it resolves)
+      if (useSpandex) {
+        runAdvisory({
+          fromToken: fromToken.symbol,
+          toToken: toToken.symbol,
+          fromTokenAddress: fromToken.address,
+          toTokenAddress: toToken.address,
+          inputAmountHuman: fromAmount,
+          inputAmountRaw,
+          chainId: 8453,
+          slippageBps: Math.round(parseFloat(slippage) * 100),
+          swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as string,
+        }).catch((e) => console.warn('[BWTYA Advisory]', e));
+      }
 
       if (data.source === 'estimate' && !spandexResult) {
         toast({
@@ -501,7 +528,7 @@ const BiblicalDeFiSwap: React.FC = () => {
           <input
             type="checkbox"
             checked={useSpandex}
-            onChange={(e) => setUseSpandex(e.target.checked)}
+            onChange={(e) => { setUseSpandex(e.target.checked); resetAdvisory(); }}
             className="rounded border-border"
           />
           <Zap className="h-3 w-3 text-ancient-gold" />
@@ -511,6 +538,27 @@ const BiblicalDeFiSwap: React.FC = () => {
           Fabric · Odos · KyberSwap · LI.FI
         </span>
       </div>
+
+      {/* BWTYA Advisory — shown once the pipeline completes or while loading */}
+      <AnimatePresence>
+        {(bwtyaAdvisory || bwtyaLoading) && quote && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {bwtyaLoading && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground px-2 py-3">
+                <div className="w-3 h-3 border-2 border-ancient-gold border-t-transparent rounded-full animate-spin" />
+                Running BWTYA × BWSP biblical advisory…
+              </div>
+            )}
+            {bwtyaAdvisory && !bwtyaLoading && (
+              <SpandexBWTYAAdvisor
+                advisory={bwtyaAdvisory}
+                fromToken={fromToken?.symbol ?? ''}
+                toToken={toToken?.symbol ?? ''}
+              />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Enhanced Biblical Analysis */}
       {fromToken && toToken && fromAmount && (
