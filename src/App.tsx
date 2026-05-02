@@ -45,6 +45,20 @@ import BWSPAgentsPage from "./pages/BWSPAgentsPage";
 import BWTYAAgentsPage from "./pages/BWTYAAgentsPage";
 import MCPNetworkPage from "./pages/MCPNetworkPage";
 import SwapPage from "./pages/SwapPage";
+import AdminPage from "./pages/AdminPage";
+import BuilderScorePage from "./pages/BuilderScorePage";
+import ChurchDiscoveryPage from "./pages/ChurchDiscoveryPage";
+import ComprehensiveWisdomPage from "./pages/ComprehensiveWisdomPage";
+import DefiOpportunitiesPage from "./pages/DefiOpportunitiesPage";
+import LaunchPage from "./pages/LaunchPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import OnboardingPage from "./pages/OnboardingPage";
+import PaymentHubPage from "./pages/PaymentHubPage";
+import ScriptureIntegrityPage from "./pages/ScriptureIntegrityPage";
+import SuperfluidPage from "./pages/SuperfluidPage";
+import SuperfluidTokensPage from "./pages/SuperfluidTokensPage";
+import TechnicalRoadmapPage from "./pages/TechnicalRoadmapPage";
+import SwarmMonitorPage from "./pages/SwarmMonitorPage";
 import "./App.css";
 
 const App = () => (
@@ -94,6 +108,20 @@ const App = () => (
             <Route path="/bwtya-agents" element={<BWTYAAgentsPage />} />
             <Route path="/mcp-network" element={<MCPNetworkPage />} />
             <Route path="/swap" element={<SwapPage />} />
+            <Route path="/admin-panel" element={<AdminPage />} />
+            <Route path="/builder-score" element={<BuilderScorePage />} />
+            <Route path="/church-discovery" element={<ChurchDiscoveryPage />} />
+            <Route path="/comprehensive-wisdom" element={<ComprehensiveWisdomPage />} />
+            <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
+            <Route path="/launch" element={<LaunchPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/payment-hub" element={<PaymentHubPage />} />
+            <Route path="/scripture-integrity" element={<ScriptureIntegrityPage />} />
+            <Route path="/superfluid" element={<SuperfluidPage />} />
+            <Route path="/superfluid-tokens" element={<SuperfluidTokensPage />} />
+            <Route path="/technical-roadmap" element={<TechnicalRoadmapPage />} />
+            <Route path="/swarm-monitor" element={<SwarmMonitorPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>

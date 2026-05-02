@@ -1,10 +1,12 @@
 // useBWSP – React hook wiring BWSP → BWTYA in a single call
+// Also persists each query to the bwsp_query_log table for analytics.
 
 import { useCallback, useState } from 'react';
 import { bwtyaAlgorithm } from '@/services/bwtya/algorithm';
 import type { BWTYAResult, YieldOpportunity } from '@/services/bwtya/types';
 import { bwspEngine } from '@/services/bwsp/engine';
 import type { BWSPQuery, BWSPResponse } from '@/services/bwsp/types';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface UseBWSPState {
   bwspResponse: BWSPResponse | null;
@@ -29,6 +31,34 @@ const initialState: UseBWSPState = {
   error: null,
   lastQuery: null,
 };
+
+/** Persist a completed BWSP query to the analytics log table (best-effort). */
+async function logBwspQuery(
+  query: BWSPQuery | string,
+  response: BWSPResponse,
+  bwtyaResult: BWTYAResult | null,
+): Promise<void> {
+  try {
+    const q: BWSPQuery = typeof query === 'string' ? { text: query } : query;
+    await supabase.from('bwsp_query_log').insert({
+      wallet_address: q.walletAddress ?? null,
+      query: q.text,
+      intent: response.query.intent ?? 'general_wisdom',
+      synthesis_method: response.synthesis.synthesisMethod,
+      confidence_score: response.confidenceScore,
+      processing_time_ms: response.processingTimeMs,
+      primary_scripture_ref: response.primaryScripture.reference,
+      bwtya_strategy_id: bwtyaResult?.recommendedStrategy.id ?? null,
+      bwtya_projected_apy: bwtyaResult?.projectedApy ?? null,
+      tithe_amount: bwtyaResult?.titheAmount ?? null,
+    }).then(
+      () => { /* logged */ },
+      (err) => console.warn('[useBWSP] Query log failed silently:', err),
+    );
+  } catch {
+    // Never let logging failure surface to the user
+  }
+}
 
 export function useBWSP(): UseBWSPState & UseBWSPActions {
   const [state, setState] = useState<UseBWSPState>(initialState);
@@ -71,6 +101,9 @@ export function useBWSP(): UseBWSPState & UseBWSPActions {
           error: null,
           lastQuery: queryText,
         });
+
+        // Step 3: Persist to analytics log (fire-and-forget)
+        logBwspQuery(queryInput, bwspResponse, bwtyaResult);
       } catch (err) {
         setState((prev) => ({
           ...prev,

@@ -14,7 +14,11 @@ import {
   Calculator,
   Settings,
   Wheat,
-  Trophy
+  Trophy,
+  Brain,
+  Network,
+  Cpu,
+  Globe
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
@@ -58,6 +62,14 @@ const NavBar: React.FC = () => {
     { path: '/taxes', label: 'Taxes', icon: Calculator },
     { path: '/live-data', label: 'Live Data', icon: TrendingUp, badge: 'LIVE' },
     { path: '/analytics', label: 'Analytics', icon: Shield, badge: 'AI' },
+    // BWSP / BWTYA / MCP agent pages
+    { path: '/bwsp-agents', label: 'BWSP', icon: Brain, badge: 'RAG' },
+    { path: '/bwtya-agents', label: 'BWTYA', icon: TrendingUp, badge: 'AGI' },
+    { path: '/swarm-monitor', label: 'Swarm', icon: Cpu, badge: 'LIVE' },
+    { path: '/mcp-network', label: 'MCP Net', icon: Network },
+    { path: '/scripture-integrity', label: 'Integrity', icon: BookOpen },
+    { path: '/church-discovery', label: 'Churches', icon: Globe },
+    { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' }] : []),
     { path: '/builder-score', label: 'Builder', icon: Trophy, badge: 'REP' },
     { path: '/security', label: 'Security', icon: Shield },
