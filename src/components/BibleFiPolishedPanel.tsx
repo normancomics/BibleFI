@@ -142,7 +142,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: ERC20_APPROVE_ABI,
         functionName: 'approve',
         args: [BFI_USD_ADDRESS, assets],
-      },
+      } as any,
       {
         onSuccess: () => {
           setApprovalSubmitted(true);
@@ -179,7 +179,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: BIBLEFI_USD_ABI,
         functionName: 'depositUSDC',
         args: [assets, depositNote],
-      },
+      } as any,
       {
         onSuccess: () => {
           toast({
@@ -222,7 +222,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: BIBLEFI_SUPERFLUID_ABI,
         functionName: 'startTitheStream',
         args: [USDCX_ADDRESS, streamReceiver as `0x${string}`, flowRate, streamScripture],
-      },
+      } as any,
       {
         onSuccess: () => {
           toast({
@@ -251,7 +251,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: BIBLEFI_USD_ABI,
         functionName: 'rebaseAndTithe',
         args: [],
-      },
+      } as any,
       {
         onSuccess: () => {
           toast({

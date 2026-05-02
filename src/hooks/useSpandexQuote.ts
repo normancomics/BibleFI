@@ -9,12 +9,14 @@
 import { useState, useCallback } from 'react';
 import { spandexConfig, getQuote, getQuotes } from '@/config/spandex';
 import type { Address } from 'viem';
+import type { SuccessfulSimulatedQuote, SimulatedQuote } from '@spandex/core';
 
 export interface SpandexQuoteResult {
   provider: string;
   outputAmount: string;
   outputAmountRaw: bigint;
   gasEstimate?: string;
+  latencyMs?: number;
   priceImpact?: string;
 }
 
@@ -30,6 +32,8 @@ export interface UseSpandexQuoteReturn {
     slippageBps?: number;
     swapperAccount: Address;
     chainId?: number;
+    /** Output token decimals — required for accurate display formatting. */
+    outputDecimals?: number;
   }) => Promise<SpandexQuoteResult | null>;
 }
 
@@ -41,7 +45,7 @@ function formatOutputAmount(raw: bigint, decimals: number): string {
   return `${whole}.${fracStr}`;
 }
 
-export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteReturn {
+export function useSpandexQuote(defaultOutputDecimals: number = 18): UseSpandexQuoteReturn {
   const [bestQuote, setBestQuote] = useState<SpandexQuoteResult | null>(null);
   const [allQuotes, setAllQuotes] = useState<SpandexQuoteResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,11 +58,14 @@ export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteRet
     slippageBps?: number;
     swapperAccount: Address;
     chainId?: number;
+    outputDecimals?: number;
   }): Promise<SpandexQuoteResult | null> => {
     setIsLoading(true);
     setError(null);
     setBestQuote(null);
     setAllQuotes([]);
+
+    const decimals = params.outputDecimals ?? defaultOutputDecimals;
 
     const swapParams = {
       chainId: params.chainId ?? 8453, // Base
@@ -72,15 +79,22 @@ export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteRet
 
     try {
       // 1. Try getQuotes (all providers in parallel)
-      const quotes = await getQuotes({ config: spandexConfig, swap: swapParams });
+      const quotes: SimulatedQuote[] = await getQuotes({ config: spandexConfig, swap: swapParams });
 
-      if (quotes && quotes.length > 0) {
-        const mapped: SpandexQuoteResult[] = quotes.map((q: any) => {
-          const outRaw: bigint = q.simulation?.outputAmount ?? q.outputAmount ?? 0n;
+      // Only successful simulations expose `simulation.outputAmount`.
+      const successful = quotes.filter(
+        (q): q is SuccessfulSimulatedQuote => q.simulation.success === true,
+      );
+
+      if (successful.length > 0) {
+        const mapped: SpandexQuoteResult[] = successful.map((q) => {
+          const outRaw = q.simulation.outputAmount;
           return {
-            provider: q.provider,
-            outputAmount: formatOutputAmount(outRaw, outputDecimals),
+            provider: String(q.provider),
+            outputAmount: formatOutputAmount(outRaw, decimals),
             outputAmountRaw: outRaw,
+            gasEstimate: q.simulation.gasUsed?.toString(),
+            latencyMs: q.performance?.latency,
           };
         });
 
@@ -105,12 +119,14 @@ export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteRet
         return null;
       }
 
-      // Official API: quote.provider + quote.simulation.outputAmount
-      const outputRaw: bigint = (single as any).simulation?.outputAmount ?? 0n;
+      // getQuote returns SuccessfulSimulatedQuote | null — simulation is guaranteed successful.
+      const outputRaw = single.simulation.outputAmount;
       const result: SpandexQuoteResult = {
-        provider: single.provider,
-        outputAmount: formatOutputAmount(outputRaw, outputDecimals),
+        provider: String(single.provider),
+        outputAmount: formatOutputAmount(outputRaw, decimals),
         outputAmountRaw: outputRaw,
+        gasEstimate: single.simulation.gasUsed?.toString(),
+        latencyMs: single.performance?.latency,
       };
 
       setBestQuote(result);
@@ -123,7 +139,7 @@ export function useSpandexQuote(outputDecimals: number = 18): UseSpandexQuoteRet
     } finally {
       setIsLoading(false);
     }
-  }, [outputDecimals]);
+  }, [defaultOutputDecimals]);
 
   return { bestQuote, allQuotes, isLoading, error, fetchQuote };
 }

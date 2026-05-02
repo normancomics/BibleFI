@@ -40,10 +40,10 @@ const baseClient = createPublicClient({
  */
 export const spandexConfig = createConfig({
   providers: [
-    fabric({ appId: 'biblefi' }),
-    odos({}),
-    kyberswap({ clientId: 'biblefi' }),
-    lifi({}),
+    fabric({ appId: 'biblefi', attributes: { app: 'biblefi' } }),
+    odos({ attributes: { app: 'biblefi' } }),
+    kyberswap({ clientId: 'biblefi', attributes: { app: 'biblefi' } }),
+    lifi({ attributes: { app: 'biblefi' } }),
   ],
   clients: [baseClient] as PublicClient[],
   options: {
