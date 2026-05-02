@@ -70,6 +70,7 @@ const SimpleSwapForm: React.FC = () => {
         slippageBps: 100,
         swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
         chainId: 8453,
+        outputDecimals: toTokenInfo.decimals,
       }).then((result) => {
         if (result && parseFloat(result.outputAmount) > parseFloat(calculateSwap(value))) {
           setToAmount(result.outputAmount);
