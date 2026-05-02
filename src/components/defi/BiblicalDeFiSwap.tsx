@@ -17,6 +17,7 @@ import TokenSearchSelect from '@/components/swap/TokenSearchSelect';
 import { useSpandexQuote } from '@/hooks/useSpandexQuote';
 import { useAccount } from 'wagmi';
 import type { Address } from 'viem';
+import { parseUnits } from 'viem';
 
 interface Token {
   symbol: string;
@@ -61,7 +62,7 @@ const BiblicalDeFiSwap: React.FC = () => {
     isLoading: spandexLoading,
     error: spandexError,
     fetchQuote: fetchSpandexQuote,
-  } = useSpandexQuote(6); // default USDC 6 decimals
+  } = useSpandexQuote(6); // default fallback; per-call decimals are passed below
 
   // Base chain tokens
   const baseTokens: Record<string, Token> = {
@@ -129,6 +130,7 @@ const BiblicalDeFiSwap: React.FC = () => {
           slippageBps: Math.round(parseFloat(slippage) * 100),
           swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
           chainId: 8453,
+          outputDecimals: toToken.decimals,
         }).catch((e) => {
           console.warn('[spanDEX] Quote failed, falling back:', e);
           return null;
@@ -163,8 +165,15 @@ const BiblicalDeFiSwap: React.FC = () => {
         source: data.source || 'estimate',
       };
 
-      // If spanDEX returned a better quote, use it
-      if (spandexResult && parseFloat(spandexResult.outputAmount) > parseFloat(uniQuote.toAmount)) {
+      // If spanDEX returned a better quote, use it. Compare in raw bigint
+      // base-units to avoid float-precision drift across decimal scales.
+      let uniRaw = 0n;
+      try {
+        uniRaw = parseUnits(uniQuote.toAmount || '0', toToken.decimals);
+      } catch {
+        uniRaw = 0n;
+      }
+      if (spandexResult && spandexResult.outputAmountRaw > uniRaw) {
         uniQuote.toAmount = spandexResult.outputAmount;
         uniQuote.dex = `spanDEX (${spandexResult.provider})`;
         uniQuote.source = 'uniswap'; // Mark as live since spanDEX uses on-chain data
@@ -466,6 +475,11 @@ const BiblicalDeFiSwap: React.FC = () => {
                       <span className={i === 0 ? 'font-semibold text-eboy-green' : 'text-muted-foreground'}>
                         {sq.provider}
                       </span>
+                      {typeof sq.latencyMs === 'number' && (
+                        <span className="text-[10px] text-muted-foreground/70">
+                          {sq.latencyMs}ms
+                        </span>
+                      )}
                     </div>
                     <span className={i === 0 ? 'font-mono font-semibold' : 'font-mono text-muted-foreground'}>
                       {sq.outputAmount} {toSymbol}
