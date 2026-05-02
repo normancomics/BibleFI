@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useAccount, useConnect, useDisconnect, useChainId, useSwitchChain, Connector } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { useToast } from '@/hooks/use-toast';
@@ -39,6 +39,10 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const [walletType, setWalletType] = useState<string | undefined>();
   const [connectionStep, setConnectionStep] = useState<ConnectionStep>('idle');
   const [connectionError, setConnectionError] = useState<string | undefined>();
+  // Tracks whether the most recent wallet activity was triggered by an explicit
+  // user action (button click) vs. background auto-init / persisted reconnect.
+  // Only user-initiated activity should surface toasts/sounds.
+  const userInitiatedRef = useRef(false);
 
   const isOnBaseChain = chainId === base.id;
 
@@ -46,7 +50,9 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
     if (connectError) {
       setConnectionStep('error');
       setConnectionError(connectError.message || 'Failed to connect wallet');
-      playSound('error');
+      if (userInitiatedRef.current) {
+        playSound('error');
+      }
     } else if (isPending) {
       setConnectionStep('connecting');
       setConnectionError(undefined);
@@ -69,6 +75,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   }, [connector]);
 
   const connectWallet = useCallback((selectedConnector?: Connector) => {
+    userInitiatedRef.current = true;
     setConnectionError(undefined);
     setConnectionStep('connecting');
     
@@ -93,6 +100,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   }, []);
 
   const disconnectWallet = useCallback(() => {
+    userInitiatedRef.current = true;
     disconnect();
     setWalletType(undefined);
     setConnectionStep('idle');
@@ -106,6 +114,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
 
   const switchToBase = useCallback(() => {
     if (!isOnBaseChain) {
+      userInitiatedRef.current = true;
       setConnectionStep('switching-chain');
       toast({
         title: "🔄 Switching Network",
@@ -136,19 +145,25 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (isConnected && !isOnBaseChain) {
-      setTimeout(() => {
-        switchToBase();
+      // Silent auto-switch on persisted reconnect — no toasts.
+      const timer = setTimeout(() => {
+        setConnectionStep('switching-chain');
+        switchChain({ chainId: base.id });
       }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [isConnected, isOnBaseChain, switchToBase]);
+  }, [isConnected, isOnBaseChain, switchChain]);
 
   useEffect(() => {
     if (isConnected && address && isOnBaseChain && connectionStep === 'connected') {
-      playSound('success');
-      toast({
-        title: "Wallet Connected",
-        description: `Connected to ${walletType || 'wallet'} (${address.slice(0, 6)}...${address.slice(-4)})`,
-      });
+      if (userInitiatedRef.current) {
+        playSound('success');
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to ${walletType || 'wallet'} (${address.slice(0, 6)}...${address.slice(-4)})`,
+        });
+        userInitiatedRef.current = false;
+      }
     }
   }, [isConnected, address, walletType, isOnBaseChain, connectionStep, playSound, toast]);
 
