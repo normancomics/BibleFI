@@ -40,10 +40,10 @@ const baseClient = createPublicClient({
  */
 export const spandexConfig = createConfig({
   providers: [
-    fabric({ appId: 'biblefi' }),
-    odos({}),
-    kyberswap({ clientId: 'biblefi' }),
-    lifi({}),
+    fabric({ appId: 'biblefi', attributes: { app: 'biblefi' } }),
+    odos({ attributes: { app: 'biblefi' } }),
+    kyberswap({ clientId: 'biblefi', attributes: { app: 'biblefi' } }),
+    lifi({ attributes: { app: 'biblefi' } }),
   ],
   clients: [baseClient] as PublicClient[],
   options: {
@@ -51,6 +51,8 @@ export const spandexConfig = createConfig({
     numRetries: 2,
     initialRetryDelayMs: 500,
   },
+  // Quiet noisy provider debug output; warn+ only.
+  logging: { level: 'warn' as const },
 });
 
 // Re-export helpers for convenience
