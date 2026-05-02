@@ -51,8 +51,6 @@ export const spandexConfig = createConfig({
     numRetries: 2,
     initialRetryDelayMs: 500,
   },
-  // Quiet noisy provider debug output; warn+ only.
-  logging: { level: 'warn' as const },
 });
 
 // Re-export helpers for convenience
