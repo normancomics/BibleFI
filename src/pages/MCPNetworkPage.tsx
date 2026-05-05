@@ -69,6 +69,15 @@ function healthStatusBadge(status: AgentHealthStatus | 'unknown') {
   );
 }
 
+function noFunctionBadge() {
+  return <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-[10px]">no function</Badge>;
+}
+
+function agentStatusBadge(functionName: string | undefined, healthMap: Record<string, AgentHealthStatus>) {
+  if (!functionName) return noFunctionBadge();
+  return healthStatusBadge(healthMap[functionName] ?? 'unknown');
+}
+
 const MCPNetworkPage: React.FC = () => {
   const { agentStats, loading, lastUpdate } = useAgentRealTime();
   const { report, loading: verifying, error: verifyError, runVerification } = useAgentVerification();
@@ -219,7 +228,7 @@ const MCPNetworkPage: React.FC = () => {
                       </div>
                       {agent.functionName
                         ? healthStatusBadge(healthMap[agent.functionName] ?? 'unknown')
-                        : <Badge className="bg-gray-500/20 text-gray-400">no function</Badge>}
+                        : noFunctionBadge()}
                     </div>
                     <p className="text-xs text-white/50 mb-1">{agent.description}</p>
                     <p className="text-xs text-white/30">Schedule: {agent.schedule}</p>
@@ -248,7 +257,7 @@ const MCPNetworkPage: React.FC = () => {
                       </div>
                       {agent.functionName
                         ? healthStatusBadge(healthMap[agent.functionName] ?? 'unknown')
-                        : <Badge className="bg-gray-500/20 text-gray-400 text-[10px]">no function</Badge>}
+                        : noFunctionBadge()}
                     </div>
                     <p className="text-xs text-white/50 mb-1">{agent.description}</p>
                     <p className="text-[10px] text-white/30">Parent: {agent.parent} | {agent.schedule}</p>
