@@ -67,8 +67,9 @@ async function writeAuditEntry(
 ): Promise<void> {
   try {
     await supabase.from('defi_knowledge_base').insert({
-      topic: `agent_audit:${agentName}`,
-      content: JSON.stringify({
+      protocol_name: `agent_audit:${agentName}`,
+      protocol_type: 'spandex-client-agent',
+      description: JSON.stringify({
         agentName,
         runId,
         status,
@@ -76,8 +77,6 @@ async function writeAuditEntry(
         error: error ?? null,
         timestamp: new Date().toISOString(),
       }),
-      source: 'spandex-client-agent',
-      relevance_score: 0,
     });
   } catch {
     // Audit writes are best-effort and must never crash the agent
