@@ -175,6 +175,7 @@ export class BWSPSovereignAgent {
         resonanceScore: 0,
         wisdomDecayFactor: 1,
         titheBlessingMultiplier: 1,
+        authorityWeightedResonance: 0,
       };
       step5 = failStep(step5, String(err));
     }
