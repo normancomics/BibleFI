@@ -17,6 +17,8 @@ import TokenSearchSelect from '@/components/swap/TokenSearchSelect';
 import { useSpandexQuote } from '@/hooks/useSpandexQuote';
 import { useSpandexBWTYA } from '@/hooks/useSpandexBWTYA';
 import SpandexBWTYAAdvisor from '@/components/defi/SpandexBWTYAAdvisor';
+import SwapRiskControlsPanel from '@/components/defi/SwapRiskControlsPanel';
+import { useSwapRiskControls } from '@/hooks/useSwapRiskControls';
 import { useAccount } from 'wagmi';
 import type { Address } from 'viem';
 import { parseUnits } from 'viem';
@@ -56,6 +58,8 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [slippage, setSlippage] = useState('1.0');
   const [biblicalAnalysis, setBiblicalAnalysis] = useState(null);
   const [useSpandex, setUseSpandex] = useState(true);
+  const [showRisk, setShowRisk] = useState(false);
+  const { controls: risk, update: updateRisk, reset: resetRisk } = useSwapRiskControls();
 
   // spanDEX meta-aggregator hook
   const {
@@ -113,6 +117,16 @@ const BiblicalDeFiSwap: React.FC = () => {
 
   const getSwapQuote = async () => {
     if (!fromToken || !toToken || !fromAmount || parseFloat(fromAmount) <= 0) return;
+
+    // Risk control: enforce max slippage
+    if (parseFloat(slippage) > risk.maxSlippage) {
+      toast({
+        title: "Slippage Above Cap",
+        description: `Slippage ${slippage}% exceeds your max of ${risk.maxSlippage}%. Lower it or raise the cap in Risk Controls.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const validation = validateInput(UserInputSchemas.swapInputs, {
       fromAmount, fromToken: fromToken.symbol, toToken: toToken.symbol, slippage
@@ -228,6 +242,33 @@ const BiblicalDeFiSwap: React.FC = () => {
 
   const executeSwap = async () => {
     if (!quote || !fromToken || !toToken) return;
+
+    if (risk.pauseSwaps) {
+      toast({
+        title: "Swaps Paused",
+        description: "Emergency pause is enabled in Risk Controls.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (parseFloat(quote.slippage) > risk.maxSlippage) {
+      toast({
+        title: "Slippage Above Cap",
+        description: `Quote slippage ${quote.slippage}% exceeds max ${risk.maxSlippage}%.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (parseFloat(quote.gasEstimate) > risk.maxGasEth) {
+      toast({
+        title: "Gas Above Cap",
+        description: `Estimated network fee ${quote.gasEstimate} ETH exceeds your max ${risk.maxGasEth} ETH.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const swapTransaction = {
       amount: fromAmount,
@@ -538,6 +579,35 @@ const BiblicalDeFiSwap: React.FC = () => {
           Fabric · Odos · KyberSwap · LI.FI
         </span>
       </div>
+
+      {/* Risk Controls toggle + panel */}
+      <div className="flex items-center justify-between px-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowRisk((v) => !v)}
+          className="text-xs h-7 px-2 text-ancient-gold hover:bg-ancient-gold/10"
+        >
+          <Shield className="h-3 w-3 mr-1.5" />
+          {showRisk ? 'Hide' : 'Show'} Risk Controls
+        </Button>
+        {risk.pauseSwaps && (
+          <span className="text-[10px] font-semibold text-destructive">
+            ⏸ SWAPS PAUSED
+          </span>
+        )}
+      </div>
+      <AnimatePresence>
+        {showRisk && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <SwapRiskControlsPanel controls={risk} update={updateRisk} reset={resetRisk} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* BWTYA Advisory — shown once the pipeline completes or while loading */}
       <AnimatePresence>
