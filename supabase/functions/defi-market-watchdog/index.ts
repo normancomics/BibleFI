@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
+import { requireAgentAuth, unauthorizedResponse } from '../_shared/agent-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -131,56 +132,14 @@ function assessMarketCondition(prices: Record<string, any>, tvlChanges: number[]
   return 'neutral';
 }
 
-function unauthorized(msg = 'Authentication required') {
-  return new Response(JSON.stringify({ error: msg }), {
-    status: 401,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // --- Auth gate: require valid JWT with admin role, or cron secret ---
-  const cronSecret = req.headers.get('x-cron-secret');
-  const authHeader = req.headers.get('Authorization');
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-  if (cronSecret) {
-    if (cronSecret !== Deno.env.get('CRON_SECRET')) {
-      return unauthorized('Invalid cron secret');
-    }
-  } else if (authHeader?.startsWith('Bearer ')) {
-    const supabaseAuth = createClient(
-      supabaseUrl,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
-    if (authError || !user) {
-      return unauthorized('Invalid or expired token');
-    }
-
-    // Verify admin role
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: roleData } = await adminClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
-
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-  } else {
-    return unauthorized();
+  const auth = await requireAgentAuth(req);
+  if (!auth.authorized) {
+    return unauthorizedResponse(auth.error || 'Authentication required', corsHeaders);
   }
 
   try {

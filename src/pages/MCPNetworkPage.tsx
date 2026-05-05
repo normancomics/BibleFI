@@ -7,8 +7,17 @@ import { useAgentRealTime } from '@/hooks/useAgentRealTime';
 import { motion } from 'framer-motion';
 import NeuralNetworkBackground from '@/components/home/NeuralNetworkBackground';
 
+type RecentAgentRun = {
+  agent_name: string;
+  status: string;
+  started_at: string;
+  records_processed?: number;
+};
+
 interface AgentInfo {
   name: string;
+  /** agent_ops.agent_permissions.agent_name (when applicable) */
+  agentKey?: string;
   type: 'sovereign' | 'sub-agent' | 'swarm';
   parent?: string;
   description: string;
@@ -22,15 +31,15 @@ const AGENT_NETWORK: AgentInfo[] = [
   // Sovereign Agents
   { name: 'BWSP Sovereign Agent', type: 'sovereign', description: 'Master orchestrator for Biblical Wisdom Synthesis Protocol', schedule: 'Always on', icon: <Brain className="w-5 h-5" />, color: 'text-purple-400', status: 'active' },
   { name: 'BWTYA Sovereign Agent', type: 'sovereign', description: 'Master orchestrator for Biblical-Wisdom-To-Yield-Algorithm', schedule: 'Always on', icon: <TrendingUp className="w-5 h-5" />, color: 'text-yellow-400', status: 'active' },
-  { name: 'Church Seeder Sovereign', type: 'sovereign', description: 'Global church database discovery and seeding', schedule: 'Hourly (6 staggered jobs)', icon: <Church className="w-5 h-5" />, color: 'text-green-400', status: 'active' },
-  { name: 'Security Sovereign', type: 'sovereign', description: 'Continuous security monitoring and threat detection', schedule: 'Always on', icon: <Shield className="w-5 h-5" />, color: 'text-red-400', status: 'active' },
+  { name: 'Church Seeder Sovereign', agentKey: 'church-seeder-agent', type: 'sovereign', description: 'Global church database discovery and seeding', schedule: 'Hourly (6 staggered jobs)', icon: <Church className="w-5 h-5" />, color: 'text-green-400', status: 'active' },
+  { name: 'Security Sovereign', agentKey: 'defi-market-watchdog', type: 'sovereign', description: 'Continuous security monitoring and threat detection', schedule: 'Always on', icon: <Shield className="w-5 h-5" />, color: 'text-red-400', status: 'active' },
 
   // Sub-agents
-  { name: 'Scripture Integrity Validator', type: 'sub-agent', parent: 'BWSP', description: 'Validates KJV text accuracy with Hebrew/Greek/Aramaic originals', schedule: 'Daily', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-400', status: 'scheduled' },
+  { name: 'Scripture Integrity Validator', agentKey: 'scripture-integrity-validator', type: 'sub-agent', parent: 'BWSP', description: 'Validates KJV text accuracy with Hebrew/Greek/Aramaic originals', schedule: 'Daily', icon: <BookOpen className="w-5 h-5" />, color: 'text-blue-400', status: 'scheduled' },
   { name: 'Knowledge Base Sync', type: 'sub-agent', parent: 'BWSP', description: 'Syncs biblical knowledge base and DeFi cross-references', schedule: 'Daily', icon: <Database className="w-5 h-5" />, color: 'text-cyan-400', status: 'scheduled' },
   { name: 'Biblical Advisor (LLM)', type: 'sub-agent', parent: 'BWSP', description: 'RAG-AGI powered guidance via Fireworks.ai llama-v3p3-70b', schedule: 'On demand', icon: <Brain className="w-5 h-5" />, color: 'text-purple-300', status: 'active' },
-  { name: 'Church Data Validator', type: 'sub-agent', parent: 'Church Seeder', description: 'Verifies seeded church data accuracy', schedule: 'Hourly', icon: <Church className="w-5 h-5" />, color: 'text-green-300', status: 'active' },
-  { name: 'DeFi Opportunity Scanner', type: 'sub-agent', parent: 'BWTYA', description: 'Scans Base Chain DeFi protocols for yield opportunities', schedule: 'Every 30 min', icon: <TrendingUp className="w-5 h-5" />, color: 'text-yellow-300', status: 'active' },
+  { name: 'Church Data Validator', agentKey: 'church-data-validator', type: 'sub-agent', parent: 'Church Seeder', description: 'Verifies seeded church data accuracy', schedule: 'Hourly', icon: <Church className="w-5 h-5" />, color: 'text-green-300', status: 'active' },
+  { name: 'DeFi Opportunity Scanner', agentKey: 'defi-opportunity-scanner', type: 'sub-agent', parent: 'BWTYA', description: 'Scans Base Chain DeFi protocols for yield opportunities', schedule: 'Every 30 min', icon: <TrendingUp className="w-5 h-5" />, color: 'text-yellow-300', status: 'active' },
 
   // Swarms
   { name: 'Church Discovery Swarm', type: 'swarm', parent: 'Church Seeder', description: 'Multi-source church discovery (Google, OSM, Wikidata, denominational directories)', schedule: 'Hourly', icon: <Network className="w-5 h-5" />, color: 'text-emerald-400', status: 'active' },
@@ -44,6 +53,24 @@ const MCPNetworkPage: React.FC = () => {
   const totalRuns = agentStats?.total_runs || 0;
   const completedRuns = agentStats?.completed_runs || 0;
   const failedRuns = agentStats?.failed_runs || 0;
+  const recentRuns = (agentStats?.recent_runs || []) as unknown as RecentAgentRun[];
+  const registeredAgents = agentStats?.agents || [];
+  const registeredByKey = new Map(registeredAgents.map((a) => [a.agent_name, a] as const));
+  const expectedRegistryKeys = AGENT_NETWORK.map((a) => a.agentKey).filter(Boolean) as string[];
+  const missingRegistryKeys = expectedRegistryKeys.filter((k) => !registeredByKey.has(k));
+  const inactiveRegistryKeys = expectedRegistryKeys.filter((k) => registeredByKey.get(k)?.is_active === false);
+  const extraRegistryKeys = registeredAgents
+    .map((a) => a.agent_name)
+    .filter((k) => typeof k === 'string' && !expectedRegistryKeys.includes(k))
+    .sort();
+
+  const registryBadge = (agent: AgentInfo) => {
+    if (!agent.agentKey) return null;
+    const entry = registeredByKey.get(agent.agentKey);
+    if (!entry) return <Badge className="bg-gray-500/20 text-gray-300 text-[10px]">registry: missing</Badge>;
+    if (entry.is_active === false) return <Badge className="bg-red-500/20 text-red-300 text-[10px]">registry: inactive</Badge>;
+    return <Badge className="bg-emerald-500/20 text-emerald-300 text-[10px]">registry: active</Badge>;
+  };
 
   const typeColors = {
     sovereign: 'border-purple-500/40 bg-purple-500/5',
@@ -95,6 +122,42 @@ const MCPNetworkPage: React.FC = () => {
             ))}
           </div>
 
+          {/* Registry Verification */}
+          <Card className="bg-white/5 border-white/10 mb-8">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm text-white/80 flex items-center justify-between">
+                <span>Agent Registry Verification</span>
+                <span className="text-[10px] text-white/40">Last update: {lastUpdate.toLocaleTimeString()}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-xs text-white/60 space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <Badge className="bg-white/10 text-white/70">registered: {registeredAgents.length}</Badge>
+                <Badge className={missingRegistryKeys.length > 0 ? 'bg-red-500/20 text-red-300' : 'bg-emerald-500/20 text-emerald-300'}>
+                  missing: {missingRegistryKeys.length}
+                </Badge>
+                <Badge className={inactiveRegistryKeys.length > 0 ? 'bg-red-500/20 text-red-300' : 'bg-emerald-500/20 text-emerald-300'}>
+                  inactive: {inactiveRegistryKeys.length}
+                </Badge>
+              </div>
+              {(missingRegistryKeys.length > 0 || inactiveRegistryKeys.length > 0) ? (
+                <div className="space-y-1">
+                  {missingRegistryKeys.length > 0 && (
+                    <div className="text-red-300 font-mono">missing: {missingRegistryKeys.join(', ')}</div>
+                  )}
+                  {inactiveRegistryKeys.length > 0 && (
+                    <div className="text-red-300 font-mono">inactive: {inactiveRegistryKeys.join(', ')}</div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-emerald-300">All expected registered agents are active.</div>
+              )}
+              {extraRegistryKeys.length > 0 && (
+                <div className="text-white/40 font-mono">extra in registry: {extraRegistryKeys.join(', ')}</div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Sovereign Agents */}
           <h2 className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
             <Shield className="w-5 h-5" /> Sovereign Agents
@@ -109,10 +172,13 @@ const MCPNetworkPage: React.FC = () => {
                         <span className={agent.color}>{agent.icon}</span>
                         <span className="font-bold text-sm text-white/90">{agent.name}</span>
                       </div>
-                      <Badge className={statusColors[agent.status]}>
-                        {agent.status === 'active' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse mr-1" />}
-                        {agent.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {registryBadge(agent)}
+                        <Badge className={statusColors[agent.status]}>
+                          {agent.status === 'active' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse mr-1" />}
+                          {agent.status}
+                        </Badge>
+                      </div>
                     </div>
                     <p className="text-xs text-white/50 mb-1">{agent.description}</p>
                     <p className="text-xs text-white/30">Schedule: {agent.schedule}</p>
@@ -136,10 +202,13 @@ const MCPNetworkPage: React.FC = () => {
                         <span className={agent.color}>{agent.icon}</span>
                         <span className="font-bold text-xs text-white/90">{agent.name}</span>
                       </div>
-                      <Badge className={`${statusColors[agent.status]} text-[10px]`}>
-                        {agent.status === 'active' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse mr-1" />}
-                        {agent.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {registryBadge(agent)}
+                        <Badge className={`${statusColors[agent.status]} text-[10px]`}>
+                          {agent.status === 'active' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse mr-1" />}
+                          {agent.status}
+                        </Badge>
+                      </div>
                     </div>
                     <p className="text-xs text-white/50 mb-1">{agent.description}</p>
                     <p className="text-[10px] text-white/30">Parent: {agent.parent} | {agent.schedule}</p>
@@ -185,9 +254,9 @@ const MCPNetworkPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {agentStats?.recent_runs?.length > 0 ? (
+              {recentRuns.length > 0 ? (
                 <div className="space-y-2">
-                  {agentStats.recent_runs.map((run: any, i: number) => (
+                  {recentRuns.map((run, i: number) => (
                     <div key={i} className="flex items-center justify-between p-2 rounded bg-white/5">
                       <span className="font-mono text-xs text-white/80">{run.agent_name}</span>
                       <div className="flex items-center gap-3">
