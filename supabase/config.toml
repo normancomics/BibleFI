@@ -80,3 +80,12 @@ verify_jwt = false
 
 [functions.seed-comprehensive-texts]
 verify_jwt = false
+
+[functions.bwsp-sovereign-agent]
+verify_jwt = false
+
+[functions.spandex-swap-agent]
+verify_jwt = false
+
+[functions.agent-health-check]
+verify_jwt = false

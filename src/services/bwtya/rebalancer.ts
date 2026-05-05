@@ -98,7 +98,7 @@ function tradeBiblicalNote(action: 'BUY' | 'SELL' | 'HOLD', driftPercent: number
   }
   return (
     `Overweight by ${absDrift}% — trim this position. ` +
-    '"Divide your portion to seven, or even to eight" (Ecc 11:2).`
+    '"Divide your portion to seven, or even to eight" (Ecc 11:2).'
   );
 }
 
