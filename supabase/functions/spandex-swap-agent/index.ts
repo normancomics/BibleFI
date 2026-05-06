@@ -189,8 +189,8 @@ Deno.serve(async (req) => {
         onConflict: 'topic',
       });
 
-      await logOperation(ctx, 'ADVISORY', 'defi_knowledge_base', {
-        recordsAffected: scored.length,
+      await logOperation(ctx, 'CORRELATE', 'defi_knowledge_base', {
+        recordsAffected: 1,
         inputSummary: { fromToken, toToken, providers: scored.map((s) => s.provider) },
         outputSummary: {
           bwtyaWinner: bwtyaWinner?.provider,
@@ -198,8 +198,6 @@ Deno.serve(async (req) => {
           alignedWithBestPrice,
         },
       });
-
-      ctx.stats.created += 1;
 
       return {
         scoredProviders: scored,
