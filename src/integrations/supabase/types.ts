@@ -1203,6 +1203,69 @@ export type Database = {
         }
         Relationships: []
       }
+      theological_attestations: {
+        Row: {
+          attestation_class: Database["public"]["Enums"]["attestation_class"]
+          attestation_hash: string
+          attester_address: string
+          attester_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          pool_name: string
+          rationale: string
+          revoked: boolean
+          revoked_at: string | null
+          revoked_reason: string | null
+          scripture_reference: string
+          strategy_id: string
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+          weight: number
+        }
+        Insert: {
+          attestation_class: Database["public"]["Enums"]["attestation_class"]
+          attestation_hash: string
+          attester_address: string
+          attester_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          pool_name: string
+          rationale: string
+          revoked?: boolean
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scripture_reference: string
+          strategy_id: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+          weight?: number
+        }
+        Update: {
+          attestation_class?: Database["public"]["Enums"]["attestation_class"]
+          attestation_hash?: string
+          attester_address?: string
+          attester_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          pool_name?: string
+          rationale?: string
+          revoked?: boolean
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scripture_reference?: string
+          strategy_id?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+          weight?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1255,6 +1318,77 @@ export type Database = {
             columns: ["biblical_verse_id"]
             isOneToOne: false
             referencedRelation: "biblical_knowledge_base"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      x402_executions: {
+        Row: {
+          amount_wei: string
+          attestation_hash: string
+          attestation_id: string | null
+          created_at: string
+          error_message: string | null
+          gateway_signature: string
+          id: string
+          onchain_tx_hash: string | null
+          permit_deadline: string
+          pool_name: string
+          reasoning: string
+          status: Database["public"]["Enums"]["x402_execution_status"]
+          strategy_id: string
+          updated_at: string
+          user_id: string | null
+          user_wallet: string
+          x402_amount_usdc: number
+          x402_payment_hash: string
+        }
+        Insert: {
+          amount_wei: string
+          attestation_hash: string
+          attestation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          gateway_signature: string
+          id?: string
+          onchain_tx_hash?: string | null
+          permit_deadline: string
+          pool_name: string
+          reasoning: string
+          status?: Database["public"]["Enums"]["x402_execution_status"]
+          strategy_id: string
+          updated_at?: string
+          user_id?: string | null
+          user_wallet: string
+          x402_amount_usdc: number
+          x402_payment_hash: string
+        }
+        Update: {
+          amount_wei?: string
+          attestation_hash?: string
+          attestation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          gateway_signature?: string
+          id?: string
+          onchain_tx_hash?: string | null
+          permit_deadline?: string
+          pool_name?: string
+          reasoning?: string
+          status?: Database["public"]["Enums"]["x402_execution_status"]
+          strategy_id?: string
+          updated_at?: string
+          user_id?: string | null
+          user_wallet?: string
+          x402_amount_usdc?: number
+          x402_payment_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "x402_executions_attestation_id_fkey"
+            columns: ["attestation_id"]
+            isOneToOne: false
+            referencedRelation: "theological_attestations"
             referencedColumns: ["id"]
           },
         ]
@@ -1510,6 +1644,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      attestation_class: "A_theological" | "B_ministry" | "C_creator"
+      x402_execution_status: "signed" | "executed" | "expired" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1638,6 +1774,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      attestation_class: ["A_theological", "B_ministry", "C_creator"],
+      x402_execution_status: ["signed", "executed", "expired", "failed"],
     },
   },
 } as const
