@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  * @title BWTYACore - Biblical Wisdom To Yield Algorithm
@@ -25,8 +27,9 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * - Community factor for ecosystem participation
  * - Emergency pause and rate limiting
  */
-contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
+contract BWTYACore is Ownable, ReentrancyGuard, Pausable, EIP712 {
     using SafeERC20 for IERC20;
+    using ECDSA for bytes32;
 
     // ============ Structs ============
     
@@ -97,6 +100,14 @@ contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
     address public bwspCore;        // BWSP contract for tithe verification
     address public wisdomOracle;    // Off-chain wisdom calculator
     address public treasury;
+
+    // x402 attestation gateway
+    address public x402Gateway;     // Authorized signer of strategy permits
+    mapping(bytes32 => bool) public consumedPermits; // replay protection
+
+    bytes32 public constant STRATEGY_PERMIT_TYPEHASH = keccak256(
+        "StrategyPermit(address user,string poolName,uint256 amount,string reasoning,bytes32 attestationHash,uint256 deadline,bytes32 nonce)"
+    );
     
     // Rate limiting
     uint256 public maxDailyWithdrawal;
@@ -113,6 +124,14 @@ contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
     event WisdomProfileUpdated(address indexed user, uint256 newScore, uint256 multiplier, bool hasTitheBonus);
     event EmergencyWithdraw(address indexed user, string indexed pool, uint256 amount);
     event TreasuryUpdated(address oldTreasury, address newTreasury);
+    event X402GatewayUpdated(address oldGateway, address newGateway);
+    event AttestedInvestment(
+        address indexed user,
+        string indexed pool,
+        uint256 amount,
+        bytes32 attestationHash,
+        bytes32 nonce
+    );
 
     // ============ Errors ============
     
@@ -126,10 +145,13 @@ contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
     error BelowMinimumInvestment();
     error DailyLimitExceeded();
     error Unauthorized();
+    error InvalidSignature();
+    error PermitExpired();
+    error PermitAlreadyUsed();
 
     // ============ Constructor ============
     
-    constructor(address _treasury) Ownable(msg.sender) {
+    constructor(address _treasury) Ownable(msg.sender) EIP712("BibleFiBWTYA", "1") {
         treasury = _treasury;
         maxDailyWithdrawal = 100000 * 10**6; // 100k USDC default
         _initializePools();
@@ -257,6 +279,50 @@ contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
      */
     function claimYield(string calldata poolName) external nonReentrant returns (uint256) {
         return _claimRewards(msg.sender, poolName);
+    }
+
+    /**
+     * @notice Invest gated by an x402 + theological attestation permit signed by the gateway.
+     * @dev User signs the on-chain tx; gateway signature only authorizes the parameters.
+     *      "Where there is no counsel, the people fall: but in the multitude of counsellors
+     *       there is safety." - Proverbs 11:14
+     */
+    function investWithAttestation(
+        string calldata poolName,
+        uint256 amount,
+        string calldata reasoning,
+        bytes32 attestationHash,
+        uint256 deadline,
+        bytes32 nonce,
+        bytes calldata gatewaySignature
+    ) external nonReentrant whenNotPaused returns (bool) {
+        if (block.timestamp > deadline) revert PermitExpired();
+        if (x402Gateway == address(0)) revert Unauthorized();
+
+        bytes32 structHash = keccak256(
+            abi.encode(
+                STRATEGY_PERMIT_TYPEHASH,
+                msg.sender,
+                keccak256(bytes(poolName)),
+                amount,
+                keccak256(bytes(reasoning)),
+                attestationHash,
+                deadline,
+                nonce
+            )
+        );
+        bytes32 digest = _hashTypedDataV4(structHash);
+
+        if (consumedPermits[digest]) revert PermitAlreadyUsed();
+        address signer = digest.recover(gatewaySignature);
+        if (signer != x402Gateway) revert InvalidSignature();
+
+        consumedPermits[digest] = true;
+
+        _investInternal(msg.sender, poolName, amount, reasoning);
+
+        emit AttestedInvestment(msg.sender, poolName, amount, attestationHash, nonce);
+        return true;
     }
 
     // ============ View Functions ============
@@ -412,6 +478,15 @@ contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
         treasury = _treasury;
         emit TreasuryUpdated(old, _treasury);
     }
+
+    /**
+     * @notice Set the authorized x402 gateway signer.
+     */
+    function setX402Gateway(address _gateway) external onlyOwner {
+        address old = x402Gateway;
+        x402Gateway = _gateway;
+        emit X402GatewayUpdated(old, _gateway);
+    }
     
     /**
      * @notice Update daily withdrawal limit
@@ -481,6 +556,42 @@ contract BWTYACore is Ownable, ReentrancyGuard, Pausable {
     function _initializePools() internal {
         // Pools will be initialized via createPool() after deployment
         // with actual token addresses for Base mainnet
+    }
+
+    function _investInternal(
+        address user,
+        string calldata poolName,
+        uint256 amount,
+        string calldata reasoning
+    ) internal {
+        Pool storage pool = pools[poolName];
+
+        if (bytes(pool.name).length == 0) revert PoolNotFound();
+        if (!pool.active) revert PoolInactive();
+        if (amount == 0) revert InvalidAmount();
+        if (amount < pool.minInvestment) revert BelowMinimumInvestment();
+        if (bytes(reasoning).length < 20) revert InvalidReasoning();
+
+        WisdomProfile memory profile = wisdomProfiles[user];
+        if (profile.score < pool.minWisdomScore) revert InsufficientWisdomScore();
+
+        IERC20(pool.token).safeTransferFrom(user, address(this), amount);
+
+        UserPosition storage position = userPositions[user][poolName];
+        if (position.amount > 0) {
+            _claimRewards(user, poolName);
+        }
+
+        position.amount += amount;
+        position.depositTime = block.timestamp;
+        position.lastClaimTime = block.timestamp;
+        position.investmentReasoning = reasoning;
+
+        pool.totalDeposited += amount;
+
+        _updateDiversificationScore(user);
+
+        emit Invested(user, poolName, amount, reasoning);
     }
     
     function _calculateWisdomMultiplier(uint256 score) internal pure returns (uint256) {
