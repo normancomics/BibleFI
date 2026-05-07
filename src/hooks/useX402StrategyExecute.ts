@@ -71,7 +71,9 @@ export function useX402StrategyExecute() {
       const txHash = await walletClient.sendTransaction({
         to: params.bwtyaContract,
         data: calldata,
-      });
+        account: address,
+        chain: walletClient.chain,
+      } as any);
       toast.success('Strategy execution submitted');
       await publicClient?.waitForTransactionReceipt({ hash: txHash });
       return txHash;
