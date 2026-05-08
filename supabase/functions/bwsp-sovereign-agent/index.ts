@@ -5,6 +5,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireAuth, checkRateLimit, rateLimitResponse, errorResponse } from "../_shared/auth.ts";
 
 const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -70,6 +71,19 @@ serve(async (req) => {
   }
 
   try {
+    // Require authenticated user (prevents anon OpenAI key exhaustion)
+    let userId: string;
+    try {
+      const { user } = await requireAuth(req);
+      userId = user.id;
+    } catch {
+      return errorResponse("Authentication required", 401, corsHeaders);
+    }
+
+    // Per-user rate limit: 10 calls / minute
+    const rl = checkRateLimit(`bwsp:${userId}`, 10, 60_000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt, corsHeaders);
+
     const {
       query,
       intent,
