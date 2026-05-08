@@ -14,10 +14,12 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const type = url.searchParams.get('type') || 'default';
-    const verse = url.searchParams.get('verse') || '';
-    const reference = url.searchParams.get('reference') || '';
-    const fid = url.searchParams.get('fid') || '';
+    const ALLOWED_TYPES = new Set(['default', 'wisdom', 'defi', 'tithe', 'share', 'verse']);
+    const rawType = url.searchParams.get('type') || 'default';
+    const type = ALLOWED_TYPES.has(rawType) ? rawType : 'default';
+    const verse = (url.searchParams.get('verse') || '').slice(0, 500);
+    const reference = (url.searchParams.get('reference') || '').slice(0, 100);
+    const fid = (url.searchParams.get('fid') || '').slice(0, 50);
 
     // Generate SVG image based on type
     const svg = generateSVGImage(type, { verse, reference, fid });
@@ -52,6 +54,9 @@ function generateSVGImage(type: string, data: { verse?: string; reference?: stri
   let backgroundColor = '#1a1a2e';
   let title = 'Bible.fi';
   let subtitle = 'Biblical Financial Wisdom on Base Chain';
+
+  const safeVerse = data.verse ? escapeSvg(data.verse) : '';
+  const safeReference = data.reference ? escapeSvg(data.reference) : '';
   
   switch (type) {
     case 'wisdom':
@@ -111,15 +116,15 @@ function generateSVGImage(type: string, data: { verse?: string; reference?: stri
     case 'verse':
       if (data.verse && data.reference) {
         backgroundColor = '#2d1b69';
-        title = data.reference;
-        subtitle = data.verse.substring(0, 100) + (data.verse.length > 100 ? '...' : '');
+        title = safeReference;
+        subtitle = escapeSvg(data.verse.substring(0, 100) + (data.verse.length > 100 ? '...' : ''));
         content = `
           <rect x="50" y="250" width="1100" height="200" rx="15" fill="rgba(255,215,0,0.1)" stroke="#FFD700" stroke-width="2"/>
           <text x="600" y="300" text-anchor="middle" font-size="24" fill="#FFD700" font-style="italic">
-            "${data.verse.substring(0, 80)}${data.verse.length > 80 ? '...' : ''}"
+            "${escapeSvg(data.verse.substring(0, 80) + (data.verse.length > 80 ? '...' : ''))}"
           </text>
           <text x="600" y="420" text-anchor="middle" font-size="28" fill="#E5E7EB" font-weight="bold">
-            ${data.reference}
+            ${safeReference}
           </text>
         `;
       }
@@ -149,7 +154,7 @@ function generateSVGImage(type: string, data: { verse?: string; reference?: stri
       <text x="600" y="100" text-anchor="middle" font-size="72" fill="#FFD700" font-weight="bold" font-family="serif">
         ${title}
       </text>
-      
+
       <text x="600" y="140" text-anchor="middle" font-size="24" fill="#E5E7EB" font-family="sans-serif">
         ${subtitle}
       </text>
@@ -163,6 +168,15 @@ function generateSVGImage(type: string, data: { verse?: string; reference?: stri
       </text>
     </svg>
   `;
+}
+
+function escapeSvg(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function generateFallbackImage(): string {
