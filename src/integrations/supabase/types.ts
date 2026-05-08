@@ -1568,6 +1568,11 @@ export type Database = {
         Returns: undefined
       }
       get_agent_stats: { Args: never; Returns: Json }
+      get_assigned_agent_safe: { Args: { p_agent_id: string }; Returns: Json }
+      get_church_processor_safe: {
+        Args: { p_church_id: string }
+        Returns: Json[]
+      }
       get_full_church_details: { Args: { p_church_id: string }; Returns: Json }
       get_masked_church_info: {
         Args: {
