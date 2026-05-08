@@ -1,5 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { checkRateLimit, getClientIP, errorResponse, rateLimitResponse } from '../_shared/auth.ts';
+import { checkRateLimit, getClientIP, errorResponse, rateLimitResponse, requireAuth } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,9 +24,18 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Rate limiting
+    // Require authenticated user (prevents anonymous API key exhaustion)
+    let userId: string;
+    try {
+      const { user } = await requireAuth(req);
+      userId = user.id;
+    } catch {
+      return errorResponse('Authentication required', 401, corsHeaders);
+    }
+
+    // Rate limit per user (in-memory; supplements per-user JWT requirement)
     const clientIP = getClientIP(req);
-    const rateCheck = checkRateLimit(`uniswap-quote:${clientIP}`, 20, 60000);
+    const rateCheck = checkRateLimit(`uniswap-quote:${userId}:${clientIP}`, 20, 60000);
     if (!rateCheck.allowed) {
       return rateLimitResponse(rateCheck.resetAt, corsHeaders);
     }
