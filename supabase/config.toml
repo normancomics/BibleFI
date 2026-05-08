@@ -39,6 +39,9 @@ verify_jwt = false
 [functions.wisdom-score-calculator]
 verify_jwt = false
 
+[functions.bwsp-sovereign-agent]
+verify_jwt = false
+
 [functions.uniswap-quote]
 verify_jwt = false
 
