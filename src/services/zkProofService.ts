@@ -78,8 +78,11 @@ class ZKProofService {
         params.churchId
       );
 
-      console.log('🔄 Generating proof (demo mode - real proofs require compiled Noir circuits)...');
-      toast.info('Generating anonymous proof...', { duration: 3000 });
+      console.warn('⚠️ ZK DEMO MODE: placeholder proof — on-chain amounts are NOT cryptographically hidden.');
+      toast.warning(
+        'Demo mode: ZK proofs are simulated. Your tithe amount is NOT yet anonymous on-chain. Real anonymity will activate once Noir circuits are compiled and deployed.',
+        { duration: 8000 },
+      );
 
       // Simulate proof generation time
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -87,8 +90,8 @@ class ZKProofService {
       // In production, this would be real proof data from Noir.js
       const mockProof = new Uint8Array(32).fill(0);
 
-      console.log(`✅ Mock proof generated`);
-      toast.success(`Proof generated successfully`, { duration: 3000 });
+      console.log('✅ Mock proof generated (demo only)');
+      toast.info('Demo proof generated (simulation only — not anonymous)', { duration: 4000 });
 
       return {
         proof: mockProof,
@@ -203,15 +206,35 @@ class ZKProofService {
    * Converts any string to a valid field element for Noir
    */
   private hashToField(data: string): string {
-    // Simple hash to field conversion
-    // In production, use proper hash function
-    let hash = 0;
+    // Synchronous SHA-256 not available in browser; use sync FNV-1a 64-bit fallback
+    // for demo public-input formatting only. Real circuit inputs use hashToFieldAsync.
+    let h1 = 0xcbf29ce4 >>> 0;
+    let h2 = 0x84222325 >>> 0;
     for (let i = 0; i < data.length; i++) {
-      const char = data.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      const c = data.charCodeAt(i);
+      h1 ^= c; h1 = Math.imul(h1, 0x01000193) >>> 0;
+      h2 ^= c; h2 = Math.imul(h2, 0x01000193) >>> 0;
     }
-    return Math.abs(hash).toString();
+    return (BigInt(h1) * 2n ** 32n + BigInt(h2)).toString();
+  }
+
+  /**
+   * Cryptographic SHA-256 hash to field (preferred — use when async is available).
+   */
+  async hashToFieldAsync(data: string): Promise<string> {
+    const bytes = new TextEncoder().encode(data);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const arr = new Uint8Array(digest);
+    let hex = '0x';
+    for (const b of arr) hex += b.toString(16).padStart(2, '0');
+    return BigInt(hex).toString();
+  }
+
+  /**
+   * Public flag so UI components can branch on demo vs real ZK mode.
+   */
+  isDemoMode(): boolean {
+    return true;
   }
 
   /**
