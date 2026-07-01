@@ -60,6 +60,16 @@ serve(async (req) => {
       });
     }
 
+    if (typeof address !== 'string' || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      return new Response(JSON.stringify({ error: 'Invalid address format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const pageNum = Math.max(1, Math.min(10000, parseInt(String(page), 10) || 1));
+    const offsetNum = Math.max(1, Math.min(100, parseInt(String(offset), 10) || 25));
+
     const apiKey = Deno.env.get('BASESCAN_API_KEY');
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'Basescan API key not configured' }), {
@@ -73,10 +83,10 @@ serve(async (req) => {
     // Fetch normal transactions and ERC-20 token transfers in parallel
     const [normalRes, tokenRes] = await Promise.all([
       fetch(
-        `https://api.basescan.org/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=${page}&offset=${offset}&sort=desc&apikey=${apiKey}`
+        `https://api.basescan.org/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=${pageNum}&offset=${offsetNum}&sort=desc&apikey=${apiKey}`
       ),
       fetch(
-        `https://api.basescan.org/api?module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&page=${page}&offset=${offset}&sort=desc&apikey=${apiKey}`
+        `https://api.basescan.org/api?module=account&action=tokentx&address=${address}&startblock=0&endblock=99999999&page=${pageNum}&offset=${offsetNum}&sort=desc&apikey=${apiKey}`
       ),
     ]);
 
