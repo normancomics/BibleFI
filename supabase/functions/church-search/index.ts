@@ -23,7 +23,6 @@ interface ChurchResult {
   longitude?: number | null;
   rating?: number | null;
   reviewCount?: number | null;
-  phone?: string | null;
   website?: string | null;
   source: string;
   verified: boolean;
