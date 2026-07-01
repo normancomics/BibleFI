@@ -69,6 +69,13 @@ interface TalentCredential {
          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
        );
      }
+
+    if (typeof wallet_address !== 'string' || !/^0x[a-fA-F0-9]{40}$/.test(wallet_address)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid wallet_address format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
  
     // Fetch builder score from Talent Protocol v3 API
     const scoreResponse = await fetch(
