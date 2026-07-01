@@ -1095,6 +1095,57 @@ export type Database = {
         }
         Relationships: []
       }
+      superfluid_monitor_runs: {
+        Row: {
+          created_at: string
+          deltas: Json
+          duration_ms: number
+          env_name: string | null
+          errors: Json
+          id: string
+          receivers: Json
+          receivers_checked: number
+          receivers_failed: number
+          receivers_ok: number
+          status: string
+          tokens: Json
+          treasury: string | null
+          triggered_by: string
+        }
+        Insert: {
+          created_at?: string
+          deltas?: Json
+          duration_ms?: number
+          env_name?: string | null
+          errors?: Json
+          id?: string
+          receivers?: Json
+          receivers_checked?: number
+          receivers_failed?: number
+          receivers_ok?: number
+          status: string
+          tokens?: Json
+          treasury?: string | null
+          triggered_by?: string
+        }
+        Update: {
+          created_at?: string
+          deltas?: Json
+          duration_ms?: number
+          env_name?: string | null
+          errors?: Json
+          id?: string
+          receivers?: Json
+          receivers_checked?: number
+          receivers_failed?: number
+          receivers_ok?: number
+          status?: string
+          tokens?: Json
+          treasury?: string | null
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       superfluid_streams: {
         Row: {
           church_id: string | null
