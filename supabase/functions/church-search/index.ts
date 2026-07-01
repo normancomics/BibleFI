@@ -101,7 +101,7 @@ serve(async (req) => {
     try {
       let dbQuery = supabase
         .from('global_churches')
-        .select('id,name,address,city,state_province,country,rating,review_count,phone,website,verified,accepts_crypto,crypto_networks,denomination');
+        .select('id,name,address,city,state_province,country,rating,review_count,website,verified,accepts_crypto,crypto_networks,denomination');
 
       // When both query and location are provided, search more flexibly
       // Don't AND them together - just use location for filtering, query for ranking
@@ -142,7 +142,6 @@ serve(async (req) => {
             longitude: null,
             rating: row.rating,
             reviewCount: row.review_count,
-            phone: row.phone,
             website: row.website,
             source: 'database',
             verified: row.verified || false,
