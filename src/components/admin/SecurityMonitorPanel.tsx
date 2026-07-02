@@ -73,7 +73,7 @@ const SecurityMonitorPanel: React.FC = () => {
   const acknowledge = async (id: string) => {
     const { error } = await supabase
       .from("security_monitor_findings" as never)
-      .update({ acknowledged: true })
+      .update({ acknowledged: true } as never)
       .eq("id", id);
     if (error) toast.error(error.message);
     else load();
