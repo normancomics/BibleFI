@@ -1005,6 +1005,84 @@ export type Database = {
         }
         Relationships: []
       }
+      security_monitor_findings: {
+        Row: {
+          acknowledged: boolean
+          created_at: string
+          detected_at: string
+          endpoint: string
+          evidence: Json
+          id: string
+          probe: string
+          run_id: string
+          severity: string
+          status: string
+          title: string
+        }
+        Insert: {
+          acknowledged?: boolean
+          created_at?: string
+          detected_at?: string
+          endpoint: string
+          evidence?: Json
+          id?: string
+          probe: string
+          run_id: string
+          severity: string
+          status: string
+          title: string
+        }
+        Update: {
+          acknowledged?: boolean
+          created_at?: string
+          detected_at?: string
+          endpoint?: string
+          evidence?: Json
+          id?: string
+          probe?: string
+          run_id?: string
+          severity?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      security_monitor_runs: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          high_severity_count: number
+          id: string
+          probes_failed: number
+          probes_passed: number
+          probes_run: number
+          started_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          high_severity_count?: number
+          id?: string
+          probes_failed?: number
+          probes_passed?: number
+          probes_run?: number
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          high_severity_count?: number
+          id?: string
+          probes_failed?: number
+          probes_passed?: number
+          probes_run?: number
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       sovereign_agents: {
         Row: {
           active: boolean | null
