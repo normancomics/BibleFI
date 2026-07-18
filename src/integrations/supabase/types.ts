@@ -1771,6 +1771,22 @@ export type Database = {
           verse: number
         }[]
       }
+      search_public_churches: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          accepts_crypto: boolean
+          accepts_fiat: boolean
+          city: string
+          country: string
+          denomination: string
+          id: string
+          name: string
+          rating: number
+          state_province: string
+          verified: boolean
+          website: string
+        }[]
+      }
       start_agent_run: {
         Args: { p_agent_name: string; p_metadata?: Json; p_run_mode?: string }
         Returns: string
