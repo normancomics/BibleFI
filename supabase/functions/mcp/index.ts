@@ -84,7 +84,7 @@ var get_daily_verse_default = defineTool3({
     const supabase = createClient3(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
     );
     let q = supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").limit(50);
     if (category) q = q.ilike("category", `%${category}%`);
