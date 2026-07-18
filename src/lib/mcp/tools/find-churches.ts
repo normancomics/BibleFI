@@ -16,7 +16,7 @@ export default defineTool({
     const supabase = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } },
     );
     const { data, error } = await supabase.rpc("search_public_churches", {
       p_query: query,
