@@ -21,7 +21,7 @@ var search_scriptures_default = defineTool({
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
     );
     const { data, error } = await supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").or(
       `verse_text.ilike.%${query}%,reference.ilike.%${query}%,principle.ilike.%${query}%,category.ilike.%${query}%`
@@ -53,9 +53,9 @@ var find_churches_default = defineTool2({
     const supabase = createClient2(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
     );
-    const { data, error } = await supabase.from("global_churches").select("id,name,city,state_province,country,denomination,verified,accepts_crypto,accepts_fiat,rating,website").or(
+    const { data, error } = await supabase.from("public_church_directory").select("id,name,city,state_province,country,denomination,verified,accepts_crypto,accepts_fiat,rating,website").or(
       `name.ilike.%${query}%,city.ilike.%${query}%,denomination.ilike.%${query}%,country.ilike.%${query}%`
     ).limit(limit ?? 10);
     if (error) {
@@ -84,7 +84,7 @@ var get_daily_verse_default = defineTool3({
     const supabase = createClient3(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
     );
     let q = supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").limit(50);
     if (category) q = q.ilike("category", `%${category}%`);

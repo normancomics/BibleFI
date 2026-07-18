@@ -16,10 +16,10 @@ export default defineTool({
     const supabase = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } },
     );
     const { data, error } = await supabase
-      .from("global_churches")
+      .from("public_church_directory")
       .select("id,name,city,state_province,country,denomination,verified,accepts_crypto,accepts_fiat,rating,website")
       .or(
         `name.ilike.%${query}%,city.ilike.%${query}%,denomination.ilike.%${query}%,country.ilike.%${query}%`,
