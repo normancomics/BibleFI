@@ -21,7 +21,7 @@ var search_scriptures_default = defineTool({
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
     );
     const { data, error } = await supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").or(
       `verse_text.ilike.%${query}%,reference.ilike.%${query}%,principle.ilike.%${query}%,category.ilike.%${query}%`
