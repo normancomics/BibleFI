@@ -53,7 +53,22 @@ with **no** `txHash` — the caller reports failure honestly.
 3. Set `VITE_VEIL_LIVE=true`.
 4. Note: Veil screens deposits for compliance (Coinbase EAS / Binance BABT /
    Ethos / 0xbow). Verify your users' path per <https://docs.veil.cash/>.
-5. Test with small real amounts on Base before announcing.
+5. Test with small real amounts on Base before announcing. Veil has **no
+   testnet deployment** (verified: none of its contracts exist on Base Sepolia),
+   so a real test must use a burner wallet with a tiny amount of real Base ETH.
+   Use the smoke-test tool with your own key (it never leaves your machine):
+
+   ```sh
+   npm install @veil-cash/sdk ethers
+   WALLET_KEY=0xyourBurnerKey AMOUNT=0.001 \
+     [RECIPIENT=0xChurch PROVING_KEY_PATH=./keys] \
+     node scripts/veil-smoke-test.mjs
+   ```
+
+   See [scripts/veil-smoke-test.mjs](../scripts/veil-smoke-test.mjs). The
+   adapter's transaction builders were verified with an ephemeral key to target
+   the correct live contracts (deposit → Veil Entry `0xc2535c…`, USDC approve →
+   real USDC token), so the wiring is correct up to the broadcast step.
 
 ## Verified live Veil contracts (Base, chainId 8453)
 
