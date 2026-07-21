@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { supabaseApi } from '@/integrations/supabase/apiClient';
+import { getChurchDirectoryCount } from '@/services/churchDirectoryClient';
 import bibleFiNavIcon from '@/assets/biblefi-nav-icon.png';
 
 const Index = () => {
@@ -22,19 +22,10 @@ const Index = () => {
   });
 
   useEffect(() => {
-    const fetchCount = async () => {
-      const { data, count, error } = await supabaseApi
-        .from('public_church_directory')
-        .select('id', { count: 'exact' });
-
-      if (error) {
-        console.error('Error fetching church count:', error);
-      }
-
-      setChurchCount(count ?? data?.length ?? 0);
-    };
-
-    fetchCount();
+    // Cached + retried + RPC-fallback fetch; structured logging happens inside.
+    getChurchDirectoryCount()
+      .then(setChurchCount)
+      .catch((error) => console.error('Error fetching church count:', error));
   }, []);
 
   // Show intro animation first
