@@ -13,11 +13,27 @@ export const config = createConfig({
     // Farcaster mini app connector — the embedded wallet inside
     // Farcaster/Base App mini app hosts (connector id: 'farcaster')
     farcasterMiniApp(),
-    // MetaMask / Browser Wallet
+    // Rainbow — extension when installed; the wallet picker falls back to
+    // WalletConnect QR (scannable by Rainbow mobile) when it isn't
+    injected({
+      target: {
+        id: 'rainbow',
+        name: 'Rainbow',
+        provider: () => {
+          if (typeof window === 'undefined') return undefined;
+          const w = window as unknown as {
+            rainbow?: typeof window.ethereum;
+            ethereum?: typeof window.ethereum & { isRainbow?: boolean };
+          };
+          return w.rainbow ?? (w.ethereum?.isRainbow ? w.ethereum : undefined);
+        },
+      },
+    }),
+    // MetaMask / browser extension wallet
     injected({
       target: {
         id: 'injected',
-        name: 'Browser Wallet',
+        name: 'MetaMask',
         provider: typeof window !== 'undefined' ? window.ethereum : undefined,
       },
     }),
