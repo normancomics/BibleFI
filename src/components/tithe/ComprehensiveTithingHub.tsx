@@ -362,29 +362,43 @@ const ComprehensiveTithingHub: React.FC = () => {
       
       // Deposit to privacy pool
       const depositResult = await veilCashClient.deposit(veilDenomination);
-      
-      if (!depositResult.success) {
-        throw new Error(depositResult.error);
+
+      // Preview mode: nothing moved on-chain. Never imply a tithe was sent.
+      if (depositResult.preview) {
+        toast({
+          title: "Preview mode — no funds moved",
+          description: "Anonymous Veil giving is not yet live on this deployment. No on-chain transfer was made.",
+        });
+        return;
       }
-      
+
+      if (!depositResult.success || !depositResult.txHash) {
+        throw new Error(depositResult.error || 'Deposit did not confirm on-chain');
+      }
+
       toast({
-        title: "Anonymous Deposit Complete",
+        title: "Anonymous Deposit Confirmed",
         description: "Save your note securely! You'll need it to send the anonymous tithe.",
       });
-      
-      // In production, store the note securely and withdraw to church
-      // For demo, immediately withdraw to church
+
       if (depositResult.note) {
         const withdrawResult = await veilCashClient.withdraw(
           depositResult.note,
           selectedChurch.crypto_address
         );
-        
-        if (withdrawResult.success) {
+
+        if (withdrawResult.success && withdrawResult.txHash) {
           toast({
-            title: "Anonymous Tithe Sent!",
+            title: "Anonymous Tithe Sent",
             description: `${withdrawResult.amount} sent privately to ${selectedChurch.name}`,
           });
+        } else if (withdrawResult.preview) {
+          toast({
+            title: "Preview mode — no tithe sent",
+            description: "Live Veil transfers are not enabled. No funds moved.",
+          });
+        } else {
+          toast({ title: "Withdrawal failed", description: withdrawResult.error, variant: "destructive" });
         }
       }
     } catch (error) {

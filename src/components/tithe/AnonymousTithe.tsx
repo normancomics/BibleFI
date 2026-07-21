@@ -12,6 +12,7 @@ import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2, Zap, ExternalLink, Se
 import { toast } from 'sonner';
 import { zkProofService } from '@/services/zkProofService';
 import { veilCashClient, VeilDenomination } from '@/integrations/veil/client';
+import { isVeilLive } from '@/config/veil';
 import { useAccount } from 'wagmi';
 import { ethers } from 'ethers';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,7 +38,8 @@ export const AnonymousTithe: React.FC = () => {
   const [proofGenerated, setProofGenerated] = useState(false);
   const [zkProvider, setZKProvider] = useState<ZKProvider>('veil');
   const [veilDenomination, setVeilDenomination] = useState<VeilDenomination>('USDC_100');
-  const [anonymitySetSize, setAnonymitySetSize] = useState(0);
+  const [anonymitySetSize, setAnonymitySetSize] = useState<number | null>(null);
+  const veilLive = isVeilLive();
   const [savedNote, setSavedNote] = useState<string | null>(null);
   const [noteCopied, setNoteCopied] = useState(false);
   
@@ -123,19 +125,26 @@ export const AnonymousTithe: React.FC = () => {
         const provider = new BrowserProvider((window as any).ethereum);
         const signer = await provider.getSigner();
         await veilCashClient.initialize(signer);
-        
+
         const result = await veilCashClient.deposit(veilDenomination);
         clearInterval(progressInterval);
-        
+        setProofProgress(0);
+
         if (result.success && result.note) {
           setSavedNote(result.note);
           setProofProgress(100);
           setProofGenerated(true);
-          toast.success('Anonymous deposit ready!', {
+          toast.success('Anonymous deposit confirmed on-chain', {
             description: 'IMPORTANT: Save your note securely before continuing.',
           });
+        } else if (result.preview) {
+          // Preview mode: nothing moved on-chain. Be explicit — no fake success.
+          toast.warning('Preview mode — no funds moved', {
+            description: 'Anonymous Veil deposits are not yet live on this deployment. Nothing was sent on-chain.',
+            duration: 8000,
+          });
         } else {
-          throw new Error(result.error);
+          throw new Error(result.error || 'Deposit failed');
         }
       } else {
         // Noir ZK approach
@@ -180,21 +189,33 @@ export const AnonymousTithe: React.FC = () => {
   const handleSubmitTithe = async () => {
     if (!selectedChurch) return;
 
-    if (zkProvider === 'veil' && savedNote) {
+    if (zkProvider === 'veil') {
+      if (!savedNote) return;
       const result = await veilCashClient.withdraw(savedNote, selectedChurch.address);
-      if (result.success) {
-        toast.success('Anonymous tithe sent!', {
+      if (result.success && result.txHash) {
+        toast.success('Anonymous tithe sent', {
           description: `${result.amount} sent privately to ${selectedChurch.name}`,
         });
+      } else if (result.preview) {
+        toast.warning('Preview mode — no tithe was sent', {
+          description: 'Live Veil transfers are not enabled on this deployment. No funds moved.',
+          duration: 8000,
+        });
+        return;
       } else {
-        toast.error('Withdrawal failed: ' + result.error);
+        toast.error('Withdrawal failed: ' + (result.error || 'unknown error'));
         return;
       }
     } else {
-      toast.success('Anonymous tithe submitted via Noir ZK!');
+      // Noir path is proof-only until an on-chain verifier + settlement contract
+      // is deployed — do NOT claim a tithe was sent.
+      toast.info('Noir proof generated (demo). On-chain anonymous settlement is not yet live — no funds were moved.', {
+        duration: 8000,
+      });
+      return;
     }
-    
-    // Reset state
+
+    // Reset state (only reached on a real confirmed Veil transfer)
     setAmount('');
     setSelectedChurch(null);
     setProofGenerated(false);
@@ -227,10 +248,21 @@ export const AnonymousTithe: React.FC = () => {
         <Alert className="bg-purple-950/20 border-ancient-gold/30 mt-4">
           <Lock className="h-4 w-4 text-ancient-gold" />
           <AlertDescription className="text-sm">
-            <strong className="text-ancient-gold">Matthew 6:3-4:</strong> "But when you give to the needy, 
+            <strong className="text-ancient-gold">Matthew 6:3-4:</strong> "But when you give to the needy,
             do not let your left hand know what your right hand is doing, so that your giving may be in secret."
           </AlertDescription>
         </Alert>
+
+        {!veilLive && (
+          <Alert className="bg-yellow-950/20 border-yellow-500/40 mt-3">
+            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+            <AlertDescription className="text-sm">
+              <strong className="text-yellow-500">Preview:</strong> Anonymous on-chain giving is not
+              yet live on this deployment. You can explore the flow, but{' '}
+              <strong>no transaction is sent and no funds move</strong> until live mode is enabled.
+            </AlertDescription>
+          </Alert>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -276,16 +308,18 @@ export const AnonymousTithe: React.FC = () => {
               </p>
             </div>
 
-            {/* Anonymity Set Display */}
+            {/* Anonymity Set Display — real on-chain pool.nextIndex() */}
             <div className="p-3 bg-secondary/30 rounded-lg border border-border">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Anonymity Set Size:</span>
                 <Badge variant="secondary" className="text-lg">
-                  {anonymitySetSize.toLocaleString()} deposits
+                  {anonymitySetSize === null ? '—' : `${anonymitySetSize.toLocaleString()} deposits`}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Larger sets = stronger privacy. Your tithe is hidden among {anonymitySetSize} others.
+                {anonymitySetSize === null
+                  ? 'Live pool size unavailable right now.'
+                  : `Live Veil pool on Base — your tithe would hide among ${anonymitySetSize.toLocaleString()} real deposits.`}
               </p>
             </div>
           </TabsContent>
@@ -565,12 +599,12 @@ export const AnonymousTithe: React.FC = () => {
         {/* Privacy Guarantee */}
         <div className="text-center pt-4 border-t border-border">
           <Badge variant="outline" className="border-ancient-gold/50 text-ancient-gold">
-            🔐 Cryptographically Private on Base L2
+            {veilLive ? '🔐 Cryptographically Private on Base L2' : '🔎 Preview — not yet private on-chain'}
           </Badge>
           <p className="text-xs text-muted-foreground mt-2">
-            {zkProvider === 'veil' 
-              ? 'Powered by Veil.cash ZK-SNARK privacy pools'
-              : 'Powered by Noir zero-knowledge proofs'}
+            {zkProvider === 'veil'
+              ? 'Veil.cash ZK-SNARK privacy pools (Groth16 + Poseidon) on Base'
+              : 'Noir zero-knowledge proofs — on-chain settlement pending verifier deployment'}
           </p>
         </div>
       </CardContent>
