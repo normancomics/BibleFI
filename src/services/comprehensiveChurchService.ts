@@ -1,5 +1,5 @@
 import { supabaseApi } from '@/integrations/supabase/apiClient';
-import { runDirectoryQuery, fetchDirectoryRowsViaRpc } from '@/services/churchDirectoryClient';
+import { runDirectoryQuery, fetchDirectoryRowsViaRpc, DirectoryRow } from '@/services/churchDirectoryClient';
 
 export interface Church {
   id: string;
@@ -32,7 +32,7 @@ export interface ChurchSearchResult {
   searchMetadata: {
     query: string;
     location?: string;
-    filters: Record<string, any>;
+    filters: Record<string, unknown>;
     executionTime: number;
   };
 }
@@ -119,9 +119,9 @@ export class ComprehensiveChurchService {
       // When the view path is broken, fall back to the SECURITY DEFINER RPC
       // and apply the basic filters client-side.
       const rpcFallback = async () => {
-        const { data, error } = await fetchDirectoryRowsViaRpc<any>();
+        const { data, error } = await fetchDirectoryRowsViaRpc<DirectoryRow>();
         if (error || !data) return { data: null, error: error ?? new Error('rpc returned no data') };
-        const matches = (data as any[]).filter(church => {
+        const matches = data.filter(church => {
           if (params.query) {
             const q = params.query.toLowerCase();
             const hit = [church.name, church.city, church.denomination]
@@ -139,7 +139,7 @@ export class ComprehensiveChurchService {
         return { data: matches.slice(offset, offset + limit), error: null, count: matches.length };
       };
 
-      const result = await runDirectoryQuery<any>({
+      const result = await runDirectoryQuery<DirectoryRow>({
         operation: 'search',
         cacheKey: `search:${JSON.stringify(params)}`,
         run: () => buildQuery(),
@@ -174,8 +174,8 @@ export class ComprehensiveChurchService {
         verified: church.verified,
         rating: church.rating,
         coordinates: church.coordinates ? {
-          lat: (church.coordinates as any).x,
-          lng: (church.coordinates as any).y
+          lat: (church.coordinates as { x: number; y: number }).x,
+          lng: (church.coordinates as { x: number; y: number }).y
         } : undefined,
         created_at: church.created_at,
         updated_at: church.updated_at
@@ -273,8 +273,8 @@ export class ComprehensiveChurchService {
         verified: data.verified,
         rating: data.rating,
         coordinates: data.coordinates ? {
-          lat: (data.coordinates as any).x,
-          lng: (data.coordinates as any).y
+          lat: (data.coordinates as { x: number; y: number }).x,
+          lng: (data.coordinates as { x: number; y: number }).y
         } : undefined,
         created_at: data.created_at,
         updated_at: data.updated_at
@@ -320,8 +320,8 @@ export class ComprehensiveChurchService {
         verified: church.verified,
         rating: church.rating,
         coordinates: church.coordinates ? {
-          lat: (church.coordinates as any).x,
-          lng: (church.coordinates as any).y
+          lat: (church.coordinates as { x: number; y: number }).x,
+          lng: (church.coordinates as { x: number; y: number }).y
         } : undefined,
         created_at: church.created_at,
         updated_at: church.updated_at

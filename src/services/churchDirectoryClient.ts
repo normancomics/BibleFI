@@ -19,6 +19,34 @@ import { supabaseApi } from '@/integrations/supabase/apiClient';
 export const DIRECTORY_VIEW_PATH = 'api.public_church_directory';
 export const DIRECTORY_RPC_PATH = 'api.get_public_church_directory';
 
+/** Row shape served by api.public_church_directory and its RPC equivalent. */
+export interface DirectoryRow {
+  id: string;
+  name: string;
+  city: string;
+  state_province: string | null;
+  country: string;
+  denomination: string | null;
+  address: string | null;
+  postal_code?: string | null;
+  website: string | null;
+  verified: boolean;
+  accepts_crypto: boolean;
+  accepts_fiat: boolean;
+  accepts_cards: boolean;
+  accepts_checks?: boolean | null;
+  rating: number;
+  review_count?: number | null;
+  /** Postgres `point` — shape varies by client, cast at the use site. */
+  coordinates: unknown;
+  masked_email: string | null;
+  masked_phone: string | null;
+  masked_crypto_address: string | null;
+  crypto_networks: string[] | null;
+  created_at: string;
+  updated_at?: string | null;
+}
+
 export interface DirectoryError {
   code?: string;
   message: string;
