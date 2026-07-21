@@ -2,7 +2,7 @@
 import { createConfig, http } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
-import { farcasterFrame } from '@farcaster/frame-wagmi-connector'
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
 // Updated WalletConnect Project ID for BibleFi production
 const projectId = '2589ec8e083adaa554ee06641ce2b93b' // BibleFi official project ID
@@ -10,8 +10,9 @@ const projectId = '2589ec8e083adaa554ee06641ce2b93b' // BibleFi official project
 export const config = createConfig({
   chains: [base, mainnet],
   connectors: [
-    // Farcaster Frame connector — auto-connects inside Warpcast/Farcaster frames
-    farcasterFrame() as any,
+    // Farcaster mini app connector — the embedded wallet inside
+    // Farcaster/Base App mini app hosts (connector id: 'farcaster')
+    farcasterMiniApp(),
     // MetaMask / Browser Wallet
     injected({
       target: {

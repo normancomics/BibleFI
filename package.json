@@ -19,6 +19,7 @@
     "@farcaster/auth-kit": "^0.6.0",
     "@farcaster/frame-sdk": "^0.1.14",
     "@farcaster/frame-wagmi-connector": "^1.0.1",
+    "@farcaster/miniapp-sdk": "^0.2.3",
     "@farcaster/miniapp-wagmi-connector": "^1.1.1",
     "@hookform/resolvers": "^3.9.0",
     "@lovable.dev/mcp-js": "^0.20.0",

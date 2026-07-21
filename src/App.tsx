@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/contexts/SecurityContext";
+import { MiniAppBootstrap } from "@/components/farcaster/MiniAppBootstrap";
 import { SecurityProvider as EnhancedSecurityProvider } from "@/contexts/EnhancedSecurityContext";
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
@@ -51,6 +52,7 @@ import "./App.css";
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <MiniAppBootstrap />
     <SecurityProvider>
       <EnhancedSecurityProvider>
         <TooltipProvider>
