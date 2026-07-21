@@ -89,3 +89,6 @@ verify_jwt = false
 
 [functions.church-directory-debug]
 verify_jwt = false
+
+[functions.church-directory-health]
+verify_jwt = false

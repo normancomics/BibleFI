@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "verify:agents": "node scripts/verify-agents.mjs"
+    "verify:agents": "node scripts/verify-agents.mjs",
+    "test:health": "node scripts/test-church-directory-health.mjs"
   },
   "dependencies": {
     "@base-org/account": "^2.5.1",
