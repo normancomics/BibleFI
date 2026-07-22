@@ -92,3 +92,6 @@ verify_jwt = false
 
 [functions.church-directory-health]
 verify_jwt = false
+
+[functions.biblefi-terminal]
+verify_jwt = false
