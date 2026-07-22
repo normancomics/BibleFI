@@ -8,7 +8,7 @@
  * "Where there is no guidance, a people falls, but in an abundance of
  *  counsellors there is safety." – Proverbs 11:14
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import NavBar from '@/components/NavBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,11 @@ import {
 import { useSpandexBWTYA } from '@/hooks/useSpandexBWTYA';
 import SpandexBWTYAAdvisor from '@/components/defi/SpandexBWTYAAdvisor';
 import { useAccount } from 'wagmi';
+import {
+  isSabbathSunday,
+  SABBATH_AUTONOMOUS_INTERVAL_MS,
+  SABBATH_DEFAULT_PLAN,
+} from '@/utils/sabbathAutonomy';
 
 // ---------------------------------------------------------------------------
 // Known Base-chain token list for the advisory form
@@ -43,6 +48,8 @@ const BASE_TOKENS: Record<string, { address: string; decimals: number; label: st
 
 const SpandexAdvisoryPage: React.FC = () => {
   const { address: walletAddress } = useAccount();
+  const autonomousSabbathMode = isSabbathSunday();
+  const runningAutonomousRef = useRef(false);
 
   const [fromSymbol, setFromSymbol] = useState('ETH');
   const [toSymbol, setToSymbol] = useState('USDC');
@@ -51,6 +58,47 @@ const SpandexAdvisoryPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
 
   const { advisory, isLoading, error, runAdvisory, reset } = useSpandexBWTYA();
+
+  useEffect(() => {
+    if (!autonomousSabbathMode) return;
+
+    setFromSymbol(SABBATH_DEFAULT_PLAN.fromSymbol);
+    setToSymbol(SABBATH_DEFAULT_PLAN.toSymbol);
+    setAmountStr(SABBATH_DEFAULT_PLAN.amount);
+    setWisdomScore(SABBATH_DEFAULT_PLAN.wisdomScore);
+
+    const runAutonomous = async () => {
+      if (runningAutonomousRef.current) return;
+      runningAutonomousRef.current = true;
+      try {
+        const fromToken = BASE_TOKENS[SABBATH_DEFAULT_PLAN.fromSymbol];
+        const toToken = BASE_TOKENS[SABBATH_DEFAULT_PLAN.toSymbol];
+        const amount = SABBATH_DEFAULT_PLAN.amount;
+        const inputAmountRaw = BigInt(
+          Math.floor(parseFloat(amount) * 10 ** fromToken.decimals),
+        );
+        await runAdvisory({
+          fromToken: SABBATH_DEFAULT_PLAN.fromSymbol,
+          toToken: SABBATH_DEFAULT_PLAN.toSymbol,
+          fromTokenAddress: fromToken.address,
+          toTokenAddress: toToken.address,
+          inputAmountHuman: amount,
+          inputAmountRaw,
+          chainId: 8453,
+          slippageBps: SABBATH_DEFAULT_PLAN.slippageBps,
+          swapperAccount: walletAddress ?? '0x0000000000000000000000000000000000000001',
+          wisdomScore: SABBATH_DEFAULT_PLAN.wisdomScore,
+          autonomousSabbath: true,
+        });
+      } finally {
+        runningAutonomousRef.current = false;
+      }
+    };
+
+    runAutonomous();
+    const timer = window.setInterval(runAutonomous, SABBATH_AUTONOMOUS_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [autonomousSabbathMode, runAdvisory, walletAddress]);
 
   function validate(): string | null {
     const amt = parseFloat(amountStr);
@@ -83,6 +131,7 @@ const SpandexAdvisoryPage: React.FC = () => {
       slippageBps: 50,
       swapperAccount: walletAddress ?? '0x0000000000000000000000000000000000000001',
       wisdomScore,
+      autonomousSabbath: false,
     });
   }
 
@@ -99,9 +148,14 @@ const SpandexAdvisoryPage: React.FC = () => {
         >
           <div className="flex items-center gap-3 mb-1">
             <Zap className="h-7 w-7 text-ancient-gold" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-ancient-gold to-eboy-green bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-ancient-gold">
               spanDEX × BWTYA Advisory
             </h1>
+            {autonomousSabbathMode && (
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                Autonomous Sabbath Mode
+              </Badge>
+            )}
           </div>
           <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
             <BookOpen className="h-4 w-4 text-ancient-gold" />

@@ -21,7 +21,9 @@ import { bwtyaScorer } from '@/services/bwtya/scorer';
 import { bwtyaRanker } from '@/services/bwtya/ranker';
 import { bwtyaStrategyMapper } from '@/services/bwtya/strategyMapper';
 import { bwspEngine } from '@/services/bwsp/engine';
+import { evaluateBiblicalRoutePolicy } from './policy';
 import type {
+  SpandexCompetitiveBenchmark,
   SpandexRawQuote,
   SpandexScoredQuote,
   SpandexSwapAdvisoryInput,
@@ -32,6 +34,11 @@ import type { Address } from 'viem';
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+interface SpandexProviderQuote {
+  provider: string;
+  simulation?: { outputAmount?: bigint };
+  outputAmount?: bigint;
+}
 
 function formatOutputAmount(raw: bigint, decimals: number): string {
   const divisor = 10n ** BigInt(decimals);
@@ -41,17 +48,66 @@ function formatOutputAmount(raw: bigint, decimals: number): string {
   return `${whole}.${fracStr}`;
 }
 
+function computeCompetitiveBenchmark(
+  bwtyaRecommended: SpandexScoredQuote | null,
+  bestPrice: SpandexScoredQuote | null,
+): SpandexCompetitiveBenchmark | null {
+  if (!bwtyaRecommended || !bestPrice) return null;
+
+  const bestRaw = Number(bestPrice.raw.outputAmountRaw);
+  const chosenRaw = Number(bwtyaRecommended.raw.outputAmountRaw);
+  const outputDeltaBps =
+    bestRaw > 0 ? Math.round(((chosenRaw - bestRaw) / bestRaw) * 10_000) : 0;
+
+  const stewardshipPremiumBps = outputDeltaBps < 0 ? Math.abs(outputDeltaBps) : 0;
+  const priceCompetitiveness = Math.max(0, Math.min(100, 100 - Math.abs(outputDeltaBps) / 10));
+  const competitivenessScore = Math.round(
+    bwtyaRecommended.scored.bwtyaScore * 0.65 + priceCompetitiveness * 0.35,
+  );
+
+  const biblicalPolicyPass = bwtyaRecommended.biblicalPolicyPass;
+  const verdict = !biblicalPolicyPass
+    ? 'blocked'
+    : competitivenessScore >= 80
+      ? 'outperforming'
+      : competitivenessScore >= 65
+        ? 'competitive'
+        : 'caution';
+
+  const summary = biblicalPolicyPass
+    ? outputDeltaBps >= 0
+      ? `BWTYA route beats best-price by ${outputDeltaBps} bps while passing biblical policy checks.`
+      : `BWTYA route trades ${Math.abs(outputDeltaBps)} bps of output for stronger stewardship and policy alignment.`
+    : 'Top BWTYA route failed biblical policy checks; choose a compliant alternative.';
+
+  return {
+    benchmarkedAgainst: 'bankr.bot',
+    bwtyaProvider: bwtyaRecommended.raw.provider,
+    bestPriceProvider: bestPrice.raw.provider,
+    outputDeltaBps,
+    stewardshipPremiumBps,
+    competitivenessScore,
+    biblicalPolicyPass,
+    verdict,
+    summary,
+  };
+}
+
 async function fetchSpandexQuotes(
   input: SpandexSwapAdvisoryInput,
   outputDecimals: number,
 ): Promise<SpandexRawQuote[]> {
+  const effectiveSlippageBps = input.autonomousSabbath
+    ? Math.min(input.slippageBps ?? 50, 30)
+    : (input.slippageBps ?? 50);
+
   const swapParams = {
     chainId: input.chainId ?? 8453,
     inputToken: input.fromTokenAddress as Address,
     outputToken: input.toTokenAddress as Address,
     mode: 'exactIn' as const,
     inputAmount: input.inputAmountRaw,
-    slippageBps: input.slippageBps ?? 50,
+    slippageBps: effectiveSlippageBps,
     swapperAccount: input.swapperAccount as Address,
   };
 
@@ -59,7 +115,7 @@ async function fetchSpandexQuotes(
   try {
     const allQuotes = await getQuotes({ config: spandexConfig, swap: swapParams });
     if (allQuotes && allQuotes.length > 0) {
-      return (allQuotes as Array<{ provider: string; simulation?: { outputAmount?: bigint }; outputAmount?: bigint }>).map((q) => {
+      return (allQuotes as SpandexProviderQuote[]).map((q) => {
         const outRaw: bigint = q.simulation?.outputAmount ?? q.outputAmount ?? 0n;
         return {
           provider: q.provider,
@@ -80,9 +136,10 @@ async function fetchSpandexQuotes(
   });
 
   if (!single) return [];
-  const outRaw: bigint = (single as any).simulation?.outputAmount ?? 0n;
+  const singleQuote = single as SpandexProviderQuote;
+  const outRaw: bigint = singleQuote.simulation?.outputAmount ?? singleQuote.outputAmount ?? 0n;
   return [{
-    provider: single.provider,
+    provider: singleQuote.provider,
     outputAmountRaw: outRaw,
     outputAmount: formatOutputAmount(outRaw, outputDecimals),
   }];
@@ -153,13 +210,21 @@ export class SpandexSwapAgent {
         const scoredQuotes: SpandexScoredQuote[] = rawQuotes.map((raw, i) => {
           const opp = opportunities[i];
           const scoredOpp = (opp && rankedByProtocol.get(opp.protocol)) ?? ranked[0];
-
-          return {
+          const initialQuote: SpandexScoredQuote = {
             raw,
             opportunity: opp,
             scored: scoredOpp,
             isBWTYARecommended: scoredOpp?.opportunity.protocol === bwtyaTopProvider,
             isBestPrice: raw.provider === bestPriceRaw?.provider,
+            biblicalPolicyPass: true,
+            policyReasons: [],
+          };
+          const policyEval = evaluateBiblicalRoutePolicy(initialQuote);
+
+          return {
+            ...initialQuote,
+            biblicalPolicyPass: policyEval.pass,
+            policyReasons: policyEval.reasons,
           };
         });
 
@@ -167,14 +232,23 @@ export class SpandexSwapAgent {
           (a, b) => (b.scored?.bwtyaScore ?? 0) - (a.scored?.bwtyaScore ?? 0),
         );
 
+        const policyPassedQuotes = scoredQuotes.filter((q) => q.biblicalPolicyPass);
         const bwtyaRecommended =
-          scoredQuotes.find((q) => q.isBWTYARecommended) ?? scoredQuotes[0] ?? null;
+          policyPassedQuotes.find((q) => q.isBWTYARecommended) ??
+          policyPassedQuotes[0] ??
+          scoredQuotes.find((q) => q.isBWTYARecommended) ??
+          scoredQuotes[0] ??
+          null;
         const bestPrice =
           scoredQuotes.find((q) => q.isBestPrice) ?? scoredQuotes[0] ?? null;
         const alignedWithBestPrice =
           !!bwtyaRecommended &&
           !!bestPrice &&
           bwtyaRecommended.raw.provider === bestPrice.raw.provider;
+        const competitiveBenchmark = computeCompetitiveBenchmark(
+          bwtyaRecommended,
+          bestPrice,
+        );
 
         ctx.stats.processed += scored.length;
 
@@ -184,18 +258,26 @@ export class SpandexSwapAgent {
         let bwspWisdom = null;
         try {
           const swapQuery = [
+            input.autonomousSabbath
+              ? 'sabbath autonomous stewardship guidance'
+              : null,
             `swap ${input.inputAmountHuman} ${input.fromToken} for ${input.toToken}`,
             `via ${bwtyaRecommended?.raw.provider ?? 'DEX aggregator'}`,
             'biblical stewardship yield defi action',
-          ].join(' ');
+          ].filter(Boolean).join(' ');
 
           bwspWisdom = await bwspEngine.query({
             text: swapQuery,
             intent: 'defi_action',
             wisdomScore,
             availableCapital: input.capitalUsd,
-            riskTolerance:
-              wisdomScore >= 70 ? 'aggressive' : wisdomScore >= 30 ? 'moderate' : 'conservative',
+            riskTolerance: input.autonomousSabbath
+              ? 'conservative'
+              : wisdomScore >= 70
+                ? 'aggressive'
+                : wisdomScore >= 30
+                  ? 'moderate'
+                  : 'conservative',
           });
 
           ctx.stats.created += 1;
@@ -209,13 +291,21 @@ export class SpandexSwapAgent {
           bestPrice,
           alignedWithBestPrice,
           recommendedStrategy,
+          competitiveBenchmark,
           bwspWisdom,
+          autonomousExecution: input.autonomousSabbath
+            ? {
+              enabled: true,
+              triggeredAt: startTimestamp,
+              cadenceMinutes: 60,
+            }
+            : null,
           timestamp: startTimestamp,
         };
       },
     );
 
-    const { _sandbox, ...rest } = wrapped as any;
+    const { _sandbox, ...rest } = wrapped;
     return {
       ...rest,
       sandbox: {

@@ -18,6 +18,7 @@
  *   wisdomScore?: number,
  *   capitalUsd?: number,
  *   swapperAccount?: string,
+ *   autonomousSabbath?: boolean,
  * }
  *
  * "For by wise guidance you can wage your war, and in abundance of
@@ -146,6 +147,7 @@ Deno.serve(async (req) => {
     providerQuotes = [] as RawQuote[],
     wisdomScore = 50,
     capitalUsd = 0,
+    autonomousSabbath = false,
   } = body;
 
   const result = await withAgentSandbox(
@@ -178,6 +180,7 @@ Deno.serve(async (req) => {
           alignedWithBestPrice,
           wisdomScore,
           capitalUsd,
+          autonomousSabbath,
           runId: ctx.runId,
           timestamp: new Date().toISOString(),
         }),
@@ -210,6 +213,7 @@ Deno.serve(async (req) => {
         fromToken,
         toToken,
         wisdomScore,
+        autonomousSabbath,
       };
     },
   );

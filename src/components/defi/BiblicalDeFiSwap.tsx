@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,11 @@ import { useSwapRiskControls } from '@/hooks/useSwapRiskControls';
 import { useAccount } from 'wagmi';
 import type { Address } from 'viem';
 import { parseUnits } from 'viem';
+import {
+  isSabbathSunday,
+  SABBATH_AUTONOMOUS_INTERVAL_MS,
+  SABBATH_DEFAULT_PLAN,
+} from '@/utils/sabbathAutonomy';
 
 interface Token {
   symbol: string;
@@ -59,6 +64,7 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [biblicalAnalysis, setBiblicalAnalysis] = useState(null);
   const [useSpandex, setUseSpandex] = useState(true);
   const [showRisk, setShowRisk] = useState(false);
+  const autonomousSabbathMode = isSabbathSunday();
   const { controls: risk, update: updateRisk, reset: resetRisk } = useSwapRiskControls();
 
   // spanDEX meta-aggregator hook
@@ -115,8 +121,9 @@ const BiblicalDeFiSwap: React.FC = () => {
   const fromToken = baseTokens[fromSymbol] || null;
   const toToken = baseTokens[toSymbol] || null;
 
-  const getSwapQuote = async () => {
-    if (!fromToken || !toToken || !fromAmount || parseFloat(fromAmount) <= 0) return;
+  const getSwapQuote = useCallback(async (overrideAmount?: string) => {
+    const amount = overrideAmount ?? fromAmount;
+    if (!fromToken || !toToken || !amount || parseFloat(amount) <= 0) return;
 
     // Risk control: enforce max slippage
     if (parseFloat(slippage) > risk.maxSlippage) {
@@ -129,7 +136,7 @@ const BiblicalDeFiSwap: React.FC = () => {
     }
 
     const validation = validateInput(UserInputSchemas.swapInputs, {
-      fromAmount, fromToken: fromToken.symbol, toToken: toToken.symbol, slippage
+      fromAmount: amount, fromToken: fromToken.symbol, toToken: toToken.symbol, slippage
     });
 
     if (!validation.success) {
@@ -147,7 +154,7 @@ const BiblicalDeFiSwap: React.FC = () => {
     resetAdvisory();
 
     // Fire spanDEX meta-aggregated quotes in parallel with Uniswap edge function
-    const inputAmountRaw = BigInt(Math.floor(parseFloat(fromAmount) * 10 ** fromToken.decimals));
+    const inputAmountRaw = BigInt(Math.floor(parseFloat(amount) * 10 ** fromToken.decimals));
     const spandexPromise = useSpandex
       ? fetchSpandexQuote({
           inputToken: fromToken.address as Address,
@@ -169,7 +176,7 @@ const BiblicalDeFiSwap: React.FC = () => {
           body: {
             fromToken: fromToken.symbol,
             toToken: toToken.symbol,
-            amount: fromAmount,
+            amount,
             slippage: parseFloat(slippage),
           },
         }),
@@ -180,10 +187,10 @@ const BiblicalDeFiSwap: React.FC = () => {
       if (error) throw error;
 
       const uniQuote: SwapQuote = {
-        fromAmount,
+        fromAmount: amount,
         toAmount: data.toAmount || '0',
         priceImpact: data.priceImpact || '0.00',
-        fee: (parseFloat(fromAmount) * 0.003).toFixed(6),
+        fee: (parseFloat(amount) * 0.003).toFixed(6),
         route: typeof data.route === 'string' ? [data.route] : [fromToken.symbol, toToken.symbol],
         dex: data.dex || 'Uniswap V3',
         gasEstimate: data.gasEstimate || '0.000500',
@@ -218,11 +225,14 @@ const BiblicalDeFiSwap: React.FC = () => {
           toToken: toToken.symbol,
           fromTokenAddress: fromToken.address,
           toTokenAddress: toToken.address,
-          inputAmountHuman: fromAmount,
+          inputAmountHuman: amount,
           inputAmountRaw,
           chainId: 8453,
-          slippageBps: Math.round(parseFloat(slippage) * 100),
+          slippageBps: autonomousSabbathMode
+            ? Math.min(Math.round(parseFloat(slippage) * 100), SABBATH_DEFAULT_PLAN.slippageBps)
+            : Math.round(parseFloat(slippage) * 100),
           swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as string,
+          autonomousSabbath: autonomousSabbathMode,
         }).catch((e) => console.warn('[BWTYA Advisory]', e));
       }
 
@@ -238,7 +248,20 @@ const BiblicalDeFiSwap: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [
+    fromToken,
+    toToken,
+    fromAmount,
+    slippage,
+    risk.maxSlippage,
+    playSound,
+    resetAdvisory,
+    useSpandex,
+    fetchSpandexQuote,
+    walletAddress,
+    autonomousSabbathMode,
+    runAdvisory,
+  ]);
 
   const executeSwap = async () => {
     if (!quote || !fromToken || !toToken) return;
@@ -314,13 +337,39 @@ const BiblicalDeFiSwap: React.FC = () => {
     return wisdom[action] || wisdom.caution;
   };
 
+  useEffect(() => {
+    if (!autonomousSabbathMode) return;
+
+    setFromSymbol(SABBATH_DEFAULT_PLAN.fromSymbol);
+    setToSymbol(SABBATH_DEFAULT_PLAN.toSymbol);
+    setFromAmount(SABBATH_DEFAULT_PLAN.amount);
+    setSlippage((SABBATH_DEFAULT_PLAN.slippageBps / 100).toFixed(1));
+
+    const runAutonomousCycle = () => {
+      getSwapQuote(SABBATH_DEFAULT_PLAN.amount);
+    };
+
+    const bootstrapTimer = window.setTimeout(runAutonomousCycle, 300);
+    const cycleTimer = window.setInterval(runAutonomousCycle, SABBATH_AUTONOMOUS_INTERVAL_MS);
+
+    return () => {
+      window.clearTimeout(bootstrapTimer);
+      window.clearInterval(cycleTimer);
+    };
+  }, [autonomousSabbathMode, getSwapQuote]);
+
   return (
     <div className="space-y-6 max-w-md mx-auto">
       {/* Biblical Wisdom Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-eboy-green to-ancient-gold bg-clip-text text-transparent mb-2">
+        <h2 className="text-2xl font-bold text-eboy-green mb-2">
           Biblical DeFi Swaps
         </h2>
+        {autonomousSabbathMode && (
+          <p className="text-xs text-purple-300 mb-2">
+            Autonomous Sabbath mode active — quote and advisory cycles run hourly.
+          </p>
+        )}
         <p className="text-sm text-muted-foreground italic">"{getBiblicalWisdom('patience')}"</p>
       </motion.div>
 
