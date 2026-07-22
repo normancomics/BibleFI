@@ -19,10 +19,13 @@ import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, BookOpen, Shield, Activity, ChevronRight, AlertTriangle, RefreshCw,
+  ExternalLink, CheckCircle2,
 } from 'lucide-react';
 import { useSpandexBWTYA } from '@/hooks/useSpandexBWTYA';
+import { useSpandexExecute } from '@/hooks/useSpandexExecute';
 import SpandexBWTYAAdvisor from '@/components/defi/SpandexBWTYAAdvisor';
 import { useAccount } from 'wagmi';
+import type { SpandexSwapAdvisoryInput } from '@/services/spandex/types';
 
 // ---------------------------------------------------------------------------
 // Known Base-chain token list for the advisory form
@@ -49,8 +52,10 @@ const SpandexAdvisoryPage: React.FC = () => {
   const [amountStr, setAmountStr] = useState('1');
   const [wisdomScore, setWisdomScore] = useState(50);
   const [formError, setFormError] = useState<string | null>(null);
+  const [lastInput, setLastInput] = useState<SpandexSwapAdvisoryInput | null>(null);
 
   const { advisory, isLoading, error, runAdvisory, reset } = useSpandexBWTYA();
+  const { isExecuting, txHash, error: execError, execute, reset: resetExec } = useSpandexExecute();
 
   function validate(): string | null {
     const amt = parseFloat(amountStr);
@@ -64,6 +69,7 @@ const SpandexAdvisoryPage: React.FC = () => {
   async function handleRun() {
     setFormError(null);
     reset();
+    resetExec();
     const err = validate();
     if (err) { setFormError(err); return; }
 
@@ -72,7 +78,7 @@ const SpandexAdvisoryPage: React.FC = () => {
     const amt = parseFloat(amountStr);
     const inputAmountRaw = BigInt(Math.floor(amt * 10 ** fromToken.decimals));
 
-    await runAdvisory({
+    const input: SpandexSwapAdvisoryInput = {
       fromToken: fromSymbol,
       toToken: toSymbol,
       fromTokenAddress: fromToken.address,
@@ -83,7 +89,15 @@ const SpandexAdvisoryPage: React.FC = () => {
       slippageBps: 50,
       swapperAccount: walletAddress ?? '0x0000000000000000000000000000000000000001',
       wisdomScore,
-    });
+    };
+    setLastInput(input);
+    await runAdvisory(input);
+  }
+
+  async function handleExecute() {
+    if (!lastInput) return;
+    // Use the connected wallet as the swapper for the on-chain execution.
+    await execute({ ...lastInput, swapperAccount: walletAddress ?? lastInput.swapperAccount });
   }
 
   return (
@@ -240,6 +254,74 @@ const SpandexAdvisoryPage: React.FC = () => {
                 fromToken={fromSymbol}
                 toToken={toSymbol}
               />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Execute the recommended swap (real on-chain) ── */}
+        <AnimatePresence>
+          {advisory && !isLoading && lastInput && (
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              <Card className="bg-card/60 backdrop-blur-sm border-eboy-green/30 mt-6">
+                <CardHeader className="py-4 px-5">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-eboy-green" />
+                    Execute Best-Price Swap
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-5 pb-5 space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Executes {amountStr} {fromSymbol} → {toSymbol} via the best on-chain route
+                    ({advisory.bestPrice?.raw.provider ?? '—'}), routed by spanDEX across all providers.
+                    This sends a <strong className="text-foreground">real transaction</strong> (token
+                    approval + swap) from your wallet on Base.
+                  </p>
+
+                  {txHash ? (
+                    <div className="flex items-center gap-2 p-2.5 rounded-md bg-eboy-green/10 border border-eboy-green/30 text-xs text-eboy-green">
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      <span className="flex-1">Swap submitted on-chain.</span>
+                      <a
+                        href={`https://basescan.org/tx/${txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 underline"
+                      >
+                        View on BaseScan <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                  ) : execError ? (
+                    <div className="flex items-start gap-2 p-2.5 rounded-md bg-destructive/10 border border-destructive/30 text-xs text-destructive">
+                      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                      {execError}
+                    </div>
+                  ) : null}
+
+                  <Button
+                    onClick={handleExecute}
+                    disabled={isExecuting || !walletAddress}
+                    className="w-full bg-gradient-to-r from-eboy-green to-emerald-600 hover:from-emerald-600 hover:to-eboy-green text-black font-semibold"
+                  >
+                    {isExecuting ? (
+                      <span className="flex items-center gap-2">
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        Confirm in your wallet…
+                      </span>
+                    ) : !walletAddress ? (
+                      <span className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        Connect wallet to execute
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <Zap className="h-4 w-4" />
+                        Execute Swap on Base
+                        <ChevronRight className="h-4 w-4" />
+                      </span>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
             </motion.div>
           )}
         </AnimatePresence>
