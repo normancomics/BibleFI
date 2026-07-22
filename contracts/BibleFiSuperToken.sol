@@ -102,11 +102,6 @@ contract BibleFiSuperToken is ISuperApp, Ownable2Step, ReentrancyGuard {
     uint256 public constant TITHE_RATE_BPS = 1_000;
     uint256 public constant BASIS_POINTS   = 10_000;
 
-    // Base Chain Superfluid mainnet addresses
-    address public constant SUPERFLUID_HOST      = 0x4C073B3baB6d8826b8C5b229f3cfdC1eC6E47E74;
-    address public constant CFA_V1               = 0x19ba78B9cDB05A877718841c574325fdB53601bb;
-    address public constant SUPER_TOKEN_FACTORY  = 0xe20B9a38E0c96F61d1bA6b42a61512D56Fea1Eb;
-
     // ─── Protocol references ──────────────────────────────────────────────────
 
     ISuperfluid               public immutable host;
@@ -166,29 +161,43 @@ contract BibleFiSuperToken is ISuperApp, Ownable2Step, ReentrancyGuard {
     // ─── Constructor ──────────────────────────────────────────────────────────
 
     /**
-     * @param _biblefiToken   Deployed $BIBLEFI ERC-20 address
-     * @param _wisdomRegistry BWSPWisdomRegistry address (or address(0) to set later)
-     * @param _titheTreasury  BibleFi DAO treasury — receives governance accounting
-     * @param _initialOwner   Contract owner (Gnosis Safe / multisig recommended)
+     * @param _biblefiToken      Deployed $BIBLEFI ERC-20 address
+     * @param _wisdomRegistry    BWSPWisdomRegistry address (or address(0) to set later)
+     * @param _titheTreasury     BibleFi DAO treasury — receives governance accounting
+     * @param _host              Superfluid Host address on the target chain
+     * @param _cfa               Superfluid CFAv1 address on the target chain
+     * @param _superTokenFactory Superfluid SuperTokenFactory address on the target chain
+     * @param _initialOwner      Contract owner (Gnosis Safe / multisig recommended)
+     *
+     * Base Chain mainnet references (supply to constructor at deploy time):
+     *   Host:              0x4C073B3baB6d8826b8C5b229f3cfdC1eC6E47E74
+     *   CFAv1:             0x19ba78B9cDB05A877718841c574325fdB53601bb
+     *   SuperTokenFactory: verify at https://docs.superfluid.finance/docs/technical-reference/contract-addresses
      */
     constructor(
         address _biblefiToken,
         address _wisdomRegistry,
         address _titheTreasury,
+        address _host,
+        address _cfa,
+        address _superTokenFactory,
         address _initialOwner
     ) {
-        if (_biblefiToken  == address(0) ||
-            _titheTreasury == address(0) ||
-            _initialOwner  == address(0)) revert ZeroAddress();
+        if (_biblefiToken      == address(0) ||
+            _titheTreasury     == address(0) ||
+            _host              == address(0) ||
+            _cfa               == address(0) ||
+            _superTokenFactory == address(0) ||
+            _initialOwner      == address(0)) revert ZeroAddress();
 
         _transferOwnership(_initialOwner);
 
-        host             = ISuperfluid(SUPERFLUID_HOST);
-        cfa              = IConstantFlowAgreementV1(CFA_V1);
-        superTokenFactory = ISuperTokenFactory(SUPER_TOKEN_FACTORY);
+        host              = ISuperfluid(_host);
+        cfa               = IConstantFlowAgreementV1(_cfa);
+        superTokenFactory = ISuperTokenFactory(_superTokenFactory);
         _cfaLib = CFAv1Library.InitData({
-            host: ISuperfluid(SUPERFLUID_HOST),
-            cfa:  IConstantFlowAgreementV1(CFA_V1)
+            host: ISuperfluid(_host),
+            cfa:  IConstantFlowAgreementV1(_cfa)
         });
 
         biblefiToken    = IERC20Metadata(_biblefiToken);
@@ -198,7 +207,7 @@ contract BibleFiSuperToken is ISuperApp, Ownable2Step, ReentrancyGuard {
         // Register this contract as a Superfluid SuperApp.
         // The BEFORE_AGREEMENT_*_NOOP flags tell the host we don't implement
         // the before-hooks (saves gas); we only act on after-hooks.
-        ISuperfluid(SUPERFLUID_HOST).registerApp(
+        ISuperfluid(_host).registerApp(
             SuperAppDefinitions.APP_LEVEL_FINAL      |
             SuperAppDefinitions.BEFORE_AGREEMENT_CREATED_NOOP    |
             SuperAppDefinitions.BEFORE_AGREEMENT_UPDATED_NOOP    |
