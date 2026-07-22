@@ -16,15 +16,12 @@ export default defineTool({
     const supabase = createClient(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
+      { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } },
     );
-    const { data, error } = await supabase
-      .from("global_churches")
-      .select("id,name,city,state_province,country,denomination,verified,accepts_crypto,accepts_fiat,rating,website")
-      .or(
-        `name.ilike.%${query}%,city.ilike.%${query}%,denomination.ilike.%${query}%,country.ilike.%${query}%`,
-      )
-      .limit(limit ?? 10);
+    const { data, error } = await supabase.rpc("search_public_churches", {
+      p_query: query,
+      p_limit: limit ?? 10,
+    });
     if (error) {
       return { content: [{ type: "text", text: `Search failed: ${error.message}` }], isError: true };
     }

@@ -316,6 +316,54 @@ export type Database = {
         }
         Relationships: []
       }
+      church_directory_request_logs: {
+        Row: {
+          client_context: Json
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          error_details: string | null
+          error_hint: string | null
+          error_message: string | null
+          id: string
+          operation: string
+          path: string
+          request_id: string | null
+          row_count: number | null
+          success: boolean
+        }
+        Insert: {
+          client_context?: Json
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_details?: string | null
+          error_hint?: string | null
+          error_message?: string | null
+          id?: string
+          operation: string
+          path: string
+          request_id?: string | null
+          row_count?: number | null
+          success: boolean
+        }
+        Update: {
+          client_context?: Json
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_details?: string | null
+          error_hint?: string | null
+          error_message?: string | null
+          id?: string
+          operation?: string
+          path?: string
+          request_id?: string | null
+          row_count?: number | null
+          success?: boolean
+        }
+        Relationships: []
+      }
       church_memberships: {
         Row: {
           church_id: string
@@ -600,6 +648,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_job_secrets: {
+        Row: {
+          current_hash: string
+          grace_seconds: number
+          job_name: string
+          previous_hash: string | null
+          rotated_at: string
+          vault_secret_name: string
+        }
+        Insert: {
+          current_hash: string
+          grace_seconds?: number
+          job_name: string
+          previous_hash?: string | null
+          rotated_at?: string
+          vault_secret_name: string
+        }
+        Update: {
+          current_hash?: string
+          grace_seconds?: number
+          job_name?: string
+          previous_hash?: string | null
+          rotated_at?: string
+          vault_secret_name?: string
+        }
+        Relationships: []
+      }
       currency_rates: {
         Row: {
           from_currency: string
@@ -700,6 +775,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      edge_rate_limits: {
+        Row: {
+          bucket_key: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          request_count?: number
+          window_start: string
+        }
+        Update: {
+          bucket_key?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
       }
       flash_loan_strategies: {
         Row: {
@@ -1684,6 +1777,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_edge_rate_limit: {
+        Args: { p_key: string; p_max: number; p_window_seconds: number }
+        Returns: Json
+      }
       complete_agent_run: {
         Args: {
           p_error_details?: Json
@@ -1696,6 +1793,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      diagnose_church_directory: { Args: never; Returns: Json }
       get_agent_stats: { Args: never; Returns: Json }
       get_assigned_agent_safe: { Args: { p_agent_id: string }; Returns: Json }
       get_church_processor_safe: {
@@ -1730,6 +1828,10 @@ export type Database = {
           p_target_schema?: string
           p_target_table: string
         }
+        Returns: undefined
+      }
+      rotate_cron_job_secret: {
+        Args: { p_job_name: string }
         Returns: undefined
       }
       search_biblical_knowledge: {
@@ -1771,9 +1873,29 @@ export type Database = {
           verse: number
         }[]
       }
+      search_public_churches: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          accepts_crypto: boolean
+          accepts_fiat: boolean
+          city: string
+          country: string
+          denomination: string
+          id: string
+          name: string
+          rating: number
+          state_province: string
+          verified: boolean
+          website: string
+        }[]
+      }
       start_agent_run: {
         Args: { p_agent_name: string; p_metadata?: Json; p_run_mode?: string }
         Returns: string
+      }
+      validate_cron_job_secret: {
+        Args: { p_job_name: string; p_secret: string }
+        Returns: boolean
       }
     }
     Enums: {

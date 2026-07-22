@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.seed-comprehensive-texts]
 verify_jwt = false
+
+[functions.church-directory-health]
+verify_jwt = false
