@@ -48,6 +48,7 @@ import MCPNetworkPage from "./pages/MCPNetworkPage";
 import SpandexAdvisoryPage from "./pages/SpandexAdvisoryPage";
 import TerminalPage from "./pages/TerminalPage";
 import SuperVaultPage from "./pages/SuperVaultPage";
+import SuperBoringPage from "./pages/SuperBoringPage";
 import SwapPage from "./pages/SwapPage";
 import TechGraphsPage from "./pages/TechGraphsPage";
 import "./App.css";
@@ -103,6 +104,7 @@ const App = () => (
             <Route path="/spandex-advisory" element={<SpandexAdvisoryPage />} />
             <Route path="/terminal" element={<TerminalPage />} />
             <Route path="/vault" element={<SuperVaultPage />} />
+            <Route path="/dca" element={<SuperBoringPage />} />
             <Route path="/tech-graphs" element={<TechGraphsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
