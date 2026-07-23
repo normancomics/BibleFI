@@ -104,28 +104,45 @@ Context about the user: ${context ? JSON.stringify(context) : 'No specific conte
 
 Available biblical knowledge: ${biblicalKnowledge ? JSON.stringify(biblicalKnowledge.slice(0, 3)) : 'No specific verses found'}
 
-Format your response as JSON with these fields:
-- answer: Your main biblical financial advice (max 200 words)
-- scripture: Relevant Bible verse reference  
-- verseText: The actual verse text
-- practicalSteps: Array of 2-3 practical steps they can take
-- wisdomScore: A number 1-100 based on how wise their query shows they are
-- defiRelevance: How this applies to DeFi/crypto (if applicable)`;
+Respond with your biblical financial advice (max 200 words), a relevant scripture reference and verse text, 2-3 practical steps, a wisdom score (1-100) for their query, and how this applies to DeFi/crypto.`;
 
       const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${anthropicApiKey}`,
+          'x-api-key': anthropicApiKey,
           'Content-Type': 'application/json',
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 1000,
+          model: 'claude-opus-4-8',
+          max_tokens: 4096,
+          system: systemPrompt,
+          output_config: {
+            format: {
+              type: 'json_schema',
+              schema: {
+                type: 'object',
+                properties: {
+                  answer: { type: 'string', description: 'Main biblical financial advice (max 200 words)' },
+                  scripture: { type: 'string', description: 'Relevant Bible verse reference' },
+                  verseText: { type: 'string', description: 'The actual verse text' },
+                  practicalSteps: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: '2-3 practical steps they can take'
+                  },
+                  wisdomScore: { type: 'integer', description: 'A number 1-100 based on how wise their query shows they are' },
+                  defiRelevance: { type: 'string', description: 'How this applies to DeFi/crypto (if applicable)' }
+                },
+                required: ['answer', 'scripture', 'verseText', 'practicalSteps', 'wisdomScore', 'defiRelevance'],
+                additionalProperties: false
+              }
+            }
+          },
           messages: [
             {
               role: 'user',
-              content: `${systemPrompt}\n\nUser Question: ${sanitizedQuery}`
+              content: `User Question: ${sanitizedQuery}`
             }
           ]
         })
@@ -136,7 +153,10 @@ Format your response as JSON with these fields:
       }
 
       const anthropicData = await anthropicResponse.json();
-      const content = anthropicData.content[0].text;
+      if (anthropicData.stop_reason === 'refusal') {
+        throw new Error('Anthropic API declined the request');
+      }
+      const content = anthropicData.content.find((block: { type: string }) => block.type === 'text')?.text ?? '';
       
       try {
         response = JSON.parse(content);
