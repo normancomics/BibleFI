@@ -1,14 +1,22 @@
 /**
  * deploy-superfluid-tokens.ts
  * ─────────────────────────────────────────────────────────────────────────────
- * Deploys the full BibleFi Superfluid token suite to Base chain:
+ * Deploys the full BibleFi Superfluid token suite to Base chain (HYBRID
+ * architecture — see docs/NATIVE_SUPERTOKENS.md):
  *
- *   1.  $BIBLEFI  — BibleFiGovernanceToken (ERC-20 + ERC20Votes)
- *   2.  $WISDOM   — WisdomRewardsToken (ERC-20, minted on activity)
- *   3.  $xBIBLEFI — Superfluid Super Token wrapper via XBibleFiDeployer
- *   4.  $xWISDOM  — Superfluid Super Token wrapper via XWisdomDeployer
- *   5.  BibleFiDAOTreasury — DAO treasury streaming controller
- *   6.  WisdomVIPRewards   — VIP LP reward streaming controller
+ *   1.  $BIBLEFI  — BibleFiGovernanceToken (ERC-20 + ERC20Votes). Stays a
+ *       standard governance token so on-chain vote delegation/checkpoints
+ *       keep working — a native Super Token can't carry ERC20Votes.
+ *   2.  $xBIBLEFI — Superfluid Super Token WRAPPER for $BIBLEFI, via
+ *       XBibleFiDeployer. Used for DAO treasury streaming; governance itself
+ *       still happens on plain $BIBLEFI.
+ *   3.  $WISDOM   — WisdomNativeSuperTokenProxy: a TRUE NATIVE Superfluid
+ *       Super Token (no underlying ERC-20, no wrap/unwrap step). Earned
+ *       rewards are minted directly as $WISDOM via ISuperToken.selfMint and
+ *       are streamable the instant they're issued.
+ *   4.  BibleFiDAOTreasury — DAO treasury streaming controller (for $xBIBLEFI)
+ *   5.  WisdomVIPRewards   — VIP LP reward streaming controller, streams
+ *       native $WISDOM directly (no wrapping needed)
  *
  * Usage
  * ─────
@@ -61,7 +69,7 @@ const NETWORKS = {
     superfluid: {
       host:             '0x4C073B3baB6d8826b8C5b229f3cfdC1eC6E47E74',
       cfaForwarder:     '0x19ba78B9cDB05A877718841c574325fdB53601bb',
-      tokenFactory:     '0x73743A7B7af23CAc5A3BFBD11B0CF0A3D11E7CA3',
+      tokenFactory:     '0x73743A7b7Af23CAc5A3bfbD11b0cf0a3D11E7Ca3',
     },
   },
 } as const;
@@ -113,6 +121,7 @@ class SuperfluidTokenDeployer {
    */
   private loadArtifact(contractName: string): { abi: unknown[]; bytecode: string } {
     const artifactPaths = [
+      path.join(__dirname, `../../artifacts_forge/${contractName}.sol/${contractName}.json`),
       path.join(__dirname, `../../artifacts/src/contracts/${contractName}.sol/${contractName}.json`),
       path.join(__dirname, `../../out/${contractName}.sol/${contractName}.json`),
     ];
@@ -180,12 +189,8 @@ class SuperfluidTokenDeployer {
       wallets.earlySupport,
     ]);
 
-    // ── 2. $WISDOM ──────────────────────────────────────────────────────
-    console.log('── Step 2: $WISDOM Rewards Token ──────────────────────');
-    const wisdomAddress = await this.deploy('WisdomRewardsToken', []);
-
-    // ── 3. $xBIBLEFI deployer ───────────────────────────────────────────
-    console.log('── Step 3: XBibleFiDeployer → $xBIBLEFI ───────────────');
+    // ── 2. $xBIBLEFI wrapper (for DAO treasury streaming) ───────────────
+    console.log('── Step 2: XBibleFiDeployer → $xBIBLEFI ───────────────');
     const xBibleFiDeployerAddress = await this.deploy('XBibleFiDeployer', []);
 
     let xBibleFiAddress = ZeroAddress;
@@ -204,33 +209,35 @@ class SuperfluidTokenDeployer {
       }
     }
 
-    // ── 4. $xWISDOM deployer ────────────────────────────────────────────
-    console.log('── Step 4: XWisdomDeployer → $xWISDOM ─────────────────');
-    const xWisdomDeployerAddress = await this.deploy('XWisdomDeployer', []);
+    // ── 3. $WISDOM — native Super Token (no underlying ERC-20, no wrapper) ──
+    // WisdomNativeSuperTokenProxy.initialize() calls
+    // factory.initializeCustomSuperToken(address(this)) INTERNALLY (the
+    // official Superfluid custom-supertoken pattern), so deployment is just:
+    // deploy the proxy, then call initialize() once.
+    console.log('── Step 3: WisdomNativeSuperTokenProxy → native $WISDOM ──');
+    const wisdomAddress = await this.deploy('WisdomNativeSuperTokenProxy', []);
 
-    let xWisdomAddress = ZeroAddress;
-    if (xWisdomDeployerAddress !== ZeroAddress) {
+    if (wisdomAddress !== ZeroAddress) {
       try {
-        const { abi } = this.loadArtifact('XWisdomDeployer');
-        const deployer = new Contract(xWisdomDeployerAddress, abi, this.wallet);
-        const tx       = await deployer.deployXWISDOM(wisdomAddress);
-        const receipt  = await tx.wait();
-        const event    = receipt.logs?.find((l: { topics: string[] }) => l.topics[0] === ethers.id('XWisdomDeployed(address,address)'));
-        xWisdomAddress = event ? ethers.AbiCoder.defaultAbiCoder().decode(['address'], event.topics[1])[0] : ZeroAddress;
-        console.log(`  ✅ $xWISDOM wrapper deployed at: ${xWisdomAddress}\n`);
-        this.records.push({ contractName: 'xWISDOM (Super Token)', address: xWisdomAddress, txHash: tx.hash, deployedAt: new Date().toISOString(), gasUsed: '0' });
+        const { abi } = this.loadArtifact('WisdomNativeSuperTokenProxy');
+        const wisdom = new Contract(wisdomAddress, abi, this.wallet);
+        const tx = await wisdom.initialize(this.network.superfluid.tokenFactory, this.wallet.address);
+        await tx.wait();
+        console.log(`  ✅ Native $WISDOM initialized — admin/oracle roles granted to ${this.wallet.address}\n`);
+        this.records.push({ contractName: 'WISDOM (native Super Token)', address: wisdomAddress, txHash: tx.hash, deployedAt: new Date().toISOString(), gasUsed: '0' });
       } catch (err) {
-        console.warn('  ⚠️  Could not call deployXWISDOM — Superfluid factory may not be available on this network yet.');
+        console.warn('  ⚠️  Could not initialize native $WISDOM — Superfluid factory may not be available on this network yet.');
+        console.warn(`     ${err instanceof Error ? err.message : String(err)}`);
       }
     }
 
-    // ── 5. DAO Treasury controller ─────────────────────────────────────
-    console.log('── Step 5: BibleFiDAOTreasury ──────────────────────────');
+    // ── 4. DAO Treasury controller (streams $xBIBLEFI) ──────────────────
+    console.log('── Step 4: BibleFiDAOTreasury ──────────────────────────');
     const daoTreasuryAddress = await this.deploy('BibleFiDAOTreasury', [xBibleFiAddress]);
 
-    // ── 6. VIP Rewards controller ──────────────────────────────────────
-    console.log('── Step 6: WisdomVIPRewards ────────────────────────────');
-    const vipRewardsAddress = await this.deploy('WisdomVIPRewards', [xWisdomAddress]);
+    // ── 5. VIP Rewards controller (streams native $WISDOM directly) ─────
+    console.log('── Step 5: WisdomVIPRewards ────────────────────────────');
+    const vipRewardsAddress = await this.deploy('WisdomVIPRewards', [wisdomAddress]);
 
     this.printSummary();
     this.saveResults();
@@ -239,7 +246,6 @@ class SuperfluidTokenDeployer {
       biblefiAddress,
       wisdomAddress,
       xBibleFiAddress,
-      xWisdomAddress,
       daoTreasuryAddress,
       vipRewardsAddress,
     };
@@ -254,12 +260,12 @@ class SuperfluidTokenDeployer {
     }
     console.log('═══════════════════════════════════════════════════\n');
     console.log('⚠️  NEXT STEPS:');
-    console.log('  1. Verify contracts: npx hardhat verify --network <network> <address> <...args>');
-    console.log('  2. Update realClient.ts with deployed token addresses');
-    console.log('  3. Grant ORACLE_ROLE on WisdomRewardsToken to the backend oracle');
-    console.log('  4. Fund BibleFiDAOTreasury & WisdomVIPRewards with wrapped super tokens');
-    console.log('  5. Create SUP/$xBIBLEFI and SUP/$xWISDOM pools on Aerodrome');
-    console.log('  6. Register $xBIBLEFI and $xWISDOM in realClient.ts token map\n');
+    console.log('  1. Verify contracts: forge verify-contract --chain <chain-id> <address> <Contract> (see contracts_forge/)');
+    console.log('  2. Update realClient.ts with deployed token addresses (native $WISDOM needs no wrap step)');
+    console.log('  3. Grant ORACLE_ROLE on native $WISDOM to the backend oracle wallet (currently held by the deployer)');
+    console.log('  4. Fund BibleFiDAOTreasury with wrapped $xBIBLEFI for treasury streaming');
+    console.log('  5. Create SUP/$xBIBLEFI and SUP/$WISDOM pools on Aerodrome');
+    console.log('  6. Register $xBIBLEFI and native $WISDOM in realClient.ts token map\n');
   }
 
   private saveResults() {

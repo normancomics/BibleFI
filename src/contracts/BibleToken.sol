@@ -321,4 +321,3 @@ contract BibleToken is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, Pausa
         // Implementation for pausing contract
     }
 }
-```

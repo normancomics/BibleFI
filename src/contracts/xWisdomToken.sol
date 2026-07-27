@@ -123,7 +123,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  */
 contract XWisdomDeployer is Ownable {
     address public constant SUPERFLUID_TOKEN_FACTORY =
-        0x73743A7B7af23CAc5A3BFBD11B0CF0A3D11E7CA3;
+        0x73743A7b7Af23CAc5A3bfbD11b0cf0a3D11E7Ca3;
 
     address public xWisdomAddress;
 
@@ -303,7 +303,7 @@ contract WisdomVIPRewards is Ownable, ReentrancyGuard {
     ) {
         VIPInfo memory info = vipInfo[user];
         tier     = info.tier;
-        flowRate = info.active ? _flowRateForTier(info.tier) : 0;
+        flowRate = info.active ? _flowRateForTier(info.tier) : int96(0);
         active   = info.active;
         hodlDays = info.hodlStart > 0
             ? (block.timestamp - info.hodlStart) / 1 days
