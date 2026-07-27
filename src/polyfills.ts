@@ -15,7 +15,7 @@ const processPolyfill = {
   browser: true,
   version: '',
   versions: {},
-  nextTick: (fn: Function) => setTimeout(fn, 0),
+  nextTick: (fn: (...args: unknown[]) => void) => setTimeout(fn, 0),
   cwd: () => '/',
   platform: 'browser'
 };

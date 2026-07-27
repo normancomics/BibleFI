@@ -26,6 +26,7 @@ import {
   Activity,
   Clock,
   Star,
+  Scale,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SpandexSwapAdvisoryResult, SpandexScoredQuote } from '@/services/spandex/types';
@@ -96,6 +97,15 @@ function ProviderRow({ sq, rank }: { sq: SpandexScoredQuote; rank: number }) {
               Best Price
             </Badge>
           )}
+          <Badge
+            className={`text-[9px] px-1.5 py-0 ${
+              sq.biblicalPolicyPass
+                ? 'bg-green-500/20 text-green-400 border-green-500/40'
+                : 'bg-red-500/20 text-red-400 border-red-500/40'
+            }`}
+          >
+            {sq.biblicalPolicyPass ? 'Policy Pass' : 'Policy Flag'}
+          </Badge>
         </div>
 
         <div className="flex items-center gap-2">
@@ -150,7 +160,16 @@ const SpandexBWTYAAdvisor: React.FC<SpandexBWTYAAdvisorProps> = ({
   fromToken,
   toToken,
 }) => {
-  const { scoredQuotes, bwtyaRecommended, bestPrice, alignedWithBestPrice, bwspWisdom, sandbox } =
+  const {
+    scoredQuotes,
+    bwtyaRecommended,
+    bestPrice,
+    alignedWithBestPrice,
+    competitiveBenchmark,
+    bwspWisdom,
+    sandbox,
+    autonomousExecution,
+  } =
     advisory;
 
   return (
@@ -175,6 +194,11 @@ const SpandexBWTYAAdvisor: React.FC<SpandexBWTYAAdvisorProps> = ({
             <p className="text-[11px] text-muted-foreground mt-0.5">
               {fromToken} → {toToken} · {scoredQuotes.length} provider{scoredQuotes.length !== 1 ? 's' : ''} biblically scored
             </p>
+            {autonomousExecution?.enabled && (
+              <p className="text-[10px] text-purple-300 mt-1">
+                Sabbath autonomous cycle active · cadence {autonomousExecution.cadenceMinutes} min
+              </p>
+            )}
           </CardHeader>
         </Card>
 
@@ -200,6 +224,44 @@ const SpandexBWTYAAdvisor: React.FC<SpandexBWTYAAdvisorProps> = ({
                   } (best price). Consider stewardship over marginal savings.`}
             </span>
           </div>
+        )}
+
+        {/* ── Competitive benchmark ── */}
+        {competitiveBenchmark && (
+          <Card className="bg-card/40 border-border/40">
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Scale className="h-4 w-4 text-ancient-gold" />
+                Competitive Benchmark vs {competitiveBenchmark.benchmarkedAgainst}
+                <Badge
+                  className={`ml-auto text-[9px] ${
+                    competitiveBenchmark.verdict === 'outperforming'
+                      ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                      : competitiveBenchmark.verdict === 'competitive'
+                        ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                        : competitiveBenchmark.verdict === 'caution'
+                          ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                          : 'bg-red-500/20 text-red-400 border-red-500/30'
+                  }`}
+                >
+                  {competitiveBenchmark.verdict.toUpperCase()}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 space-y-2">
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="rounded border border-border/40 p-2 bg-muted/20">
+                  <p className="text-muted-foreground">Competitiveness</p>
+                  <p className="font-semibold">{competitiveBenchmark.competitivenessScore}/100</p>
+                </div>
+                <div className="rounded border border-border/40 p-2 bg-muted/20">
+                  <p className="text-muted-foreground">Output Delta</p>
+                  <p className="font-semibold">{competitiveBenchmark.outputDeltaBps} bps</p>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">{competitiveBenchmark.summary}</p>
+            </CardContent>
+          </Card>
         )}
 
         {/* ── Provider rows ── */}

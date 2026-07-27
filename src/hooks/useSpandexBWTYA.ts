@@ -49,6 +49,7 @@ async function persistAdvisoryToServer(
         wisdomScore: input.wisdomScore ?? 50,
         capitalUsd: input.capitalUsd ?? 0,
         swapperAccount: input.swapperAccount,
+        autonomousSabbath: input.autonomousSabbath ?? false,
       },
     });
   } catch {
@@ -95,4 +96,3 @@ export function useSpandexBWTYA(): UseSpandexBWTYAReturn {
 
   return { advisory, isLoading, error, runAdvisory, reset };
 }
-
