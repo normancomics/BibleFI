@@ -27,6 +27,11 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['buffer', 'ethers'],
+    // Restrict the dependency scan to the app's own entry. Without this, Vite
+    // crawls stray HTML files under contracts_forge/lib (the vendored
+    // Superfluid/OpenZeppelin Foundry deps) and aborts pre-bundling on their
+    // unrelated imports.
+    entries: ['index.html', 'src/**/*.{ts,tsx}'],
     esbuildOptions: {
       define: {
         global: 'globalThis'
