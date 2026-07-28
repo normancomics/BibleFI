@@ -1,7 +1,48 @@
-// Church Directory Health endpoint
-// GET → { status, count, pagination, checked_at }
-// Authenticated mode: ?auth=1 requires a valid JWT with the `admin` role,
-// returns masked sample fields only, and 401/403 otherwise.
+// Church Directory Health endpoint.
+//
+// Auth is detected automatically from the Authorization header — no query
+// flag needed (the legacy ?auth=1 flag is still honored: it *forces*
+// authenticated mode, turning would-be public responses into 401s).
+//
+// Mode resolution:
+//   - No bearer token, or the anon/publishable key as bearer (valid JWT with
+//     no user `sub` claim)                      → PUBLIC mode
+//   - Bearer user JWT, valid, admin role        → AUTHENTICATED (masked) mode
+//   - Bearer user JWT, valid, no admin role     → 403
+//   - Bearer token that fails verification      → 401
+//   - ?auth=1 and no user JWT                   → 401
+//
+// Response contract (also documented in docs/CHURCH_DIRECTORY_HEALTH.md):
+//
+//   200 PUBLIC:
+//     {
+//       "status": "ok", "healthy": true, "mode": "public",
+//       "count": 846,
+//       "pagination": { "page": 1, "pageSize": 25, "totalPages": 34,
+//                       "from": 0, "to": 24, "returned": 25, "hasMore": true },
+//       "sample": [ { "id": "…", "name": "Grace Community Church",
+//                     "city": "New York", "country": "United States",
+//                     "denomination": "Baptist", "verified": false,
+//                     "accepts_crypto": true } ],
+//       "checked_at": "…", "latency_ms": 123
+//     }
+//
+//   200 AUTHENTICATED (admin): same shape, but "mode": "authenticated" and
+//     each sample row is masked — `name`/`city` are replaced by:
+//       { "id": "…", "name_masked": "Gra*******************",
+//         "city_masked": "Ne******", "country": "…", "denomination": "…",
+//         "verified": false, "accepts_crypto": true }
+//     (name keeps its first 3 chars, city its first 2; the rest become "*",
+//     minimum 3 asterisks; null/empty values stay null)
+//
+//   401: { "status": "error", "healthy": false, "error": "Missing bearer token"
+//          | "Invalid or expired token", "checked_at": "…" }
+//   403: { "status": "error", "healthy": false,
+//          "error": "Forbidden: admin role required", "checked_at": "…" }
+//   503: { "status": "error", "healthy": false, "error": "<db error>", … }
+//
+// Query params: page (default 1), pageSize (default 25, max 100), auth
+// (optional legacy flag: 1|true|yes forces authenticated mode).
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -20,35 +61,53 @@ Deno.serve(async (req) => {
     const pageSize = Math.min(100, Math.max(1, parseInt(url.searchParams.get("pageSize") ?? "25", 10) || 25));
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
-    const authMode = ["1", "true", "yes"].includes((url.searchParams.get("auth") ?? "").toLowerCase());
+    const forceAuth = ["1", "true", "yes"].includes((url.searchParams.get("auth") ?? "").toLowerCase());
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
 
-    // Authenticated mode: verify JWT + admin role BEFORE any data access.
-    if (authMode) {
-      const authHeader = req.headers.get("Authorization") ?? "";
-      if (!authHeader.toLowerCase().startsWith("bearer ")) {
-        return json({ status: "error", healthy: false, error: "Missing bearer token", checked_at: new Date().toISOString() }, 401);
-      }
+    // ── Detect caller identity from the Authorization header ────────────────
+    // A user session JWT carries a `sub` claim; the anon/publishable key is a
+    // valid JWT without one, so it (or no header at all) selects public mode.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const hasBearer = authHeader.toLowerCase().startsWith("bearer ");
+    let isAdmin = false;
+    let authMode = false;
+
+    if (hasBearer) {
       const token = authHeader.slice(7).trim();
       const authClient = createClient(SUPABASE_URL, ANON_KEY, {
         auth: { persistSession: false, autoRefreshToken: false },
         global: { headers: { Authorization: `Bearer ${token}` } },
       });
       const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+      if (claimsError) {
+        // The anon/publishable key is not a session token, so getClaims
+        // rejects it — but it grants nothing beyond anonymous access anyway,
+        // so it falls through to public mode (same as sending no header).
+        if (token !== ANON_KEY && !isAnonApiKey(token)) {
+          return json({ status: "error", healthy: false, error: "Invalid or expired token", checked_at: new Date().toISOString() }, 401);
+        }
+      }
       const userId = claimsData?.claims?.sub;
-      if (claimsError || !userId) {
-        return json({ status: "error", healthy: false, error: "Invalid or expired token", checked_at: new Date().toISOString() }, 401);
+      if (userId) {
+        // Signed-in caller: admin gets masked mode, everyone else is rejected.
+        authMode = true;
+        const { data: roleResult, error: roleError } = await authClient.rpc("has_role", { _user_id: userId, _role: "admin" });
+        if (roleError) {
+          return json({ status: "error", healthy: false, error: "Role lookup failed", checked_at: new Date().toISOString() }, 500);
+        }
+        isAdmin = roleResult === true;
+        if (!isAdmin) {
+          return json({ status: "error", healthy: false, error: "Forbidden: admin role required", checked_at: new Date().toISOString() }, 403);
+        }
       }
-      // Role check via SECURITY DEFINER has_role — runs as the signed-in user.
-      const { data: isAdmin, error: roleError } = await authClient.rpc("has_role", { _user_id: userId, _role: "admin" });
-      if (roleError) {
-        return json({ status: "error", healthy: false, error: "Role lookup failed", checked_at: new Date().toISOString() }, 500);
-      }
-      if (!isAdmin) {
-        return json({ status: "error", healthy: false, error: "Forbidden: admin role required", checked_at: new Date().toISOString() }, 403);
-      }
+    }
+
+    // Legacy ?auth=1 flag: force authenticated mode — anonymous callers 401.
+    if (forceAuth && !authMode) {
+      const error = hasBearer ? "Invalid or expired token" : "Missing bearer token";
+      return json({ status: "error", healthy: false, error, checked_at: new Date().toISOString() }, 401);
     }
 
     const supabase = createClient(SUPABASE_URL, ANON_KEY, {
@@ -109,6 +168,20 @@ function json(payload: unknown, status: number): Response {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
+}
+
+// True for API-key-style JWTs (role "anon"/"publishable", no user sub).
+// Unverified decode is fine here: matching only downgrades the caller to
+// public mode, identical to sending no Authorization header at all.
+function isAnonApiKey(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    return !payload.sub && (payload.role === "anon" || payload.role === "publishable");
+  } catch {
+    return false;
+  }
 }
 
 function maskText(v: unknown, keep = 2): string | null {

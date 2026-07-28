@@ -1,4 +1,5 @@
 import { supabaseApi } from '@/integrations/supabase/apiClient';
+import { runDirectoryQuery, fetchDirectoryRowsViaRpc, DirectoryRow } from '@/services/churchDirectoryClient';
 
 export interface Church {
   id: string;
@@ -31,7 +32,7 @@ export interface ChurchSearchResult {
   searchMetadata: {
     query: string;
     location?: string;
-    filters: Record<string, any>;
+    filters: Record<string, unknown>;
     executionTime: number;
   };
 }
@@ -61,63 +62,96 @@ export class ComprehensiveChurchService {
     offset?: number;
   }): Promise<ChurchSearchResult> {
     const startTime = Date.now();
-    
+
     try {
-      let query = supabaseApi
-        .from('public_church_directory')
-        .select('*');
-
-      // Text search across multiple fields
-      if (params.query) {
-        const searchTerms = params.query.toLowerCase();
-        query = query.or(`name.ilike.%${searchTerms}%,city.ilike.%${searchTerms}%,denomination.ilike.%${searchTerms}%`);
-      }
-
-      // Location filters
-      if (params.city) {
-        query = query.ilike('city', `%${params.city}%`);
-      }
-      if (params.state) {
-        query = query.ilike('state_province', `%${params.state}%`);
-      }
-      if (params.country) {
-        query = query.ilike('country', `%${params.country}%`);
-      }
-
-      // Feature filters
-      if (params.denomination) {
-        query = query.ilike('denomination', `%${params.denomination}%`);
-      }
-      if (params.acceptsCrypto !== undefined) {
-        query = query.eq('accepts_crypto', params.acceptsCrypto);
-      }
-      if (params.verified !== undefined) {
-        query = query.eq('verified', params.verified);
-      }
-
-      // Geographic proximity search
-      if (params.latitude && params.longitude && params.radius) {
-        // Using PostGIS for geographic search (approximate for now)
-        const radiusInDegrees = params.radius / 69; // Rough conversion for US
-        query = query.gte('coordinates', `(${params.latitude - radiusInDegrees}, ${params.longitude - radiusInDegrees})`)
-                    .lte('coordinates', `(${params.latitude + radiusInDegrees}, ${params.longitude + radiusInDegrees})`);
-      }
-
-      // Pagination
       const limit = params.limit || 50;
       const offset = params.offset || 0;
-      query = query.range(offset, offset + limit - 1);
 
-      // Order by relevance (verified first, then rating)
-      query = query.order('verified', { ascending: false })
-                   .order('rating', { ascending: false })
-                   .order('name', { ascending: true });
+      const buildQuery = () => {
+        let query = supabaseApi
+          .from('public_church_directory')
+          .select('*', { count: 'exact' });
 
-      const { data, error, count } = await query;
+        // Text search across multiple fields
+        if (params.query) {
+          const searchTerms = params.query.toLowerCase();
+          query = query.or(`name.ilike.%${searchTerms}%,city.ilike.%${searchTerms}%,denomination.ilike.%${searchTerms}%`);
+        }
 
-      if (error) {
-        throw new Error(`Church search failed: ${error.message}`);
+        // Location filters
+        if (params.city) {
+          query = query.ilike('city', `%${params.city}%`);
+        }
+        if (params.state) {
+          query = query.ilike('state_province', `%${params.state}%`);
+        }
+        if (params.country) {
+          query = query.ilike('country', `%${params.country}%`);
+        }
+
+        // Feature filters
+        if (params.denomination) {
+          query = query.ilike('denomination', `%${params.denomination}%`);
+        }
+        if (params.acceptsCrypto !== undefined) {
+          query = query.eq('accepts_crypto', params.acceptsCrypto);
+        }
+        if (params.verified !== undefined) {
+          query = query.eq('verified', params.verified);
+        }
+
+        // Geographic proximity search
+        if (params.latitude && params.longitude && params.radius) {
+          // Using PostGIS for geographic search (approximate for now)
+          const radiusInDegrees = params.radius / 69; // Rough conversion for US
+          query = query.gte('coordinates', `(${params.latitude - radiusInDegrees}, ${params.longitude - radiusInDegrees})`)
+                      .lte('coordinates', `(${params.latitude + radiusInDegrees}, ${params.longitude + radiusInDegrees})`);
+        }
+
+        // Pagination + order by relevance (verified first, then rating)
+        return query
+          .range(offset, offset + limit - 1)
+          .order('verified', { ascending: false })
+          .order('rating', { ascending: false })
+          .order('name', { ascending: true });
+      };
+
+      // When the view path is broken, fall back to the SECURITY DEFINER RPC
+      // and apply the basic filters client-side.
+      const rpcFallback = async () => {
+        const { data, error } = await fetchDirectoryRowsViaRpc<DirectoryRow>();
+        if (error || !data) return { data: null, error: error ?? new Error('rpc returned no data') };
+        const matches = data.filter(church => {
+          if (params.query) {
+            const q = params.query.toLowerCase();
+            const hit = [church.name, church.city, church.denomination]
+              .some(v => typeof v === 'string' && v.toLowerCase().includes(q));
+            if (!hit) return false;
+          }
+          if (params.city && !church.city?.toLowerCase().includes(params.city.toLowerCase())) return false;
+          if (params.state && !church.state_province?.toLowerCase().includes(params.state.toLowerCase())) return false;
+          if (params.country && !church.country?.toLowerCase().includes(params.country.toLowerCase())) return false;
+          if (params.denomination && !church.denomination?.toLowerCase().includes(params.denomination.toLowerCase())) return false;
+          if (params.acceptsCrypto !== undefined && church.accepts_crypto !== params.acceptsCrypto) return false;
+          if (params.verified !== undefined && church.verified !== params.verified) return false;
+          return true;
+        });
+        return { data: matches.slice(offset, offset + limit), error: null, count: matches.length };
+      };
+
+      const result = await runDirectoryQuery<DirectoryRow>({
+        operation: 'search',
+        cacheKey: `search:${JSON.stringify(params)}`,
+        run: () => buildQuery(),
+        fallback: rpcFallback,
+        context: { service: 'comprehensiveChurchService' },
+      });
+
+      if (result.error && result.data.length === 0 && result.count === null) {
+        throw new Error(`Church search failed: ${result.error.message}`);
       }
+
+      const { data, count } = result;
 
       const churches: Church[] = (data || []).map(church => ({
         id: church.id,
@@ -140,8 +174,8 @@ export class ComprehensiveChurchService {
         verified: church.verified,
         rating: church.rating,
         coordinates: church.coordinates ? {
-          lat: (church.coordinates as any).x,
-          lng: (church.coordinates as any).y
+          lat: (church.coordinates as { x: number; y: number }).x,
+          lng: (church.coordinates as { x: number; y: number }).y
         } : undefined,
         created_at: church.created_at,
         updated_at: church.updated_at
@@ -239,8 +273,8 @@ export class ComprehensiveChurchService {
         verified: data.verified,
         rating: data.rating,
         coordinates: data.coordinates ? {
-          lat: (data.coordinates as any).x,
-          lng: (data.coordinates as any).y
+          lat: (data.coordinates as { x: number; y: number }).x,
+          lng: (data.coordinates as { x: number; y: number }).y
         } : undefined,
         created_at: data.created_at,
         updated_at: data.updated_at
@@ -286,8 +320,8 @@ export class ComprehensiveChurchService {
         verified: church.verified,
         rating: church.rating,
         coordinates: church.coordinates ? {
-          lat: (church.coordinates as any).x,
-          lng: (church.coordinates as any).y
+          lat: (church.coordinates as { x: number; y: number }).x,
+          lng: (church.coordinates as { x: number; y: number }).y
         } : undefined,
         created_at: church.created_at,
         updated_at: church.updated_at

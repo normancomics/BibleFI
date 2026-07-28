@@ -1,89 +1,70 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useConnect, useAccount } from 'wagmi';
+import { sdk } from '@farcaster/miniapp-sdk';
+
+type MiniAppContext = Awaited<typeof sdk.context>;
 
 /**
- * Detects if the app is running inside a Farcaster frame/mini-app
- * and auto-connects the embedded wallet when available.
+ * Farcaster / Base App mini app bootstrap hook.
+ *
+ * Must be mounted once near the app root (see MiniAppBootstrap): it detects
+ * the mini app host, signals `sdk.actions.ready()` so the host dismisses the
+ * splash screen (without this the app hangs on the splash forever), exposes
+ * the host context, and auto-connects the host's embedded wallet.
  */
 export function useFarcasterFrame() {
   const [isInsideFrame, setIsInsideFrame] = useState(false);
   const [isFrameReady, setIsFrameReady] = useState(false);
-  const [frameContext, setFrameContext] = useState<any>(null);
+  const [frameContext, setFrameContext] = useState<MiniAppContext | null>(null);
   const { connect, connectors } = useConnect();
   const { isConnected } = useAccount();
 
-  // Detect if we're inside a Farcaster frame
+  // Detect the mini app host and signal ready. Detection uses the SDK's own
+  // handshake (not iframe heuristics); everything is a no-op in a plain browser.
   useEffect(() => {
-    const detectFrame = () => {
-      // Check for Farcaster frame environment indicators
-      const isFrame =
-        typeof window !== 'undefined' &&
-        (window.parent !== window || // inside an iframe
-          (window as any).__FARCASTER_FRAME__ ||
-          new URLSearchParams(window.location.search).has('fc_frame'));
-      setIsInsideFrame(isFrame);
-      return isFrame;
-    };
-
-    detectFrame();
-  }, []);
-
-  // Initialize Frame SDK and signal ready
-  useEffect(() => {
-    if (!isInsideFrame) return;
-
     let cancelled = false;
 
-    const initFrameSDK = async () => {
+    const init = async () => {
       try {
-        const frameSdk = await import('@farcaster/frame-sdk');
-        const sdk = frameSdk.default || frameSdk.sdk;
+        const inMiniApp = await sdk.isInMiniApp();
+        if (cancelled) return;
+        setIsInsideFrame(inMiniApp);
+        if (!inMiniApp) return;
 
-        if (!sdk) {
-          console.warn('[BibleFi] Frame SDK imported but no sdk export found');
-          return;
-        }
-
-        // Get context (user info, etc.)
-        if (sdk.context) {
-          try {
-            const ctx = await sdk.context;
-            if (!cancelled) {
-              setFrameContext(ctx);
-              console.log('[BibleFi] Farcaster frame context:', ctx);
-            }
-          } catch {
-            // context may not be available in all environments
+        try {
+          const ctx = await sdk.context;
+          if (!cancelled && ctx) {
+            setFrameContext(ctx);
+            console.log('[BibleFi] Farcaster mini app context:', ctx);
           }
+        } catch {
+          // context may not be available in all hosts
         }
 
-        // Signal that the frame is ready to render
-        if (sdk.actions?.ready) {
-          await sdk.actions.ready();
-        }
-
+        // Dismiss the host splash screen once the app has rendered.
+        await sdk.actions.ready();
         if (!cancelled) {
           setIsFrameReady(true);
-          console.log('[BibleFi] Farcaster Frame SDK ready');
+          console.log('[BibleFi] Farcaster mini app ready');
         }
       } catch (err) {
-        console.warn('[BibleFi] Frame SDK init failed (not in frame?):', err);
+        console.warn('[BibleFi] Mini app SDK init failed (not in mini app?):', err);
       }
     };
 
-    initFrameSDK();
+    init();
 
     return () => {
       cancelled = true;
     };
-  }, [isInsideFrame]);
+  }, []);
 
-  // Auto-connect the Farcaster wallet connector when inside a frame
+  // Auto-connect the host's embedded wallet once ready.
   useEffect(() => {
     if (!isFrameReady || isConnected) return;
 
     const farcasterConnector = connectors.find(
-      (c) => c.id === 'farcasterFrame' || c.name === 'Farcaster' || c.id === 'farcaster'
+      (c) => c.id === 'farcaster' || c.id === 'farcasterFrame' || c.name === 'Farcaster'
     );
 
     if (farcasterConnector) {
@@ -96,19 +77,11 @@ export function useFarcasterFrame() {
     }
   }, [isFrameReady, isConnected, connectors, connect]);
 
-  const closeFrame = useCallback(async (toastMessage?: string) => {
+  const closeFrame = useCallback(async () => {
     try {
-      const frameSdk = await import('@farcaster/frame-sdk');
-      const sdk = frameSdk.default || frameSdk.sdk;
-      if (sdk?.actions?.close) {
-        if (toastMessage) {
-          await (sdk.actions.close as any)({ toast: { message: toastMessage } });
-        } else {
-          await sdk.actions.close();
-        }
-      }
+      await sdk.actions.close();
     } catch {
-      // Not in frame
+      // Not in a mini app
     }
   }, []);
 

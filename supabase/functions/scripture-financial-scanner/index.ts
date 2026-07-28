@@ -223,6 +223,9 @@ Deno.serve(async (req) => {
       async (ctx: AgentContext) => {
         const results: VerseResult[] = [];
         const errors: string[] = [];
+        // Database write failures, tracked separately from fetch/parse errors so
+        // a seeder that parses fine but writes nothing can never look healthy.
+        const writeErrors: string[] = [];
 
         // Helper to process verses from any source
         const processVerses = async (verses: any[], fallbackBook: string, fallbackChapter: number) => {
@@ -243,7 +246,11 @@ Deno.serve(async (req) => {
             };
             results.push(verseResult);
 
-            await sandboxedInsert(ctx, 'biblical_knowledge_base', {
+            // NOTE: check these results. Previously the return values were
+            // discarded, so when the upserts began failing (no unique
+            // constraint backing the ON CONFLICT target -> 42P10) the agent
+            // still reported success and the seeders wrote nothing for months.
+            const kbRes = await sandboxedInsert(ctx, 'biblical_knowledge_base', {
               reference: `${verseResult.book} ${verseResult.chapter}:${verseResult.verse}`,
               verse_text: text, category: categories[0] || 'general_finance',
               principle: `Financial wisdom: ${keywords.slice(0, 3).join(', ')}`,
@@ -251,10 +258,14 @@ Deno.serve(async (req) => {
               defi_relevance: defiRelevance, financial_keywords: keywords,
             }, { onConflict: 'reference' });
 
-            await sandboxedInsert(ctx, 'comprehensive_biblical_texts', {
+            if (kbRes?.error) writeErrors.push(`biblical_knowledge_base: ${kbRes.error.message}`);
+
+            const cbtRes = await sandboxedInsert(ctx, 'comprehensive_biblical_texts', {
               book: verseResult.book, chapter: verseResult.chapter, verse: verseResult.verse,
               kjv_text: text, financial_keywords: keywords, financial_relevance: relevance,
             }, { onConflict: 'book,chapter,verse' });
+
+            if (cbtRes?.error) writeErrors.push(`comprehensive_biblical_texts: ${cbtRes.error.message}`);
           }
         };
 
@@ -297,9 +308,20 @@ Deno.serve(async (req) => {
           }
         }
 
+        // Report what was actually WRITTEN, not just parsed. `results.length`
+        // alone made a seeder that wrote zero rows look successful.
+        if (writeErrors.length > 0) {
+          console.error(`[scripture-scanner] ${writeErrors.length} database writes FAILED. First: ${writeErrors[0]}`);
+        }
+
         return {
           mode, processed: mode === 'full_bible' ? 'systematic_scan' : 'targeted_passages',
           financial_verses_found: results.length,
+          // ctx.stats.created is incremented by sandboxedInsert on real writes.
+          rows_written: ctx.stats.created,
+          write_errors: writeErrors.length,
+          write_error_details: writeErrors.slice(0, 3),
+          healthy: writeErrors.length === 0 && (results.length === 0 || ctx.stats.created > 0),
           errors: errors.length, error_details: errors.slice(0, 5),
           sample_results: results.slice(0, 5).map(r => ({
             reference: `${r.book} ${r.chapter}:${r.verse}`, keywords: r.financial_keywords,

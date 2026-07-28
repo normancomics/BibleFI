@@ -130,4 +130,3 @@ contract WisdomRewardsPool is ReentrancyGuard, Ownable {
         );
     }
 }
-```

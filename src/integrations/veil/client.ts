@@ -1,278 +1,267 @@
 /**
- * Veil.cash Integration for Anonymous ZK Tithing on Base Chain
- * 
- * Veil Cash is a privacy application leveraging zk-SNARKs on Base L2,
- * enabling verified depositors to achieve privacy and anonymity within
- * a pool of trusted users.
- * 
- * Docs: https://docs.veil.cash/
+ * Veil.cash integration for anonymous ZK tithing on Base.
+ *
+ * Veil Cash is a real privacy protocol on Base L2 (UTXO model, Poseidon +
+ * Groth16). This client uses the VERIFIED live contract addresses and reads
+ * real pool state on-chain.
+ *
+ * SAFETY CONTRACT
+ * ───────────────
+ * This client NEVER fabricates a transaction. In PREVIEW mode (the default —
+ * see src/config/veil.ts) deposit()/withdraw() return { success:false,
+ * preview:true } and no funds move. Real transfers only happen when the
+ * deployment opts into live mode (VITE_VEIL_LIVE=true) AND the @veil-cash/sdk
+ * is installed; even then, success is only reported after a confirmed on-chain
+ * transaction hash. A donor is never told a tithe was sent unless it was.
+ *
+ * Docs: https://docs.veil.cash/  SDK: @veil-cash/sdk
  */
 
-import { ethers } from 'ethers';
+import { Contract, JsonRpcProvider } from 'ethers';
 import {
   createBrowserProvider,
   keccak256,
-  toUtf8Bytes,
   hexlify,
   randomBytes,
   concat,
   getBytes,
   type Provider,
-  type Signer
+  type Signer,
 } from '@/lib/ethers-compat';
+import {
+  VEIL_ASSETS,
+  VEIL_CHAIN_ID,
+  VEIL_PROTOCOL_FEE_BPS,
+  isVeilLive,
+  type VeilAsset,
+} from '@/config/veil';
 
-// Veil.cash contract addresses on Base
-const VEIL_CONTRACTS = {
-  // Base mainnet - pool contracts for different denominations
-  POOL_01_ETH: '0x...' as const, // 0.1 ETH pool
-  POOL_1_ETH: '0x...' as const,  // 1 ETH pool  
-  POOL_10_ETH: '0x...' as const, // 10 ETH pool
-  USDC_POOL: '0x...' as const,   // USDC privacy pool
-};
-
-// Veil deposit denominations
+// Kept for backwards-compat with existing UI; maps onto real assets/pools.
 export type VeilDenomination = '0.1_ETH' | '1_ETH' | '10_ETH' | 'USDC_100' | 'USDC_1000';
 
-interface VeilDepositParams {
-  denomination: VeilDenomination;
-  commitment: string;
-}
-
-interface VeilWithdrawParams {
-  proof: string;
-  nullifierHash: string;
-  recipient: string;
-  relayer: string;
-  fee: bigint;
-  refund: bigint;
-}
+const DENOMINATION_ASSET: Record<VeilDenomination, { asset: VeilAsset; amount: string; label: string }> = {
+  '0.1_ETH': { asset: 'ETH', amount: '0.1', label: '0.1 ETH' },
+  '1_ETH': { asset: 'ETH', amount: '1', label: '1 ETH' },
+  '10_ETH': { asset: 'ETH', amount: '10', label: '10 ETH' },
+  'USDC_100': { asset: 'USDC', amount: '100', label: '100 USDC' },
+  'USDC_1000': { asset: 'USDC', amount: '1000', label: '1,000 USDC' },
+};
 
 interface VeilDepositResult {
   success: boolean;
+  /** True when the call was a no-op because live mode is off (funds untouched). */
+  preview?: boolean;
   txHash?: string;
   commitment?: string;
-  note?: string; // Private note to save
+  note?: string;
   error?: string;
 }
 
 interface VeilWithdrawResult {
   success: boolean;
+  preview?: boolean;
   txHash?: string;
   amount?: string;
   error?: string;
 }
 
-/**
- * Veil.cash Client for private tithing on Base chain
- */
+const PREVIEW_MESSAGE =
+  'Anonymous giving via Veil is in preview on this deployment — no on-chain transfer was made and no funds moved. Enable VITE_VEIL_LIVE with the @veil-cash/sdk to send real anonymous tithes.';
+
+// Minimal read ABI — nextIndex is the number of commitments (anonymity set).
+const POOL_READ_ABI = [
+  'function nextIndex() view returns (uint32)',
+  'function getLastRoot() view returns (bytes32)',
+];
+
 export class VeilCashClient {
   private provider: Provider | null = null;
   private signer: Signer | null = null;
-  
-  // Supported denominations for tithing
-  readonly denominations: { value: VeilDenomination; label: string; amount: string }[] = [
-    { value: '0.1_ETH', label: '0.1 ETH', amount: '0.1' },
-    { value: '1_ETH', label: '1 ETH', amount: '1' },
-    { value: '10_ETH', label: '10 ETH', amount: '10' },
-    { value: 'USDC_100', label: '100 USDC', amount: '100' },
-    { value: 'USDC_1000', label: '1,000 USDC', amount: '1000' },
-  ];
 
-  /**
-   * Initialize the Veil.cash client with a signer
-   */
+  readonly denominations: { value: VeilDenomination; label: string; amount: string }[] =
+    (Object.keys(DENOMINATION_ASSET) as VeilDenomination[]).map((value) => ({
+      value,
+      label: DENOMINATION_ASSET[value].label,
+      amount: DENOMINATION_ASSET[value].amount,
+    }));
+
+  /** True only when real transfers are enabled for this build. */
+  isLive(): boolean {
+    return isVeilLive();
+  }
+
   async initialize(signer?: Signer): Promise<void> {
     if (signer) {
       this.signer = signer;
       this.provider = signer.provider || null;
-    } else if (typeof window !== 'undefined' && (window as any).ethereum) {
-      const browserProvider = createBrowserProvider((window as any).ethereum);
+    } else if (typeof window !== 'undefined' && (window as { ethereum?: unknown }).ethereum) {
+      const browserProvider = createBrowserProvider((window as { ethereum?: unknown }).ethereum);
       this.provider = browserProvider;
       this.signer = await browserProvider.getSigner();
     }
   }
 
-  /**
-   * Generate a random commitment for deposit
-   */
+  /** Generate deposit secrets locally (real, harmless — used for the user's note). */
   generateCommitment(): { commitment: string; nullifier: string; secret: string } {
-    // Generate random nullifier and secret
     const nullifier = hexlify(randomBytes(31));
     const secret = hexlify(randomBytes(31));
-    
-    // Create commitment hash (simplified - actual implementation uses Pedersen hash)
-    const preimage = concat([
-      getBytes(nullifier),
-      getBytes(secret)
-    ]);
-    const commitment = keccak256(preimage);
-    
+    const commitment = keccak256(concat([getBytes(nullifier), getBytes(secret)]));
     return { commitment, nullifier, secret };
   }
 
-  /**
-   * Create a note string from commitment data (for user to save)
-   */
   createNote(denomination: VeilDenomination, nullifier: string, secret: string): string {
-    // Encode the note as base64 for the user to save
-    const noteData = {
-      denomination,
-      nullifier,
-      secret,
-      network: 'base',
-      timestamp: Date.now()
-    };
+    const noteData = { denomination, nullifier, secret, network: 'base', timestamp: Date.now() };
     return `veil-note-${btoa(JSON.stringify(noteData))}`;
   }
 
-  /**
-   * Parse a saved note back into its components
-   */
   parseNote(note: string): { denomination: VeilDenomination; nullifier: string; secret: string } | null {
     try {
       if (!note.startsWith('veil-note-')) return null;
-      const base64Data = note.replace('veil-note-', '');
-      const noteData = JSON.parse(atob(base64Data));
-      return {
-        denomination: noteData.denomination,
-        nullifier: noteData.nullifier,
-        secret: noteData.secret
-      };
+      const noteData = JSON.parse(atob(note.replace('veil-note-', '')));
+      return { denomination: noteData.denomination, nullifier: noteData.nullifier, secret: noteData.secret };
     } catch {
       return null;
     }
   }
 
   /**
-   * Deposit into privacy pool (generates commitment and deposits)
+   * Deposit into a Veil privacy pool. In preview mode this is a no-op that
+   * returns preview:true — it NEVER submits a transaction or moves funds.
    */
   async deposit(denomination: VeilDenomination): Promise<VeilDepositResult> {
+    if (!this.isLive()) {
+      return { success: false, preview: true, error: PREVIEW_MESSAGE };
+    }
     if (!this.signer) {
       return { success: false, error: 'Wallet not connected' };
     }
-
     try {
-      const { commitment, nullifier, secret } = this.generateCommitment();
-      const note = this.createNote(denomination, nullifier, secret);
-
-      // In production, this would interact with the actual Veil.cash contract
-      // For now, simulate the deposit process
-      console.log('Veil.cash deposit initiated:', { denomination, commitment });
-
-      // Simulate transaction
-      const simulatedTxHash = keccak256(toUtf8Bytes(`deposit-${Date.now()}-${commitment}`));
-
-      return {
-        success: true,
-        txHash: simulatedTxHash,
-        commitment,
-        note // User must save this to withdraw later
-      };
+      const adapter = await loadVeilSdk();
+      if (!adapter) {
+        return { success: false, preview: true, error: PREVIEW_MESSAGE };
+      }
+      const { asset, amount } = DENOMINATION_ASSET[denomination];
+      // Delegate to the real SDK. Only report success on a confirmed tx hash.
+      const res = await adapter.deposit({ signer: this.signer, asset, amount });
+      if (!res?.txHash) {
+        return { success: false, error: res?.error ?? 'Deposit did not confirm on-chain' };
+      }
+      return { success: true, txHash: res.txHash, commitment: res.commitment, note: res.note };
     } catch (error) {
-      console.error('Veil deposit error:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Deposit failed'
-      };
+      return { success: false, error: error instanceof Error ? error.message : 'Deposit failed' };
     }
   }
 
   /**
-   * Withdraw from privacy pool to any address (church wallet)
+   * Withdraw from a Veil pool to a recipient (church) address. Preview mode is
+   * a no-op; live mode reports success only on a confirmed tx.
    */
   async withdraw(note: string, recipientAddress: string): Promise<VeilWithdrawResult> {
+    if (!this.isLive()) {
+      return { success: false, preview: true, error: PREVIEW_MESSAGE };
+    }
     if (!this.signer) {
       return { success: false, error: 'Wallet not connected' };
     }
-
-    const parsedNote = this.parseNote(note);
-    if (!parsedNote) {
+    const parsed = this.parseNote(note);
+    if (!parsed) {
       return { success: false, error: 'Invalid note format' };
     }
-
     try {
-      // Generate the ZK proof for withdrawal
-      // In production, this calls the Veil.cash SDK to generate the proof
-      console.log('Generating ZK proof for withdrawal...', { 
-        denomination: parsedNote.denomination,
-        recipient: recipientAddress 
-      });
-
-      // Simulate proof generation and withdrawal
-      const denominationInfo = this.denominations.find(d => d.value === parsedNote.denomination);
-      const simulatedTxHash = keccak256(toUtf8Bytes(`withdraw-${Date.now()}-${recipientAddress}`));
-
-      return {
-        success: true,
-        txHash: simulatedTxHash,
-        amount: denominationInfo?.amount || '0'
-      };
+      const adapter = await loadVeilSdk();
+      if (!adapter) {
+        return { success: false, preview: true, error: PREVIEW_MESSAGE };
+      }
+      const { asset, amount } = DENOMINATION_ASSET[parsed.denomination];
+      const res = await adapter.withdraw({ signer: this.signer, asset, amount, note, recipient: recipientAddress });
+      if (!res?.txHash) {
+        return { success: false, error: res?.error ?? 'Withdrawal did not confirm on-chain' };
+      }
+      return { success: true, txHash: res.txHash, amount };
     } catch (error) {
-      console.error('Veil withdrawal error:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Withdrawal failed'
-      };
+      return { success: false, error: error instanceof Error ? error.message : 'Withdrawal failed' };
     }
   }
 
-  /**
-   * Check if user has pending deposits (for UI state)
-   */
-  async getPendingDeposits(address: string): Promise<Array<{ commitment: string; denomination: VeilDenomination; timestamp: number }>> {
-    // In production, query the Veil.cash subgraph or contract events
-    // For now, return empty array
+  async getPendingDeposits(): Promise<Array<{ commitment: string; denomination: VeilDenomination; timestamp: number }>> {
     return [];
   }
 
   /**
-   * Get the current anonymity set size for a pool
+   * Real anonymity-set size = number of commitments in the pool's merkle tree
+   * (pool.nextIndex()). Returns null when it can't be read (UI shows "—" rather
+   * than a fabricated number).
    */
-  async getAnonymitySetSize(denomination: VeilDenomination): Promise<number> {
-    // In production, query the contract for deposit count
-    // Larger anonymity set = better privacy
-    const mockSizes: Record<VeilDenomination, number> = {
-      '0.1_ETH': 1250,
-      '1_ETH': 890,
-      '10_ETH': 320,
-      'USDC_100': 2100,
-      'USDC_1000': 650
-    };
-    return mockSizes[denomination] || 0;
+  async getAnonymitySetSize(denomination: VeilDenomination): Promise<number | null> {
+    const { asset } = DENOMINATION_ASSET[denomination];
+    const pool = VEIL_ASSETS[asset].pool;
+    try {
+      const provider = this.provider ?? (await this.readProvider());
+      if (!provider) return null;
+      const contract = new Contract(pool, POOL_READ_ABI, provider);
+      const idx = await contract.nextIndex();
+      return Number(idx);
+    } catch {
+      return null;
+    }
   }
 
-  /**
-   * Check if Veil.cash is available on current network
-   */
+  private async readProvider(): Promise<Provider | null> {
+    try {
+      return new JsonRpcProvider('https://mainnet.base.org');
+    } catch {
+      return null;
+    }
+  }
+
   async isAvailable(): Promise<boolean> {
     if (!this.provider) return false;
     try {
       const network = await this.provider.getNetwork();
-      // Base mainnet (8453) or Base Goerli (84531)
-      return Number(network.chainId) === 8453 || Number(network.chainId) === 84531;
+      return Number(network.chainId) === VEIL_CHAIN_ID;
     } catch {
       return false;
     }
   }
 
-  /**
-   * Get estimated gas for deposit
-   */
-  async estimateDepositGas(denomination: VeilDenomination): Promise<string> {
-    // Veil deposits typically cost around 0.0015-0.002 ETH in gas on Base
-    return '0.002';
+  /** Estimated protocol fee for an amount (0.3%). */
+  estimateFee(amount: number): number {
+    return (amount * VEIL_PROTOCOL_FEE_BPS) / 10_000;
   }
 
-  /**
-   * Get relayer info for gasless withdrawals (if available)
-   */
-  async getRelayers(): Promise<Array<{ address: string; fee: string; available: boolean }>> {
-    // In production, query active relayers
-    return [
-      { address: '0x...', fee: '0.001', available: true }
-    ];
+  async estimateDepositGas(): Promise<string> {
+    return '0.002';
   }
 }
 
-// Export singleton instance
+/**
+ * Lazily load the real @veil-cash/sdk adapter. Uses a runtime dynamic import so
+ * the default build never bundles the (heavy, snarkjs-based) SDK. Returns null
+ * if the SDK isn't installed — callers then stay in preview mode.
+ */
+interface VeilSdkAdapter {
+  deposit(args: { signer: Signer; asset: VeilAsset; amount: string }): Promise<{ txHash?: string; commitment?: string; note?: string; error?: string }>;
+  withdraw(args: { signer: Signer; asset: VeilAsset; amount: string; note: string; recipient: string }): Promise<{ txHash?: string; error?: string }>;
+}
+
+let sdkAdapterPromise: Promise<VeilSdkAdapter | null> | null = null;
+
+async function loadVeilSdk(): Promise<VeilSdkAdapter | null> {
+  if (!sdkAdapterPromise) {
+    sdkAdapterPromise = (async () => {
+      try {
+        // Real integration point (src/integrations/veil/sdkAdapter.ts). Wire
+        // @veil-cash/sdk there; the adapter returns a real txHash only after
+        // on-chain confirmation. Code-split so proving deps stay out of the
+        // main bundle.
+        const mod = await import('@/integrations/veil/sdkAdapter');
+        return mod.veilSdkAdapter as VeilSdkAdapter;
+      } catch {
+        return null;
+      }
+    })();
+  }
+  return sdkAdapterPromise;
+}
+
 export const veilCashClient = new VeilCashClient();

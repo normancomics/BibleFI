@@ -84,5 +84,14 @@ verify_jwt = false
 [functions.seed-comprehensive-texts]
 verify_jwt = false
 
+[functions.superfluid-stream-monitor]
+verify_jwt = false
+
+[functions.church-directory-debug]
+verify_jwt = false
+
 [functions.church-directory-health]
+verify_jwt = false
+
+[functions.biblefi-terminal]
 verify_jwt = false

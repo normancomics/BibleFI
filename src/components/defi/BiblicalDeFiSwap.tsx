@@ -450,7 +450,7 @@ const BiblicalDeFiSwap: React.FC = () => {
 
           {/* Get Quote Button */}
           <Button
-            onClick={getSwapQuote}
+            onClick={() => getSwapQuote()}
             disabled={!fromToken || !toToken || !fromAmount || isLoading}
             className="w-full bg-eboy-green hover:bg-eboy-green/90 text-black"
           >

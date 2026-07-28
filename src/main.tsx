@@ -13,7 +13,11 @@ import { WalletErrorBoundary } from '@/components/wallet/WalletErrorBoundary';
 import '@farcaster/auth-kit/styles.css';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import App from "./App";
+import { installGlobalErrorHandlers } from "@/lib/errorReporting";
 import "./index.css";
+
+// Capture unhandled rejections / runtime errors that React boundaries can't see.
+installGlobalErrorHandlers();
 
 const queryClient = new QueryClient({
   defaultOptions: {

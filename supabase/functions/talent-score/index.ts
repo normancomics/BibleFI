@@ -1,5 +1,6 @@
  import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
- 
+import { enforceRateLimit } from "../_shared/rate-limit.ts";
+
 // Talent Protocol API v3 - Base URL
 const TALENT_API_BASE = 'https://api.talentprotocol.com';
  
@@ -51,6 +52,15 @@ interface TalentCredential {
          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
        );
      }
+
+     const limited = await enforceRateLimit({
+       functionName: 'talent-score',
+       key: user.id,
+       maxRequests: 10,
+       windowSeconds: 60,
+       corsHeaders,
+     });
+     if (limited) return limited;
 
      const TALENT_API_KEY = Deno.env.get('TALENT_API_KEY');
      

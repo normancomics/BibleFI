@@ -131,7 +131,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract XBibleFiDeployer is Ownable {
     // ── Base chain addresses ──
     address public constant SUPERFLUID_TOKEN_FACTORY =
-        0x73743A7B7af23CAc5A3BFBD11B0CF0A3D11E7CA3;
+        0x73743A7b7Af23CAc5A3bfbD11b0cf0a3D11E7Ca3;
 
     address public xBibleFiAddress;
 
