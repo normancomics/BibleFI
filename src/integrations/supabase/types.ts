@@ -1056,6 +1056,24 @@ export type Database = {
         }
         Relationships: []
       }
+      mcp_rate_limits: {
+        Row: {
+          bucket_key: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          bucket_key?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           country: string
@@ -1779,6 +1797,10 @@ export type Database = {
       }
       check_edge_rate_limit: {
         Args: { p_key: string; p_max: number; p_window_seconds: number }
+        Returns: Json
+      }
+      check_mcp_rate_limit: {
+        Args: { p_key: string; p_max?: number; p_window_seconds?: number }
         Returns: Json
       }
       complete_agent_run: {
