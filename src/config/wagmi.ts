@@ -1,5 +1,5 @@
 
-import { createConfig, http } from 'wagmi'
+import { createConfig, http, type CreateConnectorFn } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
@@ -12,7 +12,9 @@ export const config = createConfig({
   connectors: [
     // Farcaster mini app connector — the embedded wallet inside
     // Farcaster/Base App mini app hosts (connector id: 'farcaster')
-    farcasterMiniApp(),
+    // Cast: the connector ships its own viem/wagmi types, which structurally
+    // duplicate ours and confuse TS. Runtime behaviour is unaffected.
+    farcasterMiniApp() as unknown as CreateConnectorFn,
     // Rainbow — extension when installed; the wallet picker falls back to
     // WalletConnect QR (scannable by Rainbow mobile) when it isn't
     injected({
