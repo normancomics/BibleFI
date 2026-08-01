@@ -57,6 +57,7 @@ const SuperVaultPage = lazy(() => import("./pages/SuperVaultPage"));
 const SuperBoringPage = lazy(() => import("./pages/SuperBoringPage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
+const MCPAuditLogPage = lazy(() => import("./pages/MCPAuditLogPage"));
 
 /** Shown while a lazily-loaded route chunk is being fetched. */
 const PageLoader = () => (
@@ -123,6 +124,7 @@ const App = () => (
             <Route path="/vault" element={<SuperVaultPage />} />
             <Route path="/dca" element={<SuperBoringPage />} />
             <Route path="/tech-graphs" element={<TechGraphsPage />} />
+            <Route path="/mcp-audit" element={<MCPAuditLogPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

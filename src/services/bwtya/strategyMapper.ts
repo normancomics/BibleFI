@@ -8,7 +8,75 @@ import {
   maxDrawdownEstimate,
   normaliseKellyAllocations,
 } from './mathEngine';
-import type { BWTYAStrategy, ScoredOpportunity, StrategyAllocation } from './types';
+import type { BWTYAStrategy, ScoredOpportunity, StrategyAllocation, YieldOpportunity } from './types';
+
+// ---------------------------------------------------------------------------
+// Morpho & Aerodrome canonical vault definitions (Base network)
+// ---------------------------------------------------------------------------
+
+/**
+ * Well-known Morpho and Aerodrome vaults on Base, used as seed opportunities
+ * when the caller does not supply live market data.  APYs are conservative
+ * estimates; the live oracle should override these at runtime.
+ */
+export const MORPHO_AERODROME_VAULTS: YieldOpportunity[] = [
+  {
+    protocol: 'Morpho',
+    poolName: 'USDC Flagship Vault',
+    tokenSymbol: 'USDC',
+    chain: 'base',
+    apy: 8.5,
+    tvlUsd: 420_000_000,
+    riskScore: 18,
+    category: 'lending',
+    biblicalAlignment: 'transparent stewardship faithful firstfruits sustainable',
+    isVerified: true,
+    audited: true,
+    transparent: true,
+  },
+  {
+    protocol: 'Morpho',
+    poolName: 'WETH Flagship Vault',
+    tokenSymbol: 'WETH',
+    chain: 'base',
+    apy: 5.2,
+    tvlUsd: 290_000_000,
+    riskScore: 22,
+    category: 'lending',
+    biblicalAlignment: 'transparent stewardship faithful honest',
+    isVerified: true,
+    audited: true,
+    transparent: true,
+  },
+  {
+    protocol: 'Aerodrome',
+    poolName: 'USDC/ETH sLP',
+    tokenSymbol: 'AERO',
+    chain: 'base',
+    apy: 14.8,
+    tvlUsd: 185_000_000,
+    riskScore: 35,
+    category: 'dex',
+    biblicalAlignment: 'transparent community justice sustainable giving',
+    isVerified: true,
+    audited: true,
+    transparent: true,
+  },
+  {
+    protocol: 'Aerodrome',
+    poolName: 'cbETH/ETH sLP',
+    tokenSymbol: 'AERO',
+    chain: 'base',
+    apy: 9.1,
+    tvlUsd: 98_000_000,
+    riskScore: 28,
+    category: 'dex',
+    biblicalAlignment: 'transparent stewardship sustainable',
+    isVerified: true,
+    audited: true,
+    transparent: true,
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Strategy definitions

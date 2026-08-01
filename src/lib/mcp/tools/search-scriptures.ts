@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { enforceMcpRateLimit, publicClient, sanitizeFilterText } from "../guard";
+import { enforceMcpRateLimit, publicClient, sanitizeFilterText, sanitizeInputsForAudit } from "../guard";
 
 export default defineTool({
   name: "search_scriptures",
@@ -16,16 +16,20 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query }, ctx) => {
-    const limited = await enforceMcpRateLimit("search_scriptures", ctx);
-    if (limited.error) return limited.error;
-
     const safe = sanitizeFilterText(query);
     if (!safe) {
       return {
-        content: [{ type: "text", text: "Please provide a searchable word or phrase." }],
+        content: [{ type: "text", text: "Please provide a searchable word or phrase (letters and spaces only)." }],
         isError: true,
       };
     }
+
+    const limited = await enforceMcpRateLimit(
+      "search_scriptures",
+      ctx,
+      sanitizeInputsForAudit({ query }),
+    );
+    if (limited.error) return limited.error;
 
     const supabase = publicClient();
     const { data, error } = await supabase

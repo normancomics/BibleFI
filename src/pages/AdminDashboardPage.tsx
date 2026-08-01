@@ -6,6 +6,7 @@ import PaymentProcessorSetup from '@/components/admin/PaymentProcessorSetup';
 import ChurchPaymentProcessorDashboard from '@/components/admin/ChurchPaymentProcessorDashboard';
 import LiveDataDashboard from '@/components/dashboard/LiveDataDashboard';
 import SecurityMonitorPanel from '@/components/admin/SecurityMonitorPanel';
+import MCPRateLimitsPanel from '@/components/admin/MCPRateLimitsPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -30,12 +31,14 @@ const AdminDashboardPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <Tabs defaultValue="live-data" className="space-y-6">
-        <TabsList className="grid grid-cols-5 w-full max-w-3xl">
+        <TabsList className="grid grid-cols-7 w-full max-w-4xl">
           <TabsTrigger value="live-data">Live Data</TabsTrigger>
-          <TabsTrigger value="crawlers">Data Crawlers</TabsTrigger>
-          <TabsTrigger value="processors">Payment Setup</TabsTrigger>
+          <TabsTrigger value="crawlers">Crawlers</TabsTrigger>
+          <TabsTrigger value="processors">Payment</TabsTrigger>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="rate-limits">Rate Limits</TabsTrigger>
+          <TabsTrigger value="audit-log">Audit Log</TabsTrigger>
         </TabsList>
 
         <TabsContent value="live-data">
@@ -57,6 +60,19 @@ const AdminDashboardPage: React.FC = () => {
 
         <TabsContent value="security">
           <SecurityMonitorPanel />
+        </TabsContent>
+
+        <TabsContent value="rate-limits">
+          <MCPRateLimitsPanel />
+        </TabsContent>
+
+        <TabsContent value="audit-log">
+          <div className="text-center py-6 text-white/50 text-sm">
+            Full audit log is available at{' '}
+            <a href="/mcp-audit" className="text-purple-400 hover:underline">/mcp-audit</a>
+            {' '}— this tab shows a summary.
+          </div>
+          <MCPRateLimitsPanel />
         </TabsContent>
       </Tabs>
     </div>

@@ -2,7 +2,82 @@
 // Calls the enhanced-biblical-advisor Supabase edge function with offline fallback synthesis
 
 import { supabase } from '@/integrations/supabase/client';
-import type { BWSPContext, BWSPSynthesis, ScriptureResult } from './types';
+import type { BWSPContext, BWSPSynthesis, ScriptureResult, TripleCheckResult } from './types';
+
+// ---------------------------------------------------------------------------
+// Triple-Check: Authenticity · Context · Anti-Cherry-Picking
+// ---------------------------------------------------------------------------
+
+/**
+ * Deterministic djb2-style hex hash of a string — used to produce a stable
+ * verse fingerprint that can be submitted to BibleFiBWSP.synthesizeWisdom()
+ * on Base without a crypto dependency.
+ */
+function verseHashHex(text: string): string {
+  let h = 5381;
+  for (let i = 0; i < text.length; i++) {
+    h = ((h << 5) + h) ^ text.charCodeAt(i);
+    h = h >>> 0; // keep 32-bit unsigned
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
+// Books of the Bible considered authoritative for financial/stewardship topics
+const FINANCIAL_BOOKS = new Set([
+  'genesis', 'deuteronomy', 'proverbs', 'ecclesiastes', 'malachi',
+  'matthew', 'mark', 'luke', 'john', 'romans', 'corinthians',
+  '1 timothy', '2 timothy', 'james', 'revelation',
+]);
+
+// Patterns that indicate a verse is plucked out of non-financial narrative context
+const OUT_OF_CONTEXT_PATTERNS = [/battle/i, /genealog/i, /census/i, /sacrific.*animal/i];
+
+/**
+ * Run the BWSP triple-check on the assembled synthesis context.
+ *
+ * 1. **Authenticity** – primary scripture has a recognisable book:chapter:verse
+ *    reference and non-empty text.
+ * 2. **Context** – the verse does not match out-of-context narrative patterns,
+ *    and is drawn from a book known for financial/stewardship teaching.
+ * 3. **Anti-cherry-picking** – at least 2 additional supporting verses are
+ *    present so no single text is used in isolation.
+ */
+export function tripleCheck(
+  primaryScripture: ScriptureResult,
+  supportingScriptures: ScriptureResult[],
+): TripleCheckResult {
+  const failReasons: string[] = [];
+
+  // --- Check 1: Authenticity ---
+  const refPattern = /^[1-3]?\s*[A-Za-z]+\s+\d+:\d+/;
+  const hasValidRef = refPattern.test((primaryScripture.reference ?? '').trim());
+  const hasText = (primaryScripture.text ?? '').trim().length > 10;
+  const authentic = hasValidRef && hasText;
+  if (!hasValidRef) failReasons.push('Primary scripture reference does not match expected Book Chapter:Verse format.');
+  if (!hasText) failReasons.push('Primary scripture text is missing or too short to verify.');
+
+  // --- Check 2: Context ---
+  const bookName = (primaryScripture.reference ?? '').replace(/\d+:\d+.*/, '').toLowerCase().trim();
+  const isFinancialBook = FINANCIAL_BOOKS.has(bookName) ||
+    [...FINANCIAL_BOOKS].some((b) => bookName.includes(b));
+  const hasOutOfContextPattern = OUT_OF_CONTEXT_PATTERNS.some((p) => p.test(primaryScripture.text ?? ''));
+  const contextual = isFinancialBook && !hasOutOfContextPattern;
+  if (!isFinancialBook) failReasons.push(`Book "${bookName}" is not in the approved financial-stewardship canon.`);
+  if (hasOutOfContextPattern) failReasons.push('Verse appears to be drawn from a non-financial narrative context.');
+
+  // --- Check 3: Anti-cherry-picking ---
+  const notCherryPicked = supportingScriptures.length >= 2;
+  if (!notCherryPicked) {
+    failReasons.push(
+      `Only ${supportingScriptures.length} supporting scripture(s) found; ≥ 2 required to prevent single-verse cherry-picking.`,
+    );
+  }
+
+  const passed = authentic && contextual && notCherryPicked;
+  const verseHash = '0x' + verseHashHex(primaryScripture.text ?? primaryScripture.reference ?? '');
+
+  return { authentic, contextual, notCherryPicked, passed, verseHash, failReasons };
+}
 
 // ---------------------------------------------------------------------------
 // Offline fallback synthesis by intent
@@ -84,12 +159,15 @@ function buildOfflineSynthesis(context: BWSPContext): BWSPSynthesis {
     category: 'stewardship',
   };
 
+  const supportingScriptures = context.scriptures.slice(1, 4);
+  const check = tripleCheck(primaryScripture, supportingScriptures);
+
   return {
     guidance: fallback.guidance,
     principle: fallback.principle,
     action: fallback.action,
     primaryScripture,
-    supportingScriptures: context.scriptures.slice(1, 4),
+    supportingScriptures,
     confidenceScore: 0.72,
     synthesisMethod: 'offline_fallback',
     protocol: 'BWSP-v1.0',
@@ -97,6 +175,7 @@ function buildOfflineSynthesis(context: BWSPContext): BWSPSynthesis {
     authorityWeightedResonance: 0,
     wisdomDecayFactor: 1,
     titheBlessingMultiplier: 1,
+    tripleCheck: check,
   };
 }
 
@@ -122,18 +201,22 @@ export class BWSPSynthesizer {
 
       if (error || !data) throw new Error('Edge function failed');
 
+      const primaryScripture: ScriptureResult = context.scriptures[0] ?? {
+        reference: data.primaryScripture ?? 'Proverbs 3:9',
+        text: '',
+        principle: '',
+        defiApplication: '',
+        category: '',
+      };
+      const supportingScriptures = context.scriptures.slice(1, 4);
+      const check = tripleCheck(primaryScripture, supportingScriptures);
+
       return {
         guidance: data.guidance ?? '',
         principle: data.principle ?? '',
         action: data.action ?? '',
-        primaryScripture: context.scriptures[0] ?? {
-          reference: data.primaryScripture ?? 'Proverbs 3:9',
-          text: '',
-          principle: '',
-          defiApplication: '',
-          category: '',
-        },
-        supportingScriptures: context.scriptures.slice(1, 4),
+        primaryScripture,
+        supportingScriptures,
         confidenceScore: data.confidenceScore ?? 0.8,
         synthesisMethod: (data.synthesisMethod as BWSPSynthesis['synthesisMethod']) ?? 'rag_vector',
         protocol: data.protocol ?? 'BWSP-v1.0',
@@ -143,6 +226,7 @@ export class BWSPSynthesizer {
         authorityWeightedResonance: 0,
         wisdomDecayFactor: 1,
         titheBlessingMultiplier: 1,
+        tripleCheck: check,
       };
     } catch {
       return buildOfflineSynthesis(context);

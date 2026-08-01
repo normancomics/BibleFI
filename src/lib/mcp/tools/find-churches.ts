@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { enforceMcpRateLimit, publicClient, sanitizeFilterText } from "../guard";
+import { enforceMcpRateLimit, publicClient, sanitizeFilterText, sanitizeInputsForAudit } from "../guard";
 
 export default defineTool({
   name: "find_churches",
@@ -17,16 +17,20 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query, limit }, ctx) => {
-    const limited = await enforceMcpRateLimit("find_churches", ctx);
-    if (limited.error) return limited.error;
-
     const safe = sanitizeFilterText(query);
     if (!safe) {
       return {
-        content: [{ type: "text", text: "Please provide a city, church name, denomination, or country." }],
+        content: [{ type: "text", text: "Please provide a city, church name, denomination, or country (letters and spaces only)." }],
         isError: true,
       };
     }
+
+    const limited = await enforceMcpRateLimit(
+      "find_churches",
+      ctx,
+      sanitizeInputsForAudit({ query, limit }),
+    );
+    if (limited.error) return limited.error;
 
     const supabase = publicClient();
     const { data, error } = await supabase.rpc("search_public_churches", {
