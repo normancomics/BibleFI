@@ -28,6 +28,7 @@
             "query": {
               "type": "string",
               "minLength": 1,
+              "maxLength": 100,
               "description": "Keyword or phrase to search for (e.g. 'tithing', 'stewardship', 'debt')."
             }
           },
@@ -53,6 +54,7 @@
             "query": {
               "type": "string",
               "minLength": 1,
+              "maxLength": 100,
               "description": "City, church name, denomination, or country."
             },
             "limit": {
@@ -83,7 +85,8 @@
           "properties": {
             "category": {
               "description": "Optional category filter.",
-              "type": "string"
+              "type": "string",
+              "maxLength": 60
             }
           }
         },
