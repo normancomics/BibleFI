@@ -141,8 +141,8 @@ serve(async (req) => {
   let foundry: FoundryDenoCient;
   try {
     foundry = new FoundryDenoCient();
-  } catch (err) {
-    return new Response(JSON.stringify({ error: String(err), hint: 'Set PALANTIR_* env vars in Supabase secrets' }), {
+  } catch (_err) {
+    return new Response(JSON.stringify({ error: 'Foundry client initialization failed', hint: 'Set PALANTIR_* env vars in Supabase secrets' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
