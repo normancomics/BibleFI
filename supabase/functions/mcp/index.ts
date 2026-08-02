@@ -3,10 +3,10 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
 
 // src/lib/mcp/tools/search-scriptures.ts
-import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z } from "npm:zod@^4.4.3";
 
 // src/lib/mcp/guard.ts
@@ -20,6 +20,13 @@ function publicClient() {
     { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
   );
 }
+function adminClient() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) return null;
+  return createClient(process.env.SUPABASE_URL, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
 function callerKey(ctx) {
   const userId = ctx?.getUserId?.();
   if (userId) return `user:${userId}`;
@@ -27,25 +34,78 @@ function callerKey(ctx) {
   if (clientId) return `client:${clientId}`;
   return "anon";
 }
-async function enforceMcpRateLimit(tool, ctx) {
+async function logAudit(row) {
   try {
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey) return {};
-    const admin = createClient(process.env.SUPABASE_URL, serviceKey, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+    const admin = adminClient();
+    if (!admin) return;
+    await admin.from("mcp_audit_log").insert(row);
+  } catch {
+  }
+}
+function sanitizeFilterText(input, maxLength = 100) {
+  return input.replace(/[,()*%\\"'.:]/g, " ").replace(/\s+/g, " ").trim().slice(0, maxLength);
+}
+function sanitizeInputsForAudit(inputs) {
+  const safe = {};
+  for (const [k, v] of Object.entries(inputs)) {
+    if (typeof v === "string") {
+      safe[k] = sanitizeFilterText(v, 200);
+    } else if (typeof v === "number" || typeof v === "boolean") {
+      safe[k] = v;
+    } else {
+      safe[k] = "[redacted]";
+    }
+  }
+  return safe;
+}
+async function enforceMcpRateLimit(tool, ctx, sanitizedInputs) {
+  const caller = callerKey(ctx);
+  try {
+    const admin = adminClient();
+    if (!admin) {
+      await logAudit({
+        tool_name: tool,
+        caller_key: caller,
+        sanitized_input: sanitizedInputs ?? null,
+        rate_limited: false,
+        rate_remaining: null,
+        retry_after: null,
+        outcome: "success"
+      });
+      return {};
+    }
     const { data, error } = await admin.rpc("check_mcp_rate_limit", {
-      p_key: `mcp:${tool}:${callerKey(ctx)}`,
+      p_key: `mcp:${tool}:${caller}`,
       p_max: MCP_RATE_LIMIT,
       p_window_seconds: MCP_RATE_WINDOW_SECONDS
     });
     if (error) {
       console.warn(`[mcp:rate-limit] check failed for ${tool}: ${error.message}`);
+      await logAudit({
+        tool_name: tool,
+        caller_key: caller,
+        sanitized_input: sanitizedInputs ?? null,
+        rate_limited: false,
+        rate_remaining: null,
+        retry_after: null,
+        outcome: "success",
+        error_message: `rate-limit check error: ${error.message}`
+      });
       return {};
     }
     const result = data;
+    const remaining = result?.limit != null && result?.count != null ? Math.max(0, result.limit - result.count) : null;
     if (result?.allowed === false) {
       const retry = Number(result.retry_after) || MCP_RATE_WINDOW_SECONDS;
+      await logAudit({
+        tool_name: tool,
+        caller_key: caller,
+        sanitized_input: sanitizedInputs ?? null,
+        rate_limited: true,
+        rate_remaining: 0,
+        retry_after: retry,
+        outcome: "rate_limited"
+      });
       return {
         error: {
           content: [
@@ -58,14 +118,20 @@ async function enforceMcpRateLimit(tool, ctx) {
         }
       };
     }
+    await logAudit({
+      tool_name: tool,
+      caller_key: caller,
+      sanitized_input: sanitizedInputs ?? null,
+      rate_limited: false,
+      rate_remaining: remaining,
+      retry_after: null,
+      outcome: "success"
+    });
     return {};
   } catch (e) {
     console.warn(`[mcp:rate-limit] unexpected error for ${tool}:`, e);
     return {};
   }
-}
-function sanitizeFilterText(input, maxLength = 100) {
-  return input.replace(/[,()*%\\"'.:]/g, " ").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
 // src/lib/mcp/tools/search-scriptures.ts
@@ -78,15 +144,19 @@ var search_scriptures_default = defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query }, ctx) => {
-    const limited = await enforceMcpRateLimit("search_scriptures", ctx);
-    if (limited.error) return limited.error;
     const safe = sanitizeFilterText(query);
     if (!safe) {
       return {
-        content: [{ type: "text", text: "Please provide a searchable word or phrase." }],
+        content: [{ type: "text", text: "Please provide a searchable word or phrase (letters and spaces only)." }],
         isError: true
       };
     }
+    const limited = await enforceMcpRateLimit(
+      "search_scriptures",
+      ctx,
+      sanitizeInputsForAudit({ query })
+    );
+    if (limited.error) return limited.error;
     const supabase = publicClient();
     const { data, error } = await supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").or(
       `verse_text.ilike.%${safe}%,reference.ilike.%${safe}%,principle.ilike.%${safe}%,category.ilike.%${safe}%`
@@ -102,7 +172,7 @@ var search_scriptures_default = defineTool({
 });
 
 // src/lib/mcp/tools/find-churches.ts
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z as z2 } from "npm:zod@^4.4.3";
 var find_churches_default = defineTool2({
   name: "find_churches",
@@ -114,15 +184,19 @@ var find_churches_default = defineTool2({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query, limit }, ctx) => {
-    const limited = await enforceMcpRateLimit("find_churches", ctx);
-    if (limited.error) return limited.error;
     const safe = sanitizeFilterText(query);
     if (!safe) {
       return {
-        content: [{ type: "text", text: "Please provide a city, church name, denomination, or country." }],
+        content: [{ type: "text", text: "Please provide a city, church name, denomination, or country (letters and spaces only)." }],
         isError: true
       };
     }
+    const limited = await enforceMcpRateLimit(
+      "find_churches",
+      ctx,
+      sanitizeInputsForAudit({ query, limit })
+    );
+    if (limited.error) return limited.error;
     const supabase = publicClient();
     const { data, error } = await supabase.rpc("search_public_churches", {
       p_query: safe,
@@ -139,7 +213,7 @@ var find_churches_default = defineTool2({
 });
 
 // src/lib/mcp/tools/get-daily-verse.ts
-import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z as z3 } from "npm:zod@^4.4.3";
 var get_daily_verse_default = defineTool3({
   name: "get_daily_verse",
@@ -150,7 +224,11 @@ var get_daily_verse_default = defineTool3({
   },
   annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
   handler: async ({ category }, ctx) => {
-    const limited = await enforceMcpRateLimit("get_daily_verse", ctx);
+    const limited = await enforceMcpRateLimit(
+      "get_daily_verse",
+      ctx,
+      sanitizeInputsForAudit({ category: category ?? "" })
+    );
     if (limited.error) return limited.error;
     const supabase = publicClient();
     let q = supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").limit(50);
@@ -184,5 +262,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.0/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.1/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
