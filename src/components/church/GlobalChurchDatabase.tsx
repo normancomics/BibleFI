@@ -20,6 +20,7 @@ import {
   Bitcoin
 } from 'lucide-react';
 import { GlobalChurchCrawlerService, GlobalChurchData, ChurchCrawlerStats } from '@/services/globalChurchCrawler';
+import { churchRelevanceScore } from '@/utils/churchSearch';
 import { useToast } from '@/hooks/use-toast';
 import AddChurchForm from '@/components/tithe/AddChurchForm';
 
@@ -138,6 +139,18 @@ const GlobalChurchDatabase: React.FC = () => {
     } else if (cryptoFilter === 'verified') {
       filtered = filtered.filter(church => church.verified);
     }
+
+    // Sort: by relevance when a query is active, otherwise alphabetically by name then city
+    filtered = [...filtered].sort((a, b) => {
+      if (searchQuery) {
+        const scoreA = churchRelevanceScore(a.name, a.city, a.state_province, a.country, searchQuery);
+        const scoreB = churchRelevanceScore(b.name, b.city, b.state_province, b.country, searchQuery);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+      }
+      const nameComp = a.name.localeCompare(b.name);
+      if (nameComp !== 0) return nameComp;
+      return (a.city || '').localeCompare(b.city || '');
+    });
 
     setFilteredChurches(filtered);
   };

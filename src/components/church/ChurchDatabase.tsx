@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Users, Phone, Globe, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
+import { churchRelevanceScore } from '@/utils/churchSearch';
 
 interface Church {
   id: string;
@@ -80,13 +81,24 @@ export const ChurchDatabase = () => {
   const [showAddChurch, setShowAddChurch] = useState(false);
   const { toast } = useToast();
 
-  const filteredChurches = churches.filter(church => {
-    const matchesSearch = church.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         church.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         church.state.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDenomination = !selectedDenomination || church.denomination === selectedDenomination;
-    return matchesSearch && matchesDenomination;
-  });
+  const filteredChurches = churches
+    .filter(church => {
+      const matchesSearch = church.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           church.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           church.state.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDenomination = !selectedDenomination || church.denomination === selectedDenomination;
+      return matchesSearch && matchesDenomination;
+    })
+    .sort((a, b) => {
+      if (searchTerm) {
+        const scoreA = churchRelevanceScore(a.name, a.city, a.state, a.country, searchTerm);
+        const scoreB = churchRelevanceScore(b.name, b.city, b.state, b.country, searchTerm);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+      }
+      const nameComp = a.name.localeCompare(b.name);
+      if (nameComp !== 0) return nameComp;
+      return a.city.localeCompare(b.city);
+    });
 
   const denominations = [...new Set(churches.map(church => church.denomination))];
 

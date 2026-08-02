@@ -4,6 +4,7 @@ import { supabaseApi } from "@/integrations/supabase/apiClient";
 import { runDirectoryQuery, fetchDirectoryRowsViaRpc, DirectoryRow } from "@/services/churchDirectoryClient";
 import { Church } from "@/types/church";
 import { ExternalChurchService } from "./externalChurchService";
+import { churchRelevanceScore } from "@/utils/churchSearch";
 
 export async function searchChurches(query: string): Promise<Church[]> {
   try {
@@ -49,6 +50,17 @@ export async function searchChurches(query: string): Promise<Church[]> {
       verified: church.verified,
       created_at: church.created_at,
     }));
+
+    // Sort by relevance to the query: starts-with ranks higher than contains,
+    // with alphabetical name then city as the tiebreaker.
+    results.sort((a, b) => {
+      const scoreA = churchRelevanceScore(a.name, a.city, a.state, a.country, query);
+      const scoreB = churchRelevanceScore(b.name, b.city, b.state, b.country, query);
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      const nameComp = a.name.localeCompare(b.name);
+      if (nameComp !== 0) return nameComp;
+      return (a.city || '').localeCompare(b.city || '');
+    });
     
     return results;
   } catch (error) {

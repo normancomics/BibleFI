@@ -4,6 +4,7 @@
  */
 
 import { supabaseApi } from "@/integrations/supabase/apiClient";
+import { churchRelevanceScore } from "@/utils/churchSearch";
 
 export interface LiveChurchSearchParams {
   query?: string;
@@ -98,7 +99,26 @@ export class LiveChurchSearchService {
         throw error;
       }
 
-      return data || [];
+      // When a text query is present, re-sort client-side by relevance so that
+      // names/locations that start with the query appear before those that merely
+      // contain it.  Verified status and rating are used as secondary tiebreakers.
+      let results = data || [];
+      if (params.query?.trim()) {
+        const q = params.query.trim();
+        results = [...results].sort((a, b) => {
+          const scoreA = churchRelevanceScore(a.name, a.city, a.state_province, a.country, q);
+          const scoreB = churchRelevanceScore(b.name, b.city, b.state_province, b.country, q);
+          if (scoreB !== scoreA) return scoreB - scoreA;
+          if (a.verified !== b.verified) return a.verified ? -1 : 1;
+          const ratingDiff = (b.rating ?? 0) - (a.rating ?? 0);
+          if (ratingDiff !== 0) return ratingDiff;
+          const nameComp = a.name.localeCompare(b.name);
+          if (nameComp !== 0) return nameComp;
+          return (a.city || '').localeCompare(b.city || '');
+        });
+      }
+
+      return results;
     } catch (error) {
       console.error('Live church search error:', error);
       return [];
