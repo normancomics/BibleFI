@@ -1,0 +1,304 @@
+# BibleFI → Palantir Foundry AIP TaskManager Pipeline
+# ─────────────────────────────────────────────────────
+# This file defines the full ingest → embed → ontology-map → eval → publish
+# pipeline for the AIP TaskManager.
+#
+# Import into Foundry:
+#   Compass → AIP TaskManager → Import Pipeline → Upload YAML
+#
+# Dependencies:
+#   - BibleFi_Palantir_Import_Manifest.json (source dataset definitions)
+#   - Ontology configured per manifest ontologyMapping section
+#   - PALANTIR_STACK, PALANTIR_TOKEN, PALANTIR_ONT_RID set in Foundry secrets
+#
+# "Without counsel purposes are disappointed: but in the multitude
+#  of counsellors they are established." — Proverbs 15:22
+
+apiVersion: aip-taskmanager/v1
+kind: Pipeline
+metadata:
+  name: biblefi-ingest-pipeline
+  description: >
+    Full BibleFI data pipeline: ingest all 8 datasets, normalize, chunk,
+    embed with text-embedding-3-large, map to ontology objects, run BWSP
+    triple-check, evaluate retrieval quality, then publish to production.
+  owner: biblefi-admins
+  labels:
+    project: biblefi
+    env: production
+
+# ────────────────────────────────────────────────────────────────────────────
+# Triggers
+# ────────────────────────────────────────────────────────────────────────────
+triggers:
+  # Manual trigger for initial setup and one-off re-ingests
+  - type: manual
+    name: manual-full-ingest
+
+  # Scheduled: daily full pipeline (00:30 UTC — 30 min after midnight seeding)
+  - type: cron
+    name: daily-full-pipeline
+    schedule: "30 0 * * *"
+    timezone: UTC
+
+  # Hourly incremental for D3 (scriptures), D4 (DeFi), D7 (agents), D8 (churches)
+  - type: cron
+    name: hourly-incremental
+    schedule: "5 * * * *"
+    timezone: UTC
+    parameters:
+      incrementalOnly: true
+      datasets: ["D3", "D4", "D7", "D8"]
+
+  # On-commit trigger for D5 (BWSP spec) and D6 (contracts)
+  - type: webhook
+    name: on-commit-spec-contracts
+    path: /webhooks/biblefi/on-commit
+    secret: "${BIBLEFI_WEBHOOK_SECRET}"
+    parameters:
+      datasets: ["D5", "D6"]
+
+# ────────────────────────────────────────────────────────────────────────────
+# Steps
+# ────────────────────────────────────────────────────────────────────────────
+steps:
+
+  # ── [1] INGEST ──────────────────────────────────────────────────────────────
+  - id: ingest
+    name: Ingest Source Datasets
+    type: foundry_dataset_ingest
+    description: >
+      Pull all 8 BibleFI source datasets into the Foundry raw layer.
+      Incremental runs only pull datasets flagged in trigger parameters.
+    config:
+      manifestPath: docs/palantir/BibleFi_Palantir_Import_Manifest.json
+      datasets: "${trigger.parameters.datasets || 'all'}"
+      branch: master
+      writeMode: append
+    outputs:
+      - rawDatasetRids: list<string>
+      - rowsIngested: integer
+    onFailure: fail_pipeline
+
+  # ── [2] NORMALIZE ───────────────────────────────────────────────────────────
+  - id: normalize
+    name: Normalize & Deduplicate
+    type: foundry_transform
+    description: >
+      Apply schema normalization, language detection, and SHA-256 deduplication
+      across all ingested datasets.  Rows with matching SHA-256 are skipped
+      unless their source row has a newer updated_at.
+    dependsOn: [ingest]
+    config:
+      transformType: normalize_dedupe
+      dedupeKey: sha256
+      languageDetectionField: text
+      supportedLanguages: ["en", "he", "grc", "arc"]  # English, Hebrew, Greek, Aramaic
+      schemaValidation: strict
+    outputs:
+      - normalizedRids: list<string>
+      - duplicatesSkipped: integer
+      - schemaErrors: list<string>
+    onFailure: continue_with_warnings
+
+  # ── [3] CHUNK ────────────────────────────────────────────────────────────────
+  - id: chunk
+    name: Apply Dataset-Specific Chunkers
+    type: foundry_transform
+    description: >
+      Apply the per-dataset chunking strategy from the import manifest.
+      Scripture rows are never split (one_verse_per_chunk).  Markdown docs
+      split on H2/H3.  Solidity splits per contract/function/modifier.
+    dependsOn: [normalize]
+    config:
+      chunkerConfigPath: docs/palantir/BibleFi_Palantir_Import_Manifest.json
+      chunkConfigKey: datasets[*].chunker
+      hardRule_neverSplitVerses: true      # Protects BWSP triple-check
+      maxTokensPerChunk: 1200
+      overlapTokens: 150
+    outputs:
+      - chunkDatasetRids: list<string>
+      - totalChunks: integer
+    onFailure: fail_pipeline
+
+  # ── [4] EMBED ────────────────────────────────────────────────────────────────
+  - id: embed
+    name: Generate Embeddings
+    type: foundry_embedding
+    description: >
+      Embed all text chunks with text-embedding-3-large (3072-d).
+      Solidity chunks also receive a secondary code-search-ada-002 embedding.
+      Writes to both the Foundry vector index and the pgvector backup table.
+    dependsOn: [chunk]
+    config:
+      primaryModel: text-embedding-3-large
+      primaryDimensions: 3072
+      secondaryModel: code-search-ada-002
+      secondaryAppliesTo: ["D6"]
+      batchSize: 100
+      vectorStore: foundry_vector_index
+      pgvectorSync:
+        enabled: true
+        supabaseUrl: "${SUPABASE_URL}"
+        supabaseServiceKey: "${SUPABASE_SERVICE_ROLE_KEY}"
+        targetTable: knowledge_chunk_embeddings
+    outputs:
+      - embeddingsGenerated: integer
+      - pgvectorRowsUpserted: integer
+    onFailure: fail_pipeline
+
+  # ── [5] ONTOLOGY MAP ─────────────────────────────────────────────────────────
+  - id: ontology_map
+    name: Map Chunks to Ontology Objects
+    type: foundry_ontology_sync
+    description: >
+      Upsert Foundry ontology objects (Scripture, DeFiPrinciple, BWTYAScore,
+      AgentRun, Church, Strategy, KnowledgeChunk, ContractAnchor) and create
+      all link-type edges as defined in the manifest ontologyMapping section.
+    dependsOn: [embed]
+    config:
+      ontologyRid: "${PALANTIR_ONT_RID}"
+      mappingConfigPath: docs/palantir/BibleFi_Palantir_Import_Manifest.json
+      mappingConfigKey: ontologyMapping
+      upsertMode: merge           # Update existing objects, don't recreate
+      linkStrategy: additive      # Add new links, don't delete existing
+    outputs:
+      - objectsUpserted: integer
+      - linksCreated: integer
+      - ontologyErrors: list<string>
+    onFailure: continue_with_warnings
+
+  # ── [6] TRIPLE CHECK ─────────────────────────────────────────────────────────
+  - id: triple_check
+    name: BWSP Triple-Check (Authenticity / Context / Anti-Cherry-Picking)
+    type: aip_logic
+    description: >
+      Run the BWSP triple-check on all Scripture objects staged for publish.
+      Uses an LLM-as-judge pattern with the BWSP system prompt from D5.
+      Objects that fail are flagged as tripleCheckStatus='failed' and
+      excluded from the production Scripture vector index until corrected.
+      This step BLOCKS publish on persistent failures.
+    dependsOn: [ontology_map]
+    config:
+      actionType: biblefi.BWSPTripleCheckBatch
+      inputObjectType: biblefi.Scripture
+      filter:
+        tripleCheckStatus: pending
+      batchSize: 50
+      requiredChecks:
+        - name: authenticity
+          description: "Verse has valid Book Chapter:Verse reference and non-empty text"
+        - name: context
+          description: "Verse is drawn from an approved financial-stewardship canon book"
+        - name: notCherryPicked
+          description: "Synthesis has ≥2 supporting verses — no single-verse isolation"
+      blockPublishOnFailureRate: 0.05   # Fail pipeline if > 5% of verses fail triple-check
+    outputs:
+      - checked: integer
+      - passed: integer
+      - failed: integer
+      - failureRate: float
+    onFailure: fail_pipeline
+
+  # ── [7] EVAL ─────────────────────────────────────────────────────────────────
+  - id: eval
+    name: Retrieval Quality Evaluation
+    type: aip_eval
+    description: >
+      Run golden-set retrieval evaluation against the BWSP query benchmark.
+      Requires recall@10 ≥ 0.85 and scripture-fidelity ≥ 0.95 before
+      promoting to production.  Compares embeddings against 200-query
+      golden set drawn from bwsp_query_log (hand-labelled).
+    dependsOn: [triple_check]
+    config:
+      goldenSetDatasetRid: ri.foundry.main.dataset.biblefi-golden-eval-set
+      metrics:
+        - name: recall_at_10
+          threshold: 0.85
+          description: "≥85% of golden-set queries retrieve the correct scripture in top-10"
+        - name: scripture_fidelity
+          threshold: 0.95
+          description: "≥95% of retrieved verses are KJV-accurate (no hallucination)"
+        - name: bwsp_confidence_mean
+          threshold: 0.70
+          description: "Mean BWSP synthesis confidence ≥ 0.70 across golden set"
+      compareToBaseline: true     # Alert if eval degrades vs. last publish
+    outputs:
+      - recallAt10: float
+      - scriptureFidelity: float
+      - bwspConfidenceMean: float
+      - metricsPass: boolean
+    onFailure: fail_pipeline
+
+  # ── [8] PUBLISH ───────────────────────────────────────────────────────────────
+  - id: publish
+    name: Promote to Production
+    type: foundry_dataset_promote
+    description: >
+      Promote all passing datasets from staging to production branch.
+      Emit BWSP_PIPELINE_PUBLISHED and BWTYA_PIPELINE_PUBLISHED events
+      that downstream Supabase edge functions can subscribe to via webhook.
+    dependsOn: [eval]
+    condition: "steps.eval.outputs.metricsPass == true"
+    config:
+      fromBranch: staging
+      toBranch:   master
+      datasets: "${steps.ingest.outputs.rawDatasetRids}"
+      emitEvents:
+        - name: BWSP_PIPELINE_PUBLISHED
+          payload:
+            timestamp: "${now()}"
+            chunksPublished: "${steps.chunk.outputs.totalChunks}"
+            recallAt10: "${steps.eval.outputs.recallAt10}"
+        - name: BWTYA_PIPELINE_PUBLISHED
+          payload:
+            timestamp: "${now()}"
+            bwtyaScoresUpdated: "${steps.ontology_map.outputs.objectsUpserted}"
+      webhookNotify:
+        url: "${SUPABASE_URL}/functions/v1/palantir-foundry-sync"
+        secret: "${CRON_SECRET}"
+        body:
+          mode: pull
+          source: foundry_pipeline_publish
+    outputs:
+      - publishedAt: string
+      - datasetsPromoted: integer
+    onFailure: fail_pipeline
+
+  # ── [9] SCHEDULE REFRESH ─────────────────────────────────────────────────────
+  - id: schedule
+    name: Register Dataset Refresh Jobs
+    type: foundry_schedule_register
+    description: >
+      Register or update per-dataset refresh schedules in AIP TaskManager
+      according to the refreshCadence values in the import manifest.
+      This step is idempotent — re-running does not create duplicate schedules.
+    dependsOn: [publish]
+    config:
+      manifestPath: docs/palantir/BibleFi_Palantir_Import_Manifest.json
+      scheduleKey: datasets[*].refreshCadenceSeconds
+      skipIfZero: true              # datasets with cadence=0 are manual/on-commit only
+    outputs:
+      - schedulesRegistered: integer
+    onFailure: continue_with_warnings
+
+# ────────────────────────────────────────────────────────────────────────────
+# Notifications
+# ────────────────────────────────────────────────────────────────────────────
+notifications:
+  onSuccess:
+    - type: email
+      to: ["admin@biblefi.io"]
+      subject: "BibleFI Foundry Pipeline: SUCCESS — {{steps.chunk.outputs.totalChunks}} chunks published"
+  onFailure:
+    - type: email
+      to: ["admin@biblefi.io", "oncall@biblefi.io"]
+      subject: "🚨 BibleFI Foundry Pipeline: FAILED at step {{failedStep}}"
+      body: "{{failureDetails}}"
+    - type: supabase_insert
+      table: foundry_action_log
+      row:
+        action_type: pipeline_failure
+        status: error
+        error_message: "{{failureDetails}}"
+        triggered_by: cron

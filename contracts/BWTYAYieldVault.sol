@@ -542,4 +542,189 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             boostBps = BASIS_POINTS + bonusPortion / 2;
         }
     }
+
+    // =========================================================================
+    // Palantir Foundry Oracle — BWTYA Strategy Weight Feed
+    // =========================================================================
+    //
+    // The Foundry BWTYAScoreBatch AIP action returns per-protocol strategy weights
+    // (kellyFraction equivalents) derived from ML scoring.  These weights are
+    // submitted by the oracle and used to cap single-position exposure beyond
+    // what the deterministic Ecclesiastes Ratio allows.
+    //
+    // This creates a two-layer risk framework:
+    //   Layer 1 (on-chain deterministic): Ecclesiastes Ratio, Joseph's Reserve
+    //   Layer 2 (Foundry ML):             ML kelly-weight cap per protocol
+    //
+    // The on-chain cap is always the more conservative of the two layers:
+    //   effectiveCap = min(MAX_SINGLE_POSITION, foundryKellyCap[protocol])
+    //
+    // "The wise man's eyes are in his head; but the fool walketh in darkness."
+    // — Ecclesiastes 2:14
+
+    // ── Storage ───────────────────────────────────────────────────────────────
+
+    /// @notice Foundry oracle address (same oracle as BWSPWisdomRegistry uses)
+    address public foundryStrategyOracle;
+
+    /// @notice ML-derived Kelly fraction cap per protocol slug (in bps, 0–10 000)
+    ///         e.g. "aave-v3-base" => 2_500 means max 25 % allocation to Aave v3
+    mapping(bytes32 => uint256) public foundryKellyCapBps;
+
+    /// @notice Market regime reported by Foundry: 0 = sideways, 1 = bull, 2 = bear
+    uint8 public foundryMarketRegime;
+
+    /// @notice Timestamp of the last Foundry strategy weight update
+    uint256 public foundryStrategyLastUpdated;
+
+    /// @notice Consumed strategy oracle batch IDs (replay protection)
+    mapping(bytes32 => bool) public consumedStrategyBatches;
+
+    /// @notice Maximum age (seconds) of an accepted strategy bundle
+    uint256 public constant STRATEGY_ORACLE_FRESHNESS = 30 minutes;
+
+    // ── Events ────────────────────────────────────────────────────────────────
+
+    event FoundryStrategyOracleSet(address indexed previousOracle, address indexed newOracle);
+    event FoundryStrategyWeightsUpdated(uint8 marketRegime, uint256 protocolCount, bytes32 indexed batchId);
+
+    // ── Errors ────────────────────────────────────────────────────────────────
+
+    error StrategyOracleNotSet();
+    error StrategyOracleUnauthorized();
+    error StrategyBatchAlreadyConsumed(bytes32 batchId);
+    error StrategyBundleTooStale(uint256 bundleTimestamp, uint256 cutoff);
+
+    // ── Owner functions ───────────────────────────────────────────────────────
+
+    /**
+     * @notice Set or rotate the Foundry strategy oracle address.
+     */
+    function setFoundryStrategyOracle(address oracle) external onlyOwner {
+        emit FoundryStrategyOracleSet(foundryStrategyOracle, oracle);
+        foundryStrategyOracle = oracle;
+    }
+
+    // ── Oracle submission ─────────────────────────────────────────────────────
+
+    /**
+     * @notice Submit Palantir Foundry BWTYA strategy weight update.
+     *
+     * @param protocolSlugs   Array of protocol slug strings (e.g. "aave-v3-base")
+     * @param kellyCapsBps    Corresponding Kelly fraction caps in basis points (0–10 000)
+     * @param marketRegime    0 = sideways, 1 = bull, 2 = bear
+     * @param bundleTimestamp Unix timestamp when the Foundry bundle was generated
+     * @param batchId         Unique batch identifier (replay protection)
+     * @param signature       EIP-191 personal_sign of the packed payload
+     *
+     * @dev Payload for signing:
+     *        keccak256(abi.encodePacked(
+     *          "BibleFI:FoundryStrategy:",
+     *          keccak256(abi.encodePacked(protocolSlugs)),
+     *          keccak256(abi.encodePacked(kellyCapsBps)),
+     *          marketRegime, bundleTimestamp, batchId
+     *        ))
+     */
+    function syncFoundryStrategyWeights(
+        string[] calldata protocolSlugs,
+        uint256[] calldata kellyCapsBps,
+        uint8 marketRegime,
+        uint256 bundleTimestamp,
+        bytes32 batchId,
+        bytes calldata signature
+    ) external {
+        if (foundryStrategyOracle == address(0)) revert StrategyOracleNotSet();
+        require(protocolSlugs.length == kellyCapsBps.length, "BWTYAYieldVault: length mismatch");
+
+        // Freshness check
+        if (block.timestamp > bundleTimestamp + STRATEGY_ORACLE_FRESHNESS) {
+            revert StrategyBundleTooStale(bundleTimestamp, block.timestamp - STRATEGY_ORACLE_FRESHNESS);
+        }
+
+        // Replay protection
+        if (consumedStrategyBatches[batchId]) revert StrategyBatchAlreadyConsumed(batchId);
+        consumedStrategyBatches[batchId] = true;
+
+        // Build string arrays as bytes32[] for abi.encodePacked
+        bytes32[] memory slugHashes = new bytes32[](protocolSlugs.length);
+        for (uint256 i = 0; i < protocolSlugs.length; i++) {
+            slugHashes[i] = keccak256(bytes(protocolSlugs[i]));
+        }
+
+        // Signature verification
+        bytes32 msgHash = keccak256(abi.encodePacked(
+            "BibleFI:FoundryStrategy:",
+            keccak256(abi.encodePacked(slugHashes)),
+            keccak256(abi.encodePacked(kellyCapsBps)),
+            marketRegime,
+            bundleTimestamp,
+            batchId
+        ));
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
+        address recovered = _recoverStrategySigner(ethSignedHash, signature);
+        if (recovered != foundryStrategyOracle) revert StrategyOracleUnauthorized();
+
+        // Persist
+        for (uint256 i = 0; i < protocolSlugs.length; i++) {
+            bytes32 slugKey = keccak256(bytes(protocolSlugs[i]));
+            foundryKellyCapBps[slugKey] = kellyCapsBps[i] > BASIS_POINTS
+                ? BASIS_POINTS
+                : kellyCapsBps[i];
+        }
+        foundryMarketRegime       = marketRegime;
+        foundryStrategyLastUpdated = block.timestamp;
+
+        emit FoundryStrategyWeightsUpdated(marketRegime, protocolSlugs.length, batchId);
+    }
+
+    /**
+     * @notice Returns the effective allocation cap for a protocol, taking the
+     *         more conservative of the on-chain Ecclesiastes cap and the
+     *         Foundry ML Kelly cap.
+     *
+     * @param protocolSlug  e.g. "aave-v3-base"
+     * @return capBps       Effective cap in basis points (0–10 000)
+     */
+    function getEffectiveAllocationCap(string calldata protocolSlug) external view returns (uint256 capBps) {
+        bytes32 slugKey = keccak256(bytes(protocolSlug));
+        uint256 foundryCapBps_ = foundryKellyCapBps[slugKey];
+
+        // If Foundry data is stale (> 2 h) or missing, fall back to on-chain cap only
+        bool foundryFresh = foundryStrategyLastUpdated > 0 &&
+                            block.timestamp <= foundryStrategyLastUpdated + 2 hours;
+
+        if (!foundryFresh || foundryCapBps_ == 0) {
+            return MAX_SINGLE_POSITION; // Ecclesiastes 11:2 on-chain default
+        }
+
+        // More conservative of the two
+        return foundryCapBps_ < MAX_SINGLE_POSITION ? foundryCapBps_ : MAX_SINGLE_POSITION;
+    }
+
+    /**
+     * @notice Returns true if Foundry is signalling a bear-market regime
+     *         (Joseph's Reserve should be active).
+     *
+     * @dev marketRegime == 2 means bear.  Returns false if data is stale.
+     */
+    function isJosephsReserveActive() external view returns (bool) {
+        if (block.timestamp > foundryStrategyLastUpdated + 2 hours) return false;
+        return foundryMarketRegime == 2;
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    function _recoverStrategySigner(bytes32 ethSignedHash, bytes calldata sig) private pure returns (address) {
+        require(sig.length == 65, "BWTYAYieldVault: invalid sig length");
+        bytes32 r;
+        bytes32 s;
+        uint8   v;
+        assembly {
+            r := calldataload(sig.offset)
+            s := calldataload(add(sig.offset, 32))
+            v := byte(0, calldataload(add(sig.offset, 64)))
+        }
+        if (v < 27) v += 27;
+        return ecrecover(ethSignedHash, v, r, s);
+    }
 }
