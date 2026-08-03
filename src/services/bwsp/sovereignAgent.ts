@@ -246,6 +246,8 @@ export class BWSPSovereignAgent {
       intentConfidence: intentResult.primaryConfidence,
       secondaryIntent: intentResult.secondary,
       authorityWeightedConfidence,
+      // Triple-check integrity seal
+      tripleCheck: enrichedSynthesis.tripleCheck,
     };
   }
 }

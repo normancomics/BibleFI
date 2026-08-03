@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalChurchCrawlerService, type GlobalChurchData } from '@/services/globalChurchCrawler';
 import AutomationPanel from './AutomationPanel';
+import { churchRelevanceScore } from '@/utils/churchSearch';
 
 /** Haversine distance in miles */
 const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -192,13 +193,6 @@ const EnhancedChurchCrawler: React.FC = () => {
       return { ...c };
     });
 
-    const distSort = (a: ChurchWithDist, b: ChurchWithDist) => {
-      if (a._distance != null && b._distance != null) return a._distance - b._distance;
-      if (a._distance != null) return -1;
-      if (b._distance != null) return 1;
-      return a.name.localeCompare(b.name);
-    };
-
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const nameMatches: ChurchWithDist[] = [];
@@ -221,13 +215,46 @@ const EnhancedChurchCrawler: React.FC = () => {
         }
       }
 
-      nameMatches.sort(distSort);
-      locationMatches.sort(distSort);
-      otherMatches.sort(distSort);
+      // Within each tier: distance first (when origin is set), then text relevance
+      // (starts-with ranks higher than word-starts, which ranks higher than contains),
+      // then alphabetical by name and city.
+      const relevanceSort = (a: ChurchWithDist, b: ChurchWithDist): number => {
+        if (a._distance != null && b._distance != null) {
+          const diff = a._distance - b._distance;
+          if (diff !== 0) return diff;
+        } else if (a._distance != null) {
+          return -1;
+        } else if (b._distance != null) {
+          return 1;
+        }
+        const scoreA = churchRelevanceScore(a.name, a.city, a.state_province, a.country, searchQuery);
+        const scoreB = churchRelevanceScore(b.name, b.city, b.state_province, b.country, searchQuery);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        const nameComp = a.name.localeCompare(b.name);
+        if (nameComp !== 0) return nameComp;
+        return (a.city || '').localeCompare(b.city || '');
+      };
+
+      nameMatches.sort(relevanceSort);
+      locationMatches.sort(relevanceSort);
+      otherMatches.sort(relevanceSort);
 
       withDist = [...nameMatches, ...locationMatches, ...otherMatches];
     } else {
-      withDist = [...withDist].sort(distSort);
+      // No query: distance first when origin is set, otherwise alphabetical by name then city
+      withDist = [...withDist].sort((a, b) => {
+        if (a._distance != null && b._distance != null) {
+          const diff = a._distance - b._distance;
+          if (diff !== 0) return diff;
+        } else if (a._distance != null) {
+          return -1;
+        } else if (b._distance != null) {
+          return 1;
+        }
+        const nameComp = a.name.localeCompare(b.name);
+        if (nameComp !== 0) return nameComp;
+        return (a.city || '').localeCompare(b.city || '');
+      });
     }
 
     setFilteredChurches(withDist as GlobalChurchData[]);

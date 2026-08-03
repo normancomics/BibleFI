@@ -287,3 +287,61 @@ export function maxDrawdownEstimate(
   );
   return clamp(weightedRisk * DRAWDOWN_FACTOR, 0, 100);
 }
+
+// ---------------------------------------------------------------------------
+// 10. BWSP-Wisdom APY Multipliers  (Matthew 25:29 · Malachi 3:10)
+// ---------------------------------------------------------------------------
+
+/**
+ * Wisdom Score Multiplier (Matthew 25:29 — "to him who has, more will be given").
+ *
+ * Users with higher wisdom scores have demonstrated faithful stewardship and
+ * are rewarded with a compounding APY multiplier.  The curve is concave so
+ * that marginal returns diminish above score 70 (Solomon's Portfolio threshold).
+ *
+ *   multiplier = 1 + WISDOM_MAX_BONUS · ln(1 + wisdomScore) / ln(101)
+ *
+ * At score 0:  ×1.000
+ * At score 30: ×1.058
+ * At score 70: ×1.109
+ * At score 100:×1.130
+ */
+const WISDOM_MAX_BONUS = 0.13; // up to +13 % yield boost
+
+export function wisdomScoreMultiplier(wisdomScore: number): number {
+  const s = clamp(wisdomScore, 0, 100);
+  return 1 + WISDOM_MAX_BONUS * (Math.log(1 + s) / Math.log(101));
+}
+
+/**
+ * Tithe Streak Multiplier (Malachi 3:10 — "test me in this…open the floodgates").
+ *
+ * Consecutive months of on-chain tithing trigger a compounding blessing.
+ * The curve saturates at 12 months to cap at 1.20 (×20 % bonus).
+ *
+ *   multiplier = 1 + min(streakMonths, 12) / 60
+ *
+ * Months 0: ×1.000, 6: ×1.100, 12: ×1.200
+ */
+export function titheStreakMultiplier(consecutiveTitheMonths: number): number {
+  const capped = clamp(consecutiveTitheMonths, 0, 12);
+  return 1 + capped / 60;
+}
+
+/**
+ * Apply both multipliers to a raw vault APY.
+ *
+ * @param baseApy                 Protocol's raw annual percentage yield
+ * @param wisdomScore             User's current wisdom score (0–100)
+ * @param consecutiveTitheMonths  Months of unbroken on-chain tithing
+ * @returns                       Boosted APY (still a percentage, not a fraction)
+ */
+export function vaultApyWithMultipliers(
+  baseApy: number,
+  wisdomScore: number,
+  consecutiveTitheMonths: number,
+): number {
+  const wm = wisdomScoreMultiplier(wisdomScore);
+  const tm = titheStreakMultiplier(consecutiveTitheMonths);
+  return baseApy * wm * tm;
+}

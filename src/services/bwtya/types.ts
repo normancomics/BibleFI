@@ -60,6 +60,17 @@ export interface BWTYAInput {
   riskTolerance?: 'conservative' | 'moderate' | 'aggressive';
   /** Current portfolio allocation percents (matches opportunities order). Supply to get rebalance signal. */
   currentAllocs?: number[];
+  /** Consecutive months of on-chain tithing (used for tithe-streak APY multiplier) */
+  consecutiveTitheMonths?: number;
+  /**
+   * BWSP approval token from the sovereign agent.  When present and valid,
+   * BWTYA execution proceeds; when absent or marked failed, execution is blocked.
+   */
+  bwspApproval?: {
+    verseHash: string;
+    tripleCheckPassed: boolean;
+    timestamp: string;
+  };
 }
 
 export interface BWTYAResult {
@@ -69,6 +80,8 @@ export interface BWTYAResult {
   titheAmount: number;
   yieldAfterTithe: number;
   projectedApy: number;
+  /** Projected APY after wisdom-score + tithe-streak multipliers */
+  projectedApyBoosted: number;
   // Monte Carlo simulation output
   simulation: PortfolioSimulationResult | null;
   /** Projected APY at 10th percentile (bad scenario) */
@@ -80,4 +93,6 @@ export interface BWTYAResult {
   // Rebalancing signal (only populated when currentAllocs supplied)
   rebalanceSignal: RebalanceSignal | null;
   timestamp: string;
+  /** Whether BWSP approval gate was checked and passed */
+  bwspApprovalStatus: 'approved' | 'skipped' | 'blocked';
 }

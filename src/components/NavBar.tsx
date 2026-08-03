@@ -14,7 +14,11 @@ import {
   Calculator,
   Settings,
   Wheat,
-  Trophy
+  Trophy,
+  Zap,
+  Map,
+  CreditCard,
+  Search
 } from 'lucide-react';
 import SoundToggle from '@/components/SoundToggle';
 import WalletButton from '@/components/wallet/WalletButton';
@@ -61,6 +65,12 @@ const NavBar: React.FC = () => {
     { path: '/tech-graphs', label: 'Tech Graphs', icon: TrendingUp, badge: 'NEW' },
     ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: Settings, badge: 'DEV' }] : []),
     { path: '/builder-score', label: 'Builder', icon: Trophy, badge: 'REP' },
+    { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { path: '/church-discovery', label: 'Find Church', icon: Search },
+    { path: '/payment-hub', label: 'Payments', icon: CreditCard },
+    { path: '/superfluid', label: 'Streams', icon: Zap, badge: 'LIVE' },
+    { path: '/superfluid-tokens', label: 'SF Tokens', icon: Zap },
+    { path: '/roadmap', label: 'Roadmap', icon: Map },
     { path: '/security', label: 'Security', icon: Shield },
   ];
 

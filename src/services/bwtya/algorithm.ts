@@ -1,16 +1,46 @@
 // BWTYA – Algorithm
-// Full pipeline: score → rank → Pareto filter → map strategies → Monte Carlo simulate → rebalance signal
+// Full pipeline: BWSP gate → score → rank → Pareto filter → map strategies → Monte Carlo simulate → rebalance signal
 
 import { bwtyaRanker } from './ranker';
 import { bwtyaRebalancer } from './rebalancer';
 import { bwtyaScorer } from './scorer';
 import { simulatePortfolio } from './simulator';
 import { bwtyaStrategyMapper } from './strategyMapper';
+import { checkBwspGate } from './bwspGate';
+import { vaultApyWithMultipliers } from './mathEngine';
 import type { BWTYAInput, BWTYAResult } from './types';
 
 export class BWTYAAlgorithm {
   run(input: BWTYAInput): BWTYAResult {
-    const { opportunities, wisdomScore = 0, capitalUsd = 0, currentAllocs } = input;
+    const {
+      opportunities,
+      wisdomScore = 0,
+      capitalUsd = 0,
+      currentAllocs,
+      consecutiveTitheMonths = 0,
+    } = input;
+
+    // ── BWSP approval gate ──────────────────────────────────────────────────
+    const gate = checkBwspGate(input);
+    if (gate.status === 'blocked') {
+      // Return a zero-yield result — callers should surface the reason to the user
+      return {
+        scoredOpportunities: [],
+        strategies: [],
+        recommendedStrategy: null,
+        titheAmount: 0,
+        yieldAfterTithe: 0,
+        projectedApy: 0,
+        projectedApyBoosted: 0,
+        simulation: null,
+        projectedApyP10: 0,
+        projectedApyP90: 0,
+        probabilityOfLoss: 0,
+        rebalanceSignal: null,
+        timestamp: new Date().toISOString(),
+        bwspApprovalStatus: 'blocked',
+      };
+    }
 
     // 1. Score all opportunities
     const scored = bwtyaScorer.scoreAll(opportunities);
@@ -31,9 +61,12 @@ export class BWTYAAlgorithm {
         )
       : 0;
 
-    // 5. Tithe and yield calculations
+    // 4b. Apply wisdom-score + tithe-streak multipliers to the projected APY
+    const projectedApyBoosted = vaultApyWithMultipliers(projectedApy, wisdomScore, consecutiveTitheMonths);
+
+    // 5. Tithe and yield calculations (use boosted APY for yield projection)
     const titheReserve = (recommendedStrategy?.titheReservePercent ?? 10) / 100;
-    const annualYield = capitalUsd * (projectedApy / 100);
+    const annualYield = capitalUsd * (projectedApyBoosted / 100);
     const titheAmount = annualYield * titheReserve;
     const yieldAfterTithe = annualYield - titheAmount;
 
@@ -78,14 +111,17 @@ export class BWTYAAlgorithm {
       titheAmount,
       yieldAfterTithe,
       projectedApy,
+      projectedApyBoosted,
       simulation,
       projectedApyP10,
       projectedApyP90,
       probabilityOfLoss,
       rebalanceSignal,
       timestamp: new Date().toISOString(),
+      bwspApprovalStatus: gate.status,
     };
   }
 }
 
 export const bwtyaAlgorithm = new BWTYAAlgorithm();
+

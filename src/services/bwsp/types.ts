@@ -1,5 +1,24 @@
 // BWSP – Biblical-Wisdom-Synthesis-Protocol · Type Definitions
 
+// ---------------------------------------------------------------------------
+// Triple-Check: authenticity · context · anti-cherry-picking
+// ---------------------------------------------------------------------------
+
+export interface TripleCheckResult {
+  /** Verse passes format/content authenticity validation */
+  authentic: boolean;
+  /** Verse is contextually appropriate for the query intent */
+  contextual: boolean;
+  /** Synthesis draws on ≥ 2 supporting verses (anti-cherry-picking) */
+  notCherryPicked: boolean;
+  /** Overall pass: all three checks must be true */
+  passed: boolean;
+  /** Deterministic hex hash of the primary verse text (for on-chain anchoring) */
+  verseHash: string;
+  /** Human-readable reasons for any failed check */
+  failReasons: string[];
+}
+
 export type BWSPQueryIntent =
   | 'yield_advice'
   | 'risk_assessment'
@@ -93,6 +112,8 @@ export interface BWSPSynthesis {
   authorityWeightedResonance: number;    // 0–1 resonance adjusted by biblical book authority
   wisdomDecayFactor: number;             // 0–1 how much the user's wisdom has decayed
   titheBlessingMultiplier: number;       // 1.0–1.5 consecutive tithe months blessing
+  // Triple-check integrity seal
+  tripleCheck?: TripleCheckResult;
 }
 
 export interface BWSPResponse {
@@ -114,6 +135,8 @@ export interface BWSPResponse {
   secondaryIntent: BWSPQueryIntent | null;
   // Authority-weighted confidence (book-weighted resonance used in final score)
   authorityWeightedConfidence: number; // 0–1
+  // Triple-check integrity seal (passed through from synthesis)
+  tripleCheck?: TripleCheckResult;
 }
 
 export interface AgentStep {

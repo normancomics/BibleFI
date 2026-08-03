@@ -527,4 +527,188 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
     function getScriptureResonatorCount(bytes32 scriptureHash) external view returns (uint256) {
         return scriptureResonators[scriptureHash].length;
     }
+
+    // =========================================================================
+    // Palantir Foundry Oracle Integration
+    // =========================================================================
+    //
+    // Palantir Foundry / AIP enriches BWSP wisdom scores with:
+    //   • ML-derived authority-weighted resonance from the Foundry vector index
+    //   • Market-regime labels (bull / bear / sideways) from live DeFi knowledge objects
+    //   • Anomaly flags surfaced by the BWTYAScoreBatch AIP action
+    //
+    // The oracle is a trusted off-chain bridge that submits a signed bundle of
+    // wisdom updates.  Each update is a (user, batchId, mlWisdomScore, confidence)
+    // tuple signed by the oracle's EOA.  The contract verifies the signature
+    // before accepting any update.
+    //
+    // Security properties:
+    //   • Only the owner can set or rotate the oracle address.
+    //   • Each batchId is consumed exactly once (replay protection).
+    //   • mlWisdomScore is bounded to [0, 10_000] (basis points, ×0.01 = %).
+    //   • A stale-update guard rejects bundles older than ORACLE_FRESHNESS_WINDOW.
+    //   • Oracle can be disabled (address(0)) to remove dependency on Foundry.
+    //
+    // "A wise man will hear, and will increase learning; and a man of
+    //  understanding shall attain unto wise counsels." — Proverbs 1:5
+
+    // ── Storage ───────────────────────────────────────────────────────────────
+
+    /// @notice Address authorised to submit Foundry ML wisdom updates
+    address public foundryOracle;
+
+    /// @notice ML-enhanced wisdom score per user, in basis points (0–10 000)
+    mapping(address => uint256) public mlWisdomScoreBps;
+
+    /// @notice Confidence of the ML wisdom score, in basis points (0–10 000)
+    mapping(address => uint256) public mlWisdomConfidenceBps;
+
+    /// @notice Timestamp of the last ML wisdom update per user
+    mapping(address => uint256) public mlWisdomLastUpdated;
+
+    /// @notice Consumed oracle batch IDs (replay protection)
+    mapping(bytes32 => bool) public consumedOracleBatches;
+
+    /// @notice Maximum age (seconds) of an accepted oracle bundle
+    uint256 public constant ORACLE_FRESHNESS_WINDOW = 10 minutes;
+
+    // ── Events ────────────────────────────────────────────────────────────────
+
+    event FoundryOracleSet(address indexed previousOracle, address indexed newOracle);
+    event FoundryWisdomSynced(
+        address indexed user,
+        uint256 mlWisdomScoreBps,
+        uint256 mlConfidenceBps,
+        bytes32 indexed batchId
+    );
+
+    // ── Errors ────────────────────────────────────────────────────────────────
+
+    error OracleNotSet();
+    error OracleUnauthorized();
+    error BatchAlreadyConsumed(bytes32 batchId);
+    error BundleTooStale(uint256 bundleTimestamp, uint256 cutoff);
+    error InvalidWisdomScore(uint256 score);
+
+    // ── Owner functions ───────────────────────────────────────────────────────
+
+    /**
+     * @notice Set or rotate the Foundry oracle address.
+     * @param oracle  New oracle EOA.  Pass address(0) to disable Foundry sync.
+     */
+    function setFoundryOracle(address oracle) external onlyOwner {
+        emit FoundryOracleSet(foundryOracle, oracle);
+        foundryOracle = oracle;
+    }
+
+    // ── Oracle submission ─────────────────────────────────────────────────────
+
+    /**
+     * @notice Accept a Palantir Foundry AIP wisdom-score update for one user.
+     *
+     * @param user               Wallet address to update
+     * @param mlWisdomScoreBps_  ML-enhanced wisdom score in basis points (0–10 000)
+     * @param mlConfidenceBps_   Model confidence in basis points (0–10 000)
+     * @param bundleTimestamp    Unix timestamp when the Foundry bundle was generated
+     * @param batchId            Unique batch identifier (replay protection)
+     * @param signature          EIP-191 personal_sign of the packed payload by foundryOracle
+     *
+     * @dev Payload for signing:
+     *        keccak256(abi.encodePacked(
+     *          "BibleFI:FoundryWisdom:",
+     *          user, mlWisdomScoreBps_, mlConfidenceBps_, bundleTimestamp, batchId
+     *        ))
+     */
+    function syncFromFoundryOracle(
+        address user,
+        uint256 mlWisdomScoreBps_,
+        uint256 mlConfidenceBps_,
+        uint256 bundleTimestamp,
+        bytes32 batchId,
+        bytes calldata signature
+    ) external {
+        if (foundryOracle == address(0)) revert OracleNotSet();
+        if (mlWisdomScoreBps_ > 10_000)  revert InvalidWisdomScore(mlWisdomScoreBps_);
+
+        // ── Freshness check ───────────────────────────────────────────────────
+        if (block.timestamp > bundleTimestamp + ORACLE_FRESHNESS_WINDOW) {
+            revert BundleTooStale(bundleTimestamp, block.timestamp - ORACLE_FRESHNESS_WINDOW);
+        }
+
+        // ── Replay protection ─────────────────────────────────────────────────
+        if (consumedOracleBatches[batchId]) revert BatchAlreadyConsumed(batchId);
+        consumedOracleBatches[batchId] = true;
+
+        // ── Signature verification ────────────────────────────────────────────
+        bytes32 msgHash = keccak256(abi.encodePacked(
+            "BibleFI:FoundryWisdom:",
+            user,
+            mlWisdomScoreBps_,
+            mlConfidenceBps_,
+            bundleTimestamp,
+            batchId
+        ));
+        bytes32 ethSignedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", msgHash));
+        address recovered = _recoverSigner(ethSignedHash, signature);
+        if (recovered != foundryOracle) revert OracleUnauthorized();
+
+        // ── Persist ───────────────────────────────────────────────────────────
+        mlWisdomScoreBps[user]        = mlWisdomScoreBps_;
+        mlWisdomConfidenceBps[user]   = mlConfidenceBps_;
+        mlWisdomLastUpdated[user]     = block.timestamp;
+
+        emit FoundryWisdomSynced(user, mlWisdomScoreBps_, mlConfidenceBps_, batchId);
+    }
+
+    /**
+     * @notice Returns the fused wisdom score: blends the deterministic on-chain
+     *         score with the Palantir ML score when confidence is sufficient.
+     *
+     * @param user  Wallet address
+     * @return fusedScoreBps  Fused wisdom score in basis points (0–10 000)
+     *
+     * @dev Fusion formula:
+     *        alpha = min(mlConfidenceBps, 3500) / 10000   // cap ML weight at 35 %
+     *        fused = alpha * mlScore + (1-alpha) * onChainScore
+     */
+    function getFusedWisdomScore(address user) external view returns (uint256 fusedScoreBps) {
+        uint256 onChainBps = _getOnChainWisdomBps(user);
+        uint256 mlScore    = mlWisdomScoreBps[user];
+        uint256 mlConf     = mlWisdomConfidenceBps[user];
+
+        // No ML data or stale > 24 h — use pure on-chain score
+        if (mlScore == 0 || block.timestamp > mlWisdomLastUpdated[user] + 24 hours) {
+            return onChainBps;
+        }
+
+        // Cap ML alpha at 35 % to preserve biblical math anchors
+        uint256 alpha      = mlConf > 3_500 ? 3_500 : mlConf;      // ≤ 35 %
+        uint256 oneMinAlpha = 10_000 - alpha;
+
+        fusedScoreBps = (alpha * mlScore + oneMinAlpha * onChainBps) / 10_000;
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    /// @dev Returns the current on-chain wisdom score in basis points.
+    ///      Normalises the existing wisdomScore (0–100) to bps (0–10 000).
+    function _getOnChainWisdomBps(address user) private view returns (uint256) {
+        // wisdomScores is the existing mapping from the base contract
+        return wisdomScores[user] * 100;
+    }
+
+    /// @dev Recover signer from EIP-191 signed message hash + compact ECDSA sig.
+    function _recoverSigner(bytes32 ethSignedHash, bytes calldata sig) private pure returns (address) {
+        require(sig.length == 65, "BWSPWisdomRegistry: invalid sig length");
+        bytes32 r;
+        bytes32 s;
+        uint8   v;
+        assembly {
+            r := calldataload(sig.offset)
+            s := calldataload(add(sig.offset, 32))
+            v := byte(0, calldataload(add(sig.offset, 64)))
+        }
+        if (v < 27) v += 27;
+        return ecrecover(ethSignedHash, v, r, s);
+    }
 }

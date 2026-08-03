@@ -57,6 +57,19 @@ const SuperVaultPage = lazy(() => import("./pages/SuperVaultPage"));
 const SuperBoringPage = lazy(() => import("./pages/SuperBoringPage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
+const MCPAuditLogPage = lazy(() => import("./pages/MCPAuditLogPage"));
+const DefiOpportunitiesPage = lazy(() => import("./pages/DefiOpportunitiesPage"));
+const BuilderScorePage = lazy(() => import("./pages/BuilderScorePage"));
+const ChurchDiscoveryPage = lazy(() => import("./pages/ChurchDiscoveryPage"));
+const ComprehensiveWisdomPage = lazy(() => import("./pages/ComprehensiveWisdomPage"));
+const LaunchPage = lazy(() => import("./pages/LaunchPage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const PaymentHubPage = lazy(() => import("./pages/PaymentHubPage"));
+const ScriptureIntegrityPage = lazy(() => import("./pages/ScriptureIntegrityPage"));
+const SuperfluidPage = lazy(() => import("./pages/SuperfluidPage"));
+const SuperfluidTokensPage = lazy(() => import("./pages/SuperfluidTokensPage"));
+const TechnicalRoadmapPage = lazy(() => import("./pages/TechnicalRoadmapPage"));
 
 /** Shown while a lazily-loaded route chunk is being fetched. */
 const PageLoader = () => (
@@ -123,6 +136,19 @@ const App = () => (
             <Route path="/vault" element={<SuperVaultPage />} />
             <Route path="/dca" element={<SuperBoringPage />} />
             <Route path="/tech-graphs" element={<TechGraphsPage />} />
+            <Route path="/mcp-audit" element={<MCPAuditLogPage />} />
+            <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
+            <Route path="/builder-score" element={<BuilderScorePage />} />
+            <Route path="/church-discovery" element={<ChurchDiscoveryPage />} />
+            <Route path="/comprehensive-wisdom" element={<ComprehensiveWisdomPage />} />
+            <Route path="/launch" element={<LaunchPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/payment-hub" element={<PaymentHubPage />} />
+            <Route path="/scripture-integrity" element={<ScriptureIntegrityPage />} />
+            <Route path="/superfluid" element={<SuperfluidPage />} />
+            <Route path="/superfluid-tokens" element={<SuperfluidTokensPage />} />
+            <Route path="/roadmap" element={<TechnicalRoadmapPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

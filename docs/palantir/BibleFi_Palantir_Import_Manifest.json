@@ -1,0 +1,245 @@
+{
+  "$schema": "https://biblefi.io/schemas/palantir-import-manifest/v1",
+  "name": "BibleFI Palantir Foundry Import Manifest",
+  "version": "1.0.0",
+  "ontologyRid": "ri.ontology.main.ontology.biblefi",
+  "workspaceRid": "ri.workspace.main.workspace.biblefi-aip",
+  "description": "Machine-readable ingest manifest for BibleFI → Palantir Foundry AIP pipeline. Consumed by AIP TaskManager on initial ingest and on subsequent scheduled refreshes.",
+
+  "embeddings": {
+    "primaryModel": "text-embedding-3-large",
+    "primaryDimensions": 3072,
+    "secondaryModel": "code-search-ada-002",
+    "secondaryAppliesTo": ["contracts"],
+    "vectorStore": "foundry_vector_index",
+    "pgvectorFallback": true,
+    "similarityMetric": "cosine"
+  },
+
+  "acl": {
+    "readGroups": ["biblefi-readers"],
+    "writeGroups": ["biblefi-admins"],
+    "piiMasked": true,
+    "sabbathMode": {
+      "jobsRun": true,
+      "humanApprovalGatesAutoSkipped": true
+    }
+  },
+
+  "datasets": [
+    {
+      "id": "D1",
+      "foundryName": "biblefi.knowledge.dossier",
+      "rid": "ri.foundry.main.dataset.biblefi-knowledge-dossier",
+      "description": "BibleFI knowledge dossier — full system architecture, BWSP/BWTYA spec, and integration guides",
+      "sourcePaths": [
+        "docs/BWSP_BWTYA_FRAMEWORK.md",
+        "PROJECT_OVERVIEW.md",
+        "BIBLE_FI_COMPREHENSIVE_OUTLINE.md",
+        "docs/palantir/BibleFi_Palantir_AIP_Tasks.yaml"
+      ],
+      "format": "markdown",
+      "refreshCadence": "manual",
+      "refreshCadenceSeconds": 0,
+      "chunker": {
+        "strategy": "markdown_header_aware",
+        "chunkSizeTokens": 1200,
+        "overlapTokens": 150,
+        "splitOnHeaders": ["H2", "H3"],
+        "keepFrontmatter": true
+      }
+    },
+    {
+      "id": "D2",
+      "foundryName": "biblefi.scriptures.financial",
+      "rid": "ri.foundry.main.dataset.biblefi-scriptures-financial",
+      "description": "Financial-wisdom scriptures exported from TypeScript data files (KJV + principle + DeFi application)",
+      "sourcePaths": [
+        "src/data/comprehensiveFinancialScriptures.ts",
+        "src/lib/biblicalFinanceScriptures.ts",
+        "src/data/comprehensiveBibleVerses.ts"
+      ],
+      "format": "typescript_to_jsonl",
+      "refreshCadence": "hourly",
+      "refreshCadenceSeconds": 3600,
+      "chunker": {
+        "strategy": "one_verse_per_chunk",
+        "neverSplitVerses": true,
+        "fields": ["reference", "kjvText", "principle", "defiApplication", "category", "financialKeywords"]
+      }
+    },
+    {
+      "id": "D3",
+      "foundryName": "biblefi.scriptures.multilang",
+      "rid": "ri.foundry.main.dataset.biblefi-scriptures-multilang",
+      "description": "Comprehensive biblical texts including KJV, ESV, Hebrew, Greek, Aramaic and Strong's numbers from Supabase",
+      "sourceSupabaseTable": "comprehensive_biblical_texts",
+      "format": "postgres_cdc",
+      "refreshCadence": "hourly",
+      "refreshCadenceSeconds": 3600,
+      "chunker": {
+        "strategy": "one_verse_per_chunk",
+        "neverSplitVerses": true,
+        "fields": ["book", "chapter", "verse", "kjv_text", "esv_text", "hebrew_text", "greek_text", "aramaic_text", "strongs_numbers", "principle", "defi_application", "category"]
+      }
+    },
+    {
+      "id": "D4",
+      "foundryName": "biblefi.defi.knowledge",
+      "rid": "ri.foundry.main.dataset.biblefi-defi-knowledge",
+      "description": "DeFi protocol knowledge base and live market signals from Supabase + live market data service",
+      "sourceSupabaseTable": "defi_knowledge_base",
+      "format": "postgres_cdc_plus_live_json",
+      "refreshCadence": "every_30_minutes",
+      "refreshCadenceSeconds": 1800,
+      "chunker": {
+        "strategy": "semantic_paragraph",
+        "chunkSizeTokens": 800,
+        "overlapTokens": 100,
+        "groupBy": ["protocol", "topic"]
+      }
+    },
+    {
+      "id": "D5",
+      "foundryName": "biblefi.bwsp.spec",
+      "rid": "ri.foundry.main.dataset.biblefi-bwsp-spec",
+      "description": "BWSP/BWTYA framework specification and TypeScript source (algorithms, types, math engines)",
+      "sourcePaths": [
+        "src/services/bwsp/",
+        "src/services/bwtya/",
+        "src/services/palantir/",
+        "docs/BWSP_BWTYA_FRAMEWORK.md"
+      ],
+      "format": "markdown_plus_typescript",
+      "refreshCadence": "on_commit",
+      "refreshCadenceSeconds": 0,
+      "chunker": {
+        "strategy": "markdown_header_aware",
+        "chunkSizeTokens": 1200,
+        "overlapTokens": 150
+      }
+    },
+    {
+      "id": "D6",
+      "foundryName": "biblefi.contracts",
+      "rid": "ri.foundry.main.dataset.biblefi-contracts",
+      "description": "Smart contracts: BWSPWisdomRegistry, BWTYAYieldVault, BibleFiBWSP, BWTYAMath — Solidity source with NatSpec",
+      "sourcePaths": [
+        "contracts/BWSPWisdomRegistry.sol",
+        "contracts/BWTYAYieldVault.sol",
+        "contracts/BibleFiBWSP.sol",
+        "contracts/BWTYAMath.sol",
+        "contracts/BWTYAYieldVault.sol",
+        "contracts/BibleFiSpandexAdvisory.sol"
+      ],
+      "format": "solidity",
+      "refreshCadence": "on_commit",
+      "refreshCadenceSeconds": 0,
+      "chunker": {
+        "strategy": "code_symbol_aware",
+        "granularity": ["contract", "function", "modifier"],
+        "keepNatSpec": true,
+        "keepScriptureComments": true,
+        "secondaryEmbeddingModel": "code-search-ada-002"
+      }
+    },
+    {
+      "id": "D7",
+      "foundryName": "biblefi.agents.runtime",
+      "rid": "ri.foundry.main.dataset.biblefi-agent-telemetry",
+      "description": "BWSP agent run logs and BWTYA opportunity scores from Supabase (real-time telemetry)",
+      "sourceSupabaseTables": ["bwsp_query_log", "bwtya_opportunity_scores", "foundry_action_log"],
+      "format": "postgres_cdc",
+      "refreshCadence": "every_15_minutes",
+      "refreshCadenceSeconds": 900,
+      "chunker": {
+        "strategy": "event_window",
+        "windowHours": 1,
+        "aggregateBy": "agent_name",
+        "emitSummaryChunk": true,
+        "emitRawJsonSidecar": true
+      }
+    },
+    {
+      "id": "D8",
+      "foundryName": "biblefi.churches",
+      "rid": "ri.foundry.main.dataset.biblefi-churches",
+      "description": "International Christian church directory (PII masked — no address, phone, or email)",
+      "sourceSupabaseTable": "global_churches",
+      "format": "postgres_cdc",
+      "piiMasked": true,
+      "maskedColumns": ["address", "phone", "email", "created_by"],
+      "refreshCadence": "hourly",
+      "refreshCadenceSeconds": 3600,
+      "chunker": {
+        "strategy": "row_per_chunk",
+        "fieldOrder": ["name", "denomination", "city", "country", "accepts_crypto", "crypto_networks", "verified"]
+      }
+    }
+  ],
+
+  "ontologyMapping": {
+    "objectTypes": [
+      {
+        "apiName": "biblefi.Scripture",
+        "primaryKeyProperty": "reference",
+        "sourceDatasets": ["D2", "D3"],
+        "vectorIndexed": true,
+        "embeddingField": "kjvText"
+      },
+      {
+        "apiName": "biblefi.DeFiPrinciple",
+        "primaryKeyProperty": "primaryKey",
+        "sourceDatasets": ["D4"],
+        "vectorIndexed": true,
+        "embeddingField": "content"
+      },
+      {
+        "apiName": "biblefi.BWTYAScore",
+        "primaryKeyProperty": "primaryKey",
+        "sourceDatasets": ["D7"],
+        "vectorIndexed": false
+      },
+      {
+        "apiName": "biblefi.AgentRun",
+        "primaryKeyProperty": "primaryKey",
+        "sourceDatasets": ["D7"],
+        "vectorIndexed": false
+      },
+      {
+        "apiName": "biblefi.Church",
+        "primaryKeyProperty": "primaryKey",
+        "sourceDatasets": ["D8"],
+        "vectorIndexed": false
+      },
+      {
+        "apiName": "biblefi.Strategy",
+        "primaryKeyProperty": "primaryKey",
+        "sourceDatasets": ["D5"],
+        "vectorIndexed": true,
+        "embeddingField": "description"
+      },
+      {
+        "apiName": "biblefi.KnowledgeChunk",
+        "primaryKeyProperty": "id",
+        "sourceDatasets": ["D1", "D5", "D6"],
+        "vectorIndexed": true,
+        "embeddingField": "text"
+      },
+      {
+        "apiName": "biblefi.ContractAnchor",
+        "primaryKeyProperty": "primaryKey",
+        "sourceDatasets": ["D6"],
+        "vectorIndexed": false
+      }
+    ],
+    "linkTypes": [
+      { "apiName": "biblefi.ScriptureCitedByChunk",   "from": "biblefi.Scripture",     "to": "biblefi.KnowledgeChunk",  "cardinality": "ONE_TO_MANY" },
+      { "apiName": "biblefi.ScriptureSupportsDefi",   "from": "biblefi.Scripture",     "to": "biblefi.DeFiPrinciple",   "cardinality": "MANY_TO_MANY" },
+      { "apiName": "biblefi.DeFiRealizedByStrategy",  "from": "biblefi.DeFiPrinciple", "to": "biblefi.Strategy",        "cardinality": "MANY_TO_MANY" },
+      { "apiName": "biblefi.StrategyExecutedByAnchor","from": "biblefi.Strategy",      "to": "biblefi.ContractAnchor",  "cardinality": "ONE_TO_MANY" },
+      { "apiName": "biblefi.AgentRunProducedScore",   "from": "biblefi.AgentRun",      "to": "biblefi.BWTYAScore",      "cardinality": "ONE_TO_MANY" },
+      { "apiName": "biblefi.ChurchValidatedByAgent",  "from": "biblefi.Church",        "to": "biblefi.AgentRun",        "cardinality": "MANY_TO_MANY" }
+    ]
+  }
+}
