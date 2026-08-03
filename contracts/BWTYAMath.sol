@@ -49,9 +49,11 @@ library BWTYAMath {
 
     // Wisdom Decay: per-day decay factor in WAD form
     // λ = 0.005/day → per-day factor = 1 - 0.005 = 0.995
-    // We store as (995 * WAD / 1000) for integer math
     uint256 internal constant DECAY_FACTOR_NUMERATOR   = 995;
     uint256 internal constant DECAY_FACTOR_DENOMINATOR = 1_000;
+    /// @dev 0.995 in WAD — the per-day retention factor used by wisdomDecay.
+    uint256 internal constant DECAY_PER_DAY =
+        (DECAY_FACTOR_NUMERATOR * WAD) / DECAY_FACTOR_DENOMINATOR;
     // Minimum retained wisdom fraction (40 %)
     uint256 internal constant WISDOM_FLOOR_FRAC = 40e16; // 0.40 WAD
 
@@ -98,31 +100,53 @@ library BWTYAMath {
     function fruitSustainabilityCurve(uint256 apyBps) internal pure returns (uint256 score) {
         if (apyBps == 0) return 0;
 
+        // Rising edge: linear ramp that meets the parabola exactly at 500 bps.
+        // Ramping to a hard-coded 20 pts (as this previously did) left a cliff
+        // at exactly 5 % APY — 500 bps scored 20 while 501 bps scored 15, which
+        // a protocol could game by advertising precisely 5.00 %.
         if (apyBps <= 500) {
-            // Low APY: linear ramp 0→20 over 0–5 %
-            return (apyBps * 20) / 500;
+            return (apyBps * _parabolaScore(500)) / 500;
         }
 
-        if (apyBps <= 2_500) {
-            // Core orchard zone: parabola peaked at 1200 bps
-            // delta = |apy_bps - 1200|, spread = 1000 bps
-            uint256 delta = apyBps >= APY_PEAK_BPS
-                ? apyBps - APY_PEAK_BPS
-                : APY_PEAK_BPS - apyBps;
-            // score = 30 × (1 - (delta/1000)²) clamped [0, 30]
-            if (delta >= 1_000) return 0;
-            uint256 frac = (delta * WAD) / 1_000; // normalised deviation in WAD
-            uint256 sq   = (frac * frac) / WAD;   // (delta/1000)² in WAD
-            if (sq >= WAD) return 0;
-            return (30 * (WAD - sq)) / WAD;
-        }
+        uint256 parabola = _parabolaScore(apyBps);
 
-        // High APY: inverse power law — 30 × (1200 / apy)^1.5
-        // Integer approximation: score ≈ 30 × (peak/apy) × sqrt(peak/apy)
-        uint256 ratio   = (APY_PEAK_BPS * WAD) / apyBps;                          // WAD
-        uint256 sqrtRat = babylonianSqrt(ratio * WAD) / SQRT_PRECISION;            // WAD (approx)
-        uint256 raw     = (30 * ratio * sqrtRat) / (WAD * WAD / SQRT_PRECISION);   // pts
-        return raw > 30 ? 0 : raw; // ultra-high APY → near zero
+        // At or below the peak, the parabola is the curve.
+        if (apyBps <= APY_PEAK_BPS) return parabola;
+
+        // Above the peak, take the upper envelope of the parabola and the
+        // inverse power-law tail.  The parabola alone collapses to 0 at
+        // 2200 bps while the tail is still ~12 pts, which produced a dead
+        // zone: 22 %–25 % APY scored 0, then jumped back up to ~10 pts at
+        // 25.01 %.  The envelope is continuous and monotonically decreasing.
+        uint256 tail = _powerLawScore(apyBps);
+        return parabola >= tail ? parabola : tail;
+    }
+
+    /**
+     * @dev Parabolic bell: 30 × (1 − (Δ/1000)²), clamped to [0, 30],
+     *      where Δ = |apyBps − APY_PEAK_BPS|.
+     */
+    function _parabolaScore(uint256 apyBps) private pure returns (uint256) {
+        uint256 delta = apyBps >= APY_PEAK_BPS
+            ? apyBps - APY_PEAK_BPS
+            : APY_PEAK_BPS - apyBps;
+        if (delta >= 1_000) return 0;
+        uint256 frac = (delta * WAD) / 1_000; // normalised deviation in WAD
+        uint256 sq   = (frac * frac) / WAD;   // (Δ/1000)² in WAD
+        if (sq >= WAD) return 0;
+        return (30 * (WAD - sq)) / WAD;
+    }
+
+    /**
+     * @dev Inverse power-law tail: 30 × (APY_PEAK_BPS / apyBps)^1.5.
+     *      Unsustainably high APY decays toward zero rather than cliff-edging.
+     *      Caller must ensure apyBps > 0.
+     */
+    function _powerLawScore(uint256 apyBps) private pure returns (uint256) {
+        uint256 ratio   = (APY_PEAK_BPS * WAD) / apyBps;         // WAD
+        uint256 sqrtRat = babylonianSqrt(ratio * WAD);           // WAD (sqrt of WAD² is WAD)
+        uint256 raw     = (30 * ratio * sqrtRat) / (WAD * WAD);  // 30 × r^1.5, in points
+        return raw > 30 ? 30 : raw;
     }
 
     // ============================================================
@@ -139,8 +163,8 @@ library BWTYAMath {
         if (tvlUsd == 0) return 0;
         // ratio = tvl / TVL_TARGET in WAD
         uint256 ratio = tvlUsd >= TVL_TARGET ? WAD : (tvlUsd * WAD) / TVL_TARGET;
-        // sqrt(ratio) in WAD
-        uint256 sqrtRatio = babylonianSqrt(ratio * WAD) / 1e9;
+        // sqrt of a WAD² quantity is already WAD-scaled — no extra rescaling.
+        uint256 sqrtRatio = babylonianSqrt(ratio * WAD);
         if (sqrtRatio > WAD) sqrtRatio = WAD;
         return (15 * sqrtRatio) / WAD;
     }
@@ -205,26 +229,40 @@ library BWTYAMath {
         uint256 currentScore,
         uint256 daysInactive
     ) internal pure returns (uint256 decayedScore) {
-        if (daysInactive == 0) return currentScore;
+        if (daysInactive == 0 || currentScore == 0) return currentScore;
 
-        // Binomial two-term approximation: (1 - λ)^n ≈ 1 - nλ + n(n-1)/2 λ²
-        // λ = 5/1000 = 0.005
-        uint256 lambda_num = 5;
-        uint256 lambda_den = 1_000;
-        uint256 n = daysInactive;
+        uint256 floorScore = (currentScore * WISDOM_FLOOR_FRAC) / WAD;
 
-        // term1 = n × λ  (as fraction × currentScore)
-        uint256 term1 = (n * lambda_num * currentScore) / lambda_den;
-        // term2 = n(n-1)/2 × λ²  (second-order correction)
-        uint256 term2 = (n * (n > 0 ? n - 1 : 0) * lambda_num * lambda_num * currentScore)
-                        / (2 * lambda_den * lambda_den);
+        // Exact fixed-point exponentiation, NOT a truncated binomial series.
+        // The previous two-term expansion 1 − nλ + n(n−1)/2·λ² diverges badly
+        // past ~150 days and then turns *upward*: at n = 500 it returned the
+        // full undecayed score, so an account abandoned for over a year
+        // out-scored one inactive for a month and still collected the top
+        // wisdom-boost tier in BWTYAYieldVault.
+        uint256 factor  = _powWad(DECAY_PER_DAY, daysInactive); // 0.995ⁿ in WAD
+        uint256 decayed = (currentScore * factor) / WAD;
 
-        uint256 reduction = term1 > term2 ? term1 - term2 : 0;
-        uint256 result    = reduction < currentScore ? currentScore - reduction : 0;
+        return decayed < floorScore ? floorScore : decayed;
+    }
 
-        // Floor at WISDOM_FLOOR_FRAC (40 %) of original
-        uint256 floor = (currentScore * 40) / 100;
-        return result < floor ? floor : result;
+    /**
+     * @notice Fixed-point exponentiation: baseWad^exp, in WAD.
+     * @dev    Binary exponentiation — O(log exp) multiplications, so even
+     *         decade-scale day counts stay cheap.  Truncation is downward and
+     *         bounded by ~1 wei per squaring, which is immaterial against the
+     *         WISDOM_FLOOR_FRAC floor applied by the caller.  Underflow to 0
+     *         for very large exponents is correct: the floor then governs.
+     */
+    function _powWad(uint256 baseWad, uint256 exp) private pure returns (uint256 result) {
+        result = WAD;
+        uint256 b = baseWad;
+        while (exp > 0) {
+            if (exp & 1 == 1) {
+                result = (result * b) / WAD;
+            }
+            b = (b * b) / WAD;
+            exp >>= 1;
+        }
     }
 
     // ============================================================
