@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "verify:agents": "node scripts/verify-agents.mjs"
+    "verify:agents": "node scripts/verify-agents.mjs",
+    "test:health": "node scripts/test-church-directory-health.mjs"
   },
   "dependencies": {
     "@base-org/account": "^2.5.1",
@@ -18,6 +19,7 @@
     "@farcaster/auth-kit": "^0.6.0",
     "@farcaster/frame-sdk": "^0.1.14",
     "@farcaster/frame-wagmi-connector": "^1.0.1",
+    "@farcaster/miniapp-sdk": "^0.2.3",
     "@farcaster/miniapp-wagmi-connector": "^1.1.1",
     "@hookform/resolvers": "^3.9.0",
     "@lovable.dev/mcp-js": "^0.20.0",
@@ -60,6 +62,7 @@
     "@types/three": "^0.183.1",
     "@wagmi/connectors": "^5.11.2",
     "@wagmi/core": "^2.17.3",
+    "@web3icons/react": "^4.1.19",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -67,7 +70,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
-    "ethers": "^6.16.0",
+    "ethers": "^6.17.0",
     "framer-motion": "^12.10.5",
     "graphql": "^16.11.0",
     "input-otp": "^1.2.4",
@@ -79,7 +82,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
     "react-resizable-panels": "^2.1.3",
-    "react-router-dom": "^7.14.0",
+    "react-router-dom": "^7.18.1",
     "recharts": "^2.12.7",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
@@ -103,22 +106,31 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "lovable-tagger": "^1.3.3",
-    "postcss": "^8.4.47",
+    "postcss": "^8.5.23",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^8.0.5"
+    "vite": "^8.1.5"
   },
   "overrides": {
     "flatted": "3.4.2",
-    "glob": "10.5.0",
-    "minimatch": "3.1.5",
     "picomatch": "2.3.2",
     "lodash": "4.18.1",
-    "axios": "1.14.0",
+    "axios": "1.18.0",
     "defu": "6.1.6",
-    "js-yaml": "4.1.1",
+    "js-yaml": "4.3.0",
     "yaml": "2.8.3",
-    "ajv": "6.14.0"
+    "ajv": "6.14.0",
+    "hono": "4.12.32",
+    "form-data": "4.0.6",
+    "ws": "^8.21.0",
+    "jayson": {
+      "ws": "7.5.11"
+    },
+    "@walletconnect/jsonrpc-ws-connection": {
+      "ws": "7.5.11"
+    },
+    "minimatch": "3.1.5",
+    "glob": "10.5.0"
   }
 }

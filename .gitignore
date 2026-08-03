@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Foundry (contracts_forge/): vendored deps + build output — run
+# `cd contracts_forge && forge install && forge build` to regenerate
+contracts_forge/lib/
+contracts_forge/cache/
+contracts_forge/out/
+artifacts_forge/
+deployments/

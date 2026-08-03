@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { WalletConnectorIcon } from '@/components/wallet/WalletBrandIcons';
 
 interface WalletButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
@@ -25,25 +26,21 @@ interface WalletButtonProps {
   className?: string;
 }
 
-const WALLET_ICONS: Record<string, string> = {
-  'Farcaster Wallet': '🟣',
-  'Farcaster': '🟣',
-  'Coinbase Wallet': '🔵',
-  'WalletConnect': '🔗',
-  'Browser Wallet': '🦊',
-  'MetaMask': '🦊',
-  'Injected': '🌐',
-};
-
 const WALLET_DESCRIPTIONS: Record<string, string> = {
   'Farcaster Wallet': 'Connect with your Farcaster/Warpcast wallet',
   'Farcaster': 'Connect with your Farcaster/Warpcast wallet',
+  'Rainbow': 'Connect with Rainbow — extension or mobile via QR',
   'Coinbase Wallet': 'Connect with Coinbase Wallet or Smart Wallet',
   'WalletConnect': 'Scan QR code with any WalletConnect-compatible wallet',
-  'Browser Wallet': 'Connect with MetaMask or other browser extension wallets',
-  'MetaMask': 'Connect with MetaMask browser extension',
+  'MetaMask': 'Connect with the MetaMask browser extension',
   'Injected': 'Connect with your browser wallet extension',
 };
+
+function hasRainbowProvider(): boolean {
+  if (typeof window === 'undefined') return false;
+  const w = window as unknown as { rainbow?: unknown; ethereum?: { isRainbow?: boolean } };
+  return Boolean(w.rainbow ?? w.ethereum?.isRainbow);
+}
 
 const WalletButton: React.FC<WalletButtonProps> = ({ 
   variant = 'default', 
@@ -96,14 +93,21 @@ const WalletButton: React.FC<WalletButtonProps> = ({
                   variant="outline"
                   className="h-auto p-4 justify-start border-stone-600 hover:border-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/10 transition-all"
                   onClick={() => {
-                    connectWallet(connector);
+                    // Rainbow without the extension: hand off to WalletConnect
+                    // QR, which the Rainbow mobile app scans natively.
+                    if (connector.id === 'rainbow' && !hasRainbowProvider()) {
+                      const wc = availableConnectors.find((c) => c.id === 'walletConnect');
+                      connectWallet(wc ?? connector);
+                    } else {
+                      connectWallet(connector);
+                    }
                     setShowWalletPicker(false);
                   }}
                   disabled={isConnecting}
                 >
                   <div className="flex items-center gap-3 w-full">
-                    <span className="text-2xl">
-                      {WALLET_ICONS[connector.name] || '💼'}
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+                      <WalletConnectorIcon connectorId={connector.id} connectorName={connector.name} size={40} />
                     </span>
                     <div className="text-left flex-1">
                       <div className="font-semibold text-white">{connector.name}</div>

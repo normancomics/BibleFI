@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { supabaseApi } from "@/integrations/supabase/apiClient";
+import { runDirectoryQuery, fetchDirectoryRowsViaRpc, DirectoryRow } from "@/services/churchDirectoryClient";
 import { Church } from "@/types/church";
 import { ExternalChurchService } from "./externalChurchService";
 
@@ -10,21 +11,30 @@ export async function searchChurches(query: string): Promise<Church[]> {
       return [];
     }
 
-    // Use the api schema's public_church_directory view which masks sensitive PII
-    // PostgREST only exposes the 'api' schema, so we must use supabaseApi
-    const { data, error } = await supabaseApi
-      .from('public_church_directory')
-      .select('*')
-      .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
-      .limit(20);
-    
-    if (error) {
-      console.error("Error searching churches:", error);
-      return [];
-    }
-    
+    // Use the api schema's public_church_directory view which masks sensitive PII.
+    // runDirectoryQuery adds structured logging, retry, caching, and an RPC fallback.
+    const { data } = await runDirectoryQuery<DirectoryRow>({
+      operation: 'search',
+      cacheKey: `quick-search:${query.toLowerCase()}`,
+      run: () => supabaseApi
+        .from('public_church_directory')
+        .select('*')
+        .or(`name.ilike.%${query}%, denomination.ilike.%${query}%, city.ilike.%${query}%, state_province.ilike.%${query}%, country.ilike.%${query}%`)
+        .limit(20),
+      fallback: async () => {
+        const { data: rows, error } = await fetchDirectoryRowsViaRpc<DirectoryRow>();
+        if (error || !rows) return { data: null, error: error ?? new Error('rpc returned no data') };
+        const q = query.toLowerCase();
+        const matches = rows.filter(church =>
+          [church.name, church.denomination, church.city, church.state_province, church.country]
+            .some(v => typeof v === 'string' && v.toLowerCase().includes(q)));
+        return { data: matches.slice(0, 20), error: null, count: matches.length };
+      },
+      context: { service: 'churchService' },
+    });
+
     // Transform public_church_directory view results
-    const results: Church[] = (data || []).map((church: any) => ({
+    const results: Church[] = (data || []).map((church) => ({
       id: church.id,
       name: church.name,
       denomination: church.denomination,

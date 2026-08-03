@@ -33,6 +33,31 @@ export interface SpandexScoredQuote {
   isBWTYARecommended: boolean;
   /** Whether this provider is best-price (highest outputAmount) */
   isBestPrice: boolean;
+  /** Biblical route policy pass/fail status */
+  biblicalPolicyPass: boolean;
+  /** If policy fails, the exact reasons */
+  policyReasons: string[];
+}
+
+export type CompetitiveBenchmarkVerdict =
+  | 'outperforming'
+  | 'competitive'
+  | 'caution'
+  | 'blocked';
+
+export interface SpandexCompetitiveBenchmark {
+  benchmarkedAgainst: 'bankr.bot';
+  bwtyaProvider: string;
+  bestPriceProvider: string;
+  /** BWTYA output delta vs best price, in bps (negative means less output) */
+  outputDeltaBps: number;
+  /** The "cost" of biblical alignment when choosing stewardship over raw price */
+  stewardshipPremiumBps: number;
+  /** Composite 0–100 competitiveness score */
+  competitivenessScore: number;
+  biblicalPolicyPass: boolean;
+  verdict: CompetitiveBenchmarkVerdict;
+  summary: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -51,6 +76,7 @@ export interface SpandexSwapAdvisoryInput {
   swapperAccount: string;
   wisdomScore?: number;
   capitalUsd?: number;
+  autonomousSabbath?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -68,6 +94,8 @@ export interface SpandexSwapAdvisoryResult {
   alignedWithBestPrice: boolean;
   /** BWTYA strategy recommended given current wisdom score */
   recommendedStrategy: BWTYAStrategy | null;
+  /** Competitiveness benchmark against bankr.bot-style best-price routing */
+  competitiveBenchmark: SpandexCompetitiveBenchmark | null;
   /** BWSP biblical wisdom synthesis for this specific swap */
   bwspWisdom: BWSPResponse | null;
   /** ISO timestamp */
@@ -79,6 +107,11 @@ export interface SpandexSwapAdvisoryResult {
     durationMs: number;
     providersEvaluated: number;
   };
+  autonomousExecution: {
+    enabled: boolean;
+    triggeredAt: string;
+    cadenceMinutes: number;
+  } | null;
 }
 
 // ---------------------------------------------------------------------------

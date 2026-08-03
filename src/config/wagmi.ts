@@ -1,8 +1,8 @@
 
-import { createConfig, http } from 'wagmi'
+import { createConfig, http, type CreateConnectorFn } from 'wagmi'
 import { base, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
-import { farcasterFrame } from '@farcaster/frame-wagmi-connector'
+import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
 // Updated WalletConnect Project ID for BibleFi production
 const projectId = '2589ec8e083adaa554ee06641ce2b93b' // BibleFi official project ID
@@ -10,13 +10,32 @@ const projectId = '2589ec8e083adaa554ee06641ce2b93b' // BibleFi official project
 export const config = createConfig({
   chains: [base, mainnet],
   connectors: [
-    // Farcaster Frame connector — auto-connects inside Warpcast/Farcaster frames
-    farcasterFrame() as any,
-    // MetaMask / Browser Wallet
+    // Farcaster mini app connector — the embedded wallet inside
+    // Farcaster/Base App mini app hosts (connector id: 'farcaster')
+    // Cast: the connector ships its own viem/wagmi types, which structurally
+    // duplicate ours and confuse TS. Runtime behaviour is unaffected.
+    farcasterMiniApp() as unknown as CreateConnectorFn,
+    // Rainbow — extension when installed; the wallet picker falls back to
+    // WalletConnect QR (scannable by Rainbow mobile) when it isn't
+    injected({
+      target: {
+        id: 'rainbow',
+        name: 'Rainbow',
+        provider: () => {
+          if (typeof window === 'undefined') return undefined;
+          const w = window as unknown as {
+            rainbow?: typeof window.ethereum;
+            ethereum?: typeof window.ethereum & { isRainbow?: boolean };
+          };
+          return w.rainbow ?? (w.ethereum?.isRainbow ? w.ethereum : undefined);
+        },
+      },
+    }),
+    // MetaMask / browser extension wallet
     injected({
       target: {
         id: 'injected',
-        name: 'Browser Wallet',
+        name: 'MetaMask',
         provider: typeof window !== 'undefined' ? window.ethereum : undefined,
       },
     }),

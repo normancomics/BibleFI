@@ -16,13 +16,16 @@ import {
   type Provider
 } from 'ethers';
 
-// Superfluid CFA V1 Forwarder ABI (preferred over raw CFA for user-facing calls)
-const CFA_V1_ABI = [
-  'function createFlow(address token, address receiver, int96 flowRate, bytes userData) external returns (bool)',
-  'function updateFlow(address token, address receiver, int96 flowRate, bytes userData) external returns (bool)',
+// Superfluid CFAv1Forwarder ABI — the ONLY contract user-facing flow calls
+// should hit. Direct calls to the CFA agreement revert with "unauthorized
+// host" (agreement methods are host-only); the forwarder wraps
+// host.callAgreement for us. Note every write takes an explicit `sender`.
+const CFA_FORWARDER_ABI = [
+  'function createFlow(address token, address sender, address receiver, int96 flowrate, bytes userData) external returns (bool)',
+  'function updateFlow(address token, address sender, address receiver, int96 flowrate, bytes userData) external returns (bool)',
   'function deleteFlow(address token, address sender, address receiver, bytes userData) external returns (bool)',
-  'function getFlow(address token, address sender, address receiver) external view returns (uint256 timestamp, int96 flowRate, uint256 deposit, uint256 owedDeposit)',
-  'function getNetFlow(address token, address account) external view returns (int96 flowRate)',
+  'function getFlowInfo(address token, address sender, address receiver) external view returns (uint256 lastUpdated, int96 flowrate, uint256 deposit, uint256 owedDeposit)',
+  'function getAccountFlowrate(address token, address account) external view returns (int96)',
 ];
 
 // Super Token ABI — includes upgrade (wrap) and downgrade (unwrap)
@@ -34,6 +37,8 @@ const SUPER_TOKEN_ABI = [
   'function allowance(address owner, address spender) external view returns (uint256)',
   'function getUnderlyingToken() external view returns (address)',
   'function realtimeBalanceOfNow(address account) external view returns (int256 availableBalance, uint256 deposit, uint256 owedDeposit, uint256 timestamp)',
+  // Native-asset super tokens (ETHx) wrap by sending ETH, not ERC-20 upgrade()
+  'function upgradeByETH() external payable',
 ];
 
 // Standard ERC-20 ABI for underlying token approval
@@ -45,10 +50,13 @@ const ERC20_ABI = [
   'function symbol() external view returns (string)',
 ];
 
-// Base chain Superfluid addresses (verified on basescan.org)
+// Base chain Superfluid addresses (verified on-chain 2026-07)
 const SUPERFLUID_ADDRESSES = {
   host: '0x4C073B3baB6d8826b8C5b229f3cfdC1eC6E47E74',
+  // CFA agreement — reads only; writes revert with "unauthorized host"
   cfaV1: '0x19ba78B9cDB05A877718841c574325fdB53601bb',
+  // CFAv1Forwarder — same address on every Superfluid network
+  cfaForwarder: '0xcfA132E353cB4E398080B9700609bb008eceB125',
 };
 
 export interface SuperfluidToken {
@@ -61,6 +69,8 @@ export interface SuperfluidToken {
     address: string;
     decimals: number; // Underlying decimals (e.g., 6 for USDC, 18 for DAI)
   };
+  /** True for native-asset super tokens (ETHx): wrap with upgradeByETH, no approval */
+  isNativeAsset?: boolean;
   logoURI?: string;
   deployed: boolean; // Whether this token is live on Base
 }
@@ -108,7 +118,8 @@ export class RealSuperfluidClient {
     'USDCx': {
       name: 'Super USDC',
       symbol: 'USDCx',
-      address: '0x1efF3Dd78F4A14aBfa9Fa66579bD3Ce9E1B30529',
+      // Canonical listed USDCx on Base (verified on-chain: wraps native USDC)
+      address: '0xD04383398dD2426297da660F9CCA3d439AF9ce1b',
       decimals: 18, // Super tokens always 18
       underlyingToken: {
         symbol: 'USDC',
@@ -121,20 +132,23 @@ export class RealSuperfluidClient {
     'ETHx': {
       name: 'Super ETH',
       symbol: 'ETHx',
+      // Native-asset super token: wraps ETH itself via upgradeByETH (payable)
       address: '0x46fd5cfB4c12D87acD3a13e92BAa53240C661D93',
       decimals: 18,
       underlyingToken: {
         symbol: 'ETH',
-        address: '0x4200000000000000000000000000000000000006', // WETH on Base
+        address: ZeroAddress, // native ETH, not an ERC-20
         decimals: 18
       },
+      isNativeAsset: true,
       logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
       deployed: true
     },
     'DAIx': {
       name: 'Super DAI',
       symbol: 'DAIx',
-      address: '0x7D60e4223A5C1e8A167aEF98a92a4B5C6889bE9C',
+      // Canonical listed DAIx on Base (verified on-chain: wraps DAI)
+      address: '0x708169c8C87563Ce904E0a7F3BFC1F3b0b767f41',
       decimals: 18,
       underlyingToken: {
         symbol: 'DAI',
@@ -213,8 +227,8 @@ export class RealSuperfluidClient {
       this.provider = new JsonRpcProvider(this.BASE_RPC_URL);
 
       this.cfaContract = new Contract(
-        SUPERFLUID_ADDRESSES.cfaV1,
-        CFA_V1_ABI,
+        SUPERFLUID_ADDRESSES.cfaForwarder,
+        CFA_FORWARDER_ABI,
         this.provider
       );
 
@@ -233,12 +247,23 @@ export class RealSuperfluidClient {
     tokenSymbol: string
   ): Promise<{ balance: bigint; formatted: string; decimals: number }> {
     const token = this.getToken(tokenSymbol);
-    if (!token?.underlyingToken || token.underlyingToken.address === ZeroAddress) {
+    if (!token?.underlyingToken) {
+      return { balance: 0n, formatted: '0', decimals: 18 };
+    }
+
+    const address = await signer.getAddress();
+
+    // Native-asset super tokens (ETHx): the "underlying balance" is plain ETH
+    if (token.isNativeAsset) {
+      const balance = (await signer.provider?.getBalance(address)) ?? 0n;
+      return { balance, formatted: formatUnits(balance, 18), decimals: 18 };
+    }
+
+    if (token.underlyingToken.address === ZeroAddress) {
       return { balance: 0n, formatted: '0', decimals: 18 };
     }
 
     const erc20 = new Contract(token.underlyingToken.address, ERC20_ABI, signer);
-    const address = await signer.getAddress();
     const balance = await erc20.balanceOf(address);
     const decimals = token.underlyingToken.decimals;
 
@@ -307,7 +332,16 @@ export class RealSuperfluidClient {
     amount: bigint
   ): Promise<{ success: boolean; txHash?: string; error?: string }> {
     const token = this.getToken(tokenSymbol);
-    if (!token?.underlyingToken || token.underlyingToken.address === ZeroAddress) {
+    if (!token?.underlyingToken) {
+      return { success: false, error: `Token ${tokenSymbol} not deployed yet` };
+    }
+
+    // Native ETH needs no ERC-20 approval — upgradeByETH takes msg.value
+    if (token.isNativeAsset) {
+      return { success: true };
+    }
+
+    if (token.underlyingToken.address === ZeroAddress) {
       return { success: false, error: `Token ${tokenSymbol} not deployed yet` };
     }
 
@@ -358,7 +392,10 @@ export class RealSuperfluidClient {
       const superToken = new Contract(token.address, SUPER_TOKEN_ABI, signer);
 
       console.log(`[Superfluid] Upgrading ${formatUnits(underlyingAmount, token.underlyingToken?.decimals ?? 18)} ${token.underlyingToken?.symbol} → ${tokenSymbol}`);
-      const tx = await superToken.upgrade(underlyingAmount);
+      // Native-asset super tokens wrap by sending ETH; ERC-20 wrappers use upgrade()
+      const tx = token.isNativeAsset
+        ? await superToken.upgradeByETH({ value: underlyingAmount })
+        : await superToken.upgrade(underlyingAmount);
       const receipt = await tx.wait();
 
       return {
@@ -487,16 +524,18 @@ export class RealSuperfluidClient {
       }
 
       const cfaWithSigner = new Contract(
-        SUPERFLUID_ADDRESSES.cfaV1,
-        CFA_V1_ABI,
+        SUPERFLUID_ADDRESSES.cfaForwarder,
+        CFA_FORWARDER_ABI,
         signer
       );
 
+      const sender = await signer.getAddress();
       const flowRateBigInt = BigInt(flowRate);
       console.log(`[Superfluid] Creating flow: ${flowRate} wei/sec to ${receiver}`);
 
       const tx = await cfaWithSigner.createFlow(
         tokenAddress,
+        sender,
         receiver,
         flowRateBigInt,
         '0x'
@@ -532,13 +571,15 @@ export class RealSuperfluidClient {
       }
 
       const cfaWithSigner = new Contract(
-        SUPERFLUID_ADDRESSES.cfaV1,
-        CFA_V1_ABI,
+        SUPERFLUID_ADDRESSES.cfaForwarder,
+        CFA_FORWARDER_ABI,
         signer
       );
 
+      const sender = await signer.getAddress();
       const tx = await cfaWithSigner.updateFlow(
         tokenAddress,
+        sender,
         receiver,
         BigInt(newFlowRate),
         '0x'
@@ -569,8 +610,8 @@ export class RealSuperfluidClient {
       }
 
       const cfaWithSigner = new Contract(
-        SUPERFLUID_ADDRESSES.cfaV1,
-        CFA_V1_ABI,
+        SUPERFLUID_ADDRESSES.cfaForwarder,
+        CFA_FORWARDER_ABI,
         signer
       );
 
@@ -610,10 +651,10 @@ export class RealSuperfluidClient {
         throw new Error("CFA contract not initialized");
       }
 
-      const flow = await this.cfaContract.getFlow(tokenAddress, sender, receiver);
+      const flow = await this.cfaContract.getFlowInfo(tokenAddress, sender, receiver);
 
       return {
-        flowRate: flow.flowRate.toString(),
+        flowRate: flow.flowrate.toString(),
         deposit: flow.deposit.toString(),
         owedDeposit: flow.owedDeposit.toString()
       };

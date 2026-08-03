@@ -13,7 +13,18 @@
     "buttonTitle": "Enter BibleFi",
     "splashImageUrl": "https://biblefi.lovable.app/bible-fi-brand-logo-v2.png",
     "splashBackgroundColor": "#1E40AF",
-    "webhookUrl": "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler"
+    "webhookUrl": "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
+    "subtitle": "Biblical wisdom for DeFi",
+    "description": "Christian faith-based DeFi on Base. Tithe with real-time streams, stake, learn biblical financial wisdom, discover churches, and grow wealth according to Scripture.",
+    "primaryCategory": "finance",
+    "tags": ["defi", "tithing", "bible", "base", "staking"],
+    "tagline": "Tithe, stake & grow in wisdom",
+    "ogTitle": "BibleFi - Biblical DeFi App",
+    "ogDescription": "Biblical principles for your financial journey. Stake, tithe, and grow wealth according to scripture.",
+    "ogImageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
+    "heroImageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
+    "requiredChains": ["eip155:8453"],
+    "canonicalDomain": "biblefi.lovable.app"
   },
   "manifest": {
     "appName": "BibleFi - Biblical Wisdom for DeFi",

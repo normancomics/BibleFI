@@ -7,24 +7,89 @@ import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
 
 // src/lib/mcp/tools/search-scriptures.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient } from "npm:@supabase/supabase-js@^2.105.1";
 import { z } from "npm:zod@^4.4.3";
+
+// src/lib/mcp/guard.ts
+import { createClient } from "npm:@supabase/supabase-js@^2.105.1";
+var MCP_RATE_LIMIT = 30;
+var MCP_RATE_WINDOW_SECONDS = 60;
+function publicClient() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false }, db: { schema: "api" } }
+  );
+}
+function callerKey(ctx) {
+  const userId = ctx?.getUserId?.();
+  if (userId) return `user:${userId}`;
+  const clientId = ctx?.getClientId?.();
+  if (clientId) return `client:${clientId}`;
+  return "anon";
+}
+async function enforceMcpRateLimit(tool, ctx) {
+  try {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) return {};
+    const admin = createClient(process.env.SUPABASE_URL, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+    const { data, error } = await admin.rpc("check_mcp_rate_limit", {
+      p_key: `mcp:${tool}:${callerKey(ctx)}`,
+      p_max: MCP_RATE_LIMIT,
+      p_window_seconds: MCP_RATE_WINDOW_SECONDS
+    });
+    if (error) {
+      console.warn(`[mcp:rate-limit] check failed for ${tool}: ${error.message}`);
+      return {};
+    }
+    const result = data;
+    if (result?.allowed === false) {
+      const retry = Number(result.retry_after) || MCP_RATE_WINDOW_SECONDS;
+      return {
+        error: {
+          content: [
+            {
+              type: "text",
+              text: `Rate limit exceeded (${MCP_RATE_LIMIT} requests/minute). Retry in ${retry}s. "Let all things be done decently and in order." \u2014 1 Corinthians 14:40`
+            }
+          ],
+          isError: true
+        }
+      };
+    }
+    return {};
+  } catch (e) {
+    console.warn(`[mcp:rate-limit] unexpected error for ${tool}:`, e);
+    return {};
+  }
+}
+function sanitizeFilterText(input, maxLength = 100) {
+  return input.replace(/[,()*%\\"'.:]/g, " ").replace(/\s+/g, " ").trim().slice(0, maxLength);
+}
+
+// src/lib/mcp/tools/search-scriptures.ts
 var search_scriptures_default = defineTool({
   name: "search_scriptures",
   title: "Search biblical financial scriptures",
   description: "Full-text search of the BibleFi biblical knowledge base for verses, principles, and DeFi application notes. Returns up to 10 matching scriptures.",
   inputSchema: {
-    query: z.string().min(1).describe("Keyword or phrase to search for (e.g. 'tithing', 'stewardship', 'debt').")
+    query: z.string().min(1).max(100).describe("Keyword or phrase to search for (e.g. 'tithing', 'stewardship', 'debt').")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ query }) => {
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    );
+  handler: async ({ query }, ctx) => {
+    const limited = await enforceMcpRateLimit("search_scriptures", ctx);
+    if (limited.error) return limited.error;
+    const safe = sanitizeFilterText(query);
+    if (!safe) {
+      return {
+        content: [{ type: "text", text: "Please provide a searchable word or phrase." }],
+        isError: true
+      };
+    }
+    const supabase = publicClient();
     const { data, error } = await supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").or(
-      `verse_text.ilike.%${query}%,reference.ilike.%${query}%,principle.ilike.%${query}%,category.ilike.%${query}%`
+      `verse_text.ilike.%${safe}%,reference.ilike.%${safe}%,principle.ilike.%${safe}%,category.ilike.%${safe}%`
     ).limit(10);
     if (error) {
       return { content: [{ type: "text", text: `Search failed: ${error.message}` }], isError: true };
@@ -38,26 +103,31 @@ var search_scriptures_default = defineTool({
 
 // src/lib/mcp/tools/find-churches.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.105.1";
 import { z as z2 } from "npm:zod@^4.4.3";
 var find_churches_default = defineTool2({
   name: "find_churches",
   title: "Find crypto-friendly churches",
   description: "Search the global BibleFi church directory. Returns masked public info only (no raw PII) \u2014 matches the app's public RLS view.",
   inputSchema: {
-    query: z2.string().min(1).describe("City, church name, denomination, or country."),
+    query: z2.string().min(1).max(100).describe("City, church name, denomination, or country."),
     limit: z2.number().int().min(1).max(25).optional().describe("Max results (default 10).")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ query, limit }) => {
-    const supabase = createClient2(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    );
-    const { data, error } = await supabase.from("global_churches").select("id,name,city,state_province,country,denomination,verified,accepts_crypto,accepts_fiat,rating,website").or(
-      `name.ilike.%${query}%,city.ilike.%${query}%,denomination.ilike.%${query}%,country.ilike.%${query}%`
-    ).limit(limit ?? 10);
+  handler: async ({ query, limit }, ctx) => {
+    const limited = await enforceMcpRateLimit("find_churches", ctx);
+    if (limited.error) return limited.error;
+    const safe = sanitizeFilterText(query);
+    if (!safe) {
+      return {
+        content: [{ type: "text", text: "Please provide a city, church name, denomination, or country." }],
+        isError: true
+      };
+    }
+    const supabase = publicClient();
+    const { data, error } = await supabase.rpc("search_public_churches", {
+      p_query: safe,
+      p_limit: limit ?? 10
+    });
     if (error) {
       return { content: [{ type: "text", text: `Search failed: ${error.message}` }], isError: true };
     }
@@ -70,24 +140,22 @@ var find_churches_default = defineTool2({
 
 // src/lib/mcp/tools/get-daily-verse.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
-import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.105.1";
 import { z as z3 } from "npm:zod@^4.4.3";
 var get_daily_verse_default = defineTool3({
   name: "get_daily_verse",
   title: "Get a biblical financial verse",
   description: "Returns one scripture from the BibleFi knowledge base, optionally filtered by category (e.g. 'tithing', 'stewardship').",
   inputSchema: {
-    category: z3.string().optional().describe("Optional category filter.")
+    category: z3.string().max(60).optional().describe("Optional category filter.")
   },
   annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
-  handler: async ({ category }) => {
-    const supabase = createClient3(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false } }
-    );
+  handler: async ({ category }, ctx) => {
+    const limited = await enforceMcpRateLimit("get_daily_verse", ctx);
+    if (limited.error) return limited.error;
+    const supabase = publicClient();
     let q = supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").limit(50);
-    if (category) q = q.ilike("category", `%${category}%`);
+    const safeCategory = category ? sanitizeFilterText(category, 60) : "";
+    if (safeCategory) q = q.ilike("category", `%${safeCategory}%`);
     const { data, error } = await q;
     if (error) {
       return { content: [{ type: "text", text: `Query failed: ${error.message}` }], isError: true };
