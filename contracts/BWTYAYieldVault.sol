@@ -24,11 +24,11 @@ import "./BWSPWisdomRegistry.sol";
  *      Users with higher BWTYA wisdom scores receive a multiplied share of
  *      yield.  Scores are read from BWSPWisdomRegistry with a 7-day TWAP
  *      (Time-Weighted Average Wisdom) to prevent flash-exploitation.
- *      Boost tiers (on top of base APY):
- *        Score < 250 (Seeker)   → 1.00× base
- *        Score 250–499 (Learner) → 1.05×
- *        Score 500–749 (Faithful) → 1.15×
- *        Score ≥ 750  (Steward)  → 1.30×
+ *      Boost tiers (on top of base APY), on the registry's 0–100 score scale:
+ *        Score < 25 (Seeker)    → 1.00× base
+ *        Score 25–49 (Learner)  → 1.05×
+ *        Score 50–74 (Faithful) → 1.15×
+ *        Score ≥ 75 (Steward)   → 1.30×
  *
  *   3. JOSEPH'S RESERVE  (Genesis 41 — "store up in the seven years of plenty")
  *      During periods of extreme market fear (communicated via an oracle),
@@ -118,11 +118,15 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     uint256 public constant BOOST_FAITHFUL = 11_500; // 1.15×
     uint256 public constant BOOST_STEWARD  = 13_000; // 1.30×
 
-    // Wisdom score thresholds
+    // Wisdom score thresholds.
+    // BWSPWisdomRegistry.updateWisdomScore reverts on any score above 100, so
+    // these live on a 0–100 scale. They were previously 250/500/750, which no
+    // score could ever reach: every user would have been pinned to the Seeker
+    // tier and the wisdom boost would never have paid out at all.
     uint256 public constant WISDOM_SEEKER   = 0;
-    uint256 public constant WISDOM_LEARNER  = 250;
-    uint256 public constant WISDOM_FAITHFUL = 500;
-    uint256 public constant WISDOM_STEWARD  = 750;
+    uint256 public constant WISDOM_LEARNER  = 25;
+    uint256 public constant WISDOM_FAITHFUL = 50;
+    uint256 public constant WISDOM_STEWARD  = 75;
 
     // ============================================================
     // State Variables
@@ -172,6 +176,7 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         uint256 reserveAmount
     );
 
+    event YieldFunded(address indexed funder, uint256 amount, uint256 newBacking);
     event JosephReserveActivated(bool active, uint256 timestamp);
     event BaseApyUpdated(uint256 oldBps, uint256 newBps);
     event TreasuryUpdated(address oldTreasury, address newTreasury);
@@ -187,6 +192,7 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     error InsufficientBalance();
     error NotYieldOracle();
     error RebalanceLockActive();
+    error InsufficientYieldBacking();
 
     // ============================================================
     // Constructor
@@ -265,7 +271,15 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             lastClaimTime:    block.timestamp,
             accruedYield:     0,
             wisdomTwapStart:  decayedScore,
-            wisdomTwapAccum:  decayedScore * block.timestamp,
+            // Accumulate score-seconds from the deposit onward. Seeding this
+            // with `decayedScore * block.timestamp` measured from the UNIX
+            // epoch instead: _getWisdomTwap divides the accumulator by the time
+            // since deposit, so a fresh deposit yielded roughly
+            // score * (now / elapsed) — inflating the TWAP by four to five
+            // orders of magnitude and handing every non-zero score the top
+            // Steward tier instantly, which is exactly the flash-manipulation
+            // the TWAP exists to prevent.
+            wisdomTwapAccum:  0,
             twapLastUpdated:  block.timestamp,
             inRebalanceLock:  rebalanceLock,
             rebalanceLockEnds: lockEnds
@@ -334,6 +348,12 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         }
 
         uint256 finalAmount = net + wisdomBonus + titheBlessingBonus;
+
+        // Solvency: yield must be backed by tokens held over and above
+        // depositor principal. Without this the payouts below are drawn from
+        // other depositors' capital — the vault silently becomes unable to
+        // honour withdrawals rather than failing loudly here.
+        if (tithe + finalAmount > availableYieldBacking()) revert InsufficientYieldBacking();
 
         // Update state
         dep.lastClaimTime = block.timestamp;
@@ -453,6 +473,36 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             uint256 blessingBps = ((titheBlessingWad - 1e18) * BASIS_POINTS) / 1e18;
             effectiveApyBps += (netApyBps * blessingBps) / BASIS_POINTS;
         }
+    }
+
+    // ============================================================
+    // Yield Backing
+    // ============================================================
+
+    /**
+     * @notice Tokens held by the vault in excess of depositor principal and
+     *         Joseph's Reserve — i.e. the balance actually available to pay
+     *         yield and tithe.
+     * @dev    Derived from the live balance rather than tracked in its own
+     *         accumulator, so it cannot drift out of step with reality.
+     */
+    function availableYieldBacking() public view returns (uint256) {
+        uint256 balance = depositToken.balanceOf(address(this));
+        uint256 owed    = stats.totalDeposited + stats.totalReserve;
+        return balance > owed ? balance - owed : 0;
+    }
+
+    /**
+     * @notice Supply tokens to back yield payouts.
+     * @dev    Permissionless by design: the strategy operator, the DAO, or an
+     *         external yield source can all top the vault up. Deliberately does
+     *         not touch `stats`, so the transferred amount lands entirely in
+     *         `availableYieldBacking` rather than being mistaken for principal.
+     */
+    function fundYield(uint256 amount) external nonReentrant {
+        if (amount == 0) revert ZeroDeposit();
+        depositToken.safeTransferFrom(msg.sender, address(this), amount);
+        emit YieldFunded(msg.sender, amount, availableYieldBacking());
     }
 
     // ============================================================

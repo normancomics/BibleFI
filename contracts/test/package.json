@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "Isolated Solidity test harness for the BWSP/BWTYA contracts. Kept out of the root package.json so contract tooling never affects the frontend build.",
   "scripts": {
-    "test": "node run-tests.js"
+    "test": "node run-tests.js && node run-vault-tests.js"
   },
   "dependencies": {
     "@ethereumjs/util": "9.1.0",
