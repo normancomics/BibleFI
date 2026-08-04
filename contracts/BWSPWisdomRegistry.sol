@@ -413,6 +413,170 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
     }
 
     // ============================================================
+    // 5b. On-Chain BWTYA Scoring  (trust-minimised advisory path)
+    // ============================================================
+
+    /**
+     * @notice Raw, independently checkable inputs to the BWTYA algorithm.
+     * @dev    `recordAdvisory` above accepts finished scores and trusts the
+     *         oracle completely — nothing on-chain constrains what it writes.
+     *         These inputs are instead facts about a protocol that anyone can
+     *         verify against public data, and the score is derived from them
+     *         here, by BWTYAMath, under consensus.
+     *
+     *         The Fruit-bearing dimension is NOT supplied: it is computed from
+     *         `apyBps` by the sustainability curve, so an unsustainable APY
+     *         cannot be laundered into a high score by an oracle asserting one.
+     */
+    struct AdvisoryInputs {
+        uint256   apyBps;       // Protocol APY in basis points  → Fruit-bearing (0–30)
+        uint256   tvlUsd;       // Protocol TVL in whole USD     → TVL depth (0–15)
+        uint16    stewardship;  // Faithful Stewardship          (0–25)
+        uint16    alignment;    // Biblical Alignment            (0–25)
+        uint16    transparency; // Transparency                  (0–20)
+        uint256[] allocations;  // Allocation % per position (must sum to 100)
+        uint256[] riskScores;   // Risk score per position   (0–100 each)
+    }
+
+    /**
+     * @notice Full derived breakdown for one advisory, retained so the score
+     *         can be audited after the fact rather than taken on faith.
+     */
+    struct ComputedAdvisory {
+        uint16  bwtyaScore;       // 0–100, sum of the four dimensions
+        uint16  convictionScore;  // 0–100, 4th-root geometric mean
+        uint16  ecclesScore;      // 0–100, inverted Herfindahl index
+        uint16  fruitScore;       // 0–30, from the sustainability curve
+        uint16  tvlScore;         // 0–15, sqrt depth scaling
+        uint16  maxDrawdownPct;   // 0–45, allocation-weighted risk estimate
+        uint256 kellyFractionWad; // WAD, capped optimal allocation fraction
+        bool    exists;
+    }
+
+    /// @dev advisoryId → derived breakdown, for post-hoc verification.
+    mapping(bytes32 => ComputedAdvisory) public advisoryBreakdown;
+
+    error DimensionOutOfRange();
+    error AllocationLengthMismatch();
+    error AllocationsMustSumTo100();
+    error AdvisoryAlreadyRecorded();
+
+    event AdvisoryComputed(
+        address indexed user,
+        bytes32 indexed advisoryId,
+        uint16  bwtyaScore,
+        uint16  convictionScore,
+        uint16  ecclesScore,
+        uint16  maxDrawdownPct
+    );
+
+    /**
+     * @notice Derive the full BWTYA breakdown from raw inputs.
+     * @dev    `pure`, so a caller can compute the exact score this contract
+     *         will store before submitting, and any third party can recompute
+     *         and challenge a stored score. This is the verification surface
+     *         that the trusted-input `recordAdvisory` path lacks.
+     */
+    function previewAdvisory(AdvisoryInputs calldata inputs)
+        public
+        pure
+        returns (ComputedAdvisory memory out)
+    {
+        _validateInputs(inputs);
+
+        // Dimension 1 is derived, not asserted.
+        uint256 fruit = BWTYAMath.fruitSustainabilityCurve(inputs.apyBps);
+        uint256 tvl   = BWTYAMath.tvlDepthScore(inputs.tvlUsd);
+
+        // The four dimension maxima (30/25/25/20) sum to exactly 100, so the
+        // composite needs no further rescaling.
+        uint256 composite =
+            fruit + uint256(inputs.stewardship) + uint256(inputs.alignment) + uint256(inputs.transparency);
+        if (composite > 100) composite = 100;
+
+        out = ComputedAdvisory({
+            bwtyaScore:      uint16(composite),
+            convictionScore: uint16(BWTYAMath.convictionScore(
+                fruit, inputs.stewardship, inputs.alignment, inputs.transparency
+            )),
+            ecclesScore:     uint16(BWTYAMath.ecclesiastesDiversificationScore(inputs.allocations)),
+            fruitScore:      uint16(fruit),
+            tvlScore:        uint16(tvl),
+            maxDrawdownPct:  uint16(BWTYAMath.maxDrawdownEstimate(inputs.allocations, inputs.riskScores)),
+            kellyFractionWad: BWTYAMath.kellyFraction(composite, inputs.apyBps),
+            exists:          true
+        });
+    }
+
+    /**
+     * @notice Record an advisory whose scores are computed here from raw
+     *         inputs, rather than supplied pre-computed by the oracle.
+     * @dev    Writes the same AdvisoryRecord as `recordAdvisory` so existing
+     *         consumers and the composite power score keep working unchanged,
+     *         and additionally retains the derived breakdown.
+     */
+    function recordAdvisoryFromInputs(
+        address user,
+        bytes32 advisoryId,
+        AdvisoryInputs calldata inputs
+    ) external onlyOracle nonReentrant returns (ComputedAdvisory memory computed) {
+        if (advisoryBreakdown[advisoryId].exists) revert AdvisoryAlreadyRecorded();
+
+        computed = previewAdvisory(inputs);
+
+        WisdomProfile storage p = profiles[user];
+        p.totalAdvisoriesReceived++;
+        if (computed.bwtyaScore > p.topBwtyaScore) {
+            p.topBwtyaScore = computed.bwtyaScore;
+        }
+
+        advisoryHistory[user].push(AdvisoryRecord({
+            advisoryId:       advisoryId,
+            bwtyaScore:       computed.bwtyaScore,
+            convictionScore:  computed.convictionScore,
+            ecclesiasteScore: computed.ecclesScore,
+            timestamp:        block.timestamp
+        }));
+
+        advisoryBreakdown[advisoryId] = computed;
+
+        emit AdvisoryRecorded(user, advisoryId, computed.bwtyaScore, computed.convictionScore);
+        emit AdvisoryComputed(
+            user,
+            advisoryId,
+            computed.bwtyaScore,
+            computed.convictionScore,
+            computed.ecclesScore,
+            computed.maxDrawdownPct
+        );
+    }
+
+    /**
+     * @dev Bounds each asserted dimension to its BWTYAMath maximum and requires
+     *      allocations to sum to exactly 100. The diversification and drawdown
+     *      formulas both assume a normalised allocation vector; a short vector
+     *      would understate concentration and silently inflate the score.
+     */
+    function _validateInputs(AdvisoryInputs calldata inputs) private pure {
+        if (
+            inputs.stewardship  > BWTYAMath.DIM2_MAX ||
+            inputs.alignment    > BWTYAMath.DIM3_MAX ||
+            inputs.transparency > BWTYAMath.DIM4_MAX
+        ) revert DimensionOutOfRange();
+
+        if (inputs.allocations.length != inputs.riskScores.length) revert AllocationLengthMismatch();
+
+        if (inputs.allocations.length > 0) {
+            uint256 total;
+            for (uint256 i = 0; i < inputs.allocations.length; i++) {
+                if (inputs.riskScores[i] > 100) revert DimensionOutOfRange();
+                total += inputs.allocations[i];
+            }
+            if (total != 100) revert AllocationsMustSumTo100();
+        }
+    }
+
+    // ============================================================
     // 6. Composite Wisdom Power Score
     // ============================================================
 

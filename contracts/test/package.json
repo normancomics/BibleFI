@@ -1,0 +1,16 @@
+{
+  "name": "biblefi-contract-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Isolated Solidity test harness for the BWSP/BWTYA contracts. Kept out of the root package.json so contract tooling never affects the frontend build.",
+  "scripts": {
+    "test": "node run-tests.js"
+  },
+  "dependencies": {
+    "@ethereumjs/util": "9.1.0",
+    "@ethereumjs/vm": "8.1.1",
+    "@openzeppelin/contracts": "4.9.6",
+    "ethers": "6.17.0",
+    "solc": "0.8.24"
+  }
+}
