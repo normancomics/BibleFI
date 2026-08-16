@@ -102,6 +102,8 @@ export interface BWSPResponse {
   agentSteps: AgentStep[];
   processingTimeMs: number;
   timestamp: string;
+  /** Mandatory triple-check gate result (authenticity · context · no-cherry-picking) */
+  tripleCheck: import('./tripleCheck').TripleCheckResult;
   // Convenience accessors (duplicated from synthesis for easy UI access)
   wisdomGuidance: string;
   financialPrinciple: string;

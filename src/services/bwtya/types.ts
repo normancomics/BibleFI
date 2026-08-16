@@ -60,6 +60,16 @@ export interface BWTYAInput {
   riskTolerance?: 'conservative' | 'moderate' | 'aggressive';
   /** Current portfolio allocation percents (matches opportunities order). Supply to get rebalance signal. */
   currentAllocs?: number[];
+  /**
+   * BWSP triple-check gate. BWTYA may only recommend execution after BWSP approval.
+   * Omit to run in advisory-only mode (execution stays blocked).
+   */
+  bwspApproval?: {
+    verdict: 'approved' | 'flagged' | 'quarantined';
+    compositeScore: number;
+    verseHash: string;
+    checkedAt: string;
+  };
 }
 
 export interface BWTYAResult {
@@ -79,5 +89,13 @@ export interface BWTYAResult {
   probabilityOfLoss: number;
   // Rebalancing signal (only populated when currentAllocs supplied)
   rebalanceSignal: RebalanceSignal | null;
+  /** BWSP gate outcome for this run – execution is forbidden unless permitted */
+  executionGate: {
+    permitted: boolean;
+    reason: string;
+    verseHash: string | null;
+    /** Capital multiplier applied to allocations (1 = full, 0.5 = half on flagged, 0 = blocked) */
+    capitalScalar: number;
+  };
   timestamp: string;
 }

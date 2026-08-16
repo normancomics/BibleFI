@@ -5,6 +5,7 @@ import { fetchBaseDeFiTVL, getMarketSentiment } from '@/services/liveMarketDataS
 import { bwspContextAssembler } from './contextAssembler';
 import { bwspRetriever } from './retriever';
 import { bwspSynthesizer } from './synthesizer';
+import { runTripleCheck } from './tripleCheck';
 import {
   authorityWeightedResonance,
   compositeConfidence,
@@ -182,6 +183,25 @@ export class BWSPSovereignAgent {
     steps.push(step5);
 
     // -----------------------------------------------------------------------
+    // Step 6 – Triple-check gate (authenticity · context · no-cherry-picking)
+    // -----------------------------------------------------------------------
+    let step6 = startStep(6, 'BWSP Triple-Check Validation');
+    const tripleCheck = runTripleCheck(synthesis, query.intent ?? 'general_wisdom');
+    if (tripleCheck.verdict === 'quarantined') {
+      step6 = failStep(
+        step6,
+        `Quarantined (score ${tripleCheck.compositeScore.toFixed(2)}): ` +
+          tripleCheck.dimensions.filter((d) => !d.passed).map((d) => d.name).join(', '),
+      );
+    } else {
+      step6 = completeStep(
+        step6,
+        `${tripleCheck.verdict} · score ${tripleCheck.compositeScore.toFixed(2)} · verseHash ${tripleCheck.verseHash}`,
+      );
+    }
+    steps.push(step6);
+
+    // -----------------------------------------------------------------------
     // Build final response
     // -----------------------------------------------------------------------
     const processingTimeMs = Date.now() - startTime;
@@ -218,7 +238,11 @@ export class BWSPSovereignAgent {
     // Patch synthesis with advanced metrics (take the higher of edge-fn confidence or composite)
     const enrichedSynthesis: BWSPSynthesis = {
       ...synthesis,
-      confidenceScore: Math.max(synthesis.confidenceScore, compositeConf),
+      // A quarantined or flagged synthesis may never inflate its own confidence
+      confidenceScore:
+        tripleCheck.verdict === 'approved'
+          ? Math.max(synthesis.confidenceScore, compositeConf)
+          : Math.min(synthesis.confidenceScore, compositeConf) * tripleCheck.compositeScore,
       resonanceScore: resonance,
       authorityWeightedResonance: authResonance,
       wisdomDecayFactor: decayFactor,
@@ -235,6 +259,7 @@ export class BWSPSovereignAgent {
       agentSteps: steps,
       processingTimeMs,
       timestamp: new Date().toISOString(),
+      tripleCheck,
       // Convenience fields
       wisdomGuidance: enrichedSynthesis.guidance,
       financialPrinciple: enrichedSynthesis.principle,
