@@ -8,9 +8,51 @@ import { simulatePortfolio } from './simulator';
 import { bwtyaStrategyMapper } from './strategyMapper';
 import type { BWTYAInput, BWTYAResult } from './types';
 
+// ---------------------------------------------------------------------------
+// BWSP execution gate – BWTYA may only execute after BWSP approval
+// ---------------------------------------------------------------------------
+
+function evaluateGate(approval: BWTYAInput['bwspApproval']): BWTYAResult['executionGate'] {
+  if (!approval) {
+    return {
+      permitted: false,
+      reason:
+        'Advisory-only: no BWSP triple-check attached. "Prove all things; hold fast that which is good" (1 Thessalonians 5:21).',
+      verseHash: null,
+      capitalScalar: 0,
+    };
+  }
+  if (approval.verdict === 'quarantined') {
+    return {
+      permitted: false,
+      reason: `BWSP quarantined this wisdom (score ${approval.compositeScore.toFixed(2)}). Execution blocked.`,
+      verseHash: approval.verseHash,
+      capitalScalar: 0,
+    };
+  }
+  if (approval.verdict === 'flagged') {
+    return {
+      permitted: true,
+      reason: `BWSP flagged minor concerns (score ${approval.compositeScore.toFixed(2)}). Deploy at half conviction.`,
+      verseHash: approval.verseHash,
+      capitalScalar: 0.5,
+    };
+  }
+  return {
+    permitted: true,
+    reason: `BWSP approved (score ${approval.compositeScore.toFixed(2)}, verse ${approval.verseHash}).`,
+    verseHash: approval.verseHash,
+    capitalScalar: 1,
+  };
+}
+
 export class BWTYAAlgorithm {
   run(input: BWTYAInput): BWTYAResult {
-    const { opportunities, wisdomScore = 0, capitalUsd = 0, currentAllocs } = input;
+    const { opportunities, wisdomScore = 0, currentAllocs, bwspApproval } = input;
+
+    // 0. BWSP gate — scales deployable capital before any projection is made
+    const executionGate = evaluateGate(bwspApproval);
+    const capitalUsd = (input.capitalUsd ?? 0) * (executionGate.capitalScalar || 1);
 
     // 1. Score all opportunities
     const scored = bwtyaScorer.scoreAll(opportunities);
@@ -83,6 +125,7 @@ export class BWTYAAlgorithm {
       projectedApyP90,
       probabilityOfLoss,
       rebalanceSignal,
+      executionGate,
       timestamp: new Date().toISOString(),
     };
   }
