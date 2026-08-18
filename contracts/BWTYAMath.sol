@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 /**
  * @title BWTYAMath — Biblical-Wisdom-To-Yield-Algorithm Fixed-Point Math Library
@@ -206,6 +206,10 @@ library BWTYAMath {
         uint256 daysInactive
     ) internal pure returns (uint256 decayedScore) {
         if (daysInactive == 0) return currentScore;
+
+        // Beyond ~185 days the 40% floor dominates; cap at 365 to keep the two-term
+        // binomial approximation (1-λ)^n accurate (it diverges for very large n).
+        if (daysInactive > 365) daysInactive = 365;
 
         // Binomial two-term approximation: (1 - λ)^n ≈ 1 - nλ + n(n-1)/2 λ²
         // λ = 5/1000 = 0.005

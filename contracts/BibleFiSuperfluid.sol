@@ -34,10 +34,10 @@ import {
 import {
     CFAv1Library
 } from "@superfluid-finance/ethereum-contracts/contracts/apps/CFAv1Library.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { Ownable2Step } from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract BibleFiSuperfluid is Ownable, ReentrancyGuard {
+contract BibleFiSuperfluid is Ownable2Step, ReentrancyGuard {
     using CFAv1Library for CFAv1Library.InitData;
 
     // ─── Constants ────────────────────────────────────────────────────────────
@@ -84,6 +84,7 @@ contract BibleFiSuperfluid is Ownable, ReentrancyGuard {
     error ZeroChurch();
     error NoActiveStream();
     error SameChurch();
+    error NotCFAOperator();
 
     // ─── Constructor ──────────────────────────────────────────────────────────
 
@@ -135,6 +136,12 @@ contract BibleFiSuperfluid is Ownable, ReentrancyGuard {
     ) external nonReentrant {
         if (totalFlowRate <= 0) revert ZeroFlowRate();
         if (church == address(0)) revert ZeroChurch();
+
+        // Verify this contract is an authorised CFA operator for the caller.
+        // Users must call host.authorizeFlowOperatorWithFullControl() (or equivalent)
+        // before calling this function, otherwise stream operations will revert.
+        (,, uint8 permissions,) = cfa.getFlowOperatorData(superToken, msg.sender, address(this));
+        if (permissions == 0) revert NotCFAOperator();
 
         address oldChurch = userChurch[msg.sender][address(superToken)];
         if (oldChurch != address(0) && oldChurch != church) {

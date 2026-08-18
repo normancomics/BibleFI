@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 interface IMorphoVault {
     function deposit(uint256 assets, address receiver) external returns (uint256 shares);
     function convertToAssets(uint256 shares) external view returns (uint256 assets);
+    function redeem(uint256 shares, address receiver, address owner) external returns (uint256 assets);
 }
 
 /**
@@ -61,6 +62,7 @@ contract BibleFiUSD is ERC20, ERC4626, ReentrancyGuard, Ownable2Step {
     event Rebased(uint256 yield, uint256 tithe, string scripture);
     event CharityWalletUpdated(address indexed oldWallet, address indexed newWallet);
     event MorphoVaultUpdated(address indexed oldVault, address indexed newVault);
+    event Withdrawn(address indexed user, uint256 assets, uint256 shares);
 
     // ============ Constructor ============
 
@@ -113,8 +115,9 @@ contract BibleFiUSD is ERC20, ERC4626, ReentrancyGuard, Ownable2Step {
 
     /**
      * @notice Rebase yield from the Morpho vault and auto-tithe 10% to charityWallet.
-     * @dev    Callable once per day by any address. Mints yield tokens rather than transferring
-     *         underlying assets, keeping the vault accounting intact.
+     * @dev    Callable once per day by any address. Redeems the tithe portion from the
+     *         Morpho vault and mints BFiUSD backed by the withdrawn USDC to charityWallet.
+     *         The remaining 90% of yield stays in the vault, increasing share value.
      */
     function rebaseAndTithe() external nonReentrant {
         require(block.timestamp >= lastRebase + 1 days, "BibleFiUSD: daily only");
@@ -131,15 +134,70 @@ contract BibleFiUSD is ERC20, ERC4626, ReentrancyGuard, Ownable2Step {
             uint256 yield_ = totalAssets_ - supply;
             uint256 tithe = (yield_ * TITHE_BPS) / 10000;
 
-            if (tithe > 0) {
-                _mint(charityWallet, tithe);
+            if (tithe > 0 && vaultShares > 0) {
+                // Calculate the vault shares that correspond to the tithe USDC amount
+                uint256 titheSharesToRedeem = (vaultShares * tithe) / vaultAssets;
+                if (titheSharesToRedeem > vaultShares) titheSharesToRedeem = vaultShares;
+
+                // Withdraw tithe USDC from Morpho vault — backs the minted tokens
+                uint256 usdcWithdrawn = IMorphoVault(morphoVault).redeem(
+                    titheSharesToRedeem,
+                    address(this),
+                    address(this)
+                );
+
+                // Mint BFiUSD backed 1:1 by the withdrawn USDC
+                _mint(charityWallet, usdcWithdrawn);
             }
-            // Retained yield remains in vault assets, automatically increasing share value
 
             emit Rebased(yield_, tithe, SCRIPTURE);
         }
 
         lastRebase = block.timestamp;
+    }
+
+    // ============ External: Withdraw ============
+
+    /**
+     * @notice Burn BFiUSD shares and receive proportional USDC from the Morpho vault.
+     * @param shares  Amount of BFiUSD to burn
+     * @return assets Amount of USDC returned to the caller
+     */
+    function withdrawUSDC(uint256 shares)
+        external
+        nonReentrant
+        returns (uint256 assets)
+    {
+        require(shares > 0, "BibleFiUSD: zero shares");
+        require(balanceOf(msg.sender) >= shares, "BibleFiUSD: insufficient balance");
+
+        uint256 supply = totalSupply();
+        require(supply > 0, "BibleFiUSD: no supply");
+
+        // Proportional share of total vault assets
+        uint256 totalAssets_ = totalAssets();
+        assets = (shares * totalAssets_) / supply;
+        require(assets > 0, "BibleFiUSD: zero assets");
+
+        _burn(msg.sender, shares);
+
+        // Withdraw USDC from Morpho vault proportional to requested assets
+        uint256 vaultShares = IERC20(morphoVault).balanceOf(address(this));
+        if (vaultShares > 0 && assets > 0) {
+            uint256 vaultAssets_ = IMorphoVault(morphoVault).convertToAssets(vaultShares);
+            // Redeem only enough shares to cover the requested assets
+            uint256 sharesToRedeem = vaultAssets_ > 0
+                ? (vaultShares * assets) / vaultAssets_
+                : 0;
+            if (sharesToRedeem > vaultShares) sharesToRedeem = vaultShares;
+            if (sharesToRedeem > 0) {
+                IMorphoVault(morphoVault).redeem(sharesToRedeem, address(this), address(this));
+            }
+        }
+
+        IERC20(USDC).safeTransfer(msg.sender, assets);
+
+        emit Withdrawn(msg.sender, assets, shares);
     }
 
     // ============ Owner: Configuration ============
@@ -165,6 +223,20 @@ contract BibleFiUSD is ERC20, ERC4626, ReentrancyGuard, Ownable2Step {
     }
 
     // ============ ERC4626 Overrides ============
+
+    /**
+     * @dev Returns total USDC assets managed by this vault: direct balance + Morpho vault balance.
+     *      This override is critical: without it, ERC4626's default totalAssets() returns only
+     *      the contract's direct USDC balance (near-zero after deposits go to Morpho), causing
+     *      all share-price calculations to be catastrophically wrong.
+     */
+    function totalAssets() public view override(ERC4626) returns (uint256) {
+        uint256 vaultShares = IERC20(morphoVault).balanceOf(address(this));
+        uint256 vaultAssets = vaultShares > 0
+            ? IMorphoVault(morphoVault).convertToAssets(vaultShares)
+            : 0;
+        return IERC20(USDC).balanceOf(address(this)) + vaultAssets;
+    }
 
     /**
      * @dev Returns the underlying asset (USDC).

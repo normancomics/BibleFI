@@ -172,6 +172,7 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         uint256 reserveAmount
     );
 
+    event YieldReported(address indexed oracle, uint256 amount, uint256 timestamp);
     event JosephReserveActivated(bool active, uint256 timestamp);
     event BaseApyUpdated(uint256 oldBps, uint256 newBps);
     event TreasuryUpdated(address oldTreasury, address newTreasury);
@@ -223,31 +224,35 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
      *         MAX_SINGLE_POSITION (50 %) of their stated total portfolio value,
      *         a 7-day Ecclesiastes Rebalancing Lock is applied to the excess.
      *
-     * @param amount           Token amount to deposit
+     *         Additional deposits from existing users are permitted and merge
+     *         into the existing position (principal added, TWAP updated).
+     *
+     * @param amount            Token amount to deposit
      * @param portfolioTotalUsd User's self-reported total portfolio USD value
-     *                          (used for Ecc 11:2 concentration check; 0 = skip check)
+     *                          (used for Ecc 11:2 concentration check; 0 = skip check).
+     *                          WARNING: This value is unverified and user-supplied; the
+     *                          concentration check can be bypassed by passing 0 or a large
+     *                          value. Integrators should supply a price-oracle-backed total.
      */
     function deposit(
         uint256 amount,
         uint256 portfolioTotalUsd
     ) external nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroDeposit();
-        if (hasDeposit[msg.sender]) revert DepositAlreadyExists();
 
         depositToken.safeTransferFrom(msg.sender, address(this), amount);
 
         // Joseph's Reserve calculation
-        uint256 reserveAmount = josephReserveActive
+        uint256 reserveAmount  = josephReserveActive
             ? (amount * JOSEPH_RESERVE_RATE) / BASIS_POINTS
             : 0;
         uint256 deployedAmount = amount - reserveAmount;
 
-        // Ecclesiastes concentration check
+        // Ecclesiastes concentration check (advisory — portfolioTotalUsd is self-reported)
         bool rebalanceLock = false;
         uint256 lockEnds   = 0;
-        if (portfolioTotalUsd > 0 && amount > 0) {
-            // Approximate position weight: depositAmount / portfolioTotal (using token value proxy)
-            // We assume 1 token ≈ $1 for simplicity; integrators should scale amount by price oracle
+        if (portfolioTotalUsd > 0) {
+            // Approximate position weight; assumes 1 token ≈ $1; integrators should scale by oracle
             uint256 positionBps = (amount * BASIS_POINTS) / portfolioTotalUsd;
             if (positionBps > MAX_SINGLE_POSITION) {
                 rebalanceLock = true;
@@ -255,28 +260,45 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             }
         }
 
-        // Read initial wisdom score for TWAP
-        (uint256 decayedScore, ) = wisdomRegistry.getDecayedWisdomScore(msg.sender);
+        if (!hasDeposit[msg.sender]) {
+            // First deposit: create a fresh Deposit struct.
+            // TWAP accumulator starts at 0 (not score * block.timestamp) so that
+            // the TWAP is computed over elapsed time relative to depositTime, not the epoch.
+            (uint256 decayedScore, ) = wisdomRegistry.getDecayedWisdomScore(msg.sender);
 
-        deposits[msg.sender] = Deposit({
-            amount:           deployedAmount,
-            reserveAmount:    reserveAmount,
-            depositTime:      block.timestamp,
-            lastClaimTime:    block.timestamp,
-            accruedYield:     0,
-            wisdomTwapStart:  decayedScore,
-            wisdomTwapAccum:  decayedScore * block.timestamp,
-            twapLastUpdated:  block.timestamp,
-            inRebalanceLock:  rebalanceLock,
-            rebalanceLockEnds: lockEnds
-        });
+            deposits[msg.sender] = Deposit({
+                amount:            deployedAmount,
+                reserveAmount:     reserveAmount,
+                depositTime:       block.timestamp,
+                lastClaimTime:     block.timestamp,
+                accruedYield:      0,
+                wisdomTwapStart:   decayedScore,
+                wisdomTwapAccum:   0,           // accumulation starts from deposit time, not epoch
+                twapLastUpdated:   block.timestamp,
+                inRebalanceLock:   rebalanceLock,
+                rebalanceLockEnds: lockEnds
+            });
 
-        // Update global stats — increment depositorCount before setting hasDeposit
+            stats.depositorCount++;
+            hasDeposit[msg.sender] = true;
+        } else {
+            // Additional deposit: merge into existing position.
+            // Update TWAP accumulator before changing the principal.
+            Deposit storage dep = deposits[msg.sender];
+            _updateWisdomTwap(dep);
+
+            dep.amount        += deployedAmount;
+            dep.reserveAmount += reserveAmount;
+
+            // Propagate rebalance lock if new deposit triggers it
+            if (rebalanceLock && !dep.inRebalanceLock) {
+                dep.inRebalanceLock   = true;
+                dep.rebalanceLockEnds = lockEnds;
+            }
+        }
+
         stats.totalDeposited += deployedAmount;
         stats.totalReserve   += reserveAmount;
-        stats.depositorCount++;        // only reached when hasDeposit was false (guarded above)
-
-        hasDeposit[msg.sender] = true;
 
         emit Deposited(msg.sender, amount, reserveAmount, deployedAmount);
     }
@@ -369,6 +391,9 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
      * @notice Withdraw principal and Joseph's Reserve.
      * @dev    No withdrawal fee — biblical principle of fair dealing.
      *         Any unclaimed yield is forfeited (must claimYield first).
+     *
+     *         Intentionally NOT guarded by whenNotPaused: users must always be
+     *         able to exit the vault, even during an emergency pause.
      */
     function withdraw() external nonReentrant {
         if (!hasDeposit[msg.sender]) revert NoDepositFound();
@@ -478,6 +503,22 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
 
     function setYieldOracle(address oracle) external onlyOwner {
         yieldOracle = oracle;
+    }
+
+    /**
+     * @notice Report externally generated yield into the vault so depositors can claim it.
+     * @dev    The vault computes yield time-proportionally from baseApyBps, but the actual
+     *         yield tokens must be present in the vault's balance for transfers to succeed.
+     *         This function transfers `amount` tokens from the oracle into the vault.
+     *         Without external yield funding the vault will run insolvent on claimYield calls.
+     * @param amount Amount of depositToken to transfer into the vault as yield
+     */
+    function reportYield(uint256 amount) external {
+        if (msg.sender != yieldOracle) revert NotYieldOracle();
+        require(amount > 0, "BWTYAYieldVault: zero yield");
+        depositToken.safeTransferFrom(msg.sender, address(this), amount);
+        stats.totalYieldGenerated += amount;
+        emit YieldReported(msg.sender, amount, block.timestamp);
     }
 
     function pause() external onlyOwner { _pause(); }
