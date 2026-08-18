@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -44,6 +44,9 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
         uint256 topBwtyaScore;          // Highest BWTYA advisory score received
         Trajectory trajectory;          // Wisdom score direction
         uint256 milestoneCount;         // Number of achieved milestones
+        // Running totals for O(1) resonance average (avoids unbounded loop)
+        uint256 sumResonance;           // Sum of all resonance scores (in bps)
+        uint256 resonanceLogCount;      // Number of resonance log entries
     }
 
     enum Trajectory { RISING, STABLE, FALLING }
@@ -85,6 +88,9 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
 
     /// @dev Content-hash → list of users who resonated with that scripture
     mapping(bytes32 => address[])                         public scriptureResonators;
+
+    /// @dev Prevents duplicate entries in scriptureResonators per user per scripture
+    mapping(bytes32 => mapping(address => bool))          public scriptureResonated;
 
     /// @dev Global leaderboard: sorted by topBwtyaScore (maintained externally via events)
     uint256 public totalUsersTracked;
@@ -352,23 +358,29 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
             timestamp:      block.timestamp
         }));
 
-        scriptureResonators[scriptureHash].push(user);
+        // Update running totals for O(1) average calculation
+        WisdomProfile storage p = profiles[user];
+        p.sumResonance      += resonanceBps;
+        p.resonanceLogCount += 1;
+
+        // Only add user to resonators list once per scripture to prevent duplicates
+        if (!scriptureResonated[scriptureHash][user]) {
+            scriptureResonated[scriptureHash][user] = true;
+            scriptureResonators[scriptureHash].push(user);
+        }
 
         emit ScriptureResonanceLogged(user, scriptureHash, resonanceBps);
     }
 
     /**
      * @notice Get a user's average scripture resonance score across all logs.
+     * @dev    O(1): uses the running sum/count stored in WisdomProfile.
      * @return avgResonanceBps  Average resonance in basis points (0–10000)
      */
     function getAverageResonance(address user) external view returns (uint256 avgResonanceBps) {
-        ScriptureResonanceLog[] storage logs = resonanceLogs[user];
-        if (logs.length == 0) return 0;
-        uint256 sum = 0;
-        for (uint256 i = 0; i < logs.length; i++) {
-            sum += logs[i].resonanceScore;
-        }
-        return sum / logs.length;
+        WisdomProfile storage p = profiles[user];
+        if (p.resonanceLogCount == 0) return 0;
+        return p.sumResonance / p.resonanceLogCount;
     }
 
     // ============================================================
@@ -444,14 +456,10 @@ contract BWSPWisdomRegistry is Ownable2Step, ReentrancyGuard {
         // 3. Top BWTYA score (already 0–100)
         uint256 topBwtya = p.topBwtyaScore;
 
-        // 4. Average resonance (convert bps → 0–100)
-        ScriptureResonanceLog[] storage logs = resonanceLogs[user];
-        uint256 avgRes = 0;
-        if (logs.length > 0) {
-            uint256 sum = 0;
-            for (uint256 i = 0; i < logs.length; i++) { sum += logs[i].resonanceScore; }
-            avgRes = (sum / logs.length) / 100; // bps → 0–100
-        }
+        // 4. Average resonance (convert bps → 0–100), O(1) via running sum
+        uint256 avgRes = p.resonanceLogCount > 0
+            ? (p.sumResonance / p.resonanceLogCount) / 100 // bps → 0–100
+            : 0;
 
         // Weighted composite: 40/30/20/10
         powerScore = (decayed * 40 + blessingNorm * 30 + topBwtya * 20 + avgRes * 10) / 100;
