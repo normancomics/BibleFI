@@ -1,6 +1,8 @@
 // BWTYA – Algorithm
 // Full pipeline: score → rank → Pareto filter → map strategies → Monte Carlo simulate → rebalance signal
 
+import { wisdomAuditTrail } from '../audit/wisdomAuditTrail';
+
 import { bwtyaRanker } from './ranker';
 import { bwtyaRebalancer } from './rebalancer';
 import { bwtyaScorer } from './scorer';
@@ -53,6 +55,20 @@ export class BWTYAAlgorithm {
     // 0. BWSP gate — scales deployable capital before any projection is made
     const executionGate = evaluateGate(bwspApproval);
     const capitalUsd = (input.capitalUsd ?? 0) * (executionGate.capitalScalar || 1);
+
+    // Auditability mandate: every gate decision emits verse hash + timestamp
+    wisdomAuditTrail.emit({
+      event: executionGate.permitted ? 'BWTYA_ExecutionGateEvaluated' : 'BWTYA_ExecutionBlocked',
+      verseHash: executionGate.verseHash,
+      summary: executionGate.reason,
+      data: {
+        verdict: bwspApproval?.verdict ?? 'none',
+        compositeScore: bwspApproval?.compositeScore ?? 0,
+        capitalScalar: executionGate.capitalScalar,
+        capitalUsd,
+        wisdomScore,
+      },
+    });
 
     // 1. Score all opportunities
     const scored = bwtyaScorer.scoreAll(opportunities);

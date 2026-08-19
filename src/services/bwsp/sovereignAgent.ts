@@ -2,6 +2,7 @@
 // Orchestrates the 5-step MCP-style agent loop, each step logged as an AgentStep
 
 import { fetchBaseDeFiTVL, getMarketSentiment } from '@/services/liveMarketDataService';
+import { wisdomAuditTrail } from '@/services/audit/wisdomAuditTrail';
 import { bwspContextAssembler } from './contextAssembler';
 import { bwspRetriever } from './retriever';
 import { bwspSynthesizer } from './synthesizer';
@@ -200,6 +201,26 @@ export class BWSPSovereignAgent {
       );
     }
     steps.push(step6);
+
+    // Auditability mandate: mirror the gate verdict with verse hash + timestamp
+    wisdomAuditTrail.emit({
+      event:
+        tripleCheck.verdict === 'quarantined'
+          ? 'BWSP_SynthesisQuarantined'
+          : 'BWSP_SynthesisChecked',
+      verseHash: tripleCheck.verseHash,
+      summary: `Triple-check ${tripleCheck.verdict} (score ${tripleCheck.compositeScore.toFixed(2)})`,
+      data: {
+        verdict: tripleCheck.verdict,
+        compositeScore: tripleCheck.compositeScore,
+        executionPermitted: tripleCheck.executionPermitted,
+        failedDimensions: tripleCheck.dimensions
+          .filter((d) => !d.passed)
+          .map((d) => d.name)
+          .join(',') || 'none',
+        intent: query.intent ?? 'general_wisdom',
+      },
+    });
 
     // -----------------------------------------------------------------------
     // Build final response
