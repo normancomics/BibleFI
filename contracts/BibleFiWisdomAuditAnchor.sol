@@ -98,8 +98,11 @@ contract BibleFiWisdomAuditAnchor is Ownable2Step, ReentrancyGuard {
         _;
     }
 
-    constructor(address initialOwner) Ownable(initialOwner) {
-        if (initialOwner == address(0)) revert ZeroAddress();
+    constructor(address initialAnchor) {
+        if (initialAnchor != address(0)) {
+            authorisedAnchors[initialAnchor] = true;
+            emit AnchorAuthorised(initialAnchor, true);
+        }
     }
 
     // ============================================================
