@@ -8,3 +8,4 @@ export * from './synthesizer';
 export * from './sovereignAgent';
 export * from './tripleCheck';
 export * from './wisdomMath';
+export * from '../audit/wisdomAuditTrail';
