@@ -34,44 +34,16 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user (admin function)
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Authentication required' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // SECURITY: allow rotating cron secret (scheduled agent runs) or an admin JWT
+    const auth = await requireAgentAuth(req);
+    if (!auth.authorized) {
+      return unauthorizedResponse(auth.error ?? 'Unauthorized', corsHeaders);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user }, error: authError } = await authClient.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Verify admin role
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-    const { data: roleData } = await adminClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
-
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: 'Admin access required' }), {
-        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey, { db: { schema: 'api' } });
+
 
     let body: Record<string, unknown> = {};
     try {
