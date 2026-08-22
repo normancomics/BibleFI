@@ -30,15 +30,34 @@ export async function requireAgentAuth(req: Request): Promise<AgentAuthResult> {
   // Method 1: Cron secret
   const cronSecret = req.headers.get('x-cron-secret');
   if (cronSecret) {
-    if (!CRON_SECRET) {
-      console.warn('[agent-auth] CRON_SECRET not configured in environment');
-      return { authorized: false, method: null, error: 'Cron secret not configured' };
-    }
-    if (cronSecret === CRON_SECRET) {
+    // 1a. Static env secret (legacy / manual triggers)
+    if (CRON_SECRET && cronSecret === CRON_SECRET) {
       return { authorized: true, method: 'cron' };
     }
+
+    // 1b. Vault-managed rotating secret (pg_cron passes the vault value).
+    // Validated by hash comparison inside public.validate_agent_cron_secret,
+    // so the schedule and the agents can never silently drift apart again.
+    try {
+      const serviceClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      const { data: valid, error } = await serviceClient.rpc('validate_agent_cron_secret', {
+        p_secret: cronSecret,
+      });
+      if (error) {
+        console.error('[agent-auth] validate_agent_cron_secret failed:', error.message);
+      } else if (valid === true) {
+        return { authorized: true, method: 'cron' };
+      }
+    } catch (e) {
+      console.error('[agent-auth] cron secret validation error:', e);
+    }
+
     return { authorized: false, method: null, error: 'Invalid cron secret' };
   }
+
 
   // Method 2: Service Role Key (for internal/tooling calls)
   const authHeader = req.headers.get('Authorization');

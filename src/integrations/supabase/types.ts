@@ -1915,6 +1915,10 @@ export type Database = {
         Args: { p_agent_name: string; p_metadata?: Json; p_run_mode?: string }
         Returns: string
       }
+      validate_agent_cron_secret: {
+        Args: { p_secret: string }
+        Returns: boolean
+      }
       validate_cron_job_secret: {
         Args: { p_job_name: string; p_secret: string }
         Returns: boolean
