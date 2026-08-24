@@ -39,9 +39,12 @@ export async function requireAgentAuth(req: Request): Promise<AgentAuthResult> {
     // Validated by hash comparison inside public.validate_agent_cron_secret,
     // so the schedule and the agents can never silently drift apart again.
     try {
+      // PostgREST only exposes the `api` schema on this project, so the RPC
+      // must be called through the api-schema wrapper.
       const serviceClient = createClient(
         Deno.env.get('SUPABASE_URL')!,
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        { db: { schema: 'api' } },
       );
       const { data: valid, error } = await serviceClient.rpc('validate_agent_cron_secret', {
         p_secret: cronSecret,

@@ -384,3 +384,5 @@ async function checkWebsite(url: string | null): Promise<boolean> {
     return false;
   }
 }
+
+// redeploy: agent-auth api-schema RPC fix 2026-08-24

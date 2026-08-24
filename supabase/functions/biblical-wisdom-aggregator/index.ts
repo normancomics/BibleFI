@@ -266,3 +266,5 @@ async function createFinancialCrossReferences(
     }
   }
 }
+
+// redeploy: agent-auth api-schema RPC fix 2026-08-24

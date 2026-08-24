@@ -229,3 +229,5 @@ Deno.serve(async (req) => {
     },
   );
 });
+
+// redeploy: agent-auth api-schema RPC fix 2026-08-24
