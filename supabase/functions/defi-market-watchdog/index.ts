@@ -219,3 +219,5 @@ Deno.serve(async (req) => {
 });
 
 // redeploy: agent-auth api-schema RPC fix 2026-08-24
+
+// redeploy: rest-based cron secret validation 2026-08-24b
