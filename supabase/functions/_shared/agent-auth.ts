@@ -39,21 +39,31 @@ export async function requireAgentAuth(req: Request): Promise<AgentAuthResult> {
     // Validated by hash comparison inside public.validate_agent_cron_secret,
     // so the schedule and the agents can never silently drift apart again.
     try {
-      const serviceClient = createClient(
-        Deno.env.get('SUPABASE_URL')!,
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-      );
-      const { data: valid, error } = await serviceClient.rpc('validate_agent_cron_secret', {
-        p_secret: cronSecret,
+      // PostgREST only exposes the `api` schema on this project, so call the
+      // api-schema wrapper directly over REST with Content-Profile: api.
+      const url = Deno.env.get('SUPABASE_URL')!;
+      const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const resp = await fetch(`${url}/rest/v1/rpc/validate_agent_cron_secret`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Profile': 'api',
+          'Accept-Profile': 'api',
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+        },
+        body: JSON.stringify({ p_secret: cronSecret }),
       });
-      if (error) {
-        console.error('[agent-auth] validate_agent_cron_secret failed:', error.message);
-      } else if (valid === true) {
+      const text = await resp.text();
+      if (!resp.ok) {
+        console.error('[agent-auth] validate_agent_cron_secret failed:', resp.status, text);
+      } else if (text.trim() === 'true') {
         return { authorized: true, method: 'cron' };
       }
     } catch (e) {
       console.error('[agent-auth] cron secret validation error:', e);
     }
+
 
     return { authorized: false, method: null, error: 'Invalid cron secret' };
   }

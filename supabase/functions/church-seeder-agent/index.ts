@@ -239,3 +239,7 @@ Deno.serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
+
+
+
+// deploy marker: rest-based cron secret validation 2026-08-24
