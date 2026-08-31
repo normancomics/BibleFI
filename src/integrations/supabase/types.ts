@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -399,6 +399,125 @@ export type Database = {
           },
         ]
       }
+      church_nfc_cards: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          design_notes: string | null
+          id: string
+          logo_url: string | null
+          onboarding_id: string
+          quantity: number
+          shipping_address: string | null
+          status: string
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          design_notes?: string | null
+          id?: string
+          logo_url?: string | null
+          onboarding_id: string
+          quantity?: number
+          shipping_address?: string | null
+          status?: string
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          design_notes?: string | null
+          id?: string
+          logo_url?: string | null
+          onboarding_id?: string
+          quantity?: number
+          shipping_address?: string | null
+          status?: string
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "church_nfc_cards_onboarding_id_fkey"
+            columns: ["onboarding_id"]
+            isOneToOne: false
+            referencedRelation: "church_onboarding"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      church_onboarding: {
+        Row: {
+          address: string | null
+          church_name: string
+          city: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          country: string
+          created_at: string
+          denomination: string | null
+          id: string
+          pastor_name: string | null
+          postal_code: string | null
+          preferred_currencies: string[]
+          review_notes: string | null
+          state_province: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          wallet_address: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          church_name: string
+          city: string
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          country: string
+          created_at?: string
+          denomination?: string | null
+          id?: string
+          pastor_name?: string | null
+          postal_code?: string | null
+          preferred_currencies?: string[]
+          review_notes?: string | null
+          state_province?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          wallet_address?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          church_name?: string
+          city?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          denomination?: string | null
+          id?: string
+          pastor_name?: string | null
+          postal_code?: string | null
+          preferred_currencies?: string[]
+          review_notes?: string | null
+          state_province?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       church_payment_processors: {
         Row: {
           auto_convert: boolean | null
@@ -542,6 +661,59 @@ export type Database = {
             columns: ["church_id"]
             isOneToOne: false
             referencedRelation: "public_church_directory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      church_tithe_payments: {
+        Row: {
+          amount: number
+          anonymous: boolean
+          created_at: string
+          currency: string
+          donor_display_name: string | null
+          id: string
+          onboarding_id: string
+          paid_at: string
+          payment_method: string
+          status: string
+          tx_hash: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          anonymous?: boolean
+          created_at?: string
+          currency?: string
+          donor_display_name?: string | null
+          id?: string
+          onboarding_id: string
+          paid_at?: string
+          payment_method?: string
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          anonymous?: boolean
+          created_at?: string
+          currency?: string
+          donor_display_name?: string | null
+          id?: string
+          onboarding_id?: string
+          paid_at?: string
+          payment_method?: string
+          status?: string
+          tx_hash?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "church_tithe_payments_onboarding_id_fkey"
+            columns: ["onboarding_id"]
+            isOneToOne: false
+            referencedRelation: "church_onboarding"
             referencedColumns: ["id"]
           },
         ]
