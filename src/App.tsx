@@ -57,6 +57,7 @@ const SuperVaultPage = lazy(() => import("./pages/SuperVaultPage"));
 const SuperBoringPage = lazy(() => import("./pages/SuperBoringPage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
+const ChurchOnboardingPage = lazy(() => import("./pages/ChurchOnboardingPage"));
 
 /** Shown while a lazily-loaded route chunk is being fetched. */
 const PageLoader = () => (
