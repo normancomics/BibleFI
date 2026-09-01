@@ -103,6 +103,7 @@ const App = () => (
             <Route path="/quantum-security" element={<QuantumSecurityPage />} />
             <Route path="/system-check" element={<SystemCheckPage />} />
             <Route path="/churches" element={<ChurchesPage />} />
+            <Route path="/church-onboarding" element={<ChurchOnboardingPage />} />
             <Route path="/live-data" element={<LiveDataPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/data-crawler" element={<DataCrawlerPage />} />
