@@ -302,7 +302,7 @@ const ChurchTreasuryDashboard: React.FC = () => {
           </div>
           <div>
             <p className="text-muted-foreground text-xs">Accrued (unswept)</p>
-            <p className="font-semibold text-grace-green">{formatMoney(yields.accrued, totals.currency)}</p>
+            <p className="font-semibold text-ancient-gold">{formatMoney(yields.accrued, totals.currency)}</p>
           </div>
           <div>
             <p className="text-muted-foreground text-xs">Next 30 days</p>
