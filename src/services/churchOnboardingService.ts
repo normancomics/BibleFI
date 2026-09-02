@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { supabaseApi } from "@/integrations/supabase/apiClient";
 
 export interface ChurchOnboardingRecord {
@@ -127,4 +128,31 @@ export async function fetchTithePayments(onboardingId: string): Promise<TithePay
 
   if (error) throw new Error(error.message);
   return (data ?? []) as TithePayment[];
+}
+
+/** Email a tithe receipt via the send-tithe-receipt edge function. */
+export async function sendTitheReceipt(
+  paymentId: string,
+  toEmail: string,
+): Promise<{ sent: boolean; message?: string }> {
+  const { data, error } = await supabase.functions.invoke("send-tithe-receipt", {
+    body: { payment_id: paymentId, to_email: toEmail },
+  });
+
+  if (error) {
+    // A 503 carries { error: "email_not_configured", message } in the body.
+    const ctx = (error as { context?: Response }).context;
+    if (ctx) {
+      const body = await ctx.json().catch(() => null);
+      if (body?.error === "email_not_configured") {
+        return { sent: false, message: body.message as string };
+      }
+      if (body?.message || body?.error) {
+        throw new Error(String(body.message ?? body.error));
+      }
+    }
+    throw new Error(error.message);
+  }
+
+  return { sent: Boolean((data as { sent?: boolean } | null)?.sent) };
 }
