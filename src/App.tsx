@@ -58,6 +58,7 @@ const SuperBoringPage = lazy(() => import("./pages/SuperBoringPage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
 const ChurchOnboardingPage = lazy(() => import("./pages/ChurchOnboardingPage"));
+const ChurchDashboardPage = lazy(() => import("./pages/ChurchDashboardPage"));
 
 /** Shown while a lazily-loaded route chunk is being fetched. */
 const PageLoader = () => (
@@ -104,6 +105,7 @@ const App = () => (
             <Route path="/system-check" element={<SystemCheckPage />} />
             <Route path="/churches" element={<ChurchesPage />} />
             <Route path="/church-onboarding" element={<ChurchOnboardingPage />} />
+            <Route path="/church-dashboard" element={<ChurchDashboardPage />} />
             <Route path="/live-data" element={<LiveDataPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/data-crawler" element={<DataCrawlerPage />} />
