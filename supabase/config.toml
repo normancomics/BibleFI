@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.scripture-version-seeder]
 verify_jwt = false
+
+[functions.original-language-seeder]
+verify_jwt = false
