@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
-import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
+import { withAgentSandbox, sandboxedInsert, sandboxedRead, checkPermission, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 import { requireAgentAuth, unauthorizedResponse } from '../_shared/agent-auth.ts';
 import { overpassQuery } from '../_shared/overpass.ts';
 
@@ -181,12 +181,12 @@ Deno.serve(async (req) => {
         const regionsToSeed = body.regions || [];
         let targetRegions = regionsToSeed.length > 0
           ? SEED_REGIONS.filter(r => regionsToSeed.includes(r.name))
-          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 6);
+          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 4);
 
         let totalSeeded = 0, totalSkipped = 0;
         const seededRegions: string[] = [];
         const startedAt = Date.now();
-        const TIME_BUDGET_MS = 40_000; // finish well inside the edge-function limit
+        const TIME_BUDGET_MS = 25_000; // finish well inside the edge-function limit
 
         for (const region of targetRegions) {
           if (Date.now() - startedAt > TIME_BUDGET_MS) {
@@ -232,15 +232,25 @@ Deno.serve(async (req) => {
               });
             }
 
-            // Bulk insert in chunks — far faster than row-by-row.
-            for (let i = 0; i < rows.length; i += 100) {
-              const chunk = rows.slice(i, i + 100);
-              const { error } = await sandboxedInsert(ctx, 'global_churches_agent', chunk);
-              if (error) {
-                console.error(`Insert error for ${region.name}:`, error.message);
-              } else {
-                totalSeeded += chunk.length;
+            // Bulk insert in small chunks, permission-checked once per region.
+            if (rows.length > 0 && await checkPermission(ctx, 'INSERT', 'global_churches_agent')) {
+              for (let i = 0; i < rows.length; i += 25) {
+                if (Date.now() - startedAt > 48_000) break;
+                const chunk = rows.slice(i, i + 25);
+                const { error } = await ctx.supabasePublic
+                  .from('global_churches_agent')
+                  .insert(chunk); // no .select() — returning rows through the view is slow
+                if (error) {
+                  console.error(`Insert error for ${region.name}:`, error.message);
+                } else {
+                  totalSeeded += chunk.length;
+                  ctx.stats.created += chunk.length;
+                }
               }
+              await logOperation(ctx, 'INSERT', 'global_churches_agent', {
+                recordsAffected: totalSeeded,
+                outputSummary: { region: region.name, created: totalSeeded },
+              });
             }
 
             seededRegions.push(`${region.name} (${churches.length} found, ${rows.length} new)`);
