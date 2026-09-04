@@ -128,6 +128,7 @@ const App = () => (
             <Route path="/vault" element={<SuperVaultPage />} />
             <Route path="/dca" element={<SuperBoringPage />} />
             <Route path="/tech-graphs" element={<TechGraphsPage />} />
+            <Route path="/scriptures" element={<ScripturesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
