@@ -126,22 +126,39 @@ async function fetchKjv(ref: Ref): Promise<string | null> {
 
 /** Hebrew / Aramaic from Sefaria. */
 async function fetchSefaria(ref: Ref): Promise<string | null> {
-  const title = SEFARIA_TITLES[ref.book] ?? ref.book;
-  const url = `https://www.sefaria.org/api/texts/${encodeURIComponent(
-    title.replace(/ /g, '_'),
-  )}.${ref.chapter}.${ref.verse}?context=0`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const he = Array.isArray(data?.he) ? data.he.join(' ') : data?.he;
-    const text = stripTags(String(he ?? ''));
-    return text.length > 0 ? text : null;
-  } catch (err) {
-    console.error('[original-language-seeder] sefaria failed', url, err);
-    return null;
+  const title = (SEFARIA_TITLES[ref.book] ?? ref.book).replace(/ /g, '_');
+  // Sefaria rejects requests without a User-Agent from datacenter IPs, so send one.
+  const headers = {
+    'User-Agent': 'BibleFi-OriginalLanguageSeeder/1.0 (+https://biblefi.org)',
+    Accept: 'application/json',
+  };
+  const candidates = [
+    `https://www.sefaria.org/api/texts/${encodeURIComponent(title)}.${ref.chapter}.${ref.verse}?context=0`,
+    `https://www.sefaria.org/api/v3/texts/${encodeURIComponent(`${title} ${ref.chapter}:${ref.verse}`)}`,
+  ];
+
+  for (const url of candidates) {
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) {
+        console.error('[original-language-seeder] sefaria status', res.status, url);
+        continue;
+      }
+      const data = await res.json();
+      // v1 shape: { he: string | string[] }; v3 shape: { versions: [{ text }] }
+      const raw = data?.he ??
+        data?.versions?.find((v: { text?: unknown }) => v?.text)?.text ??
+        null;
+      const joined = Array.isArray(raw) ? raw.flat(3).join(' ') : raw;
+      const text = stripTags(String(joined ?? ''));
+      if (text.length > 0) return text;
+    } catch (err) {
+      console.error('[original-language-seeder] sefaria failed', url, err);
+    }
   }
+  return null;
 }
+
 
 interface GreekVerse {
   text: string;
