@@ -185,20 +185,36 @@ Deno.serve(async (req) => {
 
         let totalSeeded = 0, totalSkipped = 0;
         const seededRegions: string[] = [];
+        const startedAt = Date.now();
+        const TIME_BUDGET_MS = 40_000; // finish well inside the edge-function limit
 
         for (const region of targetRegions) {
+          if (Date.now() - startedAt > TIME_BUDGET_MS) {
+            seededRegions.push(`${region.name} (deferred to next run)`);
+            continue;
+          }
           try {
             const churches = await fetchChurchesFromOSM(region.lat, region.lon, region.radius);
+
+            // One dedupe read per region instead of one per church.
+            const { data: known } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
+              from.select('name, city').eq('country', region.country).limit(5000)
+            );
+            const seen = new Set(
+              (known || []).map((r: { name: string; city: string }) =>
+                `${(r.name || '').toLowerCase()}|${(r.city || '').toLowerCase()}`,
+              ),
+            );
+
+            const rows: Record<string, unknown>[] = [];
             for (const church of churches) {
               const cleanName = sanitizeInput(church.name);
               if (!cleanName || !isValidChurchName(cleanName)) { totalSkipped++; continue; }
               const city = sanitizeInput(church.city) || region.name;
               const country = sanitizeInput(church.country) || region.country;
-
-              const { data: existing } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
-                from.select('id').eq('name', cleanName).eq('city', city).eq('country', country).limit(1)
-              );
-              if (existing && existing.length > 0) { totalSkipped++; continue; }
+              const key = `${cleanName.toLowerCase()}|${city.toLowerCase()}`;
+              if (seen.has(key)) { totalSkipped++; continue; }
+              seen.add(key);
 
               const denom = sanitizeInput(church.denomination);
               // Keep every Christian denomination OSM reports, title-cased.
@@ -207,22 +223,33 @@ Deno.serve(async (req) => {
                 : 'Christian';
               void CHRISTIAN_DENOMINATIONS;
 
-              await sandboxedInsert(ctx, 'global_churches_agent', {
+              rows.push({
                 name: cleanName, denomination: normalizedDenom, address: sanitizeInput(church.address),
                 city, state_province: sanitizeInput(church.state_province), country,
                 website: sanitizeInput(church.website), phone: sanitizeInput(church.phone),
                 coordinates: church.lat && church.lon ? `(${church.lon},${church.lat})` : null,
                 verified: false, accepts_fiat: true,
               });
-              totalSeeded++;
             }
-            seededRegions.push(`${region.name} (${churches.length} found)`);
-            await new Promise(r => setTimeout(r, 2000));
+
+            // Bulk insert in chunks — far faster than row-by-row.
+            for (let i = 0; i < rows.length; i += 100) {
+              const chunk = rows.slice(i, i + 100);
+              const { error } = await sandboxedInsert(ctx, 'global_churches_agent', chunk);
+              if (error) {
+                console.error(`Insert error for ${region.name}:`, error.message);
+              } else {
+                totalSeeded += chunk.length;
+              }
+            }
+
+            seededRegions.push(`${region.name} (${churches.length} found, ${rows.length} new)`);
           } catch (err) {
             console.error(`Error seeding ${region.name}:`, err);
             seededRegions.push(`${region.name} (error)`);
           }
         }
+
 
         return { mode: 'seed', churches_seeded: totalSeeded, churches_skipped: totalSkipped, regions_processed: seededRegions };
       }
