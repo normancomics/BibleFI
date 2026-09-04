@@ -1,6 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
-import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
+import { withAgentSandbox, sandboxedInsert, sandboxedRead, checkPermission, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 import { requireAgentAuth, unauthorizedResponse } from '../_shared/agent-auth.ts';
+import { overpassQuery } from '../_shared/overpass.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -85,38 +87,31 @@ async function fetchChurchesFromOSM(
       node["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${lat},${lon});
       way["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${lat},${lon});
     );
-    out body 50;
+    out center 200;
   `;
 
-  try {
-    const resp = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: `data=${encodeURIComponent(query)}`,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-
-    if (!resp.ok) return [];
-    const data = await resp.json();
-
-    return (data.elements || [])
-      .filter((el: any) => el.tags?.name)
-      .map((el: any) => ({
-        name: el.tags.name,
-        denomination: el.tags.denomination || el.tags.religion || 'christian',
-        address: [el.tags['addr:housenumber'], el.tags['addr:street']].filter(Boolean).join(' ') || null,
-        city: el.tags['addr:city'] || '',
-        state_province: el.tags['addr:state'] || el.tags['addr:province'] || null,
-        country: el.tags['addr:country'] || '',
-        lat: el.lat || el.center?.lat || 0,
-        lon: el.lon || el.center?.lon || 0,
-        website: el.tags.website || el.tags['contact:website'] || null,
-        phone: el.tags.phone || el.tags['contact:phone'] || null,
-      }));
-  } catch (err) {
-    console.error('OSM fetch error:', err);
+  const { elements, error } = await overpassQuery(query, 25000);
+  if (error) {
+    console.error('OSM fetch error:', error);
     return [];
   }
+
+  return (elements as any[])
+    .filter((el: any) => el.tags?.name)
+    .map((el: any) => ({
+      name: el.tags.name,
+      denomination: el.tags.denomination || el.tags.religion || 'christian',
+      address: [el.tags['addr:housenumber'], el.tags['addr:street']].filter(Boolean).join(' ') || null,
+      city: el.tags['addr:city'] || '',
+      state_province: el.tags['addr:state'] || el.tags['addr:province'] || null,
+      country: el.tags['addr:country'] || '',
+      lat: el.lat || el.center?.lat || 0,
+      lon: el.lon || el.center?.lon || 0,
+      website: el.tags.website || el.tags['contact:website'] || null,
+      phone: el.tags.phone || el.tags['contact:phone'] || null,
+    }));
 }
+
 
 function sanitizeInput(input: string | null): string | null {
   if (!input) return null;
@@ -186,45 +181,85 @@ Deno.serve(async (req) => {
         const regionsToSeed = body.regions || [];
         let targetRegions = regionsToSeed.length > 0
           ? SEED_REGIONS.filter(r => regionsToSeed.includes(r.name))
-          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 3);
+          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 4);
 
         let totalSeeded = 0, totalSkipped = 0;
         const seededRegions: string[] = [];
+        const startedAt = Date.now();
+        const TIME_BUDGET_MS = 25_000; // finish well inside the edge-function limit
 
         for (const region of targetRegions) {
+          if (Date.now() - startedAt > TIME_BUDGET_MS) {
+            seededRegions.push(`${region.name} (deferred to next run)`);
+            continue;
+          }
           try {
             const churches = await fetchChurchesFromOSM(region.lat, region.lon, region.radius);
+
+            // One dedupe read per region instead of one per church.
+            const { data: known } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
+              from.select('name, city').eq('country', region.country).limit(5000)
+            );
+            const seen = new Set(
+              (known || []).map((r: { name: string; city: string }) =>
+                `${(r.name || '').toLowerCase()}|${(r.city || '').toLowerCase()}`,
+              ),
+            );
+
+            const rows: Record<string, unknown>[] = [];
             for (const church of churches) {
               const cleanName = sanitizeInput(church.name);
               if (!cleanName || !isValidChurchName(cleanName)) { totalSkipped++; continue; }
               const city = sanitizeInput(church.city) || region.name;
               const country = sanitizeInput(church.country) || region.country;
-
-              const { data: existing } = await sandboxedRead(ctx, 'global_churches_agent', (from) =>
-                from.select('id').eq('name', cleanName).eq('city', city).eq('country', country).limit(1)
-              );
-              if (existing && existing.length > 0) { totalSkipped++; continue; }
+              const key = `${cleanName.toLowerCase()}|${city.toLowerCase()}`;
+              if (seen.has(key)) { totalSkipped++; continue; }
+              seen.add(key);
 
               const denom = sanitizeInput(church.denomination);
-              const normalizedDenom = denom && CHRISTIAN_DENOMINATIONS.includes(denom.toLowerCase())
-                ? denom.charAt(0).toUpperCase() + denom.slice(1) : denom || 'Christian';
+              // Keep every Christian denomination OSM reports, title-cased.
+              const normalizedDenom = denom
+                ? denom.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                : 'Christian';
+              void CHRISTIAN_DENOMINATIONS;
 
-              await sandboxedInsert(ctx, 'global_churches_agent', {
+              rows.push({
                 name: cleanName, denomination: normalizedDenom, address: sanitizeInput(church.address),
                 city, state_province: sanitizeInput(church.state_province), country,
                 website: sanitizeInput(church.website), phone: sanitizeInput(church.phone),
                 coordinates: church.lat && church.lon ? `(${church.lon},${church.lat})` : null,
                 verified: false, accepts_fiat: true,
               });
-              totalSeeded++;
             }
-            seededRegions.push(`${region.name} (${churches.length} found)`);
-            await new Promise(r => setTimeout(r, 2000));
+
+            // Bulk insert in small chunks, permission-checked once per region.
+            if (rows.length > 0 && await checkPermission(ctx, 'INSERT', 'global_churches_agent')) {
+              for (let i = 0; i < rows.length; i += 25) {
+                if (Date.now() - startedAt > 48_000) break;
+                const chunk = rows.slice(i, i + 25);
+                const { error } = await ctx.supabasePublic
+                  .from('global_churches_agent')
+                  .insert(chunk); // no .select() — returning rows through the view is slow
+                if (error) {
+                  console.error(`Insert error for ${region.name}:`, error.message);
+                } else {
+                  totalSeeded += chunk.length;
+                  ctx.stats.created += chunk.length;
+                }
+              }
+              await logOperation(ctx, 'INSERT', 'global_churches_agent', {
+                recordsAffected: totalSeeded,
+                outputSummary: { region: region.name, created: totalSeeded },
+              });
+            }
+
+            seededRegions.push(`${region.name} (${churches.length} found, ${rows.length} new)`);
           } catch (err) {
             console.error(`Error seeding ${region.name}:`, err);
             seededRegions.push(`${region.name} (error)`);
           }
         }
+
 
         return { mode: 'seed', churches_seeded: totalSeeded, churches_skipped: totalSkipped, regions_processed: seededRegions };
       }
@@ -242,4 +277,4 @@ Deno.serve(async (req) => {
 
 
 
-// deploy marker: rest-based cron secret validation 2026-08-24
+// deploy marker: overpass user-agent + mirrors 2026-09-04
