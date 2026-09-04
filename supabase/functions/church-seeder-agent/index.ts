@@ -1,6 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 import { withAgentSandbox, sandboxedInsert, sandboxedRead, logOperation, type AgentContext } from '../_shared/agent-sandbox.ts';
 import { requireAgentAuth, unauthorizedResponse } from '../_shared/agent-auth.ts';
+import { overpassQuery } from '../_shared/overpass.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
