@@ -239,9 +239,12 @@ Deno.serve(async (req) => {
     });
   }
 
+  // PostgREST only exposes the `api` schema on this project, so write through
+  // the api.biblical_original_texts view rather than the public table directly.
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    { db: { schema: 'api' } },
   );
 
   const body = await req.json().catch(() => ({}));
