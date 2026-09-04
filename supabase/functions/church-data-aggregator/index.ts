@@ -197,23 +197,18 @@ async function discoverNewChurches(
           continue;
         }
 
-        // Query Overpass for churches in a 15km radius
-        const overpassQuery = `[out:json][timeout:15];(node["amenity"="place_of_worship"]["religion"="christian"](around:15000,${coords.lat},${coords.lon});way["amenity"="place_of_worship"]["religion"="christian"](around:15000,${coords.lat},${coords.lon}););out center 30;`;
+        // Query Overpass for churches in a 15km radius (mirrors + identified UA)
+        const overpassQL = `[out:json][timeout:15];(node["amenity"="place_of_worship"]["religion"="christian"](around:15000,${coords.lat},${coords.lon});way["amenity"="place_of_worship"]["religion"="christian"](around:15000,${coords.lat},${coords.lon}););out center 120;`;
 
-        const response = await fetchWithTimeout(OVERPASS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `data=${encodeURIComponent(overpassQuery)}`,
-        }, 20000);
+        const { elements, error: overpassError } = await overpassQuery(overpassQL, 20000);
 
-        if (!response.ok) {
-          result.errors.push(`Overpass failed for ${cityInfo.city}: ${response.status}`);
+        if (overpassError) {
+          result.errors.push(`Overpass failed for ${cityInfo.city}: ${overpassError}`);
           continue;
         }
 
-        const osmData = await response.json();
-        const elements = osmData.elements || [];
         console.log(`📍 Found ${elements.length} churches in ${cityInfo.city}`);
+
 
         for (const el of elements) {
           if (!el.tags?.name) continue;
