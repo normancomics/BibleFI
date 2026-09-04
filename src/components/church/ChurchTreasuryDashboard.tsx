@@ -35,6 +35,7 @@ import {
   summariseTithes,
   type ParablePool,
 } from "@/services/church/titheYieldEstimator";
+import { useBWTYAVault } from "@/hooks/useBWTYAVault";
 
 const StatCard: React.FC<{
   label: string;
@@ -114,6 +115,8 @@ const ChurchTreasuryDashboard: React.FC = () => {
   const totals = useMemo(() => summariseTithes(payments), [payments]);
   const cardUsage = useMemo(() => summariseCardUsage(cards, payments), [cards, payments]);
   const yields = useMemo(() => estimatePendingYields(payments, pool), [payments, pool]);
+  const vaultYield = useBWTYAVault(church?.wallet_address ?? null);
+
 
   const handleSendReceipt = async (paymentId: string) => {
     if (!receiptEmail.trim()) {
