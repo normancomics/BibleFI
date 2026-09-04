@@ -95,3 +95,6 @@ verify_jwt = false
 
 [functions.biblefi-terminal]
 verify_jwt = false
+
+[functions.scripture-version-seeder]
+verify_jwt = false
