@@ -223,12 +223,25 @@ const ChurchTreasuryDashboard: React.FC = () => {
           icon={<CreditCard className="w-5 h-5" />}
         />
         <StatCard
-          label="Pending BWTYA yield"
-          value={formatMoney(yields.accrued, totals.currency)}
-          hint={`${pool.name} · ${(pool.apy * 100).toFixed(1)}% APY`}
+          label={vaultYield.onChain ? "BWTYA yield (on-chain)" : "Pending BWTYA yield"}
+          value={formatMoney(vaultYield.onChain?.netYield ?? yields.accrued, totals.currency)}
+          hint={
+            vaultYield.onChain
+              ? `Settles on ${vaultYield.chainLabel} · tithe ${formatMoney(vaultYield.onChain.titheAmount, totals.currency)}`
+              : `Estimate only · ${pool.name} · ${(pool.apy * 100).toFixed(1)}% APY`
+          }
           icon={<Sprout className="w-5 h-5" />}
         />
       </div>
+
+      {!vaultYield.deployed && (
+        <Card className="p-4 text-sm text-muted-foreground border-dashed">
+          Yield figures above are projections. Real settlement begins once the BWTYA vault is
+          deployed on {vaultYield.chainLabel} and its address is registered — then the mandatory 10%
+          tithe-on-yield is split on-chain to your treasury.
+        </Card>
+      )}
+
 
       {/* Card usage */}
       <Card className="p-5 space-y-4">
