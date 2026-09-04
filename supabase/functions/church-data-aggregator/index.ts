@@ -186,7 +186,7 @@ async function discoverNewChurches(
     if (!cities || cities.length === 0) continue;
 
     // Process max 2 cities per region per run to stay within time limits
-    const citiesToProcess = cities.slice(0, 2);
+    const citiesToProcess = cities.slice(0, 4);
 
     for (const cityInfo of citiesToProcess) {
       try {

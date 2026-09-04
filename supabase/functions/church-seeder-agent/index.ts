@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
         const regionsToSeed = body.regions || [];
         let targetRegions = regionsToSeed.length > 0
           ? SEED_REGIONS.filter(r => regionsToSeed.includes(r.name))
-          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 3);
+          : [...SEED_REGIONS].sort(() => Math.random() - 0.5).slice(0, 6);
 
         let totalSeeded = 0, totalSkipped = 0;
         const seededRegions: string[] = [];
@@ -201,8 +201,11 @@ Deno.serve(async (req) => {
               if (existing && existing.length > 0) { totalSkipped++; continue; }
 
               const denom = sanitizeInput(church.denomination);
-              const normalizedDenom = denom && CHRISTIAN_DENOMINATIONS.includes(denom.toLowerCase())
-                ? denom.charAt(0).toUpperCase() + denom.slice(1) : denom || 'Christian';
+              // Keep every Christian denomination OSM reports, title-cased.
+              const normalizedDenom = denom
+                ? denom.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+                : 'Christian';
+              void CHRISTIAN_DENOMINATIONS;
 
               await sandboxedInsert(ctx, 'global_churches_agent', {
                 name: cleanName, denomination: normalizedDenom, address: sanitizeInput(church.address),
@@ -237,4 +240,4 @@ Deno.serve(async (req) => {
 
 
 
-// deploy marker: rest-based cron secret validation 2026-08-24
+// deploy marker: overpass user-agent + mirrors 2026-09-04
