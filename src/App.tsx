@@ -57,6 +57,7 @@ const SuperVaultPage = lazy(() => import("./pages/SuperVaultPage"));
 const SuperBoringPage = lazy(() => import("./pages/SuperBoringPage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
+const ScripturesPage = lazy(() => import("./pages/ScripturesPage"));
 const ChurchOnboardingPage = lazy(() => import("./pages/ChurchOnboardingPage"));
 const ChurchDashboardPage = lazy(() => import("./pages/ChurchDashboardPage"));
 
