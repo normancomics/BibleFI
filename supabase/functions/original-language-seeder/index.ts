@@ -109,20 +109,43 @@ function stripTags(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
-async function fetchKjv(ref: Ref): Promise<string | null> {
-  const url = `https://bible-api.com/${encodeURIComponent(
-    `${ref.book} ${ref.chapter}:${ref.verse}`,
-  )}?translation=kjv`;
+/**
+ * KJV anchor text. Pulled per-book from a public-domain KJV JSON corpus and
+ * cached, so we never hit bible-api.com's per-request rate limit mid-run.
+ */
+const kjvBookCache = new Map<string, Map<string, string>>();
+
+async function loadKjvBook(book: string): Promise<Map<string, string> | null> {
+  if (kjvBookCache.has(book)) return kjvBookCache.get(book)!;
+  const slug = book.replace(/ /g, '');
+  const url = `https://raw.githubusercontent.com/aruljohn/Bible-kjv/master/${slug}.json`;
   try {
     const res = await fetch(url);
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error('[original-language-seeder] kjv status', res.status, url);
+      return null;
+    }
     const data = await res.json();
-    const text = (data?.text ?? '').replace(/\s+/g, ' ').trim();
-    return text.length > 0 ? text : null;
-  } catch {
+    const map = new Map<string, string>();
+    for (const ch of data?.chapters ?? []) {
+      for (const v of ch?.verses ?? []) {
+        map.set(`${parseInt(ch.chapter, 10)}:${parseInt(v.verse, 10)}`, String(v.text ?? '').trim());
+      }
+    }
+    kjvBookCache.set(book, map);
+    return map;
+  } catch (err) {
+    console.error('[original-language-seeder] kjv failed', url, err);
     return null;
   }
 }
+
+async function fetchKjv(ref: Ref): Promise<string | null> {
+  const map = await loadKjvBook(ref.book);
+  const text = map?.get(`${ref.chapter}:${ref.verse}`);
+  return text && text.length > 0 ? text : null;
+}
+
 
 /** Hebrew / Aramaic from Sefaria. */
 async function fetchSefaria(ref: Ref): Promise<string | null> {
