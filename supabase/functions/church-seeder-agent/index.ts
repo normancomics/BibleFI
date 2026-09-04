@@ -85,38 +85,31 @@ async function fetchChurchesFromOSM(
       node["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${lat},${lon});
       way["amenity"="place_of_worship"]["religion"="christian"](around:${radius},${lat},${lon});
     );
-    out body 50;
+    out center 200;
   `;
 
-  try {
-    const resp = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: `data=${encodeURIComponent(query)}`,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
-
-    if (!resp.ok) return [];
-    const data = await resp.json();
-
-    return (data.elements || [])
-      .filter((el: any) => el.tags?.name)
-      .map((el: any) => ({
-        name: el.tags.name,
-        denomination: el.tags.denomination || el.tags.religion || 'christian',
-        address: [el.tags['addr:housenumber'], el.tags['addr:street']].filter(Boolean).join(' ') || null,
-        city: el.tags['addr:city'] || '',
-        state_province: el.tags['addr:state'] || el.tags['addr:province'] || null,
-        country: el.tags['addr:country'] || '',
-        lat: el.lat || el.center?.lat || 0,
-        lon: el.lon || el.center?.lon || 0,
-        website: el.tags.website || el.tags['contact:website'] || null,
-        phone: el.tags.phone || el.tags['contact:phone'] || null,
-      }));
-  } catch (err) {
-    console.error('OSM fetch error:', err);
+  const { elements, error } = await overpassQuery(query, 25000);
+  if (error) {
+    console.error('OSM fetch error:', error);
     return [];
   }
+
+  return (elements as any[])
+    .filter((el: any) => el.tags?.name)
+    .map((el: any) => ({
+      name: el.tags.name,
+      denomination: el.tags.denomination || el.tags.religion || 'christian',
+      address: [el.tags['addr:housenumber'], el.tags['addr:street']].filter(Boolean).join(' ') || null,
+      city: el.tags['addr:city'] || '',
+      state_province: el.tags['addr:state'] || el.tags['addr:province'] || null,
+      country: el.tags['addr:country'] || '',
+      lat: el.lat || el.center?.lat || 0,
+      lon: el.lon || el.center?.lon || 0,
+      website: el.tags.website || el.tags['contact:website'] || null,
+      phone: el.tags.phone || el.tags['contact:phone'] || null,
+    }));
 }
+
 
 function sanitizeInput(input: string | null): string | null {
   if (!input) return null;
