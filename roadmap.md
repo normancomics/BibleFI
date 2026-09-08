@@ -5,5 +5,5 @@
 - [x] Rewrite public integration paragraph with current/upcoming DeFi protocols
 
 ## Open
-- [ ] Add API.Bible Pro key support for licensed NIV/ESV alternatives
+- [ ] Add API.Bible Pro key support for licensed NIV alternatives
 - [ ] Continue BWSP/BWTYA enhancements
