@@ -23,4 +23,5 @@
 
 ## Wording note
 
-Burner.Pro cards are **NFC-chip Tap-To-Pay Visa-Cards** — hardware wallets with a Visa payment interface, church-branded, standalone or with the BurnerPro app. They are **not** "cold-storage Visa cards"; that phrasing has been retired across BibleFi.
+Burner.Pro cards are **NFC-chip Tap-To-Pay Visa-Cards** — hardware wallets with a Visa payment interface, church-branded, standalone or with the BurnerPro app. They are **not** Visa debit cards, and the outdated "cold storage wallet card" description has been retired across BibleFi.
+
