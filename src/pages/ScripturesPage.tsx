@@ -125,10 +125,11 @@ const ScripturesPage: React.FC = () => {
             <Info className="w-4 h-4" />
             <AlertTitle>{missingLicensed.join(' & ')} not available from free sources</AlertTitle>
             <AlertDescription>
-              NIV and ESV are copyrighted; BibleGateway has no public API and bible-api.com serves
-              only freely redistributable texts. Add an <code>ESV_API_KEY</code> (Crossway) or
-              <code> API_BIBLE_KEY</code> (api.bible, NIV licence required) and the seeder will
-              include them automatically. Public-domain translations below are complete and legal to
+              NIV is copyrighted; BibleGateway has no public API and bible-api.com serves only
+              freely redistributable texts. Crossway's ESV API does not permit commercial use, so it
+              has been removed from BibleFi. Licensed NIV requires a direct Biblica/API.Bible Pro
+              licence (<code>API_BIBLE_KEY</code>) and the seeder will include it automatically once
+              that key is configured. Public-domain translations below are complete and legal to
               redistribute.
             </AlertDescription>
           </Alert>
