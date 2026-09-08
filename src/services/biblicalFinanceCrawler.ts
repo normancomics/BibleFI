@@ -148,7 +148,7 @@ export class BiblicalFinanceCrawlerService {
             chapter: verse.chapter,
             verse: verse.verse,
             text: verse.text,
-            version: verse.version || 'ESV',
+            version: verse.version || 'KJV',
             testament: verse.testament,
             financial_relevance: relevanceScore,
             wisdom_category: categories,

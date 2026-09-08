@@ -15,7 +15,7 @@ export interface VersionedVerse {
 export const PUBLIC_DOMAIN_VERSIONS = ['KJV', 'WEB', 'ASV', 'BBE', 'YLT', 'DARBY'] as const;
 
 /** Versions that require a paid/licensed API key and cannot be seeded freely. */
-export const LICENSED_VERSIONS = ['NIV', 'ESV'] as const;
+export const LICENSED_VERSIONS = ['NIV'] as const;
 
 export async function fetchAvailableVersions(): Promise<string[]> {
   const { data, error } = await supabaseApi

@@ -4,12 +4,13 @@
  * Seeds public.bible_verses with multiple Bible translations for the
  * financial/stewardship verse set that powers BWSP.
  *
- * IMPORTANT (licensing): NIV and ESV are copyrighted and are NOT available from
- * free, unauthenticated sources such as bible-api.com or BibleGateway (which has
- * no public API). This seeder therefore ingests only freely redistributable
- * translations. Licensed NIV/ESV text requires api.bible (API_BIBLE_KEY) or the
- * Crossway ESV API (ESV_API_KEY); when those secrets exist the corresponding
- * versions are fetched too, otherwise they are skipped and reported as such.
+ * IMPORTANT (licensing): NIV is copyrighted and is NOT available from free,
+ * unauthenticated sources such as bible-api.com or BibleGateway (which has no
+ * public API). Crossway's ESV API does NOT permit commercial use, so it has been
+ * removed from BibleFi. This seeder therefore ingests only freely redistributable
+ * translations. Licensed NIV text requires a direct Biblica/API.Bible Pro
+ * licence (API_BIBLE_KEY); when that secret exists the version is fetched too,
+ * otherwise it is skipped and reported as such.
  *
  * "Bring ye all the tithes into the storehouse" — Malachi 3:10 (KJV)
  */
@@ -86,21 +87,6 @@ async function fetchVerse(
   }
 }
 
-/** Crossway ESV API — only used when ESV_API_KEY is configured (licensed). */
-async function fetchEsv(ref: { book: string; chapter: number; verse: number }, key: string) {
-  const url =
-    `https://api.esv.org/v3/passage/text/?q=${encodeURIComponent(`${ref.book} ${ref.chapter}:${ref.verse}`)}` +
-    `&include-headings=false&include-footnotes=false&include-verse-numbers=false&include-passage-references=false`;
-  try {
-    const res = await fetch(url, { headers: { Authorization: `Token ${key}` } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = (data?.passages?.[0] ?? '').replace(/\s+/g, ' ').trim();
-    return text.length > 0 ? text : null;
-  } catch {
-    return null;
-  }
-}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -118,10 +104,9 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const esvKey = Deno.env.get('ESV_API_KEY');
+  const apiBibleKey = Deno.env.get('API_BIBLE_KEY');
   const skipped: string[] = [];
-  if (!esvKey) skipped.push('ESV (needs ESV_API_KEY — copyrighted)');
-  skipped.push('NIV (no free source; needs licensed api.bible access)');
+  skipped.push('NIV (no free source; needs licensed API.Bible / Biblica access)');
 
   const rows: Record<string, unknown>[] = [];
   const failures: string[] = [];
@@ -146,21 +131,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (esvKey) {
-      const text = await fetchEsv(ref, esvKey);
-      if (text) {
-        rows.push({
-          book_name: ref.book,
-          chapter: ref.chapter,
-          verse: ref.verse,
-          text,
-          version: 'ESV',
-          testament: ref.testament,
-          financial_relevance: ref.relevance,
-          wisdom_category: ref.categories,
-          defi_keywords: DEFI_KEYWORDS,
-        });
-      }
+    // TODO: API.Bible Pro licensed NIV seeder — only when API_BIBLE_KEY is
+    // configured and the deployment has a valid commercial licence from Biblica.
+    if (apiBibleKey) {
+      skipped.push('NIV (API_BIBLE_KEY present but commercial licence must be verified separately)');
     }
   }
 
@@ -181,7 +155,7 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       success: true,
-      versions_seeded: Object.keys(FREE_VERSIONS).concat(esvKey ? ['ESV'] : []),
+      versions_seeded: Object.keys(FREE_VERSIONS),
       references: REFERENCES.length,
       rows_upserted: upserted,
       skipped_versions: skipped,
