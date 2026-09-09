@@ -29,6 +29,8 @@ const GlobalChurchDatabase: React.FC = () => {
   const [filteredChurches, setFilteredChurches] = useState<GlobalChurchData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GlobalChurchData[] | null>(null);
+  const [searching, setSearching] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [cryptoFilter, setCryptoFilter] = useState<string>('');
   const [crawlProgress, setCrawlProgress] = useState(0);
@@ -135,16 +137,9 @@ const GlobalChurchDatabase: React.FC = () => {
   };
 
   const filterChurches = () => {
-    let filtered = churches;
+    // When searching, use the ranked directory-wide results (best match first).
+    let filtered = searchQuery.trim() ? (searchResults ?? []) : churches;
 
-    if (searchQuery) {
-      filtered = filtered.filter(church =>
-        church.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.denomination?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
 
     if (selectedCountry) {
       filtered = filtered.filter(church => church.country === selectedCountry);
