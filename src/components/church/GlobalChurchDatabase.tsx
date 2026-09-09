@@ -29,6 +29,8 @@ const GlobalChurchDatabase: React.FC = () => {
   const [filteredChurches, setFilteredChurches] = useState<GlobalChurchData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GlobalChurchData[] | null>(null);
+  const [searching, setSearching] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [cryptoFilter, setCryptoFilter] = useState<string>('');
   const [crawlProgress, setCrawlProgress] = useState(0);
@@ -45,9 +47,26 @@ const GlobalChurchDatabase: React.FC = () => {
     loadChurches();
   }, []);
 
+  // Server-side, relevance-ranked search across the entire directory
+  useEffect(() => {
+    const term = searchQuery.trim();
+    if (!term) {
+      setSearchResults(null);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const handle = setTimeout(async () => {
+      const results = await GlobalChurchCrawlerService.searchChurchesRanked(term, 100);
+      setSearchResults(results);
+      setSearching(false);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
+
   useEffect(() => {
     filterChurches();
-  }, [churches, searchQuery, selectedCountry, cryptoFilter]);
+  }, [churches, searchResults, searchQuery, selectedCountry, cryptoFilter]);
 
   const loadChurches = async () => {
     try {
@@ -118,16 +137,9 @@ const GlobalChurchDatabase: React.FC = () => {
   };
 
   const filterChurches = () => {
-    let filtered = churches;
+    // When searching, use the ranked directory-wide results (best match first).
+    let filtered = searchQuery.trim() ? (searchResults ?? []) : churches;
 
-    if (searchQuery) {
-      filtered = filtered.filter(church =>
-        church.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        church.denomination?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
 
     if (selectedCountry) {
       filtered = filtered.filter(church => church.country === selectedCountry);
@@ -301,7 +313,14 @@ const GlobalChurchDatabase: React.FC = () => {
 
           {/* Church List */}
           <div className="grid gap-4">
-            {filteredChurches.length === 0 ? (
+            {searching ? (
+              <Card className="bg-royal-purple/30 border-ancient-gold/30">
+                <CardContent className="p-8 text-center">
+                  <RefreshCw className="w-8 h-8 animate-spin text-ancient-gold mx-auto mb-3" />
+                  <p className="text-white/80">Searching the global church database...</p>
+                </CardContent>
+              </Card>
+            ) : filteredChurches.length === 0 ? (
               <Card className="bg-royal-purple/30 border-ancient-gold/30">
                 <CardContent className="p-8 text-center">
                   <Church className="w-16 h-16 text-ancient-gold/50 mx-auto mb-4" />
