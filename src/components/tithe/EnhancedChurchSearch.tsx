@@ -333,12 +333,12 @@ const EnhancedChurchSearch: React.FC<EnhancedChurchSearchProps> = ({
             
             <div className="space-y-2">
               <label className="text-sm text-white/70">Filter</label>
-              <Select value={cryptoFilter} onValueChange={setCryptoFilter}>
+              <Select value={cryptoFilter || "__all"} onValueChange={(v) => setCryptoFilter(v === "__all" ? "" : v)}>
                 <SelectTrigger className="bg-black/30 border-scripture/30">
                   <SelectValue placeholder="All Churches" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Churches</SelectItem>
+                  <SelectItem value="__all">All Churches</SelectItem>
                   <SelectItem value="crypto">Accepts Crypto</SelectItem>
                   <SelectItem value="verified">Verified Only</SelectItem>
                 </SelectContent>

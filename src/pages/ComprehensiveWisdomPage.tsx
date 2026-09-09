@@ -107,47 +107,47 @@ const ComprehensiveWisdomPage: React.FC = () => {
             
             {/* Filters */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              <Select value={filters.category || ""} onValueChange={(value) => setFilters(prev => ({ ...prev, category: (value || undefined) as CompleteBiblicalExample["category"] }))}>
+              <Select value={filters.category || "__all"} onValueChange={(value) => setFilters(prev => ({ ...prev, category: (value === "__all" ? undefined : value) as CompleteBiblicalExample["category"] }))}>
                 <SelectTrigger className="bg-white/10 border-ancient-gold/30">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="__all">All Categories</SelectItem>
                   {availableFilters.categories.map(category => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               
-              <Select value={filters.book || ""} onValueChange={(value) => setFilters(prev => ({ ...prev, book: value || undefined }))}>
+              <Select value={filters.book || "__all"} onValueChange={(value) => setFilters(prev => ({ ...prev, book: value === "__all" ? undefined : value }))}>
                 <SelectTrigger className="bg-white/10 border-ancient-gold/30">
                   <SelectValue placeholder="Book" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Books</SelectItem>
+                  <SelectItem value="__all">All Books</SelectItem>
                   {availableFilters.books.map(book => (
                     <SelectItem key={book} value={book}>{book}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               
-              <Select value={filters.testament || ""} onValueChange={(value) => setFilters(prev => ({ ...prev, testament: value as "Old" | "New" || undefined }))}>
+              <Select value={filters.testament || "__all"} onValueChange={(value) => setFilters(prev => ({ ...prev, testament: value === "__all" ? undefined : (value as "Old" | "New") }))}>
                 <SelectTrigger className="bg-white/10 border-ancient-gold/30">
                   <SelectValue placeholder="Testament" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Both</SelectItem>
+                  <SelectItem value="__all">Both</SelectItem>
                   <SelectItem value="Old">Old Testament</SelectItem>
                   <SelectItem value="New">New Testament</SelectItem>
                 </SelectContent>
               </Select>
               
-              <Select value={filters.riskLevel || ""} onValueChange={(value) => setFilters(prev => ({ ...prev, riskLevel: value as "low" | "medium" | "high" || undefined }))}>
+              <Select value={filters.riskLevel || "__all"} onValueChange={(value) => setFilters(prev => ({ ...prev, riskLevel: value === "__all" ? undefined : (value as "low" | "medium" | "high") }))}>
                 <SelectTrigger className="bg-white/10 border-ancient-gold/30">
                   <SelectValue placeholder="Risk Level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Risks</SelectItem>
+                  <SelectItem value="__all">All Risks</SelectItem>
                   <SelectItem value="low">Low Risk</SelectItem>
                   <SelectItem value="medium">Medium Risk</SelectItem>
                   <SelectItem value="high">High Risk</SelectItem>
