@@ -324,6 +324,58 @@ export class GlobalChurchCrawlerService {
     }
   }
 
+  /**
+   * Relevance-ranked search across the whole directory (not just crypto churches).
+   * Exact name matches first, then name prefix, then name contains, then city/denomination.
+   */
+  static async searchChurchesRanked(rawQuery: string, limit = 100): Promise<GlobalChurchData[]> {
+    const term = rawQuery.trim().replace(/[%,()]/g, ' ').trim();
+    if (!term) return [];
+
+    try {
+      const { data, error } = await supabaseApi
+        .from('public_church_directory')
+        .select('*')
+        .or(
+          `name.ilike.%${term}%,city.ilike.%${term}%,state_province.ilike.%${term}%,country.ilike.%${term}%,denomination.ilike.%${term}%`
+        )
+        .limit(500);
+
+      if (error) throw error;
+
+      const lower = term.toLowerCase();
+      const score = (c: any) => {
+        const name = (c.name || '').toLowerCase();
+        if (name === lower) return 0;
+        if (name.startsWith(lower)) return 1;
+        if (name.includes(lower)) return 2;
+        if ((c.city || '').toLowerCase() === lower) return 3;
+        if ((c.city || '').toLowerCase().includes(lower)) return 4;
+        if ((c.denomination || '').toLowerCase().includes(lower)) return 5;
+        return 6;
+      };
+
+      return (data || [])
+        .map((church: any) => ({
+          ...church,
+          source: 'database',
+          coordinates: church.coordinates
+            ? { lat: (church.coordinates as any)[0], lng: (church.coordinates as any)[1] }
+            : null,
+        }))
+        .sort((a: any, b: any) => {
+          const diff = score(a) - score(b);
+          if (diff !== 0) return diff;
+          if (!!b.verified !== !!a.verified) return b.verified ? 1 : -1;
+          return (a.name || '').localeCompare(b.name || '');
+        })
+        .slice(0, limit) as GlobalChurchData[];
+    } catch (error) {
+      console.error('Error searching churches:', error);
+      return [];
+    }
+  }
+
   static async getAllChurches(): Promise<GlobalChurchData[]> {
     try {
       const { data, error } = await supabaseApi
