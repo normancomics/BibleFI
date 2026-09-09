@@ -313,7 +313,14 @@ const GlobalChurchDatabase: React.FC = () => {
 
           {/* Church List */}
           <div className="grid gap-4">
-            {filteredChurches.length === 0 ? (
+            {searching ? (
+              <Card className="bg-royal-purple/30 border-ancient-gold/30">
+                <CardContent className="p-8 text-center">
+                  <RefreshCw className="w-8 h-8 animate-spin text-ancient-gold mx-auto mb-3" />
+                  <p className="text-white/80">Searching the global church database...</p>
+                </CardContent>
+              </Card>
+            ) : filteredChurches.length === 0 ? (
               <Card className="bg-royal-purple/30 border-ancient-gold/30">
                 <CardContent className="p-8 text-center">
                   <Church className="w-16 h-16 text-ancient-gold/50 mx-auto mb-4" />
