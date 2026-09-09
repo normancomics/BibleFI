@@ -111,10 +111,11 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       gain.connect(ctx.destination);
       oscillator.type = 'square';
       oscillator.frequency.setValueAtTime(FREQUENCIES[soundName] ?? 800, ctx.currentTime);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
       oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.12);
+      oscillator.stop(ctx.currentTime + 0.24);
     },
     [],
   );
