@@ -45,9 +45,26 @@ const GlobalChurchDatabase: React.FC = () => {
     loadChurches();
   }, []);
 
+  // Server-side, relevance-ranked search across the entire directory
+  useEffect(() => {
+    const term = searchQuery.trim();
+    if (!term) {
+      setSearchResults(null);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const handle = setTimeout(async () => {
+      const results = await GlobalChurchCrawlerService.searchChurchesRanked(term, 100);
+      setSearchResults(results);
+      setSearching(false);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
+
   useEffect(() => {
     filterChurches();
-  }, [churches, searchQuery, selectedCountry, cryptoFilter]);
+  }, [churches, searchResults, searchQuery, selectedCountry, cryptoFilter]);
 
   const loadChurches = async () => {
     try {
