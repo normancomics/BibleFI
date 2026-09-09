@@ -105,12 +105,12 @@ export const ComprehensiveWisdomDashboard: React.FC<ComprehensiveWisdomDashboard
               />
             </div>
             
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category || "__all"} onValueChange={(v) => setCategory(v === "__all" ? "" : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="__all">All Categories</SelectItem>
                 {categories.map(cat => (
                   <SelectItem key={cat} value={cat}>
                     {cat.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -119,12 +119,12 @@ export const ComprehensiveWisdomDashboard: React.FC<ComprehensiveWisdomDashboard
               </SelectContent>
             </Select>
 
-            <Select value={testament} onValueChange={setTestament}>
+            <Select value={testament || "__all"} onValueChange={(v) => setTestament(v === "__all" ? "" : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Testament" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Both Testaments</SelectItem>
+                <SelectItem value="__all">Both Testaments</SelectItem>
                 <SelectItem value="Old">Old Testament</SelectItem>
                 <SelectItem value="New">New Testament</SelectItem>
               </SelectContent>
@@ -147,12 +147,12 @@ export const ComprehensiveWisdomDashboard: React.FC<ComprehensiveWisdomDashboard
               Clear
             </PixelButton>
 
-            <Select value={riskLevel} onValueChange={setRiskLevel}>
+            <Select value={riskLevel || "__all"} onValueChange={(v) => setRiskLevel(v === "__all" ? "" : v)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Risk Level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Levels</SelectItem>
+                <SelectItem value="__all">All Levels</SelectItem>
                 <SelectItem value="low">Low Risk</SelectItem>
                 <SelectItem value="medium">Medium Risk</SelectItem>
                 <SelectItem value="high">High Risk</SelectItem>

@@ -234,12 +234,12 @@ const EnhancedDefiLending: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-pixel text-white/80 mb-2">Token</label>
-                <Select value={selectedToken} onValueChange={setSelectedToken}>
+                <Select value={selectedToken || "__all"} onValueChange={(v) => setSelectedToken(v === "__all" ? "" : v)}>
                   <SelectTrigger className="isometric-card bg-black/30 border-eboy-green/30">
                     <SelectValue placeholder="All tokens" />
                   </SelectTrigger>
                   <SelectContent className="bg-gradient-to-br from-iso-wall-light to-iso-wall-dark border-eboy-green/30">
-                    <SelectItem value="">All Tokens</SelectItem>
+                    <SelectItem value="__all">All Tokens</SelectItem>
                     {tokenOptions.map((token) => (
                       <SelectItem key={token} value={token}>
                         <div className="flex items-center gap-2">

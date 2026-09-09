@@ -60,6 +60,17 @@ const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
 const ScripturesPage = lazy(() => import("./pages/ScripturesPage"));
 const ChurchOnboardingPage = lazy(() => import("./pages/ChurchOnboardingPage"));
 const ChurchDashboardPage = lazy(() => import("./pages/ChurchDashboardPage"));
+const DefiOpportunitiesPage = lazy(() => import("./pages/DefiOpportunitiesPage"));
+const BuilderScorePage = lazy(() => import("./pages/BuilderScorePage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+const SuperfluidPage = lazy(() => import("./pages/SuperfluidPage"));
+const SuperfluidTokensPage = lazy(() => import("./pages/SuperfluidTokensPage"));
+const PaymentHubPage = lazy(() => import("./pages/PaymentHubPage"));
+const ChurchDiscoveryPage = lazy(() => import("./pages/ChurchDiscoveryPage"));
+const ComprehensiveWisdomPage = lazy(() => import("./pages/ComprehensiveWisdomPage"));
+const ScriptureIntegrityPage = lazy(() => import("./pages/ScriptureIntegrityPage"));
+const TechnicalRoadmapPage = lazy(() => import("./pages/TechnicalRoadmapPage"));
 
 /** Shown while a lazily-loaded route chunk is being fetched. */
 const PageLoader = () => (
@@ -129,6 +140,18 @@ const App = () => (
             <Route path="/dca" element={<SuperBoringPage />} />
             <Route path="/tech-graphs" element={<TechGraphsPage />} />
             <Route path="/scriptures" element={<ScripturesPage />} />
+            <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
+            <Route path="/opportunities" element={<DefiOpportunitiesPage />} />
+            <Route path="/builder-score" element={<BuilderScorePage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/superfluid" element={<SuperfluidPage />} />
+            <Route path="/superfluid-tokens" element={<SuperfluidTokensPage />} />
+            <Route path="/payment-hub" element={<PaymentHubPage />} />
+            <Route path="/church-discovery" element={<ChurchDiscoveryPage />} />
+            <Route path="/comprehensive-wisdom" element={<ComprehensiveWisdomPage />} />
+            <Route path="/scripture-integrity" element={<ScriptureIntegrityPage />} />
+            <Route path="/technical-roadmap" element={<TechnicalRoadmapPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
