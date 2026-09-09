@@ -24,13 +24,13 @@ const STORAGE_KEY = 'biblefi_sound_enabled';
 
 /** Retro-arcade sample files shipped in /public/sounds. */
 const SOUND_FILES: Record<string, string> = {
-  click: '/sounds/click.mp3',
-  select: '/sounds/select.mp3',
-  coin: '/sounds/coin.mp3',
-  scroll: '/sounds/scroll.mp3',
-  powerup: '/sounds/powerup.mp3',
-  success: '/sounds/success.mp3',
-  error: '/sounds/error.mp3',
+  click: '/sounds/click.wav',
+  select: '/sounds/select.wav',
+  coin: '/sounds/coin.wav',
+  scroll: '/sounds/scroll.wav',
+  powerup: '/sounds/powerup.wav',
+  success: '/sounds/success.wav',
+  error: '/sounds/error.wav',
 };
 
 /** Fallback tones when a sample is unavailable. */
