@@ -1,17 +1,17 @@
 {
   "accountAssociation": {
     "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg3YkVkYTU3MDc0QUE5MTdGRjA5OTNmYjMyOUUxNkMyYzE4OGJhRjA4In0",
-    "payload": "eyJkb21haW4iOiJiaWJsZWZpLmxvdmFibGUuYXBwIn0",
+    "payload": "eyJkb21haW4iOiJiaWJsZWZpLmFwcCJ9",
     "signature": "PENDING_SIGNATURE_FROM_TREASURY_WALLET_0x7bEda57074AA917FF0993fb329E16C2c188baF08"
   },
   "frame": {
     "version": "1",
     "name": "BibleFi",
-    "iconUrl": "https://biblefi.lovable.app/bible-fi-ios-icon-v2.png",
-    "homeUrl": "https://biblefi.lovable.app",
-    "imageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
+    "iconUrl": "https://biblefi.app/bible-fi-ios-icon-v2.png",
+    "homeUrl": "https://biblefi.app",
+    "imageUrl": "https://biblefi.app/bible-fi-app-preview.png",
     "buttonTitle": "Enter BibleFi",
-    "splashImageUrl": "https://biblefi.lovable.app/bible-fi-brand-logo-v2.png",
+    "splashImageUrl": "https://biblefi.app/bible-fi-brand-logo-v2.png",
     "splashBackgroundColor": "#1E40AF",
     "webhookUrl": "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
     "subtitle": "Biblical wisdom for DeFi",
@@ -21,16 +21,16 @@
     "tagline": "Tithe, stake & grow in wisdom",
     "ogTitle": "BibleFi - Biblical DeFi App",
     "ogDescription": "Biblical principles for your financial journey. Stake, tithe, and grow wealth according to scripture.",
-    "ogImageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
-    "heroImageUrl": "https://biblefi.lovable.app/bible-fi-app-preview.png",
+    "ogImageUrl": "https://biblefi.app/bible-fi-app-preview.png",
+    "heroImageUrl": "https://biblefi.app/bible-fi-app-preview.png",
     "requiredChains": ["eip155:8453"],
-    "canonicalDomain": "biblefi.lovable.app"
+    "canonicalDomain": "biblefi.app"
   },
   "manifest": {
     "appName": "BibleFi - Biblical Wisdom for DeFi",
     "appDescription": "The world's first Christian faith-based DeFi platform on Base Chain. Tithe, stake, invest & grow wealth according to Scripture.",
     "appVersion": "1.0.0",
-    "appUrl": "https://biblefi.lovable.app",
+    "appUrl": "https://biblefi.app",
     "appCategory": "defi",
     "appChain": "base",
     "features": [

@@ -66,7 +66,7 @@ export const generateFrameHTML = (config: FrameConfig): string => {
   <div style="text-align: center; color: white; font-family: system-ui, sans-serif;">
     <h1 style="color: gold;">BibleFi Frame</h1>
     <p>This HTML is meant to be embedded as a Farcaster Frame.</p>
-    <p>Visit <a href="https://biblefi.base.eth" style="color: gold; text-decoration: none;">BibleFi</a> to explore biblical financial wisdom.</p>
+    <p>Visit <a href="https://biblefi.app" style="color: gold; text-decoration: none;">BibleFi</a> to explore biblical financial wisdom.</p>
   </div>
 </body>
 </html>`;
@@ -123,9 +123,9 @@ export class FarcasterClient {
     return generateFrameHTML({
       image: `https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=verse&verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`,
       buttons: [
-        { label: "Get More Wisdom", action: "link", target: "https://biblefi.base.eth/wisdom" },
+        { label: "Get More Wisdom", action: "link", target: "https://biblefi.app/wisdom" },
         { label: "Share This Verse", action: "post" },
-        { label: "Open BibleFi", action: "link", target: "https://biblefi.base.eth" },
+        { label: "Open BibleFi", action: "link", target: "https://biblefi.app" },
       ],
       postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
       state: generateFrameState({ verse, reference })
@@ -143,8 +143,8 @@ export class FarcasterClient {
     return generateFrameHTML({
       image: `https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=tithe&church=${encodeURIComponent(church)}&amount=${amount}&token=${token}`,
       buttons: [
-        { label: "Tithe Now", action: "link", target: "https://biblefi.base.eth/tithe" },
-        { label: "Learn Biblical Finance", action: "link", target: "https://biblefi.base.eth/wisdom" },
+        { label: "Tithe Now", action: "link", target: "https://biblefi.app/tithe" },
+        { label: "Learn Biblical Finance", action: "link", target: "https://biblefi.app/wisdom" },
         { label: "Share Your Tithing", action: "post" },
       ],
       postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
@@ -163,8 +163,8 @@ export class FarcasterClient {
     return generateFrameHTML({
       image: `https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/generate-image?type=wisdom&score=${score}&strengths=${encodeURIComponent(strengths.join(','))}&verse=${encodeURIComponent(verse)}`,
       buttons: [
-        { label: "Get Your Wisdom Score", action: "link", target: "https://biblefi.base.eth/wisdom" },
-        { label: "Apply Biblical Finance", action: "link", target: "https://biblefi.base.eth/defi" },
+        { label: "Get Your Wisdom Score", action: "link", target: "https://biblefi.app/wisdom" },
+        { label: "Apply Biblical Finance", action: "link", target: "https://biblefi.app/defi" },
         { label: "Share Your Score", action: "post" },
       ],
       postUrl: "https://ojiipppypzigjnjblbzn.supabase.co/functions/v1/frame-handler",
@@ -198,7 +198,7 @@ export class FarcasterClient {
    */
   public generateVerseSharingUrl(verse: string, reference: string): string {
     const text = `"${verse}" - ${reference}\n\nBiblical wisdom from BibleFi`;
-    const frameUrl = `https://biblefi.base.eth/frame.html?verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`;
+    const frameUrl = `https://biblefi.app/frame.html?verse=${encodeURIComponent(verse)}&reference=${encodeURIComponent(reference)}`;
     
     return generateFarcasterShareUrl(text, frameUrl);
   }

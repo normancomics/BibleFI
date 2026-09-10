@@ -7,7 +7,7 @@ export const FARCASTER_CONFIG = {
   
   // For Farcaster Mini-App (Frames)
   frameConfig: {
-    imageUrl: 'https://biblefi.base.eth/api/generate-image?type=default',
+    imageUrl: 'https://biblefi.app/api/generate-image?type=default',
     aspectRatio: '1.91:1',
     buttons: [
       {
@@ -27,15 +27,15 @@ export const FARCASTER_CONFIG = {
         action: 'post'
       }
     ],
-    postUrl: 'https://biblefi.base.eth/api/frame-handler'
+    postUrl: 'https://biblefi.app/api/frame-handler'
   }
 };
 
 export const APP_CONFIG = {
   name: 'BibleFi',
   description: 'Biblical wisdom for your financial journey',
-  icon: 'https://biblefi.base.eth/api/generate-image?type=default',
-  canonical: 'https://biblefi.base.eth',
+  icon: 'https://biblefi.app/api/generate-image?type=default',
+  canonical: 'https://biblefi.app',
   // Farcaster API key will be retrieved from Supabase secrets in server-side functions
   farcasterApi: {
     enabled: true,
