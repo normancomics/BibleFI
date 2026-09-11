@@ -114,16 +114,23 @@ async function fetchChurchesFromOSM(
 
 
 /** Geocode a free-text church search so we can look around that place. */
-async function geocodeQuery(query: string): Promise<{ lat: number; lon: number } | null> {
+async function geocodeQuery(
+  query: string,
+): Promise<{ lat: number; lon: number; country: string } | null> {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`;
     const res = await fetch(url, {
       headers: { 'User-Agent': 'BibleFi/1.0 (Global Christian Church Seeder)' },
     });
     if (!res.ok) return null;
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) return null;
-    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+    const hit = data[0];
+    const country =
+      hit.address?.country ||
+      String(hit.display_name || '').split(',').pop()?.trim() ||
+      '';
+    return { lat: parseFloat(hit.lat), lon: parseFloat(hit.lon), country };
   } catch {
     return null;
   }
@@ -239,7 +246,7 @@ Deno.serve(async (req) => {
                 name: row.query,
                 lat: coords.lat,
                 lon: coords.lon,
-                country: '',
+                country: coords.country || 'Unknown',
                 radius: 12000,
               },
               ...targetRegions,
