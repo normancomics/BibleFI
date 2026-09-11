@@ -329,7 +329,28 @@ Deno.serve(async (req) => {
         }
 
 
-        return { mode: 'seed', churches_seeded: totalSeeded, churches_skipped: totalSkipped, regions_processed: seededRegions };
+        // Close out the searches we just went looking for.
+        for (const requested of requestedQueries) {
+          const line = seededRegions.find((r) => r.startsWith(requested.query));
+          const handled = !!line && !line.includes('deferred');
+          if (!handled) continue;
+          await admin
+            .from('church_search_queue')
+            .update({
+              status: 'seeded',
+              processed_at: new Date().toISOString(),
+              churches_added: totalSeeded,
+            })
+            .eq('id', requested.id);
+        }
+
+        return {
+          mode: 'seed',
+          churches_seeded: totalSeeded,
+          churches_skipped: totalSkipped,
+          regions_processed: seededRegions,
+          requested_searches: requestedQueries.map((r) => r.query),
+        };
       }
     );
 
