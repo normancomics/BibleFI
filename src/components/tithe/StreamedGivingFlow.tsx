@@ -159,6 +159,7 @@ const StreamedGivingFlow: React.FC = () => {
   const selectChurch = useCallback(
     async (picked: DirectoryChurch) => {
       playSound('click');
+      churchSearchMemory.rememberChurch(picked.id);
       setChurch(picked);
       setGiving(null);
       setManualAddress('');
