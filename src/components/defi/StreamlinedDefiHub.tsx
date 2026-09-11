@@ -140,26 +140,12 @@ const StreamlinedDefiHub: React.FC = () => {
                 Portfolio Analytics
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <DollarSign className="w-8 h-8 mx-auto mb-2 text-green-400" />
-                  <h3 className="font-medium">Total Value</h3>
-                  <p className="text-2xl font-bold">$0.00</p>
-                </div>
-                
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <TrendingUp className="w-8 h-8 mx-auto mb-2 text-blue-400" />
-                  <h3 className="font-medium">24h Change</h3>
-                  <p className="text-2xl font-bold text-green-400">+0.00%</p>
-                </div>
-                
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <Shield className="w-8 h-8 mx-auto mb-2 text-purple-400" />
-                  <h3 className="font-medium">Risk Score</h3>
-                  <p className="text-2xl font-bold">Low</p>
-                </div>
-              </div>
+            <CardContent className="space-y-4">
+              <RealPortfolioBalance />
+              <p className="text-xs text-muted-foreground">
+                These are your real balances on Base, read from the chain. Connect your wallet to see
+                them. "Be thou diligent to know the state of thy flocks" — Proverbs 27:23.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
