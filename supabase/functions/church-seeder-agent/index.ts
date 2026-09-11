@@ -216,16 +216,18 @@ Deno.serve(async (req) => {
         const admin = createClient(
           Deno.env.get('SUPABASE_URL')!,
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+          { db: { schema: 'api' } },
         );
         const requestedQueries: { id: string; query: string }[] = [];
         if (regionsToSeed.length === 0) {
-          const { data: pending } = await admin
+          const { data: pending, error: pendingError } = await admin
             .from('church_search_queue')
             .select('id, query, attempts')
             .eq('status', 'pending')
             .lt('attempts', 3)
             .order('search_count', { ascending: false })
             .limit(3);
+          if (pendingError) console.error('Search queue read failed:', pendingError.message);
 
           for (const row of (pending || [])) {
             const coords = await geocodeQuery(row.query);
