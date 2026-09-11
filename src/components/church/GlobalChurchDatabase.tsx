@@ -167,7 +167,7 @@ const GlobalChurchDatabase: React.FC = () => {
       filtered = filtered.filter(church => church.verified);
     }
 
-    setFilteredChurches(filtered);
+    setFilteredChurches(churchSearchMemory.pinRemembered(filtered));
   };
 
   const getUniqueCountries = () => {
