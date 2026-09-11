@@ -383,7 +383,11 @@ const GlobalChurchDatabase: React.FC = () => {
               </Card>
             ) : (
               filteredChurches.map((church) => (
-                <Card key={church.id} className="bg-royal-purple/30 border-ancient-gold/30 hover:border-ancient-gold/60 transition-all">
+                <Card
+                  key={church.id}
+                  onClick={() => churchSearchMemory.rememberChurch(church.id)}
+                  className="bg-royal-purple/30 border-ancient-gold/30 hover:border-ancient-gold/60 transition-all"
+                >
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
