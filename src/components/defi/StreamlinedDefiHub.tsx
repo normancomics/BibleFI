@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import SimpleSwapForm from './SimpleSwapForm';
 import StakingForm from '../staking/StakingForm';
 import RealPortfolioBalance from './RealPortfolioBalance';
+import LiveBasePools from './LiveBasePools';
 
 const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
 
