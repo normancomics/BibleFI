@@ -340,7 +340,12 @@ const GlobalChurchDatabase: React.FC = () => {
               <Card className="bg-royal-purple/30 border-ancient-gold/30">
                 <CardContent className="p-8 text-center">
                   <Church className="w-16 h-16 text-ancient-gold/50 mx-auto mb-4" />
-                  <p className="text-white/80 mb-4">No churches found matching your criteria.</p>
+                  <p className="text-white/80 mb-2">No churches found matching your criteria.</p>
+                  {queuedForSeeding && (
+                    <p className="text-sm text-ancient-gold/90 mb-4">
+                      We saved "{searchQuery.trim()}" and our church finder will look for it in the next hourly worldwide search.
+                    </p>
+                  )}
                   <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                       <Button className="bg-ancient-gold text-royal-purple hover:bg-ancient-gold/80">
