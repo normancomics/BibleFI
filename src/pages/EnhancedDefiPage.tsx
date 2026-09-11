@@ -57,8 +57,16 @@ const EnhancedDefiPage: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-eboy-green">+4.2%</div>
-                    <div className="text-sm text-muted-foreground">24h Portfolio</div>
+                    <div
+                      className={`text-2xl font-bold ${
+                        (ethPrice?.change24h ?? 0) >= 0 ? 'text-eboy-green' : 'text-destructive'
+                      }`}
+                    >
+                      {ethPrice ? formatChange(ethPrice.change24h) : '—'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      ETH, last 24 hours{ethPrice ? '' : ' (loading)'}
+                    </div>
                   </div>
                   
                   <div className="p-3 bg-card rounded-lg">
