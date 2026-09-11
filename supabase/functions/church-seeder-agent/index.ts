@@ -204,6 +204,51 @@ Deno.serve(async (req) => {
         const startedAt = Date.now();
         const TIME_BUDGET_MS = 25_000; // finish well inside the edge-function limit
 
+        // People searched for these churches and the directory had nothing.
+        // Look around them first — "seek, and ye shall find" (Matthew 7:7).
+        const admin = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        );
+        const requestedQueries: { id: string; query: string }[] = [];
+        if (regionsToSeed.length === 0) {
+          const { data: pending } = await admin
+            .from('church_search_queue')
+            .select('id, query, attempts')
+            .eq('status', 'pending')
+            .lt('attempts', 3)
+            .order('search_count', { ascending: false })
+            .limit(3);
+
+          for (const row of (pending || [])) {
+            const coords = await geocodeQuery(row.query);
+            if (!coords) {
+              await admin
+                .from('church_search_queue')
+                .update({
+                  attempts: (row.attempts ?? 0) + 1,
+                  last_error: 'Could not locate this place',
+                  status: (row.attempts ?? 0) + 1 >= 3 ? 'skipped' : 'pending',
+                })
+                .eq('id', row.id);
+              continue;
+            }
+            requestedQueries.push({ id: row.id, query: row.query });
+            targetRegions = [
+              {
+                name: row.query,
+                lat: coords.lat,
+                lon: coords.lon,
+                country: '',
+                radius: 12000,
+              },
+              ...targetRegions,
+            ];
+            await new Promise((r) => setTimeout(r, 1100)); // Nominatim: 1 req/sec
+          }
+        }
+
+
         for (const region of targetRegions) {
           if (Date.now() - startedAt > TIME_BUDGET_MS) {
             seededRegions.push(`${region.name} (deferred to next run)`);
