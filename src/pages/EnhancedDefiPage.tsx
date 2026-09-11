@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, TrendingUp, Shield, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRealTokenPrices } from '@/hooks/useRealTokenPrices';
+import LiveBasePools from '@/components/defi/LiveBasePools';
 
 const EnhancedDefiPage: React.FC = () => {
   const { getPrice, formatChange } = useRealTokenPrices();
@@ -141,6 +142,19 @@ const EnhancedDefiPage: React.FC = () => {
               </Card>
             </div>
           </div>
+
+          {/* Live Base opportunities */}
+          <Card className="mt-8 bg-card/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-eboy-green" />
+                Where money is earning on Base right now
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <LiveBasePools limit={6} />
+            </CardContent>
+          </Card>
 
           {/* Footer */}
           <motion.div
