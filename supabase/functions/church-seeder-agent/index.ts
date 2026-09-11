@@ -114,11 +114,11 @@ async function fetchChurchesFromOSM(
 
 
 /** Geocode a free-text church search so we can look around that place. */
-async function geocodeQuery(
-  query: string,
+async function geocodeOnce(
+  candidate: string,
 ): Promise<{ lat: number; lon: number; country: string } | null> {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`;
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(candidate)}&format=json&limit=1&addressdetails=1`;
     const res = await fetch(url, {
       headers: { 'User-Agent': 'BibleFi/1.0 (Global Christian Church Seeder)' },
     });
@@ -134,6 +134,27 @@ async function geocodeQuery(
   } catch {
     return null;
   }
+}
+
+/**
+ * Try the whole search first, then the trailing place words, so
+ * "Church of Eleven22 Orlando" still resolves to Orlando.
+ */
+async function geocodeQuery(
+  query: string,
+): Promise<{ lat: number; lon: number; country: string } | null> {
+  const words = query.trim().split(/[\s,]+/).filter(Boolean);
+  const candidates = [query.trim()];
+  if (words.length > 2) candidates.push(words.slice(-2).join(' '));
+  if (words.length > 1) candidates.push(words.slice(-1).join(' '));
+
+  for (const candidate of candidates) {
+    if (candidate.length < 3) continue;
+    const hit = await geocodeOnce(candidate);
+    if (hit) return hit;
+    await new Promise((r) => setTimeout(r, 1100)); // Nominatim: 1 req/sec
+  }
+  return null;
 }
 
 function sanitizeInput(input: string | null): string | null {
