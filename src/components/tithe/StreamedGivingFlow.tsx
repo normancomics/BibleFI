@@ -37,6 +37,7 @@ import { useSound } from '@/contexts/SoundContext';
 import { supabase } from '@/integrations/supabase/client';
 import { supabaseApi } from '@/integrations/supabase/apiClient';
 import { GlobalChurchCrawlerService } from '@/services/globalChurchCrawler';
+import { churchSearchMemory } from '@/services/churchSearchMemory';
 import { realSuperfluidClient } from '@/integrations/superfluid/realClient';
 import { SuperfluidService, type SuperfluidStreamData } from '@/services/superfluidService';
 import { createBrowserProvider } from '@/lib/ethers-compat';
