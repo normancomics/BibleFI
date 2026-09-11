@@ -665,6 +665,54 @@ export type Database = {
           },
         ]
       }
+      church_search_queue: {
+        Row: {
+          attempts: number
+          churches_added: number
+          created_at: string
+          found_in_directory: boolean
+          id: string
+          last_error: string | null
+          last_searched_at: string
+          normalized_query: string
+          processed_at: string | null
+          query: string
+          search_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          churches_added?: number
+          created_at?: string
+          found_in_directory?: boolean
+          id?: string
+          last_error?: string | null
+          last_searched_at?: string
+          normalized_query: string
+          processed_at?: string | null
+          query: string
+          search_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          churches_added?: number
+          created_at?: string
+          found_in_directory?: boolean
+          id?: string
+          last_error?: string | null
+          last_searched_at?: string
+          normalized_query?: string
+          processed_at?: string | null
+          query?: string
+          search_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       church_tithe_payments: {
         Row: {
           amount: number
