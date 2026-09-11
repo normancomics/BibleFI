@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import SimpleSwapForm from './SimpleSwapForm';
 import StakingForm from '../staking/StakingForm';
 import RealPortfolioBalance from './RealPortfolioBalance';
+import LiveBasePools from './LiveBasePools';
 
 const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
 
@@ -116,29 +117,7 @@ const StreamlinedDefiHub: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-background/50 rounded-lg border">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium">ETH/USDC Pool</h3>
-                    <span className="text-green-400">12.5% APY</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Stable yield with low impermanent loss risk
-                  </p>
-                  <Button size="sm" className="w-full">Add Liquidity</Button>
-                </div>
-                
-                <div className="p-4 bg-background/50 rounded-lg border">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium">WBTC/ETH Pool</h3>
-                    <span className="text-green-400">18.7% APY</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Higher yield for correlated assets
-                  </p>
-                  <Button size="sm" className="w-full">Add Liquidity</Button>
-                </div>
-              </div>
+              <LiveBasePools />
             </CardContent>
           </Card>
         </TabsContent>
@@ -161,26 +140,12 @@ const StreamlinedDefiHub: React.FC = () => {
                 Portfolio Analytics
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <DollarSign className="w-8 h-8 mx-auto mb-2 text-green-400" />
-                  <h3 className="font-medium">Total Value</h3>
-                  <p className="text-2xl font-bold">$0.00</p>
-                </div>
-                
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <TrendingUp className="w-8 h-8 mx-auto mb-2 text-blue-400" />
-                  <h3 className="font-medium">24h Change</h3>
-                  <p className="text-2xl font-bold text-green-400">+0.00%</p>
-                </div>
-                
-                <div className="text-center p-4 bg-background/50 rounded-lg">
-                  <Shield className="w-8 h-8 mx-auto mb-2 text-purple-400" />
-                  <h3 className="font-medium">Risk Score</h3>
-                  <p className="text-2xl font-bold">Low</p>
-                </div>
-              </div>
+            <CardContent className="space-y-4">
+              <RealPortfolioBalance />
+              <p className="text-xs text-muted-foreground">
+                These are your real balances on Base, read from the chain. Connect your wallet to see
+                them. "Be thou diligent to know the state of thy flocks" — Proverbs 27:23.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>

@@ -2,8 +2,9 @@ import React from 'react';
 import NavBar from '@/components/NavBar';
 import ComprehensiveTithingHub from '@/components/tithe/ComprehensiveTithingHub';
 import { AnonymousTithe } from '@/components/tithe/AnonymousTithe';
+import StreamedGivingFlow from '@/components/tithe/StreamedGivingFlow';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Heart, Globe } from 'lucide-react';
+import { Shield, Heart, Globe, Waves } from 'lucide-react';
 
 const TithePage: React.FC = () => {
   return (
@@ -17,15 +18,15 @@ const TithePage: React.FC = () => {
           </p>
         </div>
         
-        <Tabs defaultValue="comprehensive" className="w-full">
+        <Tabs defaultValue="streaming" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-3xl mx-auto mb-8">
+            <TabsTrigger value="streaming" className="flex items-center gap-2">
+              <Waves className="w-4 h-4" />
+              Continuous Giving
+            </TabsTrigger>
             <TabsTrigger value="comprehensive" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
               Global Tithing
-            </TabsTrigger>
-            <TabsTrigger value="standard" className="flex items-center gap-2">
-              <Heart className="w-4 h-4" />
-              Quick Tithe
             </TabsTrigger>
             <TabsTrigger value="anonymous" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
@@ -33,11 +34,13 @@ const TithePage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="comprehensive">
-            <ComprehensiveTithingHub />
+          <TabsContent value="streaming">
+            <div className="max-w-2xl mx-auto">
+              <StreamedGivingFlow />
+            </div>
           </TabsContent>
 
-          <TabsContent value="standard">
+          <TabsContent value="comprehensive">
             <ComprehensiveTithingHub />
           </TabsContent>
 
