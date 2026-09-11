@@ -36,6 +36,8 @@ const GlobalChurchDatabase: React.FC = () => {
   const [cryptoFilter, setCryptoFilter] = useState<string>('');
   const [crawlProgress, setCrawlProgress] = useState(0);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [recentQueries, setRecentQueries] = useState<string[]>(() => churchSearchMemory.getRecentQueries());
+  const [queuedForSeeding, setQueuedForSeeding] = useState(false);
   const [stats, setStats] = useState<ChurchCrawlerStats>({
     totalChurches: 0,
     cryptoEnabled: 0,
