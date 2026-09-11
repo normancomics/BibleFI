@@ -116,29 +116,7 @@ const StreamlinedDefiHub: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-background/50 rounded-lg border">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium">ETH/USDC Pool</h3>
-                    <span className="text-green-400">12.5% APY</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Stable yield with low impermanent loss risk
-                  </p>
-                  <Button size="sm" className="w-full">Add Liquidity</Button>
-                </div>
-                
-                <div className="p-4 bg-background/50 rounded-lg border">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium">WBTC/ETH Pool</h3>
-                    <span className="text-green-400">18.7% APY</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Higher yield for correlated assets
-                  </p>
-                  <Button size="sm" className="w-full">Add Liquidity</Button>
-                </div>
-              </div>
+              <LiveBasePools />
             </CardContent>
           </Card>
         </TabsContent>
