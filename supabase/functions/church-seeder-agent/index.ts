@@ -113,6 +113,50 @@ async function fetchChurchesFromOSM(
 }
 
 
+/** Geocode a free-text church search so we can look around that place. */
+async function geocodeOnce(
+  candidate: string,
+): Promise<{ lat: number; lon: number; country: string } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(candidate)}&format=json&limit=1&addressdetails=1`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'BibleFi/1.0 (Global Christian Church Seeder)' },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return null;
+    const hit = data[0];
+    const country =
+      hit.address?.country ||
+      String(hit.display_name || '').split(',').pop()?.trim() ||
+      '';
+    return { lat: parseFloat(hit.lat), lon: parseFloat(hit.lon), country };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Try the whole search first, then the trailing place words, so
+ * "Church of Eleven22 Orlando" still resolves to Orlando.
+ */
+async function geocodeQuery(
+  query: string,
+): Promise<{ lat: number; lon: number; country: string } | null> {
+  const words = query.trim().split(/[\s,]+/).filter(Boolean);
+  const candidates = [query.trim()];
+  if (words.length > 2) candidates.push(words.slice(-2).join(' '));
+  if (words.length > 1) candidates.push(words.slice(-1).join(' '));
+
+  for (const candidate of candidates) {
+    if (candidate.length < 3) continue;
+    const hit = await geocodeOnce(candidate);
+    if (hit) return hit;
+    await new Promise((r) => setTimeout(r, 1100)); // Nominatim: 1 req/sec
+  }
+  return null;
+}
+
 function sanitizeInput(input: string | null): string | null {
   if (!input) return null;
   // Strip potential injection patterns
@@ -188,6 +232,53 @@ Deno.serve(async (req) => {
         const startedAt = Date.now();
         const TIME_BUDGET_MS = 25_000; // finish well inside the edge-function limit
 
+        // People searched for these churches and the directory had nothing.
+        // Look around them first — "seek, and ye shall find" (Matthew 7:7).
+        const admin = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+          { db: { schema: 'api' } },
+        );
+        const requestedQueries: { id: string; query: string }[] = [];
+        if (regionsToSeed.length === 0) {
+          const { data: pending, error: pendingError } = await admin
+            .from('church_search_queue')
+            .select('id, query, attempts')
+            .eq('status', 'pending')
+            .lt('attempts', 3)
+            .order('search_count', { ascending: false })
+            .limit(3);
+          if (pendingError) console.error('Search queue read failed:', pendingError.message);
+
+          for (const row of (pending || [])) {
+            const coords = await geocodeQuery(row.query);
+            if (!coords) {
+              await admin
+                .from('church_search_queue')
+                .update({
+                  attempts: (row.attempts ?? 0) + 1,
+                  last_error: 'Could not locate this place',
+                  status: (row.attempts ?? 0) + 1 >= 3 ? 'skipped' : 'pending',
+                })
+                .eq('id', row.id);
+              continue;
+            }
+            requestedQueries.push({ id: row.id, query: row.query });
+            targetRegions = [
+              {
+                name: row.query,
+                lat: coords.lat,
+                lon: coords.lon,
+                country: coords.country || 'Unknown',
+                radius: 12000,
+              },
+              ...targetRegions,
+            ];
+            await new Promise((r) => setTimeout(r, 1100)); // Nominatim: 1 req/sec
+          }
+        }
+
+
         for (const region of targetRegions) {
           if (Date.now() - startedAt > TIME_BUDGET_MS) {
             seededRegions.push(`${region.name} (deferred to next run)`);
@@ -261,7 +352,28 @@ Deno.serve(async (req) => {
         }
 
 
-        return { mode: 'seed', churches_seeded: totalSeeded, churches_skipped: totalSkipped, regions_processed: seededRegions };
+        // Close out the searches we just went looking for.
+        for (const requested of requestedQueries) {
+          const line = seededRegions.find((r) => r.startsWith(requested.query));
+          const handled = !!line && !line.includes('deferred');
+          if (!handled) continue;
+          await admin
+            .from('church_search_queue')
+            .update({
+              status: 'seeded',
+              processed_at: new Date().toISOString(),
+              churches_added: totalSeeded,
+            })
+            .eq('id', requested.id);
+        }
+
+        return {
+          mode: 'seed',
+          churches_seeded: totalSeeded,
+          churches_skipped: totalSkipped,
+          regions_processed: seededRegions,
+          requested_searches: requestedQueries.map((r) => r.query),
+        };
       }
     );
 

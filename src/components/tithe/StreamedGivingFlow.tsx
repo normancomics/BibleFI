@@ -37,6 +37,7 @@ import { useSound } from '@/contexts/SoundContext';
 import { supabase } from '@/integrations/supabase/client';
 import { supabaseApi } from '@/integrations/supabase/apiClient';
 import { GlobalChurchCrawlerService } from '@/services/globalChurchCrawler';
+import { churchSearchMemory } from '@/services/churchSearchMemory';
 import { realSuperfluidClient } from '@/integrations/superfluid/realClient';
 import { SuperfluidService, type SuperfluidStreamData } from '@/services/superfluidService';
 import { createBrowserProvider } from '@/lib/ethers-compat';
@@ -138,7 +139,12 @@ const StreamedGivingFlow: React.FC = () => {
     searchTimer.current = setTimeout(async () => {
       try {
         const found = await GlobalChurchCrawlerService.searchChurchesRanked(query, 40);
-        setResults((found as unknown as DirectoryChurch[]) ?? []);
+        const ranked = churchSearchMemory.pinRemembered(
+          (found as unknown as DirectoryChurch[]) ?? [],
+        );
+        setResults(ranked);
+        churchSearchMemory.rememberQuery(query);
+        void churchSearchMemory.reportSearch(query, ranked.length > 0);
       } catch (error) {
         console.error('[BWSP] church search failed', error);
         setResults([]);
@@ -154,6 +160,7 @@ const StreamedGivingFlow: React.FC = () => {
   const selectChurch = useCallback(
     async (picked: DirectoryChurch) => {
       playSound('click');
+      churchSearchMemory.rememberChurch(picked.id);
       setChurch(picked);
       setGiving(null);
       setManualAddress('');

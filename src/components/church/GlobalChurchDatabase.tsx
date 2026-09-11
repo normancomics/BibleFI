@@ -20,6 +20,7 @@ import {
   Bitcoin
 } from 'lucide-react';
 import { GlobalChurchCrawlerService, GlobalChurchData, ChurchCrawlerStats } from '@/services/globalChurchCrawler';
+import { churchSearchMemory } from '@/services/churchSearchMemory';
 import { useToast } from '@/hooks/use-toast';
 import AddChurchForm from '@/components/tithe/AddChurchForm';
 
@@ -35,6 +36,8 @@ const GlobalChurchDatabase: React.FC = () => {
   const [cryptoFilter, setCryptoFilter] = useState<string>('');
   const [crawlProgress, setCrawlProgress] = useState(0);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [recentQueries, setRecentQueries] = useState<string[]>(() => churchSearchMemory.getRecentQueries());
+  const [queuedForSeeding, setQueuedForSeeding] = useState(false);
   const [stats, setStats] = useState<ChurchCrawlerStats>({
     totalChurches: 0,
     cryptoEnabled: 0,
@@ -47,20 +50,33 @@ const GlobalChurchDatabase: React.FC = () => {
     loadChurches();
   }, []);
 
-  // Server-side, relevance-ranked search across the entire directory
+  // Server-side, relevance-ranked search across the entire directory.
+  // Churches this person has looked up before are pinned to the very top.
   useEffect(() => {
     const term = searchQuery.trim();
     if (!term) {
       setSearchResults(null);
       setSearching(false);
+      setQueuedForSeeding(false);
       return;
     }
     setSearching(true);
     const handle = setTimeout(async () => {
       const results = await GlobalChurchCrawlerService.searchChurchesRanked(term, 100);
-      setSearchResults(results);
+      const ranked = churchSearchMemory.pinRemembered(results);
+      setSearchResults(ranked);
       setSearching(false);
-    }, 300);
+
+      const found = ranked.length > 0;
+      setQueuedForSeeding(!found);
+      churchSearchMemory.rememberQuery(term);
+      setRecentQueries(churchSearchMemory.getRecentQueries());
+      if (found) {
+        // Remember the best match so it leads the list next time.
+        churchSearchMemory.rememberChurch(ranked[0]?.id);
+      }
+      void churchSearchMemory.reportSearch(term, found);
+    }, 400);
     return () => clearTimeout(handle);
   }, [searchQuery]);
 
@@ -151,7 +167,7 @@ const GlobalChurchDatabase: React.FC = () => {
       filtered = filtered.filter(church => church.verified);
     }
 
-    setFilteredChurches(filtered);
+    setFilteredChurches(churchSearchMemory.pinRemembered(filtered));
   };
 
   const getUniqueCountries = () => {
@@ -257,6 +273,31 @@ const GlobalChurchDatabase: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-royal-purple/30 border-ancient-gold/50 text-white"
               />
+              {recentQueries.length > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-white/50">Recent:</span>
+                  {recentQueries.slice(0, 6).map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => setSearchQuery(q)}
+                      className="rounded-full border border-ancient-gold/40 px-3 py-1 text-xs text-ancient-gold hover:bg-ancient-gold/10"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      churchSearchMemory.clear();
+                      setRecentQueries([]);
+                    }}
+                    className="text-xs text-white/40 underline hover:text-white/70"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
             </div>
             
             <Select value={selectedCountry || "all"} onValueChange={(v) => setSelectedCountry(v === "all" ? "" : v)}>
@@ -324,7 +365,12 @@ const GlobalChurchDatabase: React.FC = () => {
               <Card className="bg-royal-purple/30 border-ancient-gold/30">
                 <CardContent className="p-8 text-center">
                   <Church className="w-16 h-16 text-ancient-gold/50 mx-auto mb-4" />
-                  <p className="text-white/80 mb-4">No churches found matching your criteria.</p>
+                  <p className="text-white/80 mb-2">No churches found matching your criteria.</p>
+                  {queuedForSeeding && (
+                    <p className="text-sm text-ancient-gold/90 mb-4">
+                      We saved "{searchQuery.trim()}" and our church finder will look for it in the next hourly worldwide search.
+                    </p>
+                  )}
                   <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                       <Button className="bg-ancient-gold text-royal-purple hover:bg-ancient-gold/80">
@@ -337,7 +383,11 @@ const GlobalChurchDatabase: React.FC = () => {
               </Card>
             ) : (
               filteredChurches.map((church) => (
-                <Card key={church.id} className="bg-royal-purple/30 border-ancient-gold/30 hover:border-ancient-gold/60 transition-all">
+                <Card
+                  key={church.id}
+                  onClick={() => churchSearchMemory.rememberChurch(church.id)}
+                  className="bg-royal-purple/30 border-ancient-gold/30 hover:border-ancient-gold/60 transition-all"
+                >
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
