@@ -78,15 +78,16 @@ const BwspSynthesisFlow: React.FC = () => {
   const recordedKey = useMemo(() => bwspResponse?.timestamp ?? null, [bwspResponse]);
   React.useEffect(() => {
     if (!bwspResponse || !recordedKey) return;
-    const record = wisdomAuditTrail.record({
+    const record = wisdomAuditTrail.emit({
       event: 'BWSP_SynthesisChecked',
       verseHash: bwspResponse.tripleCheck.verseHash,
+      summary: `Triple-check ${bwspResponse.tripleCheck.verdict} for "${bwspResponse.query.text}"`,
       data: {
         query: bwspResponse.query.text,
-        intent: bwspResponse.query.intent,
+        intent: bwspResponse.query.intent ?? 'general_wisdom',
         verdict: bwspResponse.tripleCheck.verdict,
-        confidence: bwspResponse.confidenceScore,
-        primaryReference: bwspResponse.primaryScripture?.reference,
+        confidence: bwspResponse.confidenceScore ?? 0,
+        primaryReference: bwspResponse.primaryScripture?.reference ?? null,
       },
     });
     setAudit(record);
