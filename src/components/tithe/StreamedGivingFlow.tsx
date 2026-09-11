@@ -138,7 +138,12 @@ const StreamedGivingFlow: React.FC = () => {
     searchTimer.current = setTimeout(async () => {
       try {
         const found = await GlobalChurchCrawlerService.searchChurchesRanked(query, 40);
-        setResults((found as unknown as DirectoryChurch[]) ?? []);
+        const ranked = churchSearchMemory.pinRemembered(
+          (found as unknown as DirectoryChurch[]) ?? [],
+        );
+        setResults(ranked);
+        churchSearchMemory.rememberQuery(query);
+        void churchSearchMemory.reportSearch(query, ranked.length > 0);
       } catch (error) {
         console.error('[BWSP] church search failed', error);
         setResults([]);
