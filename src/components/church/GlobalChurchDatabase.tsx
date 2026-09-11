@@ -20,6 +20,7 @@ import {
   Bitcoin
 } from 'lucide-react';
 import { GlobalChurchCrawlerService, GlobalChurchData, ChurchCrawlerStats } from '@/services/globalChurchCrawler';
+import { churchSearchMemory } from '@/services/churchSearchMemory';
 import { useToast } from '@/hooks/use-toast';
 import AddChurchForm from '@/components/tithe/AddChurchForm';
 
