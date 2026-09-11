@@ -195,7 +195,7 @@ const BwspSynthesisFlow: React.FC = () => {
                       <Progress value={Math.round((dimension.score ?? 0) * 100)} className="h-2" />
                       <div className="text-xs text-muted-foreground">
                         {Math.round((dimension.score ?? 0) * 100)}%
-                        {dimension.notes ? ` · ${dimension.notes}` : ''}
+                        {dimension.notes?.length ? ` · ${dimension.notes.join('; ')}` : ''}
                       </div>
                     </div>
                   ))}
