@@ -6,8 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, TrendingUp, Shield, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useRealTokenPrices } from '@/hooks/useRealTokenPrices';
 
 const EnhancedDefiPage: React.FC = () => {
+  const { getPrice, formatChange } = useRealTokenPrices();
+  const ethPrice = getPrice('ETH');
+
   return (
     <SoundSystemManager>
       <div className="min-h-screen bg-background">
