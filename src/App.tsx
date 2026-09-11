@@ -71,6 +71,7 @@ const ChurchDiscoveryPage = lazy(() => import("./pages/ChurchDiscoveryPage"));
 const ComprehensiveWisdomPage = lazy(() => import("./pages/ComprehensiveWisdomPage"));
 const ScriptureIntegrityPage = lazy(() => import("./pages/ScriptureIntegrityPage"));
 const TechnicalRoadmapPage = lazy(() => import("./pages/TechnicalRoadmapPage"));
+const BWSPPage = lazy(() => import("./pages/BWSPPage"));
 
 /** Shown while a lazily-loaded route chunk is being fetched. */
 const PageLoader = () => (
@@ -152,6 +153,7 @@ const App = () => (
             <Route path="/comprehensive-wisdom" element={<ComprehensiveWisdomPage />} />
             <Route path="/scripture-integrity" element={<ScriptureIntegrityPage />} />
             <Route path="/technical-roadmap" element={<TechnicalRoadmapPage />} />
+            <Route path="/bwsp" element={<BWSPPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
