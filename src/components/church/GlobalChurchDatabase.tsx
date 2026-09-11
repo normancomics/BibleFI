@@ -50,20 +50,33 @@ const GlobalChurchDatabase: React.FC = () => {
     loadChurches();
   }, []);
 
-  // Server-side, relevance-ranked search across the entire directory
+  // Server-side, relevance-ranked search across the entire directory.
+  // Churches this person has looked up before are pinned to the very top.
   useEffect(() => {
     const term = searchQuery.trim();
     if (!term) {
       setSearchResults(null);
       setSearching(false);
+      setQueuedForSeeding(false);
       return;
     }
     setSearching(true);
     const handle = setTimeout(async () => {
       const results = await GlobalChurchCrawlerService.searchChurchesRanked(term, 100);
-      setSearchResults(results);
+      const ranked = churchSearchMemory.pinRemembered(results);
+      setSearchResults(ranked);
       setSearching(false);
-    }, 300);
+
+      const found = ranked.length > 0;
+      setQueuedForSeeding(!found);
+      churchSearchMemory.rememberQuery(term);
+      setRecentQueries(churchSearchMemory.getRecentQueries());
+      if (found) {
+        // Remember the best match so it leads the list next time.
+        churchSearchMemory.rememberChurch(ranked[0]?.id);
+      }
+      void churchSearchMemory.reportSearch(term, found);
+    }, 400);
     return () => clearTimeout(handle);
   }, [searchQuery]);
 
