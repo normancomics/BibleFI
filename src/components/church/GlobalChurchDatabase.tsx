@@ -273,6 +273,31 @@ const GlobalChurchDatabase: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-royal-purple/30 border-ancient-gold/50 text-white"
               />
+              {recentQueries.length > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-white/50">Recent:</span>
+                  {recentQueries.slice(0, 6).map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => setSearchQuery(q)}
+                      className="rounded-full border border-ancient-gold/40 px-3 py-1 text-xs text-ancient-gold hover:bg-ancient-gold/10"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      churchSearchMemory.clear();
+                      setRecentQueries([]);
+                    }}
+                    className="text-xs text-white/40 underline hover:text-white/70"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
             </div>
             
             <Select value={selectedCountry || "all"} onValueChange={(v) => setSelectedCountry(v === "all" ? "" : v)}>
