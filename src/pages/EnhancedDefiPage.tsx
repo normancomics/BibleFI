@@ -8,6 +8,7 @@ import { ArrowLeft, TrendingUp, Shield, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRealTokenPrices } from '@/hooks/useRealTokenPrices';
 import LiveBasePools from '@/components/defi/LiveBasePools';
+import BwspYieldFlow from '@/components/bwsp/BwspYieldFlow';
 
 const EnhancedDefiPage: React.FC = () => {
   const { getPrice, formatChange } = useRealTokenPrices();
@@ -42,6 +43,11 @@ const EnhancedDefiPage: React.FC = () => {
               Every transaction guided by timeless principles of stewardship and generosity.
             </p>
           </motion.div>
+
+          {/* Ask → Scripture check → strategy */}
+          <div className="mb-8">
+            <BwspYieldFlow />
+          </div>
 
           {/* Main DeFi Features */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

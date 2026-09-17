@@ -9,7 +9,8 @@ import {
   Shield,
   DollarSign,
   PieChart,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SimpleSwapForm from './SimpleSwapForm';
@@ -18,10 +19,11 @@ import RealPortfolioBalance from './RealPortfolioBalance';
 import LiveBasePools from './LiveBasePools';
 
 const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
+const BwspYieldFlow = lazy(() => import('../bwsp/BwspYieldFlow'));
 
 const StreamlinedDefiHub: React.FC = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('swap');
+  const [activeTab, setActiveTab] = useState('wisdom');
 
   const handleSuccessfulAction = (action: string, amount?: string, token?: string) => {
     toast({
@@ -51,7 +53,11 @@ const StreamlinedDefiHub: React.FC = () => {
 
       {/* Main DeFi Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 bg-black/30">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-6 bg-black/30 h-auto">
+          <TabsTrigger value="wisdom" className="data-[state=active]:bg-yellow-600/30">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Wisdom
+          </TabsTrigger>
           <TabsTrigger value="swap" className="data-[state=active]:bg-blue-600/30">
             <ArrowUpDown className="w-4 h-4 mr-2" />
             Swap
@@ -74,6 +80,16 @@ const StreamlinedDefiHub: React.FC = () => {
             Analytics
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="wisdom" className="space-y-6">
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+            </div>
+          }>
+            <BwspYieldFlow />
+          </Suspense>
+        </TabsContent>
 
         <TabsContent value="swap" className="space-y-6">
           <Card className="bg-card/50 border-border/50">
