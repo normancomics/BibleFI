@@ -53,7 +53,11 @@ const StreamlinedDefiHub: React.FC = () => {
 
       {/* Main DeFi Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 bg-black/30">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-6 bg-black/30 h-auto">
+          <TabsTrigger value="wisdom" className="data-[state=active]:bg-yellow-600/30">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Wisdom
+          </TabsTrigger>
           <TabsTrigger value="swap" className="data-[state=active]:bg-blue-600/30">
             <ArrowUpDown className="w-4 h-4 mr-2" />
             Swap
