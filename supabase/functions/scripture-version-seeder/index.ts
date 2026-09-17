@@ -214,10 +214,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // TODO: API.Bible Pro licensed NIV seeder — only when API_BIBLE_KEY is
-    // configured and the deployment has a valid commercial licence from Biblica.
+    // Licensed translations (e.g. NIV) via API.Bible Pro — only when the key exists.
     if (apiBibleKey) {
-      skipped.push('NIV (API_BIBLE_KEY present but commercial licence must be verified separately)');
+      for (const [label, bibleId] of Object.entries(licensedIds)) {
+        const text = await fetchApiBibleVerse(apiBibleKey, bibleId, ref);
+        if (!text) {
+          failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
+          continue;
+        }
+        rows.push({
+          book_name: ref.book,
+          chapter: ref.chapter,
+          verse: ref.verse,
+          text,
+          version: label,
+          testament: ref.testament,
+          financial_relevance: ref.relevance,
+          wisdom_category: ref.categories,
+          defi_keywords: DEFI_KEYWORDS,
+        });
+      }
     }
   }
 
