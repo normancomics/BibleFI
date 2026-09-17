@@ -9,7 +9,8 @@ import {
   Shield,
   DollarSign,
   PieChart,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SimpleSwapForm from './SimpleSwapForm';
@@ -18,10 +19,11 @@ import RealPortfolioBalance from './RealPortfolioBalance';
 import LiveBasePools from './LiveBasePools';
 
 const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
+const BwspYieldFlow = lazy(() => import('../bwsp/BwspYieldFlow'));
 
 const StreamlinedDefiHub: React.FC = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('swap');
+  const [activeTab, setActiveTab] = useState('wisdom');
 
   const handleSuccessfulAction = (action: string, amount?: string, token?: string) => {
     toast({
