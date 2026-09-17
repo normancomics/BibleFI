@@ -47,6 +47,12 @@ const TithePage: React.FC = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="dashboard">
+            <div className="max-w-4xl mx-auto">
+              <GiverTitheDashboard />
+            </div>
+          </TabsContent>
+
           <TabsContent value="comprehensive">
             <ComprehensiveTithingHub />
           </TabsContent>
