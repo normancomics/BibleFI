@@ -178,7 +178,18 @@ Deno.serve(async (req) => {
 
   const apiBibleKey = Deno.env.get('API_BIBLE_KEY');
   const skipped: string[] = [];
-  skipped.push('NIV (no free source; needs licensed API.Bible / Biblica access)');
+
+  let licensedIds: Record<string, string> = {};
+  if (apiBibleKey) {
+    licensedIds = await resolveApiBibleIds(apiBibleKey);
+    for (const label of LICENSED_VERSION_LABELS) {
+      if (!licensedIds[label]) {
+        skipped.push(`${label} (not available on this API.Bible key/licence)`);
+      }
+    }
+  } else {
+    skipped.push('NIV (no free source; set API_BIBLE_KEY with a Pro/commercial licence)');
+  }
 
   const rows: Record<string, unknown>[] = [];
   const failures: string[] = [];
