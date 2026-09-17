@@ -55,12 +55,22 @@ export function useBWSP(): UseBWSPState & UseBWSPActions {
         let bwtyaResult: BWTYAResult | null = null;
 
         if (availableOpportunities && availableOpportunities.length > 0) {
+          const check = bwspResponse.tripleCheck;
           bwtyaResult = bwtyaAlgorithm.run({
             opportunities: availableOpportunities,
             wisdomScore: typeof queryInput !== 'string' ? (queryInput.wisdomScore ?? 0) : 0,
             capitalUsd: typeof queryInput !== 'string' ? (queryInput.availableCapital ?? 0) : 0,
             riskTolerance:
               typeof queryInput !== 'string' ? queryInput.riskTolerance : undefined,
+            // BWTYA may only execute after the BWSP triple-check has ruled.
+            bwspApproval: check
+              ? {
+                  verdict: check.verdict,
+                  compositeScore: check.compositeScore,
+                  verseHash: check.verseHash,
+                  checkedAt: check.checkedAt,
+                }
+              : undefined,
           });
         }
 
