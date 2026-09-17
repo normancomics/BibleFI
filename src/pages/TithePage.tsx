@@ -4,8 +4,9 @@ import ComprehensiveTithingHub from '@/components/tithe/ComprehensiveTithingHub'
 import { AnonymousTithe } from '@/components/tithe/AnonymousTithe';
 import StreamedGivingFlow from '@/components/tithe/StreamedGivingFlow';
 import TitheVaultSettlement from '@/components/tithe/TitheVaultSettlement';
+import GiverTitheDashboard from '@/components/tithe/GiverTitheDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Heart, Globe, Waves } from 'lucide-react';
+import { Shield, Globe, Waves, LayoutDashboard } from 'lucide-react';
 
 const TithePage: React.FC = () => {
   return (
@@ -20,10 +21,14 @@ const TithePage: React.FC = () => {
         </div>
         
         <Tabs defaultValue="streaming" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-3xl mx-auto mb-8">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 max-w-3xl mx-auto mb-8">
             <TabsTrigger value="streaming" className="flex items-center gap-2">
               <Waves className="w-4 h-4" />
               Continuous Giving
+            </TabsTrigger>
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <LayoutDashboard className="w-4 h-4" />
+              My Giving
             </TabsTrigger>
             <TabsTrigger value="comprehensive" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
@@ -39,6 +44,12 @@ const TithePage: React.FC = () => {
             <div className="max-w-2xl mx-auto space-y-6">
               <StreamedGivingFlow />
               <TitheVaultSettlement />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="dashboard">
+            <div className="max-w-4xl mx-auto">
+              <GiverTitheDashboard />
             </div>
           </TabsContent>
 
