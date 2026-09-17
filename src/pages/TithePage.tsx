@@ -3,6 +3,7 @@ import NavBar from '@/components/NavBar';
 import ComprehensiveTithingHub from '@/components/tithe/ComprehensiveTithingHub';
 import { AnonymousTithe } from '@/components/tithe/AnonymousTithe';
 import StreamedGivingFlow from '@/components/tithe/StreamedGivingFlow';
+import TitheVaultSettlement from '@/components/tithe/TitheVaultSettlement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, Heart, Globe, Waves } from 'lucide-react';
 
@@ -35,8 +36,9 @@ const TithePage: React.FC = () => {
           </TabsList>
 
           <TabsContent value="streaming">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto space-y-6">
               <StreamedGivingFlow />
+              <TitheVaultSettlement />
             </div>
           </TabsContent>
 

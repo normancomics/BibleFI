@@ -53,10 +53,36 @@ export const activeBwtyaVault = (): BwtyaVaultDeployment => BWTYA_VAULTS[ACTIVE_
 export const isBwtyaVaultDeployed = (): boolean =>
   /^0x[a-fA-F0-9]{40}$/.test(activeBwtyaVault().address);
 
-/** Minimal read ABI for dashboard settlement figures. */
+/**
+ * Read ABI for settlement figures. `previewYield` returns the on-chain
+ * YieldDistribution struct, so it decodes as a 6-field tuple.
+ */
 export const BWTYA_VAULT_READ_ABI = [
-  "function previewYield(address user) view returns (uint256 grossYield, uint256 titheAmount, uint256 netYield, uint256 effectiveApyBps)",
+  "function previewYield(address user) view returns ((uint256 grossYield,uint256 titheAmount,uint256 netYield,uint256 wisdomBonus,uint256 titheBlessingBonus,uint256 finalAmount))",
   "function effectiveUserApy(address user) view returns (uint256)",
+  "function depositToken() view returns (address)",
+  "function treasury() view returns (address)",
+  "function deposits(address) view returns (uint256 amount,uint256 reserveAmount,uint256 depositTime,uint256 lastClaimTime,uint256 accruedYield,uint256 wisdomTwapStart,uint256 wisdomTwapAccum,uint256 twapLastUpdated,bool inRebalanceLock,uint256 rebalanceLockEnds)",
+] as const;
+
+/**
+ * Write ABI — real settlement. `deposit` pulls the token (approve first),
+ * `claimYield` sends the mandatory 10% tithe to the treasury on-chain before
+ * releasing the steward's share, and `withdraw` returns principal.
+ */
+export const BWTYA_VAULT_WRITE_ABI = [
+  "function deposit(uint256 amount, uint256 portfolioTotalUsd)",
+  "function claimYield()",
+  "function withdraw()",
+] as const;
+
+/** Minimal ERC-20 ABI for the approve step before depositing. */
+export const ERC20_ABI = [
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
 ] as const;
 
 /** Protocol-mandated tithe on all yield (Leviticus 27:30). Never configurable. */
