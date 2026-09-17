@@ -254,7 +254,8 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       success: true,
-      versions_seeded: Object.keys(FREE_VERSIONS),
+      versions_seeded: [...Object.keys(FREE_VERSIONS), ...Object.keys(licensedIds)],
+      licensed_versions: Object.keys(licensedIds),
       references: REFERENCES.length,
       rows_upserted: upserted,
       skipped_versions: skipped,
