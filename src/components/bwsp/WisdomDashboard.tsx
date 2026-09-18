@@ -10,11 +10,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, Sparkles, TrendingUp } from 'lucide-react';
+import { ExternalLink, Loader2, RefreshCw, Sparkles, TrendingUp } from 'lucide-react';
 import {
   fetchWisdomDashboard,
   type WisdomDashboardData,
 } from '@/services/wisdomDashboardService';
+import { useWallet } from '@/contexts/WalletContext';
+import { useTitheVault } from '@/hooks/useTitheVault';
 
 const amount = (value: number, digits = 2) =>
   value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
