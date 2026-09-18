@@ -110,6 +110,9 @@ export class BWSPSynthesizer {
     promptContext: string,
   ): Promise<BWSPSynthesis> {
     try {
+      // Signed-out visitors cannot call the protected agent — use offline wisdom.
+      if (!(await hasSupabaseSession())) return buildOfflineSynthesis(context);
+
       const { data, error } = await supabase.functions.invoke('bwsp-sovereign-agent', {
         body: {
           query: context.query.text,
