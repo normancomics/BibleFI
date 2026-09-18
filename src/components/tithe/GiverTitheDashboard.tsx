@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Church, Coins, ExternalLink, RefreshCw, Waves } from 'lucide-react';
+import { Church, Coins, ExternalLink, RefreshCw, Vault, Waves } from 'lucide-react';
 import {
   buildChurchBalances,
   fetchGiverPayments,
@@ -20,6 +20,9 @@ import {
   type GiverPayment,
   type GiverStream,
 } from '@/services/titheDashboardService';
+import { fetchWisdomDashboard } from '@/services/wisdomDashboardService';
+import { useTitheVault } from '@/hooks/useTitheVault';
+import { useWallet } from '@/contexts/WalletContext';
 
 const fmt = (n: number) =>
   n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
