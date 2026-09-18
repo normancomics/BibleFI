@@ -2,6 +2,7 @@
 // Calls the enhanced-biblical-advisor Supabase edge function with offline fallback synthesis
 
 import { supabase } from '@/integrations/supabase/client';
+import { hasSupabaseSession } from './session';
 import type { BWSPContext, BWSPSynthesis, ScriptureResult } from './types';
 
 // ---------------------------------------------------------------------------
