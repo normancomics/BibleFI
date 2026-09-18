@@ -179,6 +179,16 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
             run(
               () => vault.claimTitheAndYield(),
               'Settled: the 10% tithe went to the treasury, the rest to you.',
+              async (hash) => {
+                await recordYieldSettlement({
+                  strategyName,
+                  grossYield: position?.grossYield ?? 0,
+                  titheAmount: position?.titheAmount ?? 0,
+                  netYield: position?.netYield ?? 0,
+                  tokenSymbol: vault.tokenSymbol,
+                  txHash: hash,
+                });
+              },
             )
           }
         >
