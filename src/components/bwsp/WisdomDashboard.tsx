@@ -27,6 +27,8 @@ const when = (iso: string) =>
 const WisdomDashboard: React.FC = () => {
   const [data, setData] = useState<WisdomDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { address } = useWallet();
+  const vault = useTitheVault(address ?? null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -41,8 +43,20 @@ const WisdomDashboard: React.FC = () => {
     void load();
   }, [load]);
 
+  // Keep balances and earnings current on their own: the vault holds the truth,
+  // so re-read it (and the steward's records) on a gentle timer.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void load();
+      vault.refresh();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [load, vault.refresh]);
+
   const totals = data?.totals;
-  const hasAnything = (data?.balances.length ?? 0) > 0;
+  const live = vault.position;
+  const hasLive = vault.deployed && !!live && (live.principal > 0 || live.grossYield > 0);
+  const hasAnything = (data?.balances.length ?? 0) > 0 || hasLive;
 
   return (
     <Card className="border-primary/20 bg-card/60">
