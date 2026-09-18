@@ -99,6 +99,8 @@ export class BWSPRetriever {
 
   async retrieveDefiKnowledge(queryText: string, limit = 5): Promise<DefiKnowledgeResult[]> {
     try {
+      if (!(await hasSupabaseSession())) throw new Error('No session');
+
       const embedResponse = await supabase.functions.invoke('generate-embeddings', {
         body: { text: queryText },
       });
