@@ -2,6 +2,7 @@
 // Semantic search via Supabase pgvector RPCs with offline fallback
 
 import { supabase } from '@/integrations/supabase/client';
+import { hasSupabaseSession } from './session';
 import { comprehensiveFinancialScriptures } from '@/data/comprehensiveFinancialScriptures';
 import type { ScriptureResult, DefiKnowledgeResult } from './types';
 
@@ -51,6 +52,9 @@ function offlineScriptureSearch(queryText: string, limit = 5): ScriptureResult[]
 export class BWSPRetriever {
   async retrieveScriptures(queryText: string, limit = 5): Promise<ScriptureResult[]> {
     try {
+      // The embedding function is admin-only; signed-out visitors use keyword search.
+      if (!(await hasSupabaseSession())) return offlineScriptureSearch(queryText, limit);
+
       // Generate embedding via Supabase edge function
       const embedResponse = await supabase.functions.invoke('generate-embeddings', {
         body: { text: queryText },
@@ -95,6 +99,8 @@ export class BWSPRetriever {
 
   async retrieveDefiKnowledge(queryText: string, limit = 5): Promise<DefiKnowledgeResult[]> {
     try {
+      if (!(await hasSupabaseSession())) throw new Error('No session');
+
       const embedResponse = await supabase.functions.invoke('generate-embeddings', {
         body: { text: queryText },
       });
