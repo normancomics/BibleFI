@@ -31,6 +31,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useBWSP } from '@/hooks/useBWSP';
+import BwspVaultExecution from '@/components/bwsp/BwspVaultExecution';
 import { fetchLiveBaseOpportunities } from '@/services/bwtya/liveOpportunities';
 import type { YieldOpportunity } from '@/services/bwtya/types';
 import { wisdomAuditTrail, type WisdomAuditRecord } from '@/services/audit/wisdomAuditTrail';
@@ -385,6 +386,14 @@ const BwspYieldFlow: React.FC = () => {
                         Returns change constantly and are never promised. The tithe is set aside
                         before anything else — "The tithe is the LORD's" (Leviticus 27:30).
                       </p>
+
+                      <BwspVaultExecution
+                        strategyName={strategy.name}
+                        suggestedAmount={
+                          (Math.max(0, Number(capital) || 0)) *
+                          (bwtyaResult.executionGate.capitalScalar ?? 1)
+                        }
+                      />
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">
