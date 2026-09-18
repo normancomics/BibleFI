@@ -81,6 +81,33 @@ export function useTitheVault(userAddress?: string | null): UseTitheVaultResult 
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [walletChainId, setWalletChainId] = useState<number | null>(null);
+
+  // Track which network the browser wallet is on, live.
+  useEffect(() => {
+    const injected = getInjected();
+    if (!injected) return;
+    let cancelled = false;
+    const read = async () => {
+      try {
+        const hex = (await injected.request({ method: "eth_chainId" })) as string;
+        if (!cancelled) setWalletChainId(parseInt(hex, 16));
+      } catch {
+        if (!cancelled) setWalletChainId(null);
+      }
+    };
+    void read();
+    const onChanged = (...args: unknown[]) => {
+      const hex = args[0];
+      if (typeof hex === "string") setWalletChainId(parseInt(hex, 16));
+    };
+    injected.on?.("chainChanged", onChanged);
+    return () => {
+      cancelled = true;
+      injected.removeListener?.("chainChanged", onChanged);
+    };
+  }, []);
+
 
   const load = useCallback(async () => {
     if (!deployed) return;
