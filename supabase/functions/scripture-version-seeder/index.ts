@@ -237,17 +237,22 @@ Deno.serve(async (req) => {
     }
   }
 
+  // PostgREST exposes only the `api` schema, so writes go through the
+  // SECURITY DEFINER gateway api.upsert_bible_verses(jsonb).
   let upserted = 0;
   for (let i = 0; i < rows.length; i += 100) {
-    const batch = rows.slice(i, i + 100);
-    const { error } = await supabase
-      .from('bible_verses')
-      .upsert(batch, { onConflict: 'book_name,chapter,verse,version' });
+    const batch = rows.slice(i, i + 100).map((row) => {
+      const { defi_keywords: _ignored, ...rest } = row as Record<string, unknown>;
+      return rest;
+    });
+    const { data, error } = await supabase.schema('api').rpc('upsert_bible_verses', {
+      p_rows: batch,
+    });
     if (error) {
       console.error('[scripture-version-seeder] upsert error', error);
       failures.push(`upsert batch ${i}: ${error.message}`);
     } else {
-      upserted += batch.length;
+      upserted += typeof data === 'number' ? data : batch.length;
     }
   }
 
