@@ -52,6 +52,9 @@ function offlineScriptureSearch(queryText: string, limit = 5): ScriptureResult[]
 export class BWSPRetriever {
   async retrieveScriptures(queryText: string, limit = 5): Promise<ScriptureResult[]> {
     try {
+      // The embedding function is admin-only; signed-out visitors use keyword search.
+      if (!(await hasSupabaseSession())) return offlineScriptureSearch(queryText, limit);
+
       // Generate embedding via Supabase edge function
       const embedResponse = await supabase.functions.invoke('generate-embeddings', {
         body: { text: queryText },
