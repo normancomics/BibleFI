@@ -10,11 +10,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw, Sparkles, TrendingUp } from 'lucide-react';
+import { ExternalLink, Loader2, RefreshCw, Sparkles, TrendingUp } from 'lucide-react';
 import {
   fetchWisdomDashboard,
   type WisdomDashboardData,
 } from '@/services/wisdomDashboardService';
+import { useWallet } from '@/contexts/WalletContext';
+import { useTitheVault } from '@/hooks/useTitheVault';
 
 const amount = (value: number, digits = 2) =>
   value.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -25,6 +27,8 @@ const when = (iso: string) =>
 const WisdomDashboard: React.FC = () => {
   const [data, setData] = useState<WisdomDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { address } = useWallet();
+  const vault = useTitheVault(address ?? null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -39,8 +43,20 @@ const WisdomDashboard: React.FC = () => {
     void load();
   }, [load]);
 
+  // Keep balances and earnings current on their own: the vault holds the truth,
+  // so re-read it (and the steward's records) on a gentle timer.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void load();
+      vault.refresh();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [load, vault.refresh]);
+
   const totals = data?.totals;
-  const hasAnything = (data?.balances.length ?? 0) > 0;
+  const live = vault.position;
+  const hasLive = vault.deployed && !!live && (live.principal > 0 || live.grossYield > 0);
+  const hasAnything = (data?.balances.length ?? 0) > 0 || hasLive;
 
   return (
     <Card className="border-primary/20 bg-card/60">
@@ -68,6 +84,51 @@ const WisdomDashboard: React.FC = () => {
           </div>
         ) : (
           <>
+            {hasLive && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">
+                    Live in the vault · {vault.chainLabel}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">{vault.tokenSymbol}</Badge>
+                    {vault.explorerUrl && (
+                      <a
+                        href={vault.explorerUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-primary underline"
+                      >
+                        <ExternalLink className="h-3 w-3" /> View
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">In the vault now</p>
+                    <p>{amount(live?.principal ?? 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Earned, not settled</p>
+                    <p className="text-eboy-green">{amount(live?.grossYield ?? 0, 4)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Tithe due (10%)</p>
+                    <p className="text-primary">{amount(live?.titheAmount ?? 0, 4)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Your share when settled</p>
+                    <p>{amount(live?.netYield ?? 0, 4)}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Read straight from the vault and refreshed every minute. The tithe is sent to the
+                  treasury by the contract itself when you settle.
+                </p>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
                 { label: 'At work', value: amount(totals?.principal ?? 0) },

@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Church, Coins, ExternalLink, RefreshCw, Waves } from 'lucide-react';
+import { Church, Coins, ExternalLink, RefreshCw, Vault, Waves } from 'lucide-react';
 import {
   buildChurchBalances,
   fetchGiverPayments,
@@ -20,6 +20,9 @@ import {
   type GiverPayment,
   type GiverStream,
 } from '@/services/titheDashboardService';
+import { fetchWisdomDashboard } from '@/services/wisdomDashboardService';
+import { useTitheVault } from '@/hooks/useTitheVault';
+import { useWallet } from '@/contexts/WalletContext';
 
 const fmt = (n: number) =>
   n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
@@ -30,15 +33,25 @@ const GiverTitheDashboard: React.FC = () => {
   const [balances, setBalances] = useState<ChurchBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [vaultTitheSettled, setVaultTitheSettled] = useState(0);
+  const [vaultSettlements, setVaultSettlements] = useState(0);
+  const { address } = useWallet();
+  const vault = useTitheVault(address ?? null);
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [s, p] = await Promise.all([fetchGiverStreams(), fetchGiverPayments()]);
+      const [s, p, wisdom] = await Promise.all([
+        fetchGiverStreams(),
+        fetchGiverPayments(),
+        fetchWisdomDashboard(),
+      ]);
       setStreams(s);
       setPayments(p);
       setBalances(buildChurchBalances(s, p));
+      setVaultTitheSettled(wisdom.totals.tithePaid);
+      setVaultSettlements(wisdom.events.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load your giving');
     } finally {
@@ -49,6 +62,16 @@ const GiverTitheDashboard: React.FC = () => {
   useEffect(() => {
     load();
   }, []);
+
+  // Settled tithes come from the vault itself, so keep them current on a timer.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void load();
+      vault.refresh();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [vault.refresh]);
+
 
   const monthlyTotal = streams
     .filter((s) => s.status === 'active')
@@ -119,6 +142,53 @@ const GiverTitheDashboard: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="border-2 border-scripture/30 bg-black/20">
+        <CardHeader className="border-b border-ancient-gold/20">
+          <CardTitle className="font-scroll text-ancient-gold flex items-center gap-2">
+            <Vault className="w-4 h-4" /> Tithes settled by the vault
+          </CardTitle>
+          <CardDescription className="text-white/70">
+            {vault.deployed
+              ? `Taken by the contract on ${vault.chainLabel} before your share — not an estimate`
+              : 'The vault is not connected on this network yet, so nothing settles here.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6 space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <p className="text-xs text-white/50">Tithe already settled</p>
+              <p className="text-lg font-bold text-ancient-gold">{fmt(vaultTitheSettled)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50">Settlements</p>
+              <p className="text-lg font-bold text-ancient-gold">{vaultSettlements}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50">Tithe due next settle</p>
+              <p className="text-lg font-bold text-ancient-gold">
+                {fmt(vault.position?.titheAmount ?? 0)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50">In the vault now</p>
+              <p className="text-lg font-bold text-ancient-gold">
+                {fmt(vault.position?.principal ?? 0)} {vault.tokenSymbol}
+              </p>
+            </div>
+          </div>
+          {vault.explorerUrl && (
+            <a
+              href={vault.explorerUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-ancient-gold underline"
+            >
+              <ExternalLink size={12} /> See the vault on the block explorer
+            </a>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="border-2 border-scripture/30 bg-black/20">
         <CardHeader className="border-b border-ancient-gold/20">
