@@ -47,9 +47,18 @@ export const BWTYA_VAULTS: Record<BwtyaChain, BwtyaVaultDeployment> = {
   },
 };
 
-/** Active vault chain — testnet first until the mainnet vault is audited. */
+/**
+ * Active vault chain. Explicit VITE_BWTYA_VAULT_CHAIN wins; otherwise a
+ * registered Base mainnet address promotes the app to real Base money, and
+ * failing that we stay on testnet. Mainnet must only be registered after audit.
+ */
+const explicitChain = env("VITE_BWTYA_VAULT_CHAIN") as BwtyaChain | "";
 export const ACTIVE_BWTYA_CHAIN: BwtyaChain =
-  (env("VITE_BWTYA_VAULT_CHAIN") as BwtyaChain) || "base-sepolia";
+  explicitChain === "base" || explicitChain === "base-sepolia"
+    ? explicitChain
+    : /^0x[a-fA-F0-9]{40}$/.test(env("VITE_BWTYA_VAULT_BASE"))
+      ? "base"
+      : "base-sepolia";
 
 export const activeBwtyaVault = (): BwtyaVaultDeployment => BWTYA_VAULTS[ACTIVE_BWTYA_CHAIN];
 
