@@ -145,7 +145,21 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
             />
             <Button
               onClick={() =>
-                run(() => vault.deposit(amount), 'Your funds are working in the vault.')
+                run(
+                  () => vault.deposit(amount),
+                  'Your funds are working in the vault.',
+                  async (hash) => {
+                    await recordStrategyDeposit({
+                      strategyName,
+                      chainId: vault.chainId,
+                      vaultAddress: vault.address,
+                      principal: parseFloat(amount) || 0,
+                      tokenSymbol: vault.tokenSymbol,
+                      walletAddress: address ?? null,
+                      depositTx: hash,
+                    });
+                  },
+                )
               }
               disabled={!isConnected || vault.busy || !amount}
             >
