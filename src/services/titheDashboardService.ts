@@ -94,18 +94,35 @@ export async function fetchGiverStreams(): Promise<GiverStream[]> {
   }));
 }
 
+interface MyTithePaymentRow {
+  id: string;
+  paid_at: string;
+  amount: number | string;
+  currency: string;
+  payment_method: string;
+  status: string;
+  tx_hash: string | null;
+  anonymous: boolean;
+  church_name: string | null;
+}
+
+/**
+ * Reads the signed-in giver's own tithe payments (scoped by giver_user_id inside
+ * public.get_my_tithe_payments), resolving the receiving church by name.
+ */
 export async function fetchGiverPayments(): Promise<GiverPayment[]> {
-  const { data, error } = await supabase
-    .from('church_tithe_payments')
-    .select('*')
-    .order('paid_at', { ascending: false })
-    .limit(200);
-  if (error) throw error;
+  const { data, error } = await (
+    supabase.rpc as unknown as (
+      fn: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: MyTithePaymentRow[] | null; error: { message: string } | null }>
+  )('get_my_tithe_payments', { p_limit: 200 });
+  if (error) throw new Error(error.message);
 
   return (data ?? []).map((r) => ({
     id: r.id,
     date: new Date(r.paid_at),
-    church: r.donor_display_name && r.anonymous ? 'Church (anonymous gift)' : 'Church tithe',
+    church: r.church_name || (r.anonymous ? 'Church (anonymous gift)' : 'Church tithe'),
     amount: Number(r.amount) || 0,
     currency: r.currency,
     method: r.payment_method,
