@@ -7,3 +7,5 @@
 ## Open
 - [ ] Add API.Bible Pro key support for licensed NIV alternatives
 - [ ] Continue BWSP/BWTYA enhancements
+
+- [ ] Store OPENSEA_API_KEY securely and wire an NFT/collection read path for BibleFi
