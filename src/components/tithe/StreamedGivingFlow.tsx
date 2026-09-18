@@ -59,6 +59,10 @@ interface GivingAddress {
   crypto_address: string;
   crypto_networks: string[] | null;
   verified: boolean | null;
+  city?: string | null;
+  state_province?: string | null;
+  country?: string | null;
+  denomination?: string | null;
 }
 
 const CADENCES = [
