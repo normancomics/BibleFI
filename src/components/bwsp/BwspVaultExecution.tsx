@@ -39,9 +39,14 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
     if (suggestedAmount > 0) setAmount(suggestedAmount.toFixed(2));
   }, [suggestedAmount]);
 
-  const run = async (action: () => Promise<string | null>, success: string) => {
+  const run = async (
+    action: () => Promise<string | null>,
+    success: string,
+    onConfirmed?: (hash: string | null) => Promise<void>,
+  ) => {
     try {
       const hash = await action();
+      if (onConfirmed) await onConfirmed(hash);
       toast.success(success, {
         description: hash ? `Confirmed on ${vault.chainLabel}: ${hash.slice(0, 10)}…` : undefined,
       });
