@@ -720,6 +720,7 @@ export type Database = {
           created_at: string
           currency: string
           donor_display_name: string | null
+          giver_user_id: string | null
           id: string
           onboarding_id: string
           paid_at: string
@@ -734,6 +735,7 @@ export type Database = {
           created_at?: string
           currency?: string
           donor_display_name?: string | null
+          giver_user_id?: string | null
           id?: string
           onboarding_id: string
           paid_at?: string
@@ -748,6 +750,7 @@ export type Database = {
           created_at?: string
           currency?: string
           donor_display_name?: string | null
+          giver_user_id?: string | null
           id?: string
           onboarding_id?: string
           paid_at?: string
@@ -2048,6 +2051,20 @@ export type Database = {
           church_row: Database["public"]["Tables"]["global_churches"]["Row"]
         }
         Returns: Json
+      }
+      get_my_tithe_payments: {
+        Args: { p_limit?: number }
+        Returns: {
+          amount: number
+          anonymous: boolean
+          church_name: string
+          currency: string
+          id: string
+          paid_at: string
+          payment_method: string
+          status: string
+          tx_hash: string
+        }[]
       }
       has_role: {
         Args: {
