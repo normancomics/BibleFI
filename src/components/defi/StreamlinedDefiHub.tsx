@@ -20,6 +20,7 @@ import LiveBasePools from './LiveBasePools';
 
 const DefiOpportunitiesDashboard = lazy(() => import('./DefiOpportunitiesDashboard'));
 const BwspYieldFlow = lazy(() => import('../bwsp/BwspYieldFlow'));
+const WisdomDashboard = lazy(() => import('../bwsp/WisdomDashboard'));
 
 const StreamlinedDefiHub: React.FC = () => {
   const { toast } = useToast();
@@ -88,6 +89,9 @@ const StreamlinedDefiHub: React.FC = () => {
             </div>
           }>
             <BwspYieldFlow />
+          </Suspense>
+          <Suspense fallback={null}>
+            <WisdomDashboard />
           </Suspense>
         </TabsContent>
 
