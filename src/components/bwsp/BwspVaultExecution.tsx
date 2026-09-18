@@ -17,6 +17,10 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ExternalLink, Loader2, RefreshCw, Vault } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTitheVault } from '@/hooks/useTitheVault';
+import {
+  recordStrategyDeposit,
+  recordYieldSettlement,
+} from '@/services/wisdomDashboardService';
 
 interface BwspVaultExecutionProps {
   /** Amount the strategy says may be deployed, in whole units of the deposit token. */
@@ -39,9 +43,14 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
     if (suggestedAmount > 0) setAmount(suggestedAmount.toFixed(2));
   }, [suggestedAmount]);
 
-  const run = async (action: () => Promise<string | null>, success: string) => {
+  const run = async (
+    action: () => Promise<string | null>,
+    success: string,
+    onConfirmed?: (hash: string | null) => Promise<void>,
+  ) => {
     try {
       const hash = await action();
+      if (onConfirmed) await onConfirmed(hash);
       toast.success(success, {
         description: hash ? `Confirmed on ${vault.chainLabel}: ${hash.slice(0, 10)}…` : undefined,
       });
@@ -136,7 +145,21 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
             />
             <Button
               onClick={() =>
-                run(() => vault.deposit(amount), 'Your funds are working in the vault.')
+                run(
+                  () => vault.deposit(amount),
+                  'Your funds are working in the vault.',
+                  async (hash) => {
+                    await recordStrategyDeposit({
+                      strategyName,
+                      chainId: vault.chainId,
+                      vaultAddress: vault.address,
+                      principal: parseFloat(amount) || 0,
+                      tokenSymbol: vault.tokenSymbol,
+                      walletAddress: address ?? null,
+                      depositTx: hash,
+                    });
+                  },
+                )
               }
               disabled={!isConnected || vault.busy || !amount}
             >
@@ -156,6 +179,16 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
             run(
               () => vault.claimTitheAndYield(),
               'Settled: the 10% tithe went to the treasury, the rest to you.',
+              async (hash) => {
+                await recordYieldSettlement({
+                  strategyName,
+                  grossYield: position?.grossYield ?? 0,
+                  titheAmount: position?.titheAmount ?? 0,
+                  netYield: position?.netYield ?? 0,
+                  tokenSymbol: vault.tokenSymbol,
+                  txHash: hash,
+                });
+              },
             )
           }
         >

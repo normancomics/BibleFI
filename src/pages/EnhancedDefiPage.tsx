@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useRealTokenPrices } from '@/hooks/useRealTokenPrices';
 import LiveBasePools from '@/components/defi/LiveBasePools';
 import BwspYieldFlow from '@/components/bwsp/BwspYieldFlow';
+import WisdomDashboard from '@/components/bwsp/WisdomDashboard';
 
 const EnhancedDefiPage: React.FC = () => {
   const { getPrice, formatChange } = useRealTokenPrices();
@@ -45,8 +46,9 @@ const EnhancedDefiPage: React.FC = () => {
           </motion.div>
 
           {/* Ask → Scripture check → strategy */}
-          <div className="mb-8">
+          <div className="mb-8 space-y-6">
             <BwspYieldFlow />
+            <WisdomDashboard />
           </div>
 
           {/* Main DeFi Features */}

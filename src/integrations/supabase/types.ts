@@ -1785,6 +1785,101 @@ export type Database = {
           },
         ]
       }
+      wisdom_strategy_positions: {
+        Row: {
+          chain_id: number
+          created_at: string
+          deposit_tx: string | null
+          id: string
+          principal: number
+          status: string
+          strategy_name: string
+          token_symbol: string
+          updated_at: string
+          user_id: string
+          vault_address: string
+          verse_hash: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          chain_id: number
+          created_at?: string
+          deposit_tx?: string | null
+          id?: string
+          principal?: number
+          status?: string
+          strategy_name: string
+          token_symbol?: string
+          updated_at?: string
+          user_id?: string
+          vault_address: string
+          verse_hash?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          chain_id?: number
+          created_at?: string
+          deposit_tx?: string | null
+          id?: string
+          principal?: number
+          status?: string
+          strategy_name?: string
+          token_symbol?: string
+          updated_at?: string
+          user_id?: string
+          vault_address?: string
+          verse_hash?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
+      wisdom_yield_events: {
+        Row: {
+          gross_yield: number
+          id: string
+          net_yield: number
+          occurred_at: string
+          position_id: string | null
+          strategy_name: string
+          tithe_amount: number
+          token_symbol: string
+          tx_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          gross_yield?: number
+          id?: string
+          net_yield?: number
+          occurred_at?: string
+          position_id?: string | null
+          strategy_name: string
+          tithe_amount?: number
+          token_symbol?: string
+          tx_hash?: string | null
+          user_id?: string
+        }
+        Update: {
+          gross_yield?: number
+          id?: string
+          net_yield?: number
+          occurred_at?: string
+          position_id?: string | null
+          strategy_name?: string
+          tithe_amount?: number
+          token_symbol?: string
+          tx_hash?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wisdom_yield_events_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "wisdom_strategy_positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       x402_executions: {
         Row: {
           amount_wei: string
