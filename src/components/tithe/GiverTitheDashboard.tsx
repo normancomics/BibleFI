@@ -145,6 +145,53 @@ const GiverTitheDashboard: React.FC = () => {
 
       <Card className="border-2 border-scripture/30 bg-black/20">
         <CardHeader className="border-b border-ancient-gold/20">
+          <CardTitle className="font-scroll text-ancient-gold flex items-center gap-2">
+            <Vault className="w-4 h-4" /> Tithes settled by the vault
+          </CardTitle>
+          <CardDescription className="text-white/70">
+            {vault.deployed
+              ? `Taken by the contract on ${vault.chainLabel} before your share — not an estimate`
+              : 'The vault is not connected on this network yet, so nothing settles here.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6 space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <p className="text-xs text-white/50">Tithe already settled</p>
+              <p className="text-lg font-bold text-ancient-gold">{fmt(vaultTitheSettled)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50">Settlements</p>
+              <p className="text-lg font-bold text-ancient-gold">{vaultSettlements}</p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50">Tithe due next settle</p>
+              <p className="text-lg font-bold text-ancient-gold">
+                {fmt(vault.position?.titheAmount ?? 0)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-white/50">In the vault now</p>
+              <p className="text-lg font-bold text-ancient-gold">
+                {fmt(vault.position?.principal ?? 0)} {vault.tokenSymbol}
+              </p>
+            </div>
+          </div>
+          {vault.explorerUrl && (
+            <a
+              href={vault.explorerUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-ancient-gold underline"
+            >
+              <ExternalLink size={12} /> See the vault on the block explorer
+            </a>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 border-scripture/30 bg-black/20">
+        <CardHeader className="border-b border-ancient-gold/20">
           <CardTitle className="font-scroll text-ancient-gold">Ongoing gifts</CardTitle>
           <CardDescription className="text-white/70">
             Continuous streams flowing to your church wallets
