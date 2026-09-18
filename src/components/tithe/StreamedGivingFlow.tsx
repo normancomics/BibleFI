@@ -132,6 +132,29 @@ const StreamedGivingFlow: React.FC = () => {
     loadStreams();
   }, [loadStreams]);
 
+  /* ------------------- churches that can receive right now ------------------ */
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabaseApi.rpc('list_churches_with_giving_address', {
+          p_limit: 24,
+        });
+        if (error) throw error;
+        if (!cancelled) setReady(((data as GivingAddress[]) ?? []).filter((r) => !!r.crypto_address));
+      } catch (error) {
+        console.error('[BWSP] ready-to-receive list failed', error);
+        if (!cancelled) setReady([]);
+      } finally {
+        if (!cancelled) setLoadingReady(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   /* ------------------------------ church search ---------------------------- */
 
   useEffect(() => {
