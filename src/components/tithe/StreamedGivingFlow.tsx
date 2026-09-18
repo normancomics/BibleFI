@@ -59,6 +59,10 @@ interface GivingAddress {
   crypto_address: string;
   crypto_networks: string[] | null;
   verified: boolean | null;
+  city?: string | null;
+  state_province?: string | null;
+  country?: string | null;
+  denomination?: string | null;
 }
 
 const CADENCES = [
@@ -89,6 +93,9 @@ const StreamedGivingFlow: React.FC = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [steps, setSteps] = useState<string[]>([]);
+
+  const [ready, setReady] = useState<GivingAddress[]>([]);
+  const [loadingReady, setLoadingReady] = useState(true);
 
   const [myStreams, setMyStreams] = useState<SuperfluidStreamData[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(false);
@@ -124,6 +131,29 @@ const StreamedGivingFlow: React.FC = () => {
   useEffect(() => {
     loadStreams();
   }, [loadStreams]);
+
+  /* ------------------- churches that can receive right now ------------------ */
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabaseApi.rpc('list_churches_with_giving_address', {
+          p_limit: 24,
+        });
+        if (error) throw error;
+        if (!cancelled) setReady(((data as GivingAddress[]) ?? []).filter((r) => !!r.crypto_address));
+      } catch (error) {
+        console.error('[BWSP] ready-to-receive list failed', error);
+        if (!cancelled) setReady([]);
+      } finally {
+        if (!cancelled) setLoadingReady(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* ------------------------------ church search ---------------------------- */
 
@@ -365,6 +395,63 @@ const StreamedGivingFlow: React.FC = () => {
               aria-label="Search churches"
             />
           </div>
+
+          {term.trim().length < 2 && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                {loadingReady
+                  ? 'Loading churches that can receive giving today…'
+                  : ready.length > 0
+                    ? 'Churches that can receive your giving today:'
+                    : 'No church has published a giving wallet yet. Search for yours and ask them for it.'}
+              </p>
+              {ready.length > 0 && (
+                <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                  {ready.map((item) => (
+                    <button
+                      key={item.church_id}
+                      type="button"
+                      onClick={() =>
+                        selectChurch({
+                          id: item.church_id,
+                          name: item.name,
+                          city: item.city,
+                          state_province: item.state_province,
+                          country: item.country,
+                          denomination: item.denomination,
+                          verified: item.verified,
+                          accepts_crypto: true,
+                        })
+                      }
+                      className={`w-full rounded-lg border p-3 text-left transition-colors ${
+                        church?.id === item.church_id
+                          ? 'border-ancient-gold bg-ancient-gold/10'
+                          : 'border-border hover:border-ancient-gold/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 font-medium">
+                        <span className="truncate">{item.name}</span>
+                        {item.verified && (
+                          <CheckCircle className="h-4 w-4 shrink-0 text-eboy-green" />
+                        )}
+                        <Badge
+                          variant="outline"
+                          className="ml-auto border-eboy-green/50 text-eboy-green"
+                        >
+                          Ready to receive
+                        </Badge>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {[item.denomination, item.city, item.state_province, item.country]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {searching && (
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
