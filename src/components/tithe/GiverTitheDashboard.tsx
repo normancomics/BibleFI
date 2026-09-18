@@ -33,15 +33,25 @@ const GiverTitheDashboard: React.FC = () => {
   const [balances, setBalances] = useState<ChurchBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [vaultTitheSettled, setVaultTitheSettled] = useState(0);
+  const [vaultSettlements, setVaultSettlements] = useState(0);
+  const { address } = useWallet();
+  const vault = useTitheVault(address ?? null);
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [s, p] = await Promise.all([fetchGiverStreams(), fetchGiverPayments()]);
+      const [s, p, wisdom] = await Promise.all([
+        fetchGiverStreams(),
+        fetchGiverPayments(),
+        fetchWisdomDashboard(),
+      ]);
       setStreams(s);
       setPayments(p);
       setBalances(buildChurchBalances(s, p));
+      setVaultTitheSettled(wisdom.totals.tithePaid);
+      setVaultSettlements(wisdom.events.length);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load your giving');
     } finally {
@@ -52,6 +62,16 @@ const GiverTitheDashboard: React.FC = () => {
   useEffect(() => {
     load();
   }, []);
+
+  // Settled tithes come from the vault itself, so keep them current on a timer.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void load();
+      vault.refresh();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [vault.refresh]);
+
 
   const monthlyTotal = streams
     .filter((s) => s.status === 'active')
