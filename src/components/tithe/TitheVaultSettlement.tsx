@@ -93,6 +93,28 @@ const TitheVaultSettlement: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {vault.wrongNetwork && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs">
+            <span className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              Your wallet is on another network. Move it to {vault.chainLabel} to give here.
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                vault
+                  .switchNetwork()
+                  .catch((e) =>
+                    toast.error(e instanceof Error ? e.message : 'Your wallet did not switch networks.'),
+                  )
+              }
+            >
+              Switch to {vault.chainLabel}
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <div>
             <p className="text-muted-foreground">Your principal</p>
