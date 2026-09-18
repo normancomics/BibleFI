@@ -256,5 +256,8 @@ export function useTitheVault(userAddress?: string | null): UseTitheVaultResult 
     refresh: () => void load(),
     deposit,
     claimTitheAndYield,
+    walletChainId,
+    wrongNetwork: walletChainId !== null && walletChainId !== vault.chainId,
+    switchNetwork,
   };
 }
