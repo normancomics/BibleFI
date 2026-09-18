@@ -90,6 +90,9 @@ const StreamedGivingFlow: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [steps, setSteps] = useState<string[]>([]);
 
+  const [ready, setReady] = useState<GivingAddress[]>([]);
+  const [loadingReady, setLoadingReady] = useState(true);
+
   const [myStreams, setMyStreams] = useState<SuperfluidStreamData[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(false);
 
