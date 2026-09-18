@@ -17,6 +17,10 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ExternalLink, Loader2, RefreshCw, Vault } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTitheVault } from '@/hooks/useTitheVault';
+import {
+  recordStrategyDeposit,
+  recordYieldSettlement,
+} from '@/services/wisdomDashboardService';
 
 interface BwspVaultExecutionProps {
   /** Amount the strategy says may be deployed, in whole units of the deposit token. */
