@@ -40,7 +40,10 @@ export const BWTYA_VAULTS: Record<BwtyaChain, BwtyaVaultDeployment> = {
     label: "Base Sepolia",
     rpcUrl: "https://sepolia.base.org",
     explorer: "https://sepolia.basescan.org",
-    address: env("VITE_BWTYA_VAULT_BASE_SEPOLIA"),
+    // Deployed 2026-09-18. Registry: 0x1Da78755fd94c58a2852E5EcB15CB466Dbd3B430.
+    // Treasury (10% tithe-on-yield): 0x7bEda57074AA917FF0993fb329E16C2c188baF08.
+    address:
+      env("VITE_BWTYA_VAULT_BASE_SEPOLIA") || "0x8549E2c482517c8E57E68178c0D2Df98D1847197",
   },
 };
 
