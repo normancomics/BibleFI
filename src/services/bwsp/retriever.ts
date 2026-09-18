@@ -2,6 +2,7 @@
 // Semantic search via Supabase pgvector RPCs with offline fallback
 
 import { supabase } from '@/integrations/supabase/client';
+import { hasSupabaseSession } from './session';
 import { comprehensiveFinancialScriptures } from '@/data/comprehensiveFinancialScriptures';
 import type { ScriptureResult, DefiKnowledgeResult } from './types';
 
