@@ -44,7 +44,22 @@ export interface UseTitheVaultResult {
   refresh: () => void;
   deposit: (amount: string) => Promise<string | null>;
   claimTitheAndYield: () => Promise<string | null>;
+  /** Chain the connected wallet is currently on (null when no wallet). */
+  walletChainId: number | null;
+  /** True when a wallet is connected but sitting on the wrong network. */
+  wrongNetwork: boolean;
+  /** Ask the wallet to switch (or add) the vault's network. */
+  switchNetwork: () => Promise<void>;
 }
+
+interface EthereumLike {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+}
+
+const getInjected = (): EthereumLike | null =>
+  ((window as unknown as { ethereum?: EthereumLike }).ethereum ?? null);
 
 const ZERO_POSITION: TitheVaultPosition = {
   principal: 0,
@@ -110,16 +125,47 @@ export function useTitheVault(userAddress?: string | null): UseTitheVaultResult 
     void load();
   }, [load]);
 
-  const getSigner = useCallback(async () => {
-    const injected = (window as unknown as { ethereum?: unknown }).ethereum;
+  const switchNetwork = useCallback(async () => {
+    const injected = getInjected();
     if (!injected) throw new Error("No wallet was found in this browser.");
-    const provider = createBrowserProvider(injected);
-    const network = await provider.getNetwork();
+    const hexId = `0x${vault.chainId.toString(16)}`;
+    try {
+      await injected.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hexId }] });
+    } catch (err) {
+      const code = (err as { code?: number })?.code;
+      if (code !== 4902) throw err;
+      await injected.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: hexId,
+            chainName: vault.label,
+            nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+            rpcUrls: [vault.rpcUrl],
+            blockExplorerUrls: [vault.explorer],
+          },
+        ],
+      });
+    }
+    setWalletChainId(vault.chainId);
+  }, [vault.chainId, vault.explorer, vault.label, vault.rpcUrl]);
+
+  const getSigner = useCallback(async () => {
+    const injected = getInjected();
+    if (!injected) throw new Error("No wallet was found in this browser.");
+    let provider = createBrowserProvider(injected);
+    let network = await provider.getNetwork();
     if (Number(network.chainId) !== vault.chainId) {
-      throw new Error(`Switch your wallet to ${vault.label} to give through the vault.`);
+      // Ask the wallet to move to the right network rather than failing outright.
+      await switchNetwork();
+      provider = createBrowserProvider(injected);
+      network = await provider.getNetwork();
+      if (Number(network.chainId) !== vault.chainId) {
+        throw new Error(`Switch your wallet to ${vault.label} to give through the vault.`);
+      }
     }
     return provider.getSigner();
-  }, [vault.chainId, vault.label]);
+  }, [switchNetwork, vault.chainId, vault.label]);
 
   const deposit = useCallback(
     async (amount: string): Promise<string | null> => {
