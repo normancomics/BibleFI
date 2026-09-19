@@ -158,7 +158,11 @@ const StreamedGivingFlow: React.FC = () => {
           p_limit: 24,
         });
         if (error) throw error;
-        if (!cancelled) setReady(((data as GivingAddress[]) ?? []).filter((r) => !!r.crypto_address));
+        const rows = ((data as GivingAddress[]) ?? []).filter((r) => !!r.crypto_address);
+        if (!cancelled) {
+          setReady(rows);
+          void loadBadges(rows.map((r) => r.crypto_address));
+        }
       } catch (error) {
         console.error('[BWSP] ready-to-receive list failed', error);
         if (!cancelled) setReady([]);
