@@ -68,8 +68,12 @@ const REFERENCES: Array<{
 
 const DEFI_KEYWORDS = ['tithe', 'yield', 'stewardship', 'stablecoin', 'stream'];
 
-/** Licensed translations fetched from API.Bible (needs a Pro/commercial licence). */
-const LICENSED_VERSION_LABELS = ['NIV'] as const;
+/**
+ * Translations fetched from API.Bible. NIV needs a Pro/commercial licence; the
+ * rest are public domain but far more reliable from API.Bible than the free
+ * rate-limited mirror, so we prefer this source for every label we can resolve.
+ */
+const LICENSED_VERSION_LABELS = ['NIV', 'KJV', 'ASV', 'WEB', 'BBE', 'DARBY', 'YLT'] as const;
 
 /** USFM book codes required by API.Bible verse IDs. */
 const USFM: Record<string, string> = {
