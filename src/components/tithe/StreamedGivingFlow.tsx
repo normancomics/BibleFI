@@ -222,6 +222,8 @@ const StreamedGivingFlow: React.FC = () => {
         if (error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
         setGiving((row as GivingAddress) ?? null);
+        const addr = (row as GivingAddress)?.crypto_address;
+        if (addr) void loadBadges([addr]);
       } catch (error) {
         console.error('[BWSP] giving address lookup failed', error);
         setGiving(null);
@@ -229,7 +231,7 @@ const StreamedGivingFlow: React.FC = () => {
         setLoadingAddress(false);
       }
     },
-    [playSound],
+    [playSound, loadBadges],
   );
 
   /* ------------------------------ start stream ----------------------------- */
