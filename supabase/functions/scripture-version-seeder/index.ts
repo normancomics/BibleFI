@@ -68,8 +68,12 @@ const REFERENCES: Array<{
 
 const DEFI_KEYWORDS = ['tithe', 'yield', 'stewardship', 'stablecoin', 'stream'];
 
-/** Licensed translations fetched from API.Bible (needs a Pro/commercial licence). */
-const LICENSED_VERSION_LABELS = ['NIV'] as const;
+/**
+ * Translations fetched from API.Bible. NIV needs a Pro/commercial licence; the
+ * rest are public domain but far more reliable from API.Bible than the free
+ * rate-limited mirror, so we prefer this source for every label we can resolve.
+ */
+const LICENSED_VERSION_LABELS = ['NIV', 'KJV', 'ASV', 'WEB', 'BBE', 'DARBY', 'YLT'] as const;
 
 /** USFM book codes required by API.Bible verse IDs. */
 const USFM: Record<string, string> = {
@@ -147,17 +151,28 @@ async function fetchVerse(
   const url =
     `https://bible-api.com/${encodeURIComponent(`${ref.book} ${ref.chapter}:${ref.verse}`)}` +
     `?translation=${apiVersion}`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = (data?.text ?? '').replace(/\s+/g, ' ').trim();
-    return text.length > 0 ? text : null;
-  } catch (err) {
-    console.error('[scripture-version-seeder] fetch failed', url, err);
-    return null;
+  // The free mirror rate-limits aggressively; back off instead of dropping the verse.
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const res = await fetch(url);
+      if (res.status === 429 || res.status >= 500) {
+        await sleep(800 * (attempt + 1));
+        continue;
+      }
+      if (!res.ok) return null;
+      const data = await res.json();
+      const text = (data?.text ?? '').replace(/\s+/g, ' ').trim();
+      if (text.length > 0) return text;
+      return null;
+    } catch (err) {
+      console.error('[scripture-version-seeder] fetch failed', url, err);
+      await sleep(600 * (attempt + 1));
+    }
   }
+  return null;
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 
 Deno.serve(async (req) => {
@@ -196,6 +211,8 @@ Deno.serve(async (req) => {
 
   for (const ref of REFERENCES) {
     for (const [label, apiVersion] of Object.entries(FREE_VERSIONS)) {
+      // API.Bible already covers this label reliably — don't hit the rate-limited mirror.
+      if (licensedIds[label]) continue;
       const text = await fetchVerse(ref, apiVersion);
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
