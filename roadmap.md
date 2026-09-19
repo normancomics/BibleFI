@@ -9,3 +9,5 @@
 - [ ] Continue BWSP/BWTYA enhancements
 
 - [ ] Store OPENSEA_API_KEY securely and wire an NFT/collection read path for BibleFi
+
+- [x] Replace social/placeholder preview image with the transparent BibleFi purple/gold Bible icon (og, twitter, farcaster, manifest, favicon)
