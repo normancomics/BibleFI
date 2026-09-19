@@ -41,6 +41,8 @@ import { churchSearchMemory } from '@/services/churchSearchMemory';
 import { realSuperfluidClient } from '@/integrations/superfluid/realClient';
 import { SuperfluidService, type SuperfluidStreamData } from '@/services/superfluidService';
 import { createBrowserProvider } from '@/lib/ethers-compat';
+import { fetchChurchNftBadges, type ChurchNftBadge as BadgeData } from '@/services/churchNftBadges';
+import ChurchNftBadgeView from '@/components/tithe/ChurchNftBadge';
 
 interface DirectoryChurch {
   id: string;
