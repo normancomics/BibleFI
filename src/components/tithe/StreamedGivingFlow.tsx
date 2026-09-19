@@ -98,6 +98,20 @@ const StreamedGivingFlow: React.FC = () => {
 
   const [ready, setReady] = useState<GivingAddress[]>([]);
   const [loadingReady, setLoadingReady] = useState(true);
+  const [badges, setBadges] = useState<Record<string, BadgeData | null>>({});
+
+  const badgeFor = useCallback(
+    (address?: string | null) =>
+      address ? (badges[address.trim().toLowerCase()] ?? null) : null,
+    [badges],
+  );
+
+  const loadBadges = useCallback(async (addresses: string[]) => {
+    const found = await fetchChurchNftBadges(addresses);
+    if (Object.keys(found).length > 0) {
+      setBadges((prev) => ({ ...prev, ...found }));
+    }
+  }, []);
 
   const [myStreams, setMyStreams] = useState<SuperfluidStreamData[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(false);
