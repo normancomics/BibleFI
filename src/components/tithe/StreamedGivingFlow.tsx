@@ -41,6 +41,8 @@ import { churchSearchMemory } from '@/services/churchSearchMemory';
 import { realSuperfluidClient } from '@/integrations/superfluid/realClient';
 import { SuperfluidService, type SuperfluidStreamData } from '@/services/superfluidService';
 import { createBrowserProvider } from '@/lib/ethers-compat';
+import { fetchChurchNftBadges, type ChurchNftBadge as BadgeData } from '@/services/churchNftBadges';
+import ChurchNftBadgeView from '@/components/tithe/ChurchNftBadge';
 
 interface DirectoryChurch {
   id: string;
@@ -96,6 +98,20 @@ const StreamedGivingFlow: React.FC = () => {
 
   const [ready, setReady] = useState<GivingAddress[]>([]);
   const [loadingReady, setLoadingReady] = useState(true);
+  const [badges, setBadges] = useState<Record<string, BadgeData | null>>({});
+
+  const badgeFor = useCallback(
+    (address?: string | null) =>
+      address ? (badges[address.trim().toLowerCase()] ?? null) : null,
+    [badges],
+  );
+
+  const loadBadges = useCallback(async (addresses: string[]) => {
+    const found = await fetchChurchNftBadges(addresses);
+    if (Object.keys(found).length > 0) {
+      setBadges((prev) => ({ ...prev, ...found }));
+    }
+  }, []);
 
   const [myStreams, setMyStreams] = useState<SuperfluidStreamData[]>([]);
   const [loadingStreams, setLoadingStreams] = useState(false);
@@ -142,7 +158,11 @@ const StreamedGivingFlow: React.FC = () => {
           p_limit: 24,
         });
         if (error) throw error;
-        if (!cancelled) setReady(((data as GivingAddress[]) ?? []).filter((r) => !!r.crypto_address));
+        const rows = ((data as GivingAddress[]) ?? []).filter((r) => !!r.crypto_address);
+        if (!cancelled) {
+          setReady(rows);
+          void loadBadges(rows.map((r) => r.crypto_address));
+        }
       } catch (error) {
         console.error('[BWSP] ready-to-receive list failed', error);
         if (!cancelled) setReady([]);
@@ -202,6 +222,8 @@ const StreamedGivingFlow: React.FC = () => {
         if (error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
         setGiving((row as GivingAddress) ?? null);
+        const addr = (row as GivingAddress)?.crypto_address;
+        if (addr) void loadBadges([addr]);
       } catch (error) {
         console.error('[BWSP] giving address lookup failed', error);
         setGiving(null);
@@ -209,7 +231,7 @@ const StreamedGivingFlow: React.FC = () => {
         setLoadingAddress(false);
       }
     },
-    [playSound],
+    [playSound, loadBadges],
   );
 
   /* ------------------------------ start stream ----------------------------- */
@@ -430,6 +452,7 @@ const StreamedGivingFlow: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center gap-2 font-medium">
+                        <ChurchNftBadgeView badge={badgeFor(item.crypto_address)} />
                         <span className="truncate">{item.name}</span>
                         {item.verified && (
                           <CheckCircle className="h-4 w-4 shrink-0 text-eboy-green" />
@@ -501,6 +524,7 @@ const StreamedGivingFlow: React.FC = () => {
                 </span>
               ) : giving ? (
                 <span className="flex flex-wrap items-center gap-2">
+                  <ChurchNftBadgeView badge={badgeFor(giving.crypto_address)} size="md" />
                   <Badge variant="outline" className="border-eboy-green/50 text-eboy-green">
                     Ready to receive
                   </Badge>
