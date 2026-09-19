@@ -524,6 +524,7 @@ const StreamedGivingFlow: React.FC = () => {
                 </span>
               ) : giving ? (
                 <span className="flex flex-wrap items-center gap-2">
+                  <ChurchNftBadgeView badge={badgeFor(giving.crypto_address)} size="md" />
                   <Badge variant="outline" className="border-eboy-green/50 text-eboy-green">
                     Ready to receive
                   </Badge>
