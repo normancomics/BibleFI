@@ -151,17 +151,28 @@ async function fetchVerse(
   const url =
     `https://bible-api.com/${encodeURIComponent(`${ref.book} ${ref.chapter}:${ref.verse}`)}` +
     `?translation=${apiVersion}`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const text = (data?.text ?? '').replace(/\s+/g, ' ').trim();
-    return text.length > 0 ? text : null;
-  } catch (err) {
-    console.error('[scripture-version-seeder] fetch failed', url, err);
-    return null;
+  // The free mirror rate-limits aggressively; back off instead of dropping the verse.
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const res = await fetch(url);
+      if (res.status === 429 || res.status >= 500) {
+        await sleep(800 * (attempt + 1));
+        continue;
+      }
+      if (!res.ok) return null;
+      const data = await res.json();
+      const text = (data?.text ?? '').replace(/\s+/g, ' ').trim();
+      if (text.length > 0) return text;
+      return null;
+    } catch (err) {
+      console.error('[scripture-version-seeder] fetch failed', url, err);
+      await sleep(600 * (attempt + 1));
+    }
   }
+  return null;
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 
 Deno.serve(async (req) => {
