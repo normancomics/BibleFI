@@ -10,12 +10,12 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png",
+      "src": "/bible-fi-icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png",
+      "src": "/bible-fi-icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -24,13 +24,5 @@
   "lang": "en",
   "dir": "ltr",
   "scope": "/",
-  "prefer_related_applications": false,
-  "screenshots": [
-    {
-      "src": "/lovable-uploads/cc7f6bb4-ec25-48d5-84c4-78292783c823.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ]
+  "prefer_related_applications": false
 }
