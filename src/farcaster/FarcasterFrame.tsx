@@ -60,7 +60,7 @@ const FarcasterFrame: React.FC = () => {
         
         <div className="my-4 flex justify-center">
           <img 
-            src="/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png" 
+            src="/bible-fi-icon.png" 
             alt="BibleFi Logo" 
             className="h-24 object-contain"
           />

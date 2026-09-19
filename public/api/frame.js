@@ -26,7 +26,7 @@ const DEFI_QUOTES = [
 const CHARACTER_IMAGES = [
   "/lovable-uploads/ca9f581b-878d-44af-bc2a-b8529637c411.png",
   "/lovable-uploads/69e0702d-fa00-4fcf-96b5-d6057ece1097.png",
-  "/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png"
+  "/bible-fi-icon.png"
 ];
 
 /**
@@ -110,7 +110,7 @@ function handleFrameRequest(request) {
     } else if (buttonIndex === 1) { // Wisdom button - just redirect
       return {
         version: 'vNext',
-        image: `${APP_BASE_URL}/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png`,
+        image: `${APP_BASE_URL}/bible-fi-icon.png`,
         text: "Discover biblical wisdom for your financial journey on biblefi.base.eth",
         buttons: [
           { label: "Explore Wisdom", action: "link", target: `${APP_BASE_URL}/wisdom` },
@@ -122,7 +122,7 @@ function handleFrameRequest(request) {
     // Default response for initial load or unknown button
     return {
       version: 'vNext',
-      image: `${APP_BASE_URL}/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png`,
+      image: `${APP_BASE_URL}/bible-fi-icon.png`,
       text: "Biblical wisdom for your financial journey",
       buttons: [
         { label: "Biblical Wisdom", action: "link", target: `${APP_BASE_URL}/wisdom` },
@@ -146,7 +146,7 @@ function handleFrameRequest(request) {
 function createErrorResponse(message) {
   return {
     version: 'vNext',
-    image: `${APP_BASE_URL}/lovable-uploads/b2a5ac39-70d2-41c8-8526-8e54375b1c1f.png`,
+    image: `${APP_BASE_URL}/bible-fi-icon.png`,
     text: message,
     buttons: [
       { label: "Try Again", action: "post" }
