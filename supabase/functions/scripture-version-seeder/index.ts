@@ -211,6 +211,8 @@ Deno.serve(async (req) => {
 
   for (const ref of REFERENCES) {
     for (const [label, apiVersion] of Object.entries(FREE_VERSIONS)) {
+      // API.Bible already covers this label reliably — don't hit the rate-limited mirror.
+      if (licensedIds[label]) continue;
       const text = await fetchVerse(ref, apiVersion);
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
