@@ -452,6 +452,7 @@ const StreamedGivingFlow: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center gap-2 font-medium">
+                        <ChurchNftBadgeView badge={badgeFor(item.crypto_address)} />
                         <span className="truncate">{item.name}</span>
                         {item.verified && (
                           <CheckCircle className="h-4 w-4 shrink-0 text-eboy-green" />
