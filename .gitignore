@@ -30,3 +30,5 @@ contracts_forge/cache/
 contracts_forge/out/
 artifacts_forge/
 deployments/
+.env
+.env.*
