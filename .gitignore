@@ -32,3 +32,4 @@ artifacts_forge/
 deployments/
 .env
 .env.*
+!.env.example
