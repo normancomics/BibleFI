@@ -13,48 +13,48 @@ import "./BWSPWisdomRegistry.sol";
  * @title BWTYAYieldVault
  * @notice Wisdom-gated DeFi yield vault powered by the BWTYA algorithm.
  *
- * @dev Implements a novel yield distribution model with five interlocking mechanisms:
+ * @dev SOLVENCY MODEL (remediates audit findings C-1, C-2, M-1, M-2)
+ *
+ *      Depositor principal and Joseph's Reserve are NEVER payable as yield.
+ *      All yield — including the wisdom boost and the tithe blessing — is paid
+ *      exclusively from `yieldPool`, which can only be credited by the yield
+ *      oracle through `reportYield`. When the computed yield exceeds the funded
+ *      pool, every component (tithe, net, bonuses) is scaled down pro-rata
+ *      rather than dipping into principal. Every state-changing path ends with
+ *      a solvency assertion:
+ *
+ *          balance >= totalDeposited + totalReserve + yieldPool
+ *
+ *      Five interlocking biblical mechanisms remain:
  *
  *   1. TITHE-FIRST DISTRIBUTION  (Proverbs 3:9 — "honour the LORD with your firstfruits")
- *      10 % of all generated yield is streamed to a DAO treasury before
- *      any user claims are processed.  This is enforced on-chain: no user
- *      can claim yield until the tithe has been allocated.
+ *      10 % of all generated yield is transferred to the DAO treasury before
+ *      any user funds are released. The rate is a `constant` — not settable.
  *
  *   2. WISDOM-GATED APY BOOST  (Proverbs 4:7 — "wisdom is the principal thing")
- *      Users with higher BWTYA wisdom scores receive a multiplied share of
- *      yield.  Scores are read from BWSPWisdomRegistry with a 7-day TWAP
- *      (Time-Weighted Average Wisdom) to prevent flash-exploitation.
- *      Boost tiers (on top of base APY):
- *        Score < 250 (Seeker)   → 1.00× base
+ *      Boost tiers on top of base APY, keyed off a discrete 7-day time-weighted
+ *      wisdom average (see `_updateWisdomTwap`):
+ *        Score < 250 (Seeker)    → 1.00×
  *        Score 250–499 (Learner) → 1.05×
- *        Score 500–749 (Faithful) → 1.15×
+ *        Score 500–749 (Faithful)→ 1.15×
  *        Score ≥ 750  (Steward)  → 1.30×
  *
  *   3. JOSEPH'S RESERVE  (Genesis 41 — "store up in the seven years of plenty")
- *      During periods of extreme market fear (communicated via an oracle),
- *      20 % of newly deposited capital is held in a liquid reserve and NOT
- *      deployed to yield strategies.  This reserve is available for immediate
- *      withdrawal, protecting against panic-driven liquidity crises.
+ *      During extreme market fear, 20 % of new capital is held liquid and
+ *      segregated: it is excluded from every payout path.
  *
  *   4. CONSECUTIVE TITHE BLESSING  (Malachi 3:10)
- *      Depositors who have an active consecutive tithe streak (as recorded in
- *      BWSPWisdomRegistry) receive an additional compound blessing multiplier
- *      computed by BWTYAMath.titheBlessingMultiplier.
+ *      Additional compound blessing multiplier for active tithe streaks,
+ *      funded from `yieldPool` like all other yield.
  *
  *   5. ECCLESIASTES REBALANCING LOCK  (Ecclesiastes 11:2)
- *      When a user holds ≥ 50 % of their portfolio in a single vault position,
- *      new deposits above that threshold are subject to a 7-day waiting period
- *      before they earn the wisdom boost — encouraging diversification across
- *      protocols as Ecc 11:2 commands.
+ *      Concentrated positions earn a halved wisdom bonus for 7 days.
  *
- * Biblical Anchors
- * ────────────────
- * • Proverbs 3:9     – tithe-first before compounding
- * • Proverbs 4:7     – wisdom as the primary acquisition
- * • Genesis 41       – Joseph's counter-cyclical reserve
- * • Malachi 3:10     – windows of heaven for faithful tithers
- * • Ecclesiastes 11:2 – diversification mandate
- * • Luke 16:10       – faithful in little, faithful in much
+ * Time accounting excludes seconds spent paused (audit H-2), so an emergency
+ * pause cannot accumulate a claim that lands the moment the vault reopens.
+ * Owner control over the payout rate is capped and timelocked (audit H-3).
+ *
+ * "The prudent considereth his steps" — Proverbs 14:15 (KJV)
  */
 contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -70,47 +70,53 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     // ============================================================
 
     struct Deposit {
-        uint256 amount;             // Principal deposited
-        uint256 reserveAmount;      // Portion held in Joseph's Reserve
-        uint256 depositTime;        // Timestamp of deposit
-        uint256 lastClaimTime;      // Timestamp of last yield claim
-        uint256 accruedYield;       // Yield earned since last claim (not yet claimed)
-        uint256 wisdomTwapStart;    // Wisdom score at deposit time (for TWAP baseline)
-        uint256 wisdomTwapAccum;    // Accumulated wisdom × time (for 7-day TWAP)
+        uint256 amount;             // Principal deployed to yield strategies
+        uint256 reserveAmount;      // Portion held in Joseph's Reserve (never payable)
+        uint256 depositTime;        // Timestamp of first deposit
+        uint256 lastClaimTime;      // Timestamp of last yield settlement
+        uint256 pausedSnapshot;     // Vault paused-seconds at last settlement
+        uint256 wisdomTwapStart;    // Wisdom score at deposit time
+        uint256 wisdomTwapAccum;    // Accumulated wisdom × time (current window)
+        uint256 twapWindowStart;    // Start of the current 7-day TWAP window
         uint256 twapLastUpdated;    // Timestamp of last TWAP update
-        bool    inRebalanceLock;    // True if subject to Ecclesiastes rebalancing delay
+        bool    inRebalanceLock;    // Ecclesiastes rebalancing delay active
         uint256 rebalanceLockEnds;  // Timestamp when rebalancing lock expires
     }
 
     struct VaultStats {
         uint256 totalDeposited;      // Total principal in vault
         uint256 totalReserve;        // Total in Joseph's Reserve
-        uint256 totalYieldGenerated; // Lifetime yield generated
+        uint256 totalYieldGenerated; // Lifetime yield FUNDED by the oracle (single source)
         uint256 totalTithePaid;      // Lifetime tithe paid to treasury
         uint256 totalClaimed;        // Lifetime user claims
         uint256 depositorCount;      // Unique depositors
     }
 
     struct YieldDistribution {
-        uint256 grossYield;     // Total yield before tithe
-        uint256 titheAmount;    // 10 % tithe to treasury
-        uint256 netYield;       // 90 % to depositor
-        uint256 wisdomBonus;    // Extra yield from wisdom boost
+        uint256 grossYield;         // Total yield before tithe (after solvency scaling)
+        uint256 titheAmount;        // 10 % tithe to treasury
+        uint256 netYield;           // 90 % to depositor
+        uint256 wisdomBonus;        // Extra yield from wisdom boost
         uint256 titheBlessingBonus; // Extra yield from tithe streak
-        uint256 finalAmount;    // Net + bonuses
+        uint256 finalAmount;        // Net + bonuses
     }
 
     // ============================================================
     // Constants
     // ============================================================
 
-    uint256 public constant BASIS_POINTS       = 10_000;
-    uint256 public constant TITHE_RATE         = 1_000;   // 10 % in bps
-    uint256 public constant JOSEPH_RESERVE_RATE = 2_000;  // 20 % in bps
-    uint256 public constant SECONDS_PER_YEAR   = 365 days;
-    uint256 public constant TWAP_WINDOW        = 7 days;
+    uint256 public constant BASIS_POINTS        = 10_000;
+    uint256 public constant TITHE_RATE          = 1_000;   // 10 % in bps — immutable
+    uint256 public constant JOSEPH_RESERVE_RATE = 2_000;   // 20 % in bps
+    uint256 public constant SECONDS_PER_YEAR    = 365 days;
+    uint256 public constant TWAP_WINDOW         = 7 days;
     uint256 public constant REBALANCE_LOCK_PERIOD = 7 days;
-    uint256 public constant MAX_SINGLE_POSITION = 5_000;  // 50 % in bps (Ecc 11:2)
+    uint256 public constant MAX_SINGLE_POSITION = 5_000;   // 50 % in bps (Ecc 11:2)
+
+    /// @notice Hard ceiling on the payout rate the owner may set (audit H-3).
+    uint256 public constant MAX_BASE_APY_BPS = 3_000;      // 30 %
+    /// @notice Delay enforced on payout-rate and treasury changes (audit H-3).
+    uint256 public constant ADMIN_TIMELOCK = 2 days;
 
     // Wisdom boost tiers (in bps, applied to net yield)
     uint256 public constant BOOST_SEEKER   = 10_000; // 1.00×
@@ -128,12 +134,25 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     // State Variables
     // ============================================================
 
-    IERC20 public depositToken;
+    IERC20  public immutable depositToken;
     address public treasury;
-    address public yieldOracle;    // Authorised to report generated yield
-    bool    public josephReserveActive; // true during extreme fear periods
+    address public yieldOracle;
+    bool    public josephReserveActive;
 
-    uint256 public baseApyBps;     // Base yield APY in bps (e.g. 800 = 8 %)
+    uint256 public baseApyBps;
+
+    /// @notice Funded yield available for payouts. Only `reportYield` credits it.
+    uint256 public yieldPool;
+
+    /// @notice Cumulative seconds the vault has spent paused (audit H-2).
+    uint256 public totalPausedSeconds;
+    uint256 public pauseStartedAt;
+
+    // Timelocked admin changes
+    uint256 public pendingBaseApyBps;
+    uint256 public pendingBaseApyEta;
+    address public pendingTreasury;
+    uint256 public pendingTreasuryEta;
 
     VaultStats public stats;
 
@@ -144,13 +163,7 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     // Events
     // ============================================================
 
-    event Deposited(
-        address indexed user,
-        uint256 principal,
-        uint256 reserveAmount,
-        uint256 deployedAmount
-    );
-
+    event Deposited(address indexed user, uint256 principal, uint256 reserveAmount, uint256 deployedAmount);
     event YieldClaimed(
         address indexed user,
         uint256 grossYield,
@@ -159,23 +172,17 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         uint256 titheBlessingBonus,
         uint256 finalAmount
     );
-
-    event TithePaid(
-        address indexed treasury,
-        uint256 amount,
-        uint256 timestamp
-    );
-
-    event Withdrawn(
-        address indexed user,
-        uint256 principal,
-        uint256 reserveAmount
-    );
-
-    event YieldReported(address indexed oracle, uint256 amount, uint256 timestamp);
+    event TithePaid(address indexed treasury, uint256 amount, uint256 timestamp);
+    event Withdrawn(address indexed user, uint256 principal, uint256 reserveAmount);
+    event YieldReported(address indexed oracle, uint256 amount, uint256 yieldPool, uint256 timestamp);
+    event YieldShortfall(address indexed user, uint256 requested, uint256 paid);
     event JosephReserveActivated(bool active, uint256 timestamp);
+    event BaseApyChangeQueued(uint256 newBps, uint256 eta);
     event BaseApyUpdated(uint256 oldBps, uint256 newBps);
+    event TreasuryChangeQueued(address newTreasury, uint256 eta);
     event TreasuryUpdated(address oldTreasury, address newTreasury);
+    event YieldOracleUpdated(address oldOracle, address newOracle);
+    event TokenRescued(address indexed token, address indexed to, uint256 amount);
 
     // ============================================================
     // Errors
@@ -183,11 +190,15 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
 
     error ZeroDeposit();
     error NoDepositFound();
-    error DepositAlreadyExists();
     error ZeroAddress();
     error InsufficientBalance();
     error NotYieldOracle();
-    error RebalanceLockActive();
+    error NothingToClaim();
+    error ApyAboveCap();
+    error TimelockPending();
+    error NoPendingChange();
+    error Insolvent();
+    error CannotRescueDepositToken();
 
     // ============================================================
     // Constructor
@@ -201,11 +212,12 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     ) {
         if (_depositToken == address(0) || _treasury == address(0) || _wisdomRegistry == address(0))
             revert ZeroAddress();
+        if (_baseApyBps > MAX_BASE_APY_BPS) revert ApyAboveCap();
 
-        depositToken    = IERC20(_depositToken);
-        treasury        = _treasury;
-        wisdomRegistry  = BWSPWisdomRegistry(_wisdomRegistry);
-        baseApyBps      = _baseApyBps;
+        depositToken   = IERC20(_depositToken);
+        treasury       = _treasury;
+        wisdomRegistry = BWSPWisdomRegistry(_wisdomRegistry);
+        baseApyBps     = _baseApyBps;
 
         _transferOwnership(msg.sender);
     }
@@ -216,44 +228,30 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
 
     /**
      * @notice Deposit tokens into the vault.
-     * @dev    If Joseph's Reserve is active, JOSEPH_RESERVE_RATE (20 %) of the
-     *         deposit is held as a liquid reserve.  The remaining 80 % is
-     *         "deployed" (tracked as yield-bearing principal).
-     *
-     *         If the deposit would make the user's single-vault position exceed
-     *         MAX_SINGLE_POSITION (50 %) of their stated total portfolio value,
-     *         a 7-day Ecclesiastes Rebalancing Lock is applied to the excess.
-     *
-     *         Additional deposits from existing users are permitted and merge
-     *         into the existing position (principal added, TWAP updated).
-     *
+     * @dev    The credited amount is the measured balance delta, so fee-on-transfer
+     *         tokens cannot over-credit a depositor (audit M-4).
      * @param amount            Token amount to deposit
-     * @param portfolioTotalUsd User's self-reported total portfolio USD value
-     *                          (used for Ecc 11:2 concentration check; 0 = skip check).
-     *                          WARNING: This value is unverified and user-supplied; the
-     *                          concentration check can be bypassed by passing 0 or a large
-     *                          value. Integrators should supply a price-oracle-backed total.
+     * @param portfolioTotalUsd Self-reported portfolio value for the Ecc 11:2
+     *                          concentration check (0 = skip). Unverified and
+     *                          therefore advisory only.
      */
-    function deposit(
-        uint256 amount,
-        uint256 portfolioTotalUsd
-    ) external nonReentrant whenNotPaused {
+    function deposit(uint256 amount, uint256 portfolioTotalUsd) external nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroDeposit();
 
+        uint256 balanceBefore = depositToken.balanceOf(address(this));
         depositToken.safeTransferFrom(msg.sender, address(this), amount);
+        uint256 credited = depositToken.balanceOf(address(this)) - balanceBefore;
+        if (credited == 0) revert ZeroDeposit();
 
-        // Joseph's Reserve calculation
-        uint256 reserveAmount  = josephReserveActive
-            ? (amount * JOSEPH_RESERVE_RATE) / BASIS_POINTS
+        uint256 reserveAmount = josephReserveActive
+            ? (credited * JOSEPH_RESERVE_RATE) / BASIS_POINTS
             : 0;
-        uint256 deployedAmount = amount - reserveAmount;
+        uint256 deployedAmount = credited - reserveAmount;
 
-        // Ecclesiastes concentration check (advisory — portfolioTotalUsd is self-reported)
         bool rebalanceLock = false;
-        uint256 lockEnds   = 0;
+        uint256 lockEnds = 0;
         if (portfolioTotalUsd > 0) {
-            // Approximate position weight; assumes 1 token ≈ $1; integrators should scale by oracle
-            uint256 positionBps = (amount * BASIS_POINTS) / portfolioTotalUsd;
+            uint256 positionBps = (credited * BASIS_POINTS) / portfolioTotalUsd;
             if (positionBps > MAX_SINGLE_POSITION) {
                 rebalanceLock = true;
                 lockEnds = block.timestamp + REBALANCE_LOCK_PERIOD;
@@ -261,9 +259,6 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         }
 
         if (!hasDeposit[msg.sender]) {
-            // First deposit: create a fresh Deposit struct.
-            // TWAP accumulator starts at 0 (not score * block.timestamp) so that
-            // the TWAP is computed over elapsed time relative to depositTime, not the epoch.
             (uint256 decayedScore, ) = wisdomRegistry.getDecayedWisdomScore(msg.sender);
 
             deposits[msg.sender] = Deposit({
@@ -271,9 +266,10 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
                 reserveAmount:     reserveAmount,
                 depositTime:       block.timestamp,
                 lastClaimTime:     block.timestamp,
-                accruedYield:      0,
+                pausedSnapshot:    _pausedSecondsNow(),
                 wisdomTwapStart:   decayedScore,
-                wisdomTwapAccum:   0,           // accumulation starts from deposit time, not epoch
+                wisdomTwapAccum:   0,
+                twapWindowStart:   block.timestamp,
                 twapLastUpdated:   block.timestamp,
                 inRebalanceLock:   rebalanceLock,
                 rebalanceLockEnds: lockEnds
@@ -282,15 +278,15 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             stats.depositorCount++;
             hasDeposit[msg.sender] = true;
         } else {
-            // Additional deposit: merge into existing position.
-            // Update TWAP accumulator before changing the principal.
             Deposit storage dep = deposits[msg.sender];
-            _updateWisdomTwap(dep);
+            // Settle any funded yield first so the new principal does not
+            // retroactively earn on the elapsed period.
+            _settleYield(msg.sender, false);
+            _updateWisdomTwap(dep, msg.sender);
 
             dep.amount        += deployedAmount;
             dep.reserveAmount += reserveAmount;
 
-            // Propagate rebalance lock if new deposit triggers it
             if (rebalanceLock && !dep.inRebalanceLock) {
                 dep.inRebalanceLock   = true;
                 dep.rebalanceLockEnds = lockEnds;
@@ -300,7 +296,8 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         stats.totalDeposited += deployedAmount;
         stats.totalReserve   += reserveAmount;
 
-        emit Deposited(msg.sender, amount, reserveAmount, deployedAmount);
+        emit Deposited(msg.sender, credited, reserveAmount, deployedAmount);
+        _assertSolvent();
     }
 
     // ============================================================
@@ -308,79 +305,14 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     // ============================================================
 
     /**
-     * @notice Claim accrued yield.
-     * @dev    Yield is computed using:
-     *           grossYield = principal × (baseApy / SECONDS_PER_YEAR) × elapsed
-     *         Then:
-     *           tithe       = grossYield × TITHE_RATE
-     *           netYield    = grossYield - tithe
-     *           wisdomBoost = netYield × (wisdomMultiplier - 1)
-     *           tithBlessing = netYield × (titheBlessingMultiplier - 1)
-     *           finalAmount = netYield + wisdomBoost + tithBlessing
-     *
-     *         TITHE-FIRST: the tithe is transferred to treasury before any
-     *         user funds are released.  On-chain enforcement, not optional.
+     * @notice Claim accrued yield. The tithe is transferred to the treasury
+     *         before any user funds are released, and every component is paid
+     *         only from the funded `yieldPool`.
      */
     function claimYield() external nonReentrant whenNotPaused {
         if (!hasDeposit[msg.sender]) revert NoDepositFound();
-
-        Deposit storage dep = deposits[msg.sender];
-
-        // Update TWAP before computing yield
-        _updateWisdomTwap(dep);
-
-        // Time elapsed since last claim
-        uint256 elapsed = block.timestamp - dep.lastClaimTime;
-        if (elapsed == 0) return;
-
-        // Gross yield: principal × APY × elapsed / year
-        uint256 grossYield = (dep.amount * baseApyBps * elapsed) / (BASIS_POINTS * SECONDS_PER_YEAR);
-
-        if (grossYield == 0) return;
-
-        // Tithe deduction (10 %)
-        uint256 tithe = (grossYield * TITHE_RATE) / BASIS_POINTS;
-        uint256 net   = grossYield - tithe;
-
-        // Wisdom boost (using 7-day TWAP score — prevents flash score manipulation)
-        uint256 twapScore  = _getWisdomTwap(dep, msg.sender);
-        uint256 boostBps   = _getWisdomBoost(twapScore, dep.inRebalanceLock && block.timestamp < dep.rebalanceLockEnds);
-        uint256 wisdomBonus = (net * (boostBps - BASIS_POINTS)) / BASIS_POINTS;
-
-        // Tithe blessing (consecutive months from registry)
-        uint256 titheBlessingWad = wisdomRegistry.getTitheBlessingMultiplier(msg.sender);
-        uint256 titheBlessingBonus = 0;
-        if (titheBlessingWad > 1e18) {
-            // blessing bonus = net × (multiplier - 1.0)
-            titheBlessingBonus = (net * (titheBlessingWad - 1e18)) / 1e18;
-        }
-
-        uint256 finalAmount = net + wisdomBonus + titheBlessingBonus;
-
-        // Update state
-        dep.lastClaimTime = block.timestamp;
-        dep.accruedYield += finalAmount;
-        stats.totalYieldGenerated += grossYield;
-        stats.totalTithePaid      += tithe;
-        stats.totalClaimed        += finalAmount;
-
-        // TITHE-FIRST: transfer tithe to treasury before user funds
-        if (tithe > 0) {
-            depositToken.safeTransfer(treasury, tithe);
-            emit TithePaid(treasury, tithe, block.timestamp);
-        }
-
-        // Transfer net yield + bonuses to user
-        depositToken.safeTransfer(msg.sender, finalAmount);
-
-        emit YieldClaimed(
-            msg.sender,
-            grossYield,
-            tithe,
-            wisdomBonus,
-            titheBlessingBonus,
-            finalAmount
-        );
+        uint256 paid = _settleYield(msg.sender, true);
+        if (paid == 0) revert NothingToClaim();
     }
 
     // ============================================================
@@ -388,24 +320,22 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
     // ============================================================
 
     /**
-     * @notice Withdraw principal and Joseph's Reserve.
-     * @dev    No withdrawal fee — biblical principle of fair dealing.
-     *         Any unclaimed yield is forfeited (must claimYield first).
-     *
-     *         Intentionally NOT guarded by whenNotPaused: users must always be
-     *         able to exit the vault, even during an emergency pause.
+     * @notice Withdraw principal and Joseph's Reserve. Accrued funded yield is
+     *         settled first, so exiting never silently forfeits it (audit H-1).
+     * @dev    Intentionally NOT guarded by whenNotPaused: users must always be
+     *         able to exit, even during an emergency pause.
      */
     function withdraw() external nonReentrant {
         if (!hasDeposit[msg.sender]) revert NoDepositFound();
 
-        Deposit storage dep = deposits[msg.sender];
-        uint256 principal  = dep.amount;
-        uint256 reserve    = dep.reserveAmount;
-        uint256 total      = principal + reserve;
+        _settleYield(msg.sender, false);
 
+        Deposit storage dep = deposits[msg.sender];
+        uint256 principal = dep.amount;
+        uint256 reserve   = dep.reserveAmount;
+        uint256 total     = principal + reserve;
         if (total == 0) revert InsufficientBalance();
 
-        // Clear state before transfer (checks-effects-interactions)
         stats.totalDeposited -= principal;
         stats.totalReserve   -= reserve;
         hasDeposit[msg.sender] = false;
@@ -414,155 +344,295 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
         depositToken.safeTransfer(msg.sender, total);
 
         emit Withdrawn(msg.sender, principal, reserve);
+        _assertSolvent();
     }
 
     // ============================================================
-    // View: Projected Yield
+    // Views
     // ============================================================
 
     /**
-     * @notice Preview the yield a user would receive if they claimed right now.
-     * @return distribution  Detailed breakdown of gross, tithe, net, and bonuses.
+     * @notice Preview the yield a user would receive if they claimed right now,
+     *         already capped at the funded yield pool.
      */
     function previewYield(address user) external view returns (YieldDistribution memory distribution) {
         if (!hasDeposit[user]) return distribution;
-
-        Deposit storage dep = deposits[user];
-        uint256 elapsed = block.timestamp - dep.lastClaimTime;
-        if (elapsed == 0) return distribution;
-
-        uint256 grossYield = (dep.amount * baseApyBps * elapsed) / (BASIS_POINTS * SECONDS_PER_YEAR);
-        uint256 tithe = (grossYield * TITHE_RATE) / BASIS_POINTS;
-        uint256 net   = grossYield - tithe;
-
-        uint256 twapScore  = _getWisdomTwap(dep, user);
-        uint256 boostBps   = _getWisdomBoost(twapScore, dep.inRebalanceLock && block.timestamp < dep.rebalanceLockEnds);
-        uint256 wisdomBonus = (net * (boostBps - BASIS_POINTS)) / BASIS_POINTS;
-
-        uint256 titheBlessingWad = wisdomRegistry.getTitheBlessingMultiplier(user);
-        uint256 titheBlessingBonus = titheBlessingWad > 1e18
-            ? (net * (titheBlessingWad - 1e18)) / 1e18
-            : 0;
-
-        uint256 final_ = net + wisdomBonus + titheBlessingBonus;
-
-        distribution = YieldDistribution({
-            grossYield:         grossYield,
-            titheAmount:        tithe,
-            netYield:           net,
-            wisdomBonus:        wisdomBonus,
-            titheBlessingBonus: titheBlessingBonus,
-            finalAmount:        final_
-        });
+        return _computeDistribution(user);
     }
 
-    /**
-     * @notice Compute the effective APY for a user (including wisdom and tithe boosts).
-     * @return effectiveApyBps  APY in basis points
-     */
+    /// @notice Effective APY in bps (net of tithe, including boosts). Advisory.
     function effectiveUserApy(address user) external view returns (uint256 effectiveApyBps) {
-        if (!hasDeposit[user]) return baseApyBps * (BASIS_POINTS - TITHE_RATE) / BASIS_POINTS;
+        uint256 netApyBps = (baseApyBps * (BASIS_POINTS - TITHE_RATE)) / BASIS_POINTS;
+        if (!hasDeposit[user]) return netApyBps;
 
         Deposit storage dep = deposits[user];
-        uint256 twapScore = _getWisdomTwap(dep, user);
-        uint256 boostBps  = _getWisdomBoost(twapScore, false);
-
-        // net APY = base × (1 - tithe) × boostMultiplier
-        uint256 netApyBps = (baseApyBps * (BASIS_POINTS - TITHE_RATE)) / BASIS_POINTS;
+        uint256 boostBps = _getWisdomBoost(_getWisdomTwap(dep, user), false);
         effectiveApyBps = (netApyBps * boostBps) / BASIS_POINTS;
 
-        // Add tithe blessing
         uint256 titheBlessingWad = wisdomRegistry.getTitheBlessingMultiplier(user);
         if (titheBlessingWad > 1e18) {
-            // blessing boost on top of net APY
             uint256 blessingBps = ((titheBlessingWad - 1e18) * BASIS_POINTS) / 1e18;
             effectiveApyBps += (netApyBps * blessingBps) / BASIS_POINTS;
         }
     }
 
+    /// @notice Tokens backing principal + reserve + funded yield.
+    function solvencyFloor() public view returns (uint256) {
+        return stats.totalDeposited + stats.totalReserve + yieldPool;
+    }
+
     // ============================================================
-    // Admin Functions
+    // Admin: yield funding
     // ============================================================
 
-    /** @notice Activate or deactivate Joseph's Reserve (extreme fear mode). */
+    /**
+     * @notice Fund the vault with externally generated yield.
+     * @dev    This is the ONLY way `yieldPool` grows, and the only source of
+     *         user payouts (audit C-1 / C-2).
+     */
+    function reportYield(uint256 amount) external nonReentrant {
+        if (msg.sender != yieldOracle) revert NotYieldOracle();
+        if (amount == 0) revert ZeroDeposit();
+
+        uint256 before = depositToken.balanceOf(address(this));
+        depositToken.safeTransferFrom(msg.sender, address(this), amount);
+        uint256 credited = depositToken.balanceOf(address(this)) - before;
+        if (credited == 0) revert ZeroDeposit();
+
+        yieldPool += credited;
+        stats.totalYieldGenerated += credited; // single source of truth (audit M-2)
+
+        emit YieldReported(msg.sender, credited, yieldPool, block.timestamp);
+        _assertSolvent();
+    }
+
+    // ============================================================
+    // Admin: configuration
+    // ============================================================
+
     function setJosephReserve(bool active) external onlyOwner {
         josephReserveActive = active;
         emit JosephReserveActivated(active, block.timestamp);
     }
 
-    function setBaseApy(uint256 newApyBps) external onlyOwner {
-        emit BaseApyUpdated(baseApyBps, newApyBps);
-        baseApyBps = newApyBps;
-    }
-
-    function setTreasury(address newTreasury) external onlyOwner {
-        if (newTreasury == address(0)) revert ZeroAddress();
-        emit TreasuryUpdated(treasury, newTreasury);
-        treasury = newTreasury;
-    }
-
     function setYieldOracle(address oracle) external onlyOwner {
+        emit YieldOracleUpdated(yieldOracle, oracle);
         yieldOracle = oracle;
     }
 
-    /**
-     * @notice Report externally generated yield into the vault so depositors can claim it.
-     * @dev    The vault computes yield time-proportionally from baseApyBps, but the actual
-     *         yield tokens must be present in the vault's balance for transfers to succeed.
-     *         This function transfers `amount` tokens from the oracle into the vault.
-     *         Without external yield funding the vault will run insolvent on claimYield calls.
-     * @param amount Amount of depositToken to transfer into the vault as yield
-     */
-    function reportYield(uint256 amount) external {
-        if (msg.sender != yieldOracle) revert NotYieldOracle();
-        require(amount > 0, "BWTYAYieldVault: zero yield");
-        depositToken.safeTransferFrom(msg.sender, address(this), amount);
-        stats.totalYieldGenerated += amount;
-        emit YieldReported(msg.sender, amount, block.timestamp);
+    /// @notice Queue a payout-rate change; capped and timelocked (audit H-3).
+    function queueBaseApy(uint256 newApyBps) external onlyOwner {
+        if (newApyBps > MAX_BASE_APY_BPS) revert ApyAboveCap();
+        pendingBaseApyBps = newApyBps;
+        pendingBaseApyEta = block.timestamp + ADMIN_TIMELOCK;
+        emit BaseApyChangeQueued(newApyBps, pendingBaseApyEta);
     }
 
-    function pause() external onlyOwner { _pause(); }
-    function unpause() external onlyOwner { _unpause(); }
+    function executeBaseApy() external onlyOwner {
+        if (pendingBaseApyEta == 0) revert NoPendingChange();
+        if (block.timestamp < pendingBaseApyEta) revert TimelockPending();
+        emit BaseApyUpdated(baseApyBps, pendingBaseApyBps);
+        baseApyBps = pendingBaseApyBps;
+        pendingBaseApyEta = 0;
+    }
+
+    /// @notice Queue a treasury change; timelocked so the tithe cannot be silently redirected.
+    function queueTreasury(address newTreasury) external onlyOwner {
+        if (newTreasury == address(0)) revert ZeroAddress();
+        pendingTreasury    = newTreasury;
+        pendingTreasuryEta = block.timestamp + ADMIN_TIMELOCK;
+        emit TreasuryChangeQueued(newTreasury, pendingTreasuryEta);
+    }
+
+    function executeTreasury() external onlyOwner {
+        if (pendingTreasuryEta == 0) revert NoPendingChange();
+        if (block.timestamp < pendingTreasuryEta) revert TimelockPending();
+        emit TreasuryUpdated(treasury, pendingTreasury);
+        treasury = pendingTreasury;
+        pendingTreasuryEta = 0;
+    }
+
+    function pause() external onlyOwner {
+        pauseStartedAt = block.timestamp;
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        if (pauseStartedAt != 0) {
+            totalPausedSeconds += block.timestamp - pauseStartedAt;
+            pauseStartedAt = 0;
+        }
+        _unpause();
+    }
+
+    /// @notice Rescue tokens sent here by mistake. The deposit token is excluded (audit L-4).
+    function rescueToken(address token, address to, uint256 amount) external onlyOwner {
+        if (token == address(depositToken)) revert CannotRescueDepositToken();
+        if (to == address(0)) revert ZeroAddress();
+        IERC20(token).safeTransfer(to, amount);
+        emit TokenRescued(token, to, amount);
+    }
 
     // ============================================================
-    // Internal: Wisdom TWAP
+    // Internal: settlement
     // ============================================================
 
     /**
-     * @notice Update the time-weighted wisdom accumulator.
-     * @dev    TWAP(t) = Σ(score_i × Δt_i) / total_time
-     *         Prevents users from temporarily inflating their score before claiming.
+     * @dev Settles funded yield for `user`, tithe-first, capped at `yieldPool`.
+     *      Returns the total amount moved (tithe + user share).
      */
-    function _updateWisdomTwap(Deposit storage dep) internal {
+    function _settleYield(address user, bool /* strict */) internal returns (uint256) {
+        Deposit storage dep = deposits[user];
+        _updateWisdomTwap(dep, user);
+
+        YieldDistribution memory d = _computeDistribution(user);
+        uint256 payout = d.titheAmount + d.finalAmount;
+
+        // Always advance the clock so unpaid time is not double-counted later.
+        dep.lastClaimTime  = block.timestamp;
+        dep.pausedSnapshot = _pausedSecondsNow();
+
+        if (payout == 0) return 0;
+
+        yieldPool -= payout;
+        stats.totalTithePaid += d.titheAmount;
+        stats.totalClaimed   += d.finalAmount;
+
+        // TITHE-FIRST: the LORD's portion moves before the steward's.
+        if (d.titheAmount > 0) {
+            depositToken.safeTransfer(treasury, d.titheAmount);
+            emit TithePaid(treasury, d.titheAmount, block.timestamp);
+        }
+        if (d.finalAmount > 0) {
+            depositToken.safeTransfer(user, d.finalAmount);
+        }
+
+        emit YieldClaimed(
+            user,
+            d.grossYield,
+            d.titheAmount,
+            d.wisdomBonus,
+            d.titheBlessingBonus,
+            d.finalAmount
+        );
+
+        _assertSolvent();
+        return payout;
+    }
+
+    /**
+     * @dev Computes the distribution for `user`, scaled down pro-rata when the
+     *      funded `yieldPool` cannot cover it. Principal and Joseph's Reserve
+     *      are never touched.
+     */
+    function _computeDistribution(address user) internal view returns (YieldDistribution memory d) {
+        Deposit storage dep = deposits[user];
+        uint256 elapsed = _effectiveElapsed(dep);
+        if (elapsed == 0 || dep.amount == 0 || yieldPool == 0) return d;
+
+        uint256 gross = (dep.amount * baseApyBps * elapsed) / (BASIS_POINTS * SECONDS_PER_YEAR);
+        if (gross == 0) return d;
+
+        uint256 tithe = (gross * TITHE_RATE) / BASIS_POINTS;
+        uint256 net   = gross - tithe;
+
+        uint256 boostBps = _getWisdomBoost(
+            _getWisdomTwap(dep, user),
+            dep.inRebalanceLock && block.timestamp < dep.rebalanceLockEnds
+        );
+        uint256 wisdomBonus = (net * (boostBps - BASIS_POINTS)) / BASIS_POINTS;
+
+        uint256 titheBlessingWad = wisdomRegistry.getTitheBlessingMultiplier(user);
+        uint256 blessingBonus = titheBlessingWad > 1e18
+            ? (net * (titheBlessingWad - 1e18)) / 1e18
+            : 0;
+
+        uint256 finalAmount = net + wisdomBonus + blessingBonus;
+        uint256 payout = tithe + finalAmount;
+
+        // Solvency cap: scale every component to what the funded pool can cover.
+        if (payout > yieldPool) {
+            uint256 pool = yieldPool;
+            gross         = (gross * pool) / payout;
+            tithe         = (tithe * pool) / payout;
+            net           = (net * pool) / payout;
+            wisdomBonus   = (wisdomBonus * pool) / payout;
+            blessingBonus = (blessingBonus * pool) / payout;
+            finalAmount   = net + wisdomBonus + blessingBonus;
+            if (tithe + finalAmount > pool) {
+                // Rounding guard — never exceed the funded pool.
+                finalAmount = pool - tithe;
+            }
+        }
+
+        d = YieldDistribution({
+            grossYield:         gross,
+            titheAmount:        tithe,
+            netYield:           net,
+            wisdomBonus:        wisdomBonus,
+            titheBlessingBonus: blessingBonus,
+            finalAmount:        finalAmount
+        });
+    }
+
+    /// @dev Seconds eligible for yield since last settlement, excluding paused time.
+    function _effectiveElapsed(Deposit storage dep) internal view returns (uint256) {
+        uint256 raw = block.timestamp - dep.lastClaimTime;
+        uint256 pausedSince = _pausedSecondsNow() - dep.pausedSnapshot;
+        return raw > pausedSince ? raw - pausedSince : 0;
+    }
+
+    function _pausedSecondsNow() internal view returns (uint256) {
+        if (paused() && pauseStartedAt != 0) {
+            return totalPausedSeconds + (block.timestamp - pauseStartedAt);
+        }
+        return totalPausedSeconds;
+    }
+
+    function _assertSolvent() internal view {
+        if (depositToken.balanceOf(address(this)) < solvencyFloor()) revert Insolvent();
+    }
+
+    // ============================================================
+    // Internal: Wisdom TWAP (discrete 7-day window)
+    // ============================================================
+
+    /**
+     * @dev Accumulates score × time within the current 7-day window. When the
+     *      window expires it rolls forward, so the average reflects recent
+     *      wisdom rather than a lifetime average (audit M-3).
+     */
+    function _updateWisdomTwap(Deposit storage dep, address user) internal {
         uint256 elapsed = block.timestamp - dep.twapLastUpdated;
         if (elapsed == 0) return;
 
-        (uint256 currentScore, ) = wisdomRegistry.getDecayedWisdomScore(msg.sender);
-        dep.wisdomTwapAccum += currentScore * elapsed;
-        dep.twapLastUpdated  = block.timestamp;
+        (uint256 currentScore, ) = wisdomRegistry.getDecayedWisdomScore(user);
+
+        if (block.timestamp - dep.twapWindowStart >= TWAP_WINDOW) {
+            // Roll the window forward, seeded with the current score.
+            dep.wisdomTwapAccum = currentScore * TWAP_WINDOW;
+            dep.twapWindowStart = block.timestamp - TWAP_WINDOW;
+        } else {
+            dep.wisdomTwapAccum += currentScore * elapsed;
+        }
+        dep.twapLastUpdated = block.timestamp;
     }
 
-    /**
-     * @dev Returns the 7-day TWAP wisdom score for a given user.
-     *      Uses accumulated score × time divided by total elapsed time.
-     *      The `user` parameter is needed so view callers can pass the depositor address.
-     */
+    /// @dev Time-weighted wisdom score over the current window (max TWAP_WINDOW).
     function _getWisdomTwap(Deposit storage dep, address user) internal view returns (uint256) {
-        uint256 totalElapsed = block.timestamp - dep.depositTime;
-        if (totalElapsed == 0) return dep.wisdomTwapStart;
+        uint256 windowElapsed = block.timestamp - dep.twapWindowStart;
+        if (windowElapsed == 0) return dep.wisdomTwapStart;
+        if (windowElapsed > TWAP_WINDOW) windowElapsed = TWAP_WINDOW;
 
         (uint256 currentScore, ) = wisdomRegistry.getDecayedWisdomScore(user);
-        uint256 extraAccum = currentScore * (block.timestamp - dep.twapLastUpdated);
-        uint256 fullAccum  = dep.wisdomTwapAccum + extraAccum;
+        uint256 pending = currentScore * (block.timestamp - dep.twapLastUpdated);
+        uint256 accum   = dep.wisdomTwapAccum + pending;
 
-        return fullAccum / totalElapsed;
+        uint256 twap = accum / windowElapsed;
+        return twap;
     }
 
-    /**
-     * @notice Get the wisdom boost multiplier in basis points.
-     * @param twapScore         7-day TWAP wisdom score
-     * @param rebalanceLockActive  True if Ecclesiastes lock is active (reduces boost)
-     */
+    /// @notice Wisdom boost multiplier in bps; halved bonus while the Ecc 11:2 lock is active.
     function _getWisdomBoost(
         uint256 twapScore,
         bool rebalanceLockActive
@@ -577,7 +647,6 @@ contract BWTYAYieldVault is Ownable2Step, ReentrancyGuard, Pausable {
             boostBps = BOOST_SEEKER;
         }
 
-        // Ecclesiastes rebalancing lock: halve the wisdom bonus portion (not base)
         if (rebalanceLockActive && boostBps > BASIS_POINTS) {
             uint256 bonusPortion = boostBps - BASIS_POINTS;
             boostBps = BASIS_POINTS + bonusPortion / 2;
