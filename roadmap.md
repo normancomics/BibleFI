@@ -13,3 +13,6 @@
 - [ ] Store OPENSEA_API_KEY securely and wire an NFT/collection read path for BibleFi
 
 - [x] Replace social/placeholder preview image with the transparent BibleFi purple/gold Bible icon (og, twitter, farcaster, manifest, favicon)
+
+- [ ] Hourly Bible loader pass that seeds any newly-found finance-related scripture
+- [ ] Compile + end-to-end test the rewritten tithe vault on Base Sepolia, then wire its address into Continuous Giving
