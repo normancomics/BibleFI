@@ -64,6 +64,19 @@ const REFERENCES: Array<{
   { book: 'Romans', chapter: 13, verse: 8, testament: 'New', relevance: 9, categories: ['debt'] },
   { book: 'Hebrews', chapter: 13, verse: 5, testament: 'New', relevance: 8, categories: ['contentment'] },
   { book: 'James', chapter: 5, verse: 4, testament: 'New', relevance: 8, categories: ['wages', 'justice'] },
+  // Ananias and Sapphira — greed, lying to the Holy Ghost about the price of land
+  // (Acts 5:1-11). Seeded in full because BWSP cites it on honesty in reporting.
+  { book: 'Acts', chapter: 5, verse: 1, testament: 'New', relevance: 10, categories: ['greed', 'honesty', 'giving'] },
+  { book: 'Acts', chapter: 5, verse: 2, testament: 'New', relevance: 10, categories: ['greed', 'honesty', 'deceit'] },
+  { book: 'Acts', chapter: 5, verse: 3, testament: 'New', relevance: 10, categories: ['honesty', 'deceit', 'warning'] },
+  { book: 'Acts', chapter: 5, verse: 4, testament: 'New', relevance: 10, categories: ['honesty', 'stewardship', 'warning'] },
+  { book: 'Acts', chapter: 5, verse: 5, testament: 'New', relevance: 9, categories: ['warning', 'judgment'] },
+  { book: 'Acts', chapter: 5, verse: 6, testament: 'New', relevance: 7, categories: ['judgment'] },
+  { book: 'Acts', chapter: 5, verse: 7, testament: 'New', relevance: 7, categories: ['deceit'] },
+  { book: 'Acts', chapter: 5, verse: 8, testament: 'New', relevance: 9, categories: ['honesty', 'deceit', 'price'] },
+  { book: 'Acts', chapter: 5, verse: 9, testament: 'New', relevance: 10, categories: ['conspiracy', 'testing-god', 'warning'] },
+  { book: 'Acts', chapter: 5, verse: 10, testament: 'New', relevance: 9, categories: ['judgment'] },
+  { book: 'Acts', chapter: 5, verse: 11, testament: 'New', relevance: 8, categories: ['fear-of-god', 'church'] },
 ];
 
 const DEFI_KEYWORDS = ['tithe', 'yield', 'stewardship', 'stablecoin', 'stream'];
@@ -85,6 +98,7 @@ const USFM: Record<string, string> = {
   Malachi: 'MAL',
   Matthew: 'MAT',
   Luke: 'LUK',
+  Acts: 'ACT',
   Romans: 'ROM',
   '1 Corinthians': '1CO',
   '2 Corinthians': '2CO',
