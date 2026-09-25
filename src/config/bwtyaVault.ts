@@ -43,7 +43,7 @@ export const BWTYA_VAULTS: Record<BwtyaChain, BwtyaVaultDeployment> = {
     // Deployed 2026-09-18. Registry: 0x1Da78755fd94c58a2852E5EcB15CB466Dbd3B430.
     // Treasury (10% tithe-on-yield): 0x7bEda57074AA917FF0993fb329E16C2c188baF08.
     address:
-      env("VITE_BWTYA_VAULT_BASE_SEPOLIA") || "0x8549E2c482517c8E57E68178c0D2Df98D1847197",
+      env("VITE_BWTYA_VAULT_BASE_SEPOLIA") || "0xf07674e05fFC3691fec0e1eb06F8b536F66dC12e",
   },
 };
 
@@ -74,7 +74,7 @@ export const BWTYA_VAULT_READ_ABI = [
   "function effectiveUserApy(address user) view returns (uint256)",
   "function depositToken() view returns (address)",
   "function treasury() view returns (address)",
-  "function deposits(address) view returns (uint256 amount,uint256 reserveAmount,uint256 depositTime,uint256 lastClaimTime,uint256 accruedYield,uint256 wisdomTwapStart,uint256 wisdomTwapAccum,uint256 twapLastUpdated,bool inRebalanceLock,uint256 rebalanceLockEnds)",
+  "function deposits(address) view returns (uint256 amount,uint256 reserveAmount,uint256 depositTime,uint256 lastClaimTime,uint256 pausedSnapshot,uint256 wisdomTwapStart,uint256 wisdomTwapAccum,uint256 twapWindowStart,uint256 twapLastUpdated,bool inRebalanceLock,uint256 rebalanceLockEnds)",
 ] as const;
 
 /**

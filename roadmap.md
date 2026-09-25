@@ -19,3 +19,4 @@
 - [ ] Opening page sound effects -> sonar-style ping
 - [ ] Fix BWSP advisor answering off-topic questions (e.g. accelerator/VC question) and loading no scriptures
 - [ ] Explore Palantir Foundry/AIP + Harmonic connection for BWSP/BWTYA (needs user credentials)
+- [ ] Farcaster identity attribution on each Continuous Giving gift
