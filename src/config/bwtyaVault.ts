@@ -74,7 +74,7 @@ export const BWTYA_VAULT_READ_ABI = [
   "function effectiveUserApy(address user) view returns (uint256)",
   "function depositToken() view returns (address)",
   "function treasury() view returns (address)",
-  "function deposits(address) view returns (uint256 amount,uint256 reserveAmount,uint256 depositTime,uint256 lastClaimTime,uint256 accruedYield,uint256 wisdomTwapStart,uint256 wisdomTwapAccum,uint256 twapLastUpdated,bool inRebalanceLock,uint256 rebalanceLockEnds)",
+  "function deposits(address) view returns (uint256 amount,uint256 reserveAmount,uint256 depositTime,uint256 lastClaimTime,uint256 pausedSnapshot,uint256 wisdomTwapStart,uint256 wisdomTwapAccum,uint256 twapWindowStart,uint256 twapLastUpdated,bool inRebalanceLock,uint256 rebalanceLockEnds)",
 ] as const;
 
 /**
