@@ -20,3 +20,4 @@
 - [ ] Fix BWSP advisor answering off-topic questions (e.g. accelerator/VC question) and loading no scriptures
 - [ ] Explore Palantir Foundry/AIP + Harmonic connection for BWSP/BWTYA (needs user credentials)
 - [ ] Farcaster identity attribution on each Continuous Giving gift
+- [ ] Add 'Seek Jesus, the Holy Spirit and the Bible first' note to Ask Wisdom
