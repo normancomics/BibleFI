@@ -103,19 +103,31 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     [getContext],
   );
 
+  // Sonar-style ping: pure sine, gentle pitch fall, long decay, and a soft echo.
   const playTone = useCallback(
     (ctx: AudioContext, soundName: string) => {
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-      oscillator.type = 'square';
-      oscillator.frequency.setValueAtTime(FREQUENCIES[soundName] ?? 800, ctx.currentTime);
-      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.24);
+      const base = FREQUENCIES[soundName] ?? 1200;
+      const ping = (delay: number, level: number) => {
+        const t = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2400;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(base, t);
+        osc.frequency.exponentialRampToValueAtTime(base * 0.94, t + 1.2);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(level, t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 1.45);
+      };
+      ping(0, 0.3);
+      ping(0.35, 0.08); // distant echo
     },
     [],
   );
@@ -132,24 +144,13 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
           if (ctx.state === 'suspended') {
             await ctx.resume();
           }
-          const buffer = await loadBuffer(soundName);
-          if (buffer) {
-            const source = ctx.createBufferSource();
-            const gain = ctx.createGain();
-            gain.gain.value = 0.6;
-            source.buffer = buffer;
-            source.connect(gain);
-            gain.connect(ctx.destination);
-            source.start(0);
-          } else {
-            playTone(ctx, soundName);
-          }
+          playTone(ctx, soundName);
         } catch {
           /* audio blocked by the browser — stay silent rather than throw */
         }
       })();
     },
-    [getContext, loadBuffer, playTone],
+    [getContext, playTone],
   );
 
   // Unlock audio on the first gesture (required on iPad/iPhone/Safari).

@@ -16,3 +16,6 @@
 
 - [ ] Hourly Bible loader pass that seeds any newly-found finance-related scripture
 - [ ] Compile + end-to-end test the rewritten tithe vault on Base Sepolia, then wire its address into Continuous Giving
+- [ ] Opening page sound effects -> sonar-style ping
+- [ ] Fix BWSP advisor answering off-topic questions (e.g. accelerator/VC question) and loading no scriptures
+- [ ] Explore Palantir Foundry/AIP + Harmonic connection for BWSP/BWTYA (needs user credentials)
