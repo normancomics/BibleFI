@@ -153,6 +153,7 @@ const BwspYieldFlow: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SeekHimFirstNote />
           <p className="text-sm text-muted-foreground">
             Your question is answered from Scripture first. That answer is then checked three ways —
             that the passages are genuine, read in context, and not picked to suit the answer — and

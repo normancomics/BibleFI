@@ -109,6 +109,7 @@ const ComprehensiveBiblicalAdvisor: React.FC<ComprehensiveBiblicalAdvisorProps> 
           </p>
         </CardHeader>
       </Card>
+      <SeekHimFirstNote />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 bg-black/30">
