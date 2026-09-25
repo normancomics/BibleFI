@@ -10,6 +10,7 @@
  * "Prove all things; hold fast that which is good" — 1 Thessalonians 5:21 (KJV)
  */
 
+import SeekHimFirstNote from '@/components/wisdom/SeekHimFirstNote';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
