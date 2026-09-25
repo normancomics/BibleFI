@@ -150,7 +150,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
         }
       })();
     },
-    [getContext, loadBuffer, playTone],
+    [getContext, playTone],
   );
 
   // Unlock audio on the first gesture (required on iPad/iPhone/Safari).
