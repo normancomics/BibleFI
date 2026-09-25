@@ -10,6 +10,7 @@
  * "Prove all things; hold fast that which is good" — 1 Thessalonians 5:21 (KJV)
  */
 
+import SeekHimFirstNote from '@/components/wisdom/SeekHimFirstNote';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -153,6 +154,7 @@ const BwspYieldFlow: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <SeekHimFirstNote />
           <p className="text-sm text-muted-foreground">
             Your question is answered from Scripture first. That answer is then checked three ways —
             that the passages are genuine, read in context, and not picked to suit the answer — and

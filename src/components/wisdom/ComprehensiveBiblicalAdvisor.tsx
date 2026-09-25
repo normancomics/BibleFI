@@ -1,3 +1,4 @@
+import SeekHimFirstNote from '@/components/wisdom/SeekHimFirstNote';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -109,6 +110,7 @@ const ComprehensiveBiblicalAdvisor: React.FC<ComprehensiveBiblicalAdvisorProps> 
           </p>
         </CardHeader>
       </Card>
+      <SeekHimFirstNote />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 bg-black/30">
