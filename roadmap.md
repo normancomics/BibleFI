@@ -18,6 +18,6 @@
 - [ ] Compile + end-to-end test the rewritten tithe vault on Base Sepolia, then wire its address into Continuous Giving
 - [ ] Opening page sound effects -> sonar-style ping
 - [ ] Fix BWSP advisor answering off-topic questions (e.g. accelerator/VC question) and loading no scriptures
-- [ ] Explore Palantir Foundry/AIP + Harmonic connection for BWSP/BWTYA (needs user credentials)
+- [ ] Explore Palantir Foundry/AIP + Harmonic connection for BWSP/BWTYA (needs user credentials) — Foundry bridge scaffolded, see docs/FOUNDRY_BRIDGE.md
 - [ ] Farcaster identity attribution on each Continuous Giving gift
 - [ ] Add 'Seek Jesus, the Holy Spirit and the Bible first' note to Ask Wisdom
