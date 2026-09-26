@@ -1,0 +1,111 @@
+FIELD DESCRIPTIONS:																
+==============																
+Ref: Eng (+Heb)#Heb.words	Bible reference in English Bibles, as defined by the NRSV (with Heb refs in brackets when they are different). Word numbers of the Hebrew Ketiv text, dividing words by spaces and metheg. [Exception: at Gen.014.017#09 the name Kedorlaomer is uncharacteristically divided as Kedorlaomer ( כְּדָרְ\־לָעֹ֔מֶר ) except in Aleppo, so this is counted as one word despite the metheg.]
+	English verses occasionally start a verse on a different word - i.e. Num.26.1; 1Sa.21.1; 1Ki.18.33; 20.3; 22.22; 22.43; 1Ch.12.4; Isa.64.1; and Psalm Titles (v.0).															
+Text type: 	L=Leningrad text; Q=Qere scribal corrections; K=original text; R=Restored text (ie Jos.21.36-37; Neh.7.67b); X=extra text from LXX as reconstructed in BHS or BHK. Other letters are used for variants - see the list below. Brackets indicate a variant  which is in lower case if it might not affect the translation.  
+	Translators normally follow L, and when this presents a choice between Q and K they follow Q, so K is presented as a variant. If there is more than one variant they are separated by "+" - eg:Neh.2.13#17=Q(K+B) indicates that this Hebrew word follows the Qere and has two variants: the Ketiv (which in this case is upper case "K" to indicate it is different enough to affect the translation), and the BHS which records the Leningrad text differently than Tyndale scholars, and this affects the translation.  If two sources record the same variant they simply follow each other - eg "=LA(HC+b) indicates the text follows Leningrad which is identical to Aleppo while there is a significant variant that is found in both Ben Haim and Cairensis and a different variant in BHS that is non-significant - ie it isn't sufficiently different to change the meaning so it is recorded in lower case. 
+Hebrew	Full Hebrew including pointing, cantillation and punctuation  with forward slash ( / ) separating prefixes and suffixes from the root word and backward slash ( \ ) separating punctuation. 															
+	This Hebrew was derived from Westminster Leningrad text WLC 4.20 via OpenScriptures, checked against the Stugartensia electronic text, then occasionally corrections towards the Leningrad Codex by BHS or by Tyndale scholars. It is, essentially, a corrected version of BHS. 															
+English translation:  	Forward slash ( / ) separates the translation to mirror the prefixes, root and suffixes in Hebrew. This means the order of English words follows the order within the Hebrew word.  															
+	Words in <angle brackets> are in the Hebrew but are best not  included in a translation. Words in [square brackets] aren't in the Hebrew but are implied and are best included in a translation. 															
+dStrongs	Lexical tags for each element of the Hebrew words, including prefixes and suffixes, with the Root in {curly brackets}. A "+" indicates the same tag also covers the next Hebrew word. These disambiguated Strong numbers (dStrong)  are defined at TinyURL.com/STEP-Disambiguated. 
+Grammar	Morphology is from ETCBC, with Ketiv forms parsed by Tyndale scholars - see e.g. Deu.33.2-15.   For the source of ETCBC and conversion method by Tyndale House, see https://goo.gl/yKaXQq#HebMorph2															
+	Morphology codes follow the form defined by OpenScriptures at http://openscriptures.github.io/morphhb/parsing/HebrewMorphologyCodes.html#vt with some adaptations - see TinyURL.com/HebMorph															
+Meaning variant	These are significant variants that are adopted by standard Bible translations which can result in a different translation.  															
+	The difference may not be reflected in translations. For example, Ruth 3.14 has Ketiv "his foot" replaced by Qere "his feet" (because single 'foot' is a euphamism for penis). This verse also has "before" spelled as בִּ/טְרוֹם in Ketiv and בְּ/טֶ֛רֶם in Qere. Both are recorded in detail even though they make little or no difference in most translations.  															
+Spelling variants	These spelling differences have no effect on the meaning, and are not recorded in the Interlinear layout. 															
+sStrong+Instance	Simple Strongs (sStrongs) are the original Strong numbers in 4-digits, without the appended "A", "B" etc for by which OpenScripture.org mirrored the BDB lexicon, and without the "A", "B" etc of disambiguation.  
+	They are appended with Instance markerss (eg  "_A" etc) to allow these to be upgraded to disambiguated tags with full morphology - see the methodology at www.TinyURL.com/UpgradingTags															
+Alt Strongs	Alternate ways to tag the same word using Strongs tags. Differences are usually due to different interpretations of the Hebrew root. The purpose of this and the sStrong+Instance is to help line up this data with other tagged Bibles.  														
+Conjoin word	Not yet implemented															
+Expanded Strong tags 	A copy of the dStrong tags with additional tags for punctuation elements. Each tag is accompanied by the lexical form in Heberew, an English gloss, and its sub-meaning after " » " where appropriate. 															
+	People and place names have unique IDs such as "Abram»Abraham@Gen.11.26-1Pe" which means: in this location the name given is Abram but the most common name is Abraham. This individual occurs first at Gen.11.26 and last in 1Peter. The ID and the accompanying dStrong number belongs to only one individual who is distinct from anyone else who shares any of their names. 															
+
+Abbreviations for sources of each word: 																
+=========================																
+L= Leningrad manuscript																
+R= restored text based on Leningrad parallels - ie Jos.21.36-37 from 1Ch.6.63-64 and Neh.7.67b from Ezr.2.66																
+X= "based on Greek sources" - ie extra words based on LXX, expressed in Hebrew as in the apparatus of BHS pr BHK - eg 1Sa.13.1 Saul was שְׁלֹשִׁים שָׁנָ֖ה ('a thirty year-old') not שָׁנָ֖ה ('a year-old') 																
+Q= "a Scribal corrections" ie the Qere ('spoken') corrections by scribes. This is made up of the letters in the margin and the pointing in the text.																
+    K= "the uncorrected text" - ie the Ketiv  ('written') is noted as a variant. This is made up of the letters in the text, pointed by Tyndale scholars. 																
+    L - the letters of K with pointing of Q, as found in Leningrad is recorded as a spelling variant. 																
+ - eg Gen.27.3 L= צָיִדה, K= צֵידָה ('food'), Q= צָיִד ('wild game')																
+																
+Abbreviations for other variants - in brackets after the source. If the variant doesn't change the meaning, it is noted in lower case, eg L(a) means this is the form found in Leningrad, where Aleppo is different but still has the same meaning. 																
+====================																
+A= "in the Aleppo manuscript" - eg Isa.27.2 חֶ֖מֶר ('wine') for חֶ֖מֶד ('delight')																
+B= "in the Biblia Hebraica Stuttgartensia" - ie BHS edition when it deviates from MT - eg Num.7.59 פְּדָה־צֽוּר (Pedah-zur') for פְּדָהצֽוּר ('Pedahzur')																
+C= "in the Cairensis manuscript" - eg 2Sa.11.1 הַמְּלָכִ֗ים ('kings') for הַמַּלְאֿכִ֗ים ('messengers')																
+D= "in a Dead Sea or Judean Desert manuscript"  - eg Psa.22.16(17) כָּ֝אֲרוּ ('they dug') for כָּ֝אֲרִ֗י ('like a lion')																
+E=  "an emendation of ancient sources" - ie a scholarly guess at the original when the Hebrew looks garbled  - eg Gen.37.36 וְהַמִדְיָנִים (and the Midianites) for וְהַמְּדָנִים ('and the Medanites)																
+F= "formatting the text differently" - ie changing  pointing or word divisions without changing any letters - eg 1Ch.24.26,27 בְנוֹ ('his son') for בְנוֹ ('Beno')																
+H= "in the Ben Chaim edtion" - ie the Second Rabbinic Bible - eg Gen.25.15 חֲדַ֣ר ('Hadar') for חֲדַ֣ד ('Hadad')																
+P= "with alternate punctuation" - as marked in major manuscripts  - eg in Gen.35.22  "Israel heard of it; and Jacob had 12 son" for "the concubine of his father; and Israel heard of it. And Jacob had 12 sons. 																
+S= "in Scribal traditions" - ie  in Itture Sopherim, Tiqqune Sopherim, Masora etc based on On the correction of the text of the Hebrew Scriptures by Heimann Jolowicz at https://www.google.co.uk/books/edition/On_the_Correction_of_the_Text_of_the_Heb/fmfE-R0b2UgC - eg Gen.18.22 "Yahweh.. before Abraham" for "Abraham... before Yahweh". 																
+V = "a variant in some manuscripts" - ie variants in Hebrew manuscripts other than those above - eg Zep.3.15 תִרְאִי ('you will see') for תִירְאִי ('you will fear')																
+(Most of these variants are yet to be added. )																
+																
+# Gen.1.1	be.re.Shit (בְּרֵאשִׁ֖ית)	ba.Ra' (בָּרָ֣א)	'E.lo.Him (אֱלֹהִ֑ים)	'et (אֵ֥ת)	ha.sha.Ma.yim (הַשָּׁמַ֖יִם)	ve.'Et (וְאֵ֥ת)	ha.'A.retz (הָאָֽרֶץ׃)									
+#_Translation	in/ beginning	he created	God	<obj.>	the/ heavens	and/ <obj.>	the/ earth									
+#_Word+Grammar	H9003/H7225G=HR/Ncfsa	H1254A=HVqp3ms	H0430G=HNcmpa	H0853=HTo	H9009/H8064=HTd/Ncmpa	H9002/H0853=HC/To	H9009/H0776G=HTd/Ncfsa									
+#_Significant variant																
+																
+Eng (Heb) Ref & Type	Hebrew	Transliteration	Translation	dStrongs	Grammar	Meaning Variants	Spelling Variants	Root dStrong+Instance	Alternative Strongs+Instance	Conjoin word	Expanded Strong tags					
+Gen.1.1#01=L	בְּ/רֵאשִׁ֖ית	be./re.Shit	in/ beginning	H9003/{H7225G}	HR/Ncfsa			H7225G			H9003=ב=in/{H7225G=רֵאשִׁית=: beginning»first:1_beginning}					
+Gen.1.1#02=L	בָּרָ֣א	ba.Ra'	he created	{H1254A}	HVqp3ms			H1254A			{H1254A=בָּרָא=to create}					
+Gen.1.1#03=L	אֱלֹהִ֑ים	'E.lo.Him	God	{H0430G}	HNcmpa			H0430G			{H0430G=אֱלֹהִים=God»LORD@Gen.1.1-Heb}					
+Gen.1.1#04=L	אֵ֥ת	'et	<obj.>	{H0853}	HTo			H0853_A			{H0853=אֵת=[Obj.]}					
+Gen.1.1#05=L	הַ/שָּׁמַ֖יִם	ha./sha.Ma.yim	the/ heavens	H9009/{H8064}	HTd/Ncmpa			H8064			H9009=ה=the/{H8064=שָׁמַיִם=heaven}					
+Gen.1.1#06=L	וְ/אֵ֥ת	ve./'Et	and/ <obj.>	H9002/{H0853}	HC/To			H0853_B			H9002=ו=and/{H0853=אֵת=[Obj.]}					
+Gen.1.1#07=L	הָ/אָֽרֶץ\׃	ha./'A.retz	the/ earth	H9009/{H0776G}\H9016	HTd/Ncfsa			H0776G			H9009=ה=the/{H0776G=אֶ֫רֶץ=: country;_planet»land:2_country;_planet}\H9016=׃=verseEnd					
+																
+# Gen.1.2	ve.ha.'A.retz (וְהָאָ֗רֶץ)	ha.ye.Tah (הָיְתָ֥ה)	to.hu (תֹ֙הוּ֙)	va.Vo.hu (וָבֹ֔הוּ)	ve.Cho.shekh (וְחֹ֖שֶׁךְ)	'al- (עַל־)	pe.Nei (פְּנֵ֣י)	te.Hom (תְה֑וֹם)	ve.Ru.ach (וְר֣וּחַ)	'E.lo.Him (אֱלֹהִ֔ים)						
+#_Translation	and/ the/ earth	<it> was	formlessness	and/ emptiness	and/ darkness	[was] over	[the] surface of	[the] deep	and/ [the] spirit of	God						
+#_Word+Grammar	H9002/H9009/H0776G=HC/Td/Ncfsa	H1961=HVqp3fs	H8414=HNcmsa	H9002/H0922=HC/Ncmsa	H9002/H2822=HC/Ncmsa	H5921A=HR	H6440J=HNcmpc	H8415=HNcfsa	H9002/H7307G=HC/Ncfsc	H0430G=HNcmpa						
+#_Significant variant																
+#_Gen.1.2	me.ra.Che.fet (מְרַחֶ֖פֶת)	'al- (עַל־)	pe.Nei (פְּנֵ֥י)	ha.Ma.yim (הַמָּֽיִם׃)												
+#_Translation	[was] hovering	over	[the] surface of	the/ waters												
+#_Word+Grammar	H7363B=HVprfsa	H5921A=HR	H6440J=HNcmpc	H9009/H4325G=HTd/Ncmpa												
+#_Significant variant																
+																
+Eng (Heb) Ref & Type	Hebrew	Transliteration	Translation	dStrongs	Grammar	Meaning Variants	Spelling Variants	Root dStrong+Instance	Alternative Strongs+Instance	Conjoin word	Expanded Strong tags					
+Gen.1.2#01=L	וְ/הָ/אָ֗רֶץ	ve./ha./'A.retz	and/ the/ earth	H9002/H9009/{H0776G}	HC/Td/Ncfsa			H0776G			H9002=ו=and/H9009=ה=the/{H0776G=אֶ֫רֶץ=: country;_planet»land:2_country;_planet}					
+Gen.1.2#02=L	הָיְתָ֥ה	ha.ye.Tah	<it> was	{H1961}	HVqp3fs			H1961			{H1961=הָיָה=to be}					
+Gen.1.2#03=L	תֹ֙הוּ֙	to.hu	formlessness	{H8414}	HNcmsa			H8414			{H8414=תֹּ֫הוּ=formlessness}					
+Gen.1.2#04=L	וָ/בֹ֔הוּ	va./Vo.hu	and/ emptiness	H9002/{H0922}	HC/Ncmsa			H0922			H9002=ו=and/{H0922=בֹּהוּ=void}					
+Gen.1.2#05=L	וְ/חֹ֖שֶׁךְ	ve./Cho.shekh	and/ darkness	H9002/{H2822}	HC/Ncmsa			H2822			H9002=ו=and/{H2822=חֹ֫שֶׁךְ=darkness}					
+Gen.1.2#06=L	עַל\־	'al-	[was] over	{H5921A}\H9014	HR			H5921A_A			{H5921A=עַל=upon}\H9014=־=link					
+Gen.1.2#07=L	פְּנֵ֣י	pe.Nei	[the] surface of	{H6440J}	HNcmpc			H6440J_A			{H6440J=פָּנֶה=: surface»face:4_surface;_land}					
+Gen.1.2#08=L	תְה֑וֹם	te.Hom	[the] deep	{H8415}	HNcfsa			H8415			{H8415=תְּהוֹם=abyss}					
+Gen.1.2#09=L	וְ/ר֣וּחַ	ve./Ru.ach	and/ [the] spirit of	H9002/{H7307G}	HC/Ncfsc			H7307G			H9002=ו=and/{H7307G=רוּחַ=: spirit»spirit:1_spirit}					
+Gen.1.2#10=L	אֱלֹהִ֔ים	'E.lo.Him	God	{H0430G}	HNcmpa			H0430G			{H0430G=אֱלֹהִים=God»LORD@Gen.1.1-Heb}					
+Gen.1.2#11=L	מְרַחֶ֖פֶת	me.ra.Che.fet	[was] hovering	{H7363B}	HVprfsa			H7363B			{H7363B=רָחַף=to hover}					
+Gen.1.2#12=L	עַל\־	'al-	over	{H5921A}\H9014	HR			H5921A_B			{H5921A=עַל=upon}\H9014=־=link					
+Gen.1.2#13=L	פְּנֵ֥י	pe.Nei	[the] surface of	{H6440J}	HNcmpc			H6440J_B			{H6440J=פָּנֶה=: surface»face:4_surface;_land}					
+Gen.1.2#14=L	הַ/מָּֽיִם\׃	ha./Ma.yim	the/ waters	H9009/{H4325G}\H9016	HTd/Ncmpa			H4325G			H9009=ה=the/{H4325G=מַי=water}\H9016=׃=verseEnd					
+																
+# Gen.1.3	vai.Yo.mer (וַיֹּ֥אמֶר)	'E.lo.Him (אֱלֹהִ֖ים)	ye.Hi (יְהִ֣י)	'or (א֑וֹר)	vay.hi- (וַֽיְהִי־)	'or (אֽוֹר׃)										
+#_Translation	and/ he said	God	let it be	light	and/ there was	light										
+#_Word+Grammar	H9001/H0559=Hc/Vqw3ms	H0430G=HNcmpa	H1961=HVqj3ms	H0216=HNcfsa	H9001/H1961=Hc/Vqw3ms	H0216=HNcfsa										
+#_Significant variant																
+																
+Eng (Heb) Ref & Type	Hebrew	Transliteration	Translation	dStrongs	Grammar	Meaning Variants	Spelling Variants	Root dStrong+Instance	Alternative Strongs+Instance	Conjoin word	Expanded Strong tags					
+Gen.1.3#01=L	וַ/יֹּ֥אמֶר	va/i.Yo.mer	and/ he said	H9001/{H0559}	Hc/Vqw3ms			H0559			H9001=ו=&/{H0559=אָמַר=to say}					
+Gen.1.3#02=L	אֱלֹהִ֖ים	'E.lo.Him	God	{H0430G}	HNcmpa			H0430G			{H0430G=אֱלֹהִים=God»LORD@Gen.1.1-Heb}					
+Gen.1.3#03=L	יְהִ֣י	ye.Hi	let it be	{H1961}	HVqj3ms			H1961_A			{H1961=הָיָה=to be}					
+Gen.1.3#04=L	א֑וֹר	'or	light	{H0216}	HNcfsa			H0216_A			{H0216=אוֹר=light}					
+Gen.1.3#05=L	וַֽ/יְהִי\־	va/y.hi-	and/ there was	H9001/{H1961}\H9014	Hc/Vqw3ms			H1961_B			H9001=ו=&/{H1961=הָיָה=to be}\H9014=־=link					
+Gen.1.3#06=L	אֽוֹר\׃	'or	light	{H0216}\H9016	HNcfsa			H0216_B			{H0216=אוֹר=light}\H9016=׃=verseEnd					
+																
+# Gen.1.4	vai.Yar' (וַיַּ֧רְא)	'E.lo.Him (אֱלֹהִ֛ים)	'et- (אֶת־)	ha.'Or (הָא֖וֹר)	ki- (כִּי־)	Tov (ט֑וֹב)	vai.yav.Del (וַיַּבְדֵּ֣ל)	'E.lo.Him (אֱלֹהִ֔ים)	bein (בֵּ֥ין)	ha.'Or (הָא֖וֹר)						
+#_Translation	and/ he saw	God	<obj.>	the/ light	that	[it was] good	and/ he separated	God	between	the/ light						
+#_Word+Grammar	H9001/H7200G=Hc/Vqw3ms	H0430G=HNcmpa	H0853=HTo	H9009/H0216=HTd/Ncfsa	H3588A=HTc	H2895=HVqp3ms	H9001/H0914=Hc/Vhw3ms	H0430G=HNcmpa	H0996G=HAcmsc	H9009/H0216=HTd/Ncfsa						
+#_Significant variant																
+#_Gen.1.4	u.Vein (וּבֵ֥ין)	ha.Cho.shekh (הַחֹֽשֶׁךְ׃)														
+#_Translation	and/ between	the/ darkness														
+#_Word+Grammar	H9002/H0996G=HC/Acmsc	H9009/H2822=HTd/Ncmsa														
+#_Significant variant																
+																
+Eng (Heb) Ref & Type	Hebrew	Transliteration	Translation	dStrongs	Grammar	Meaning Variants	Spelling Variants	Root dStrong+Instance	Alternative Strongs+Instance	Conjoin word	Expanded Strong tags					
+Gen.1.4#01=L	וַ/יַּ֧רְא	va/i.Yar'	and/ he saw	H9001/{H7200G}	Hc/Vqw3ms			H7200G			H9001=ו=&/{H7200G=רָאָה=: see»to see:1_see;_show}					
+Gen.1.4#02=L	אֱלֹהִ֛ים	'E.lo.Him	God	{H0430G}	HNcmpa			H0430G_A			{H0430G=אֱלֹהִים=God»LORD@Gen.1.1-Heb}					

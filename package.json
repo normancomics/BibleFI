@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "verify:agents": "node scripts/verify-agents.mjs",
+    "test:stepbible": "node --experimental-strip-types scripts/test-stepbible-parser.ts",
     "test:health": "node scripts/test-church-directory-health.mjs"
   },
   "dependencies": {
