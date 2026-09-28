@@ -1,0 +1,32 @@
+title = "normancomics secret-guard rules"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "evm-private-key"
+description = "EVM private key assigned to a key-like variable"
+regex = '''(?i)(private[_-]?key|priv[_-]?key|deployer[_-]?key|signer[_-]?key|pk)\s*[:=]\s*['"]?(0x)?[a-f0-9]{64}\b'''
+keywords = ["private", "priv", "deployer", "signer", "pk"]
+
+[[rules]]
+id = "seed-phrase"
+description = "Mnemonic / seed phrase"
+regex = '''(?i)(mnemonic|seed[_-]?phrase)\s*[:=]\s*['"]?([a-z]+\s+){11,23}[a-z]+'''
+keywords = ["mnemonic", "seed"]
+
+[[rules]]
+id = "supabase-service-role"
+description = "Supabase service role key"
+regex = '''(?i)(service[_-]?role[_-]?key|supabase_service_role)\s*[:=]\s*['"]?eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+'''
+keywords = ["service_role", "service-role", "servicerole", "supabase_service"]
+
+[allowlist]
+description = "Known-safe files"
+paths = [
+  '''\.env\.example$''',
+  '''package-lock\.json$''',
+  '''bun\.lockb?$''',
+  '''contracts_forge/lib/''',
+  '''node_modules/''',
+]
