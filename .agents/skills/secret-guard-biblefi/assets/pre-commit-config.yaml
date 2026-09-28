@@ -1,0 +1,16 @@
+# Blocks secrets on YOUR machine before they're ever committed.
+# Install: brew install pre-commit && pre-commit install && pre-commit autoupdate
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2 # run `pre-commit autoupdate` to pin the latest
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: block-env-files
+        name: Block .env files
+        entry: "Env files must never be committed. Use .env.example"
+        language: fail
+        files: '(^|/)\.env(\..+)?$'
+        exclude: '\.env\.example$'
