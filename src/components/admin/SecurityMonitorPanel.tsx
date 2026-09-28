@@ -88,7 +88,7 @@ const SecurityMonitorPanel: React.FC = () => {
           <div>
             <CardTitle>Endpoint Security Monitor</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Auto-runs every 6 hours. Records HIGH severity findings only.
+              Auto-runs every hour. Records HIGH severity findings only.
             </p>
           </div>
           <Button onClick={runNow} disabled={running}>
