@@ -104,3 +104,6 @@ verify_jwt = false
 
 [functions.strongs-concordance-seeder]
 verify_jwt = false
+
+[functions.foundry-bridge]
+verify_jwt = false
