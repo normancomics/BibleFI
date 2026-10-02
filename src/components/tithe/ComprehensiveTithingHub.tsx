@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import { base } from 'wagmi/chains';
+import { BUILDER_DATA_SUFFIX } from '@/config/baseBuilder';
 import { supabase } from '@/integrations/supabase/client';
 import { supabaseApi } from '@/integrations/supabase/apiClient';
 import { useSuperfluid } from '@/hooks/useSuperfluid';
@@ -305,6 +306,7 @@ const ComprehensiveTithingHub: React.FC = () => {
         args: [recipientAddress as `0x${string}`, amountInUnits],
         chain: base,
         account: address,
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       });
 
       const gasNote = gaslessMode ? ' (gasless via Coinbase Smart Wallet)' : '';
