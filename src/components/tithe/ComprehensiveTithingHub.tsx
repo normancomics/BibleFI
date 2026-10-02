@@ -305,6 +305,7 @@ const ComprehensiveTithingHub: React.FC = () => {
         args: [recipientAddress as `0x${string}`, amountInUnits],
         chain: base,
         account: address,
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       });
 
       const gasNote = gaslessMode ? ' (gasless via Coinbase Smart Wallet)' : '';

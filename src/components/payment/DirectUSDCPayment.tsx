@@ -84,6 +84,7 @@ const DirectUSDCPayment: React.FC<DirectUSDCPaymentProps> = ({
         args: [recipientAddress as `0x${string}`, amountInWei],
         account: address,
         chain: base,
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       });
 
       toast({
