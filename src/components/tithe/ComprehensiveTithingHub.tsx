@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
 import { base } from 'wagmi/chains';
+import { BUILDER_DATA_SUFFIX } from '@/config/baseBuilder';
 import { supabase } from '@/integrations/supabase/client';
 import { supabaseApi } from '@/integrations/supabase/apiClient';
 import { useSuperfluid } from '@/hooks/useSuperfluid';
