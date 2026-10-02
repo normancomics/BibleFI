@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAccount, useWriteContract } from 'wagmi';
 import { parseUnits } from 'viem';
+import { BUILDER_DATA_SUFFIX } from '@/config/baseBuilder';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
