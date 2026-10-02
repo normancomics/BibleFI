@@ -142,6 +142,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: ERC20_APPROVE_ABI,
         functionName: 'approve',
         args: [BFI_USD_ADDRESS, assets],
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       } as any,
       {
         onSuccess: () => {
@@ -179,6 +180,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: BIBLEFI_USD_ABI,
         functionName: 'depositUSDC',
         args: [assets, depositNote],
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       } as any,
       {
         onSuccess: () => {
@@ -222,6 +224,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: BIBLEFI_SUPERFLUID_ABI,
         functionName: 'startTitheStream',
         args: [USDCX_ADDRESS, streamReceiver as `0x${string}`, flowRate, streamScripture],
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       } as any,
       {
         onSuccess: () => {
@@ -251,6 +254,7 @@ const BibleFiPolishedPanel: React.FC = () => {
         abi: BIBLEFI_USD_ABI,
         functionName: 'rebaseAndTithe',
         args: [],
+        dataSuffix: BUILDER_DATA_SUFFIX, // Base builder rewards attribution
       } as any,
       {
         onSuccess: () => {
