@@ -103,34 +103,35 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     [getContext],
   );
 
-  // Soft chime: a small bell — steady pitch, gentle bell overtones, calm decay.
+  // Short, crisp blip: ~120ms, fast attack, quick decay — never drags on.
+  // A per-sound minimum interval stops rapid taps from piling sounds up.
+  const lastPlayRef = useRef<Map<string, number>>(new Map());
+  const MIN_INTERVAL_MS = 90;
+
   const playTone = useCallback(
     (ctx: AudioContext, soundName: string) => {
-      const base = (FREQUENCIES[soundName] ?? 1200) * 0.6;
+      const now = performance.now();
+      const last = lastPlayRef.current.get(soundName) ?? 0;
+      if (now - last < MIN_INTERVAL_MS) return;
+      lastPlayRef.current.set(soundName, now);
+
+      const base = FREQUENCIES[soundName] ?? 1200;
       const t = ctx.currentTime;
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 3200;
-      filter.connect(ctx.destination);
-      // [frequency ratio, level, decay seconds] — inharmonic partials give the bell tone
-      const partials: Array<[number, number, number]> = [
-        [1, 0.22, 1.8],
-        [2.76, 0.07, 1.0],
-        [5.4, 0.025, 0.5],
-      ];
-      partials.forEach(([ratio, level, decay]) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(base * ratio, t);
-        gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(level, t + 0.005);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-        osc.connect(gain);
-        gain.connect(filter);
-        osc.start(t);
-        osc.stop(t + decay + 0.05);
-      });
+      const DURATION = 0.12; // seconds — short and snappy
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(base, t);
+      // Tiny upward flick at the start gives it a clean "tick" character.
+      osc.frequency.exponentialRampToValueAtTime(base * 1.25, t + 0.02);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + DURATION);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + DURATION + 0.02);
     },
     [],
   );
