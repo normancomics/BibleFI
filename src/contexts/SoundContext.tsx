@@ -103,31 +103,34 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     [getContext],
   );
 
-  // Sonar-style ping: pure sine, gentle pitch fall, long decay, and a soft echo.
+  // Soft chime: a small bell — steady pitch, gentle bell overtones, calm decay.
   const playTone = useCallback(
     (ctx: AudioContext, soundName: string) => {
-      const base = FREQUENCIES[soundName] ?? 1200;
-      const ping = (delay: number, level: number) => {
-        const t = ctx.currentTime + delay;
+      const base = (FREQUENCIES[soundName] ?? 1200) * 0.6;
+      const t = ctx.currentTime;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 3200;
+      filter.connect(ctx.destination);
+      // [frequency ratio, level, decay seconds] — inharmonic partials give the bell tone
+      const partials: Array<[number, number, number]> = [
+        [1, 0.22, 1.8],
+        [2.76, 0.07, 1.0],
+        [5.4, 0.025, 0.5],
+      ];
+      partials.forEach(([ratio, level, decay]) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 2400;
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(base, t);
-        osc.frequency.exponentialRampToValueAtTime(base * 0.94, t + 1.2);
+        osc.frequency.setValueAtTime(base * ratio, t);
         gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(level, t + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
+        gain.gain.exponentialRampToValueAtTime(level, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        osc.connect(gain);
+        gain.connect(filter);
         osc.start(t);
-        osc.stop(t + 1.45);
-      };
-      ping(0, 0.3);
-      ping(0.35, 0.08); // distant echo
+        osc.stop(t + decay + 0.05);
+      });
     },
     [],
   );
