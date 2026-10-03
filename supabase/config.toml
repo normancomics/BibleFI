@@ -1,5 +1,8 @@
 project_id = "ojiipppypzigjnjblbzn"
 
+[functions.mcp]
+verify_jwt = true
+
 [functions.biblical-advisor]
 verify_jwt = false
 

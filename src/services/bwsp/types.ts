@@ -25,6 +25,21 @@ export interface ScriptureResult {
   defiApplication: string;
   category: string;
   similarity?: number;
+  translation?: 'KJV' | 'WEB';
+}
+
+export interface BWSPSourceCitation {
+  id: string;
+  type: 'scripture' | 'defi';
+  title: string;
+  reference: string;
+  translation?: 'KJV' | 'WEB';
+  version?: string | null;
+  protocol?: string | null;
+  url: string;
+  reviewedAt: string;
+  similarity: number;
+  text?: string;
 }
 
 export interface DefiKnowledgeResult {
@@ -87,6 +102,11 @@ export interface BWSPSynthesis {
   confidenceScore: number;
   synthesisMethod: 'rag_vector' | 'offline_fallback' | 'hybrid';
   protocol: string;
+  answerable?: boolean;
+  defiSuggestions?: string;
+  sourceCitations?: BWSPSourceCitation[];
+  disclaimer?: string;
+  riskNotice?: string;
   tokenCount?: number;
   // Advanced BWSP math outputs
   resonanceScore: number;                // 0–1 offline scripture resonance (cosine-like)

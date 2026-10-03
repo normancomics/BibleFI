@@ -5,93 +5,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { hasSupabaseSession } from './session';
 import type { BWSPContext, BWSPSynthesis, ScriptureResult } from './types';
 
-// ---------------------------------------------------------------------------
-// Offline fallback synthesis by intent
-// ---------------------------------------------------------------------------
-
-interface FallbackSynthesis {
-  guidance: string;
-  principle: string;
-  action: string;
-}
-
-const OFFLINE_BY_INTENT: Record<string, FallbackSynthesis> = {
-  yield_advice: {
-    guidance:
-      'Scripture calls us to be faithful stewards of the talents we receive (Matthew 25:14-30). ' +
-      'Seek protocols with a proven track record, transparent smart contracts, and sustainable APY — ' +
-      'not those promising overnight wealth (Proverbs 28:22).',
-    principle: 'Faithful stewardship multiplies; reckless speculation diminishes.',
-    action:
-      'Allocate capital across 2–3 audited, low-risk protocols. Reserve 10% as a tithe before compounding rewards.',
-  },
-  risk_assessment: {
-    guidance:
-      'Prudence guards against sudden loss (Proverbs 27:12). Evaluate every DeFi position ' +
-      'by its audit history, team transparency, and TVL stability before committing.',
-    principle: 'The prudent sees danger and hides; the simple pass on and are punished.',
-    action:
-      'Review smart-contract audits, check protocol insurance options, and never invest more than you can lose.',
-  },
-  tithe_guidance: {
-    guidance:
-      '"Honour the LORD with your wealth, with the firstfruits of all your crops" (Proverbs 3:9). ' +
-      'On-chain tithing allows you to route a biblical 10% automatically to your chosen ministry wallet.',
-    principle: 'The firstfruits belong to the Lord; the rest flows with His blessing.',
-    action:
-      'Configure a Superfluid stream or wallet split to send 10% of each yield harvest to your church or charity wallet.',
-  },
-  stewardship_principle: {
-    guidance:
-      'Good stewardship means growing what you have been given for the Master\'s return (Luke 19:13). ' +
-      'Diversify across asset classes, maintain liquidity, and document every position.',
-    principle: 'Stewards are accountable for both growth and preservation of entrusted resources.',
-    action: 'Build a diversified portfolio: liquid stablecoins, yield-bearing positions, and an emergency reserve.',
-  },
-  defi_action: {
-    guidance:
-      'Before taking any DeFi action, count the cost (Luke 14:28). Simulate the transaction, ' +
-      'review the contract address on-chain, and ensure you understand the fee structure.',
-    principle: 'Wisdom begins with understanding all terms and conditions before signing.',
-    action:
-      'Use a block explorer to verify the contract, simulate with a small test amount, then proceed with your full position.',
-  },
-  tax_wisdom: {
-    guidance:
-      '"Render to Caesar what is Caesar\'s" (Matthew 22:21). Track every on-chain transaction ' +
-      'with its USD value at time of receipt for accurate tax reporting.',
-    principle: 'Integrity in taxation reflects our broader commitment to honesty before God and man.',
-    action:
-      'Export transaction history monthly, record cost-basis for each token lot, and consult a crypto-literate CPA annually.',
-  },
-  general_wisdom: {
-    guidance:
-      '"The plans of the diligent lead to profit as surely as haste leads to poverty" (Proverbs 21:5). ' +
-      'Approach every financial decision with prayer, research, and counsel.',
-    principle: 'Wisdom, patience, and diligence are the foundations of lasting financial health.',
-    action: 'Set a weekly financial review cadence: check positions, tithe allocation, and wisdom score progress.',
-  },
-};
-
-function buildOfflineSynthesis(context: BWSPContext): BWSPSynthesis {
-  const intent = context.query.intent ?? 'general_wisdom';
-  const fallback = OFFLINE_BY_INTENT[intent] ?? OFFLINE_BY_INTENT.general_wisdom;
-
-  const primaryScripture: ScriptureResult = context.scriptures[0] ?? {
-    reference: 'Proverbs 3:9',
-    text: 'Honour the LORD with your wealth, with the firstfruits of all your crops.',
-    principle: 'Prioritise giving to God from your first and best.',
-    defiApplication: 'Allocate tithe from yield before compounding.',
-    category: 'stewardship',
-  };
-
+function buildOfflineSynthesis(): BWSPSynthesis {
   return {
-    guidance: fallback.guidance,
-    principle: fallback.principle,
-    action: fallback.action,
-    primaryScripture,
-    supportingScriptures: context.scriptures.slice(1, 4),
-    confidenceScore: 0.72,
+    answerable: false,
+    guidance: 'A sourced answer could not be generated. Sign in and retry when reviewed sources and the advisor are available.',
+    principle: '',
+    action: '',
+    defiSuggestions: 'No DeFi suggestion is provided without a reviewed official source.',
+    primaryScripture: {
+      reference: '',
+      text: '',
+      principle: '',
+      defiApplication: '',
+      category: '',
+    },
+    supportingScriptures: [],
+    sourceCitations: [],
+    disclaimer: 'Educational information only, not financial, investment, tax, or legal advice. Scripture interpretation is not authoritative.',
+    riskNotice: 'DeFi involves substantial risks, including loss of funds, smart-contract vulnerabilities, liquidation, liquidity limits, and changing market conditions.',
+    confidenceScore: 0,
     synthesisMethod: 'offline_fallback',
     protocol: 'BWSP-v1.0',
     resonanceScore: 0,
@@ -111,8 +43,8 @@ export class BWSPSynthesizer {
     promptContext: string,
   ): Promise<BWSPSynthesis> {
     try {
-      // Signed-out visitors cannot call the protected agent — use offline wisdom.
-      if (!(await hasSupabaseSession())) return buildOfflineSynthesis(context);
+      // Signed-out visitors cannot call the protected agent.
+      if (!(await hasSupabaseSession())) return buildOfflineSynthesis();
 
       const { data, error } = await supabase.functions.invoke('bwsp-sovereign-agent', {
         body: {
@@ -126,19 +58,43 @@ export class BWSPSynthesizer {
 
       if (error || !data) throw new Error('Edge function failed');
 
+      const citations = Array.isArray(data.citations) ? data.citations : [];
+      const scriptureCitations = citations.filter(
+        (citation: { type?: string }) => citation.type === 'scripture',
+      );
+      const primaryCitation = scriptureCitations[0];
+      const primaryScripture: ScriptureResult = primaryCitation
+        ? {
+            reference: primaryCitation.reference,
+            text: primaryCitation.text ?? '',
+            principle: '',
+            defiApplication: '',
+            category: 'reviewed',
+            translation: primaryCitation.translation,
+          }
+        : { reference: '', text: '', principle: '', defiApplication: '', category: '' };
+
       return {
+        answerable: data.answerable === true,
         guidance: data.guidance ?? '',
         principle: data.principle ?? '',
         action: data.action ?? '',
-        primaryScripture: context.scriptures[0] ?? {
-          reference: data.primaryScripture ?? 'Proverbs 3:9',
-          text: '',
-          principle: '',
-          defiApplication: '',
-          category: '',
-        },
-        supportingScriptures: context.scriptures.slice(1, 4),
-        confidenceScore: data.confidenceScore ?? 0.8,
+        defiSuggestions: data.defiSuggestions ?? '',
+        primaryScripture,
+        supportingScriptures: scriptureCitations.slice(1).map(
+          (citation: { reference: string; text?: string; translation?: 'KJV' | 'WEB' }) => ({
+            reference: citation.reference,
+            text: citation.text ?? '',
+            principle: '',
+            defiApplication: '',
+            category: 'reviewed',
+            translation: citation.translation,
+          }),
+        ),
+        sourceCitations: citations,
+        disclaimer: data.disclaimer ?? '',
+        riskNotice: data.riskNotice ?? '',
+        confidenceScore: data.confidenceScore ?? 0,
         synthesisMethod: (data.synthesisMethod as BWSPSynthesis['synthesisMethod']) ?? 'rag_vector',
         protocol: data.protocol ?? 'BWSP-v1.0',
         tokenCount: data.tokenCount,
@@ -149,7 +105,7 @@ export class BWSPSynthesizer {
         titheBlessingMultiplier: 1,
       };
     } catch {
-      return buildOfflineSynthesis(context);
+      return buildOfflineSynthesis();
     }
   }
 }

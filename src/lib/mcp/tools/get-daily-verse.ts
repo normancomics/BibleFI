@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { enforceMcpRateLimit, publicClient, sanitizeFilterText } from "../guard";
+import { enforceMcpRateLimit, publicClient, requireMcpUser, sanitizeFilterText } from "../guard";
 
 export default defineTool({
   name: "get_daily_verse",
@@ -12,6 +12,8 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
   handler: async ({ category }, ctx) => {
+    const auth = requireMcpUser(ctx);
+    if (auth.error) return auth.error;
     const limited = await enforceMcpRateLimit("get_daily_verse", ctx);
     if (limited.error) return limited.error;
 

@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "eval:rag": "node --test scripts/evals/*.test.mjs",
     "verify:agents": "node scripts/verify-agents.mjs",
     "test:health": "node scripts/test-church-directory-health.mjs"
   },
