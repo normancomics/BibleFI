@@ -27,6 +27,7 @@
  * withdrawals both re-derive the same keypair from the connected wallet — no
  * separate secret note is required to move the private balance.
  */
+import { withBuilderCode } from "@/config/baseBuilder";
 import type { Signer } from '@/lib/ethers-compat';
 import type { VeilAsset } from '@/config/veil';
 
@@ -102,7 +103,7 @@ async function deriveKeypair(sdk: VeilSdkModule, signer: Signer): Promise<VeilKe
 
 /** Send a built Veil transaction with the wallet signer and wait for confirmation. */
 async function sendTx(signer: Signer, tx: TransactionData): Promise<string> {
-  const sent = await signer.sendTransaction({ to: tx.to, data: tx.data, value: tx.value ?? 0n });
+  const sent = await signer.sendTransaction({ to: tx.to, data: tx.data ? withBuilderCode(tx.data) : tx.data, value: tx.value ?? 0n });
   const receipt = await sent.wait();
   const hash = receipt?.hash ?? sent.hash;
   if (!hash) throw new Error('Transaction did not return a hash');

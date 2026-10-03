@@ -3,6 +3,7 @@ import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { ethers } from 'ethers';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { withBuilderCode } from '@/config/baseBuilder';
 
 const BWTYA_ABI = [
   'function investWithAttestation(string poolName,uint256 amount,string reasoning,bytes32 attestationHash,uint256 deadline,bytes32 nonce,bytes gatewaySignature) external returns (bool)',
@@ -70,7 +71,7 @@ export function useX402StrategyExecute() {
 
       const txHash = await walletClient.sendTransaction({
         to: params.bwtyaContract,
-        data: calldata,
+        data: withBuilderCode(calldata),
         account: address,
         chain: walletClient.chain,
       } as any);
