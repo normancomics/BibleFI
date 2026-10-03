@@ -8,6 +8,6 @@ export default defineMcp({
   title: "BibleFi MCP",
   version: "0.1.0",
   instructions:
-    "Faith-based DeFi tools for BibleFi. Use `search_scriptures` to find biblical financial wisdom, `find_churches` to look up crypto-friendly congregations in the global directory, and `get_daily_verse` for a scripture drop. All tools read public, masked data only — no PII.",
+    "Read-only BibleFi tools. `search_scriptures` and `get_daily_verse` return only human-reviewed KJV/WEB passages with source provenance. `find_churches` searches the public church directory and returns masked data. All tools require authentication.",
   tools: [searchScripturesTool, findChurchesTool, getDailyVerseTool],
 });

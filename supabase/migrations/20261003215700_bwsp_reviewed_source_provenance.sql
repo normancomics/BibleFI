@@ -35,6 +35,9 @@ ALTER TABLE public.defi_knowledge_base
   ADD COLUMN IF NOT EXISTS reviewed_at timestamptz,
   ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL;
 
+CREATE OR REPLACE VIEW api.biblical_knowledge_base AS
+SELECT * FROM public.biblical_knowledge_base;
+
 UPDATE public.defi_knowledge_base
 SET source_url = documentation_url
 WHERE source_url IS NULL AND documentation_url IS NOT NULL;

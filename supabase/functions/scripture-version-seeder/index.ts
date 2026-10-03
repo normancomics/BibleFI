@@ -165,7 +165,6 @@ Deno.serve(async (req) => {
         skippedRequestLimit += 1;
         continue;
       }
-      externalRequests += 1;
       const text = await fetchVerse(
         ref,
         apiVersion,

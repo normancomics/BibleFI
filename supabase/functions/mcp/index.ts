@@ -105,7 +105,9 @@ var search_scriptures_default = defineTool({
       };
     }
     const supabase = publicClient();
-    const { data, error } = await supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").or(
+    const { data, error } = await supabase.from("biblical_knowledge_base").select(
+      "reference,verse_text,category,principle,application,defi_relevance,source_translation,source_name,source_url,source_version,reviewed_at"
+    ).eq("provenance_status", "verified").eq("review_status", "approved").in("source_translation", ["KJV", "WEB"]).not("reviewed_at", "is", null).not("source_name", "is", null).not("source_url", "is", null).or(
       `verse_text.ilike.%${safe}%,reference.ilike.%${safe}%,principle.ilike.%${safe}%,category.ilike.%${safe}%`
     ).limit(10);
     if (error) {
@@ -174,7 +176,9 @@ var get_daily_verse_default = defineTool3({
     const limited = await enforceMcpRateLimit("get_daily_verse", ctx);
     if (limited.error) return limited.error;
     const supabase = publicClient();
-    let q = supabase.from("biblical_knowledge_base").select("reference,verse_text,category,principle,application,defi_relevance").limit(50);
+    let q = supabase.from("biblical_knowledge_base").select(
+      "reference,verse_text,category,principle,application,defi_relevance,source_translation,source_name,source_url,source_version,reviewed_at"
+    ).eq("provenance_status", "verified").eq("review_status", "approved").in("source_translation", ["KJV", "WEB"]).not("reviewed_at", "is", null).not("source_name", "is", null).not("source_url", "is", null).limit(50);
     const safeCategory = category ? sanitizeFilterText(category, 60) : "";
     if (safeCategory) q = q.ilike("category", `%${safeCategory}%`);
     const { data, error } = await q;
@@ -187,9 +191,15 @@ var get_daily_verse_default = defineTool3({
     }
     const pick = rows[Math.floor(Math.random() * rows.length)];
     return {
-      content: [{ type: "text", text: `${pick.reference} \u2014 ${pick.verse_text}
+      content: [{
+        type: "text",
+        text: `${pick.reference} (${pick.source_translation}) \u2014 ${pick.verse_text}
 
-Principle: ${pick.principle}` }],
+Source: ${pick.source_name} (${pick.source_url})${pick.source_version ? ` \xB7 ${pick.source_version}` : ""}
+Reviewed: ${pick.reviewed_at}
+
+Principle: ${pick.principle}`
+      }],
       structuredContent: { verse: pick }
     };
   }
@@ -200,7 +210,7 @@ var mcp_default = defineMcp({
   name: "biblefi-mcp",
   title: "BibleFi MCP",
   version: "0.1.0",
-  instructions: "Faith-based DeFi tools for BibleFi. Use `search_scriptures` to find biblical financial wisdom, `find_churches` to look up crypto-friendly congregations in the global directory, and `get_daily_verse` for a scripture drop. All tools read public, masked data only \u2014 no PII.",
+  instructions: "Read-only BibleFi tools. `search_scriptures` and `get_daily_verse` return only human-reviewed KJV/WEB passages with source provenance. `find_churches` searches the public church directory and returns masked data. All tools require authentication.",
   tools: [search_scriptures_default, find_churches_default, get_daily_verse_default]
 });
 
