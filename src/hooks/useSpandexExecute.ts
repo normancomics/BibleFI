@@ -76,7 +76,8 @@ export function useSpandexExecute(): UseSpandexExecuteReturn {
         const { transactionHash } = await executeQuote({
           swap,
           quote,
-          walletClient,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          walletClient: walletClient as any,
           config: spandexConfig,
         });
 
