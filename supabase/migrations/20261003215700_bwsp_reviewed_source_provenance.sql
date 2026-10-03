@@ -161,3 +161,45 @@ GRANT EXECUTE ON FUNCTION public.match_reviewed_biblical_knowledge(vector, doubl
  TO service_role;
 GRANT EXECUTE ON FUNCTION public.match_reviewed_defi_knowledge(vector, double precision, integer)
  TO service_role;
+
+CREATE OR REPLACE FUNCTION api.missing_bible_verse_keys(
+  p_refs jsonb,
+  p_versions text[]
+)
+RETURNS TABLE (
+  book_name text,
+  chapter integer,
+  verse integer,
+  version text
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
+  WITH requested_refs AS (
+    SELECT ref.book_name, ref.chapter, ref.verse
+    FROM jsonb_to_recordset(COALESCE(p_refs, '[]'::jsonb))
+      AS ref(book_name text, chapter integer, verse integer)
+    WHERE ref.book_name IS NOT NULL AND ref.chapter > 0 AND ref.verse > 0
+  ),
+  allowed_versions AS (
+    SELECT requested.version
+    FROM unnest(COALESCE(p_versions, ARRAY[]::text[])) AS requested(version)
+    WHERE requested.version IN ('KJV', 'WEB')
+  )
+  SELECT requested_refs.book_name, requested_refs.chapter, requested_refs.verse, allowed_versions.version
+  FROM requested_refs
+  CROSS JOIN allowed_versions
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM public.bible_verses AS existing
+    WHERE existing.book_name = requested_refs.book_name
+      AND existing.chapter = requested_refs.chapter
+      AND existing.verse = requested_refs.verse
+      AND existing.version = allowed_versions.version
+  );
+$$;
+
+REVOKE ALL ON FUNCTION api.missing_bible_verse_keys(jsonb, text[]) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION api.missing_bible_verse_keys(jsonb, text[]) TO service_role;

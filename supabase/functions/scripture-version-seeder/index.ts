@@ -1,16 +1,12 @@
 /**
  * scripture-version-seeder
  *
- * Seeds public.bible_verses with multiple Bible translations for the
+ * Seeds public.bible_verses with KJV and WEB text for the
  * financial/stewardship verse set that powers BWSP.
  *
- * IMPORTANT (licensing): NIV is copyrighted and is NOT available from free,
- * unauthenticated sources such as bible-api.com or BibleGateway (which has no
- * public API). Crossway's ESV API does NOT permit commercial use, so it has been
- * removed from BibleFi. This seeder therefore ingests only freely redistributable
- * translations. Licensed NIV text requires a direct Biblica/API.Bible Pro
- * licence (API_BIBLE_KEY); when that secret exists the version is fetched too,
- * otherwise it is skipped and reported as such.
+ * This seeder only fetches public-domain KJV and WEB text from bible-api.com.
+ * It checks the database first and never calls API.Bible or uses a licensed
+ * translation API key. Existing rows are not fetched or overwritten.
  *
  * "Bring ye all the tithes into the storehouse" — Malachi 3:10 (KJV)
  */
@@ -23,14 +19,10 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
-/** Freely redistributable translations served by bible-api.com */
+/** Public-domain translations permitted for BWSP source material. */
 const FREE_VERSIONS: Record<string, string> = {
   KJV: 'kjv',
   WEB: 'web',
-  ASV: 'asv',
-  BBE: 'bbe',
-  YLT: 'ylt',
-  DARBY: 'darby',
 };
 
 /** Core financial / stewardship references seeded for every version. */
@@ -81,93 +73,19 @@ const REFERENCES: Array<{
 
 const DEFI_KEYWORDS = ['tithe', 'yield', 'stewardship', 'stablecoin', 'stream'];
 
-/**
- * Translations fetched from API.Bible. NIV needs a Pro/commercial licence; the
- * rest are public domain but far more reliable from API.Bible than the free
- * rate-limited mirror, so we prefer this source for every label we can resolve.
- */
-const LICENSED_VERSION_LABELS = ['NIV', 'KJV', 'ASV', 'WEB', 'BBE', 'DARBY', 'YLT'] as const;
-
-/** USFM book codes required by API.Bible verse IDs. */
-const USFM: Record<string, string> = {
-  Genesis: 'GEN',
-  Deuteronomy: 'DEU',
-  Psalms: 'PSA',
-  Proverbs: 'PRO',
-  Ecclesiastes: 'ECC',
-  Malachi: 'MAL',
-  Matthew: 'MAT',
-  Luke: 'LUK',
-  Acts: 'ACT',
-  Romans: 'ROM',
-  '1 Corinthians': '1CO',
-  '2 Corinthians': '2CO',
-  '1 Timothy': '1TI',
-  Hebrews: 'HEB',
-  James: 'JAS',
-};
-
-const API_BIBLE_BASE = 'https://api.scripture.api.bible/v1';
-
-/** Resolve API.Bible bibleIds for the licensed labels we want, by abbreviation. */
-async function resolveApiBibleIds(key: string): Promise<Record<string, string>> {
-  const res = await fetch(`${API_BIBLE_BASE}/bibles?language=eng`, {
-    headers: { 'api-key': key },
-  });
-  if (!res.ok) {
-    console.error('[scripture-version-seeder] API.Bible list failed', res.status);
-    return {};
-  }
-  const json = await res.json();
-  const bibles: Array<{ id: string; abbreviation?: string; abbreviationLocal?: string }> =
-    json?.data ?? [];
-  const out: Record<string, string> = {};
-  for (const label of LICENSED_VERSION_LABELS) {
-    const match = bibles.find(
-      (b) =>
-        (b.abbreviation ?? '').toUpperCase() === label ||
-        (b.abbreviationLocal ?? '').toUpperCase() === label,
-    );
-    if (match) out[label] = match.id;
-  }
-  return out;
-}
-
-async function fetchApiBibleVerse(
-  key: string,
-  bibleId: string,
-  ref: { book: string; chapter: number; verse: number },
-): Promise<string | null> {
-  const usfm = USFM[ref.book];
-  if (!usfm) return null;
-  const verseId = `${usfm}.${ref.chapter}.${ref.verse}`;
-  const url =
-    `${API_BIBLE_BASE}/bibles/${bibleId}/verses/${verseId}` +
-    `?content-type=text&include-notes=false&include-titles=false&include-verse-numbers=false`;
-  try {
-    const res = await fetch(url, { headers: { 'api-key': key } });
-    if (!res.ok) return null;
-    const json = await res.json();
-    const text = String(json?.data?.content ?? '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return text.length > 0 ? text : null;
-  } catch (err) {
-    console.error('[scripture-version-seeder] API.Bible verse failed', verseId, err);
-    return null;
-  }
-}
-
 async function fetchVerse(
   ref: { book: string; chapter: number; verse: number },
   apiVersion: string,
+  maxAttempts: number,
+  onRequest: () => void,
 ): Promise<string | null> {
   const url =
     `https://bible-api.com/${encodeURIComponent(`${ref.book} ${ref.chapter}:${ref.verse}`)}` +
     `?translation=${apiVersion}`;
   // The free mirror rate-limits aggressively; back off instead of dropping the verse.
-  for (let attempt = 0; attempt < 4; attempt += 1) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     try {
+      onRequest();
       const res = await fetch(url);
       if (res.status === 429 || res.status >= 500) {
         await sleep(800 * (attempt + 1));
@@ -205,29 +123,55 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const apiBibleKey = Deno.env.get('API_BIBLE_KEY');
-  const skipped: string[] = [];
-
-  let licensedIds: Record<string, string> = {};
-  if (apiBibleKey) {
-    licensedIds = await resolveApiBibleIds(apiBibleKey);
-    for (const label of LICENSED_VERSION_LABELS) {
-      if (!licensedIds[label]) {
-        skipped.push(`${label} (not available on this API.Bible key/licence)`);
-      }
-    }
-  } else {
-    skipped.push('NIV (no free source; set API_BIBLE_KEY with a Pro/commercial licence)');
+  const { data: missingKeys, error: missingKeysError } = await supabase
+    .schema('api')
+    .rpc('missing_bible_verse_keys', {
+      p_refs: REFERENCES.map(({ book, chapter, verse }) => ({
+        book_name: book,
+        chapter,
+        verse,
+      })),
+      p_versions: Object.keys(FREE_VERSIONS),
+    });
+  if (missingKeysError) {
+    console.error('[scripture-version-seeder] cache lookup failed', missingKeysError);
+    return new Response(JSON.stringify({ error: 'Could not check seeded scripture cache.' }), {
+      status: 503,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
+
+  const missing = new Set(
+    (missingKeys ?? []).map((key: { book_name: string; chapter: number; verse: number; version: string }) =>
+      `${key.book_name}|${key.chapter}|${key.verse}|${key.version}`,
+    ),
+  );
+  const maxExternalRequests = 100;
+  let externalRequests = 0;
+  let skippedExisting = 0;
+  let skippedRequestLimit = 0;
 
   const rows: Record<string, unknown>[] = [];
   const failures: string[] = [];
 
   for (const ref of REFERENCES) {
     for (const [label, apiVersion] of Object.entries(FREE_VERSIONS)) {
-      // API.Bible already covers this label reliably — don't hit the rate-limited mirror.
-      if (licensedIds[label]) continue;
-      const text = await fetchVerse(ref, apiVersion);
+      const key = `${ref.book}|${ref.chapter}|${ref.verse}|${label}`;
+      if (!missing.has(key)) {
+        skippedExisting += 1;
+        continue;
+      }
+      if (externalRequests >= maxExternalRequests) {
+        skippedRequestLimit += 1;
+        continue;
+      }
+      externalRequests += 1;
+      const text = await fetchVerse(
+        ref,
+        apiVersion,
+        Math.min(2, maxExternalRequests - externalRequests),
+        () => { externalRequests += 1; },
+      );
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
         continue;
@@ -243,28 +187,6 @@ Deno.serve(async (req) => {
         wisdom_category: ref.categories,
         defi_keywords: DEFI_KEYWORDS,
       });
-    }
-
-    // Licensed translations (e.g. NIV) via API.Bible Pro — only when the key exists.
-    if (apiBibleKey) {
-      for (const [label, bibleId] of Object.entries(licensedIds)) {
-        const text = await fetchApiBibleVerse(apiBibleKey, bibleId, ref);
-        if (!text) {
-          failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
-          continue;
-        }
-        rows.push({
-          book_name: ref.book,
-          chapter: ref.chapter,
-          verse: ref.verse,
-          text,
-          version: label,
-          testament: ref.testament,
-          financial_relevance: ref.relevance,
-          wisdom_category: ref.categories,
-          defi_keywords: DEFI_KEYWORDS,
-        });
-      }
     }
   }
 
@@ -290,11 +212,13 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       success: true,
-      versions_seeded: [...Object.keys(FREE_VERSIONS), ...Object.keys(licensedIds)],
-      licensed_versions: Object.keys(licensedIds),
+      versions_seeded: Object.keys(FREE_VERSIONS),
       references: REFERENCES.length,
       rows_upserted: upserted,
-      skipped_versions: skipped,
+      skipped_existing: skippedExisting,
+      skipped_request_limit: skippedRequestLimit,
+      external_requests,
+      max_external_requests: maxExternalRequests,
       failures,
     }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },

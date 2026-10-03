@@ -100,7 +100,13 @@ export interface BWSPSynthesis {
   primaryScripture: ScriptureResult;
   supportingScriptures: ScriptureResult[];
   confidenceScore: number;
-  synthesisMethod: 'rag_vector' | 'offline_fallback' | 'hybrid';
+  synthesisMethod:
+    | 'rag_vector'
+    | 'rag_reviewed_sources'
+    | 'insufficient_citations'
+    | 'unavailable'
+    | 'offline_fallback'
+    | 'hybrid';
   protocol: string;
   answerable?: boolean;
   defiSuggestions?: string;
