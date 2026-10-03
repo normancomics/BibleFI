@@ -3,14 +3,25 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
 
 // src/lib/mcp/tools/search-scriptures.ts
-import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z } from "npm:zod@^4.4.3";
 
 // src/lib/mcp/guard.ts
 import { createClient } from "npm:@supabase/supabase-js@^2.105.1";
+
+// src/lib/mcp/auth.mjs
+function mcpAuthenticationError(userId) {
+  if (typeof userId === "string" && userId.length > 0) return void 0;
+  return {
+    content: [{ type: "text", text: "Authentication required. Sign in to use BibleFi MCP tools." }],
+    isError: true
+  };
+}
+
+// src/lib/mcp/guard.ts
 var MCP_RATE_LIMIT = 30;
 var MCP_RATE_WINDOW_SECONDS = 60;
 function publicClient() {
@@ -26,6 +37,10 @@ function callerKey(ctx) {
   const clientId = ctx?.getClientId?.();
   if (clientId) return `client:${clientId}`;
   return "anon";
+}
+function requireMcpUser(ctx) {
+  const error = mcpAuthenticationError(ctx?.getUserId?.());
+  return error ? { error } : {};
 }
 async function enforceMcpRateLimit(tool, ctx) {
   try {
@@ -78,6 +93,8 @@ var search_scriptures_default = defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query }, ctx) => {
+    const auth = requireMcpUser(ctx);
+    if (auth.error) return auth.error;
     const limited = await enforceMcpRateLimit("search_scriptures", ctx);
     if (limited.error) return limited.error;
     const safe = sanitizeFilterText(query);
@@ -102,7 +119,7 @@ var search_scriptures_default = defineTool({
 });
 
 // src/lib/mcp/tools/find-churches.ts
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z as z2 } from "npm:zod@^4.4.3";
 var find_churches_default = defineTool2({
   name: "find_churches",
@@ -114,6 +131,8 @@ var find_churches_default = defineTool2({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query, limit }, ctx) => {
+    const auth = requireMcpUser(ctx);
+    if (auth.error) return auth.error;
     const limited = await enforceMcpRateLimit("find_churches", ctx);
     if (limited.error) return limited.error;
     const safe = sanitizeFilterText(query);
@@ -139,7 +158,7 @@ var find_churches_default = defineTool2({
 });
 
 // src/lib/mcp/tools/get-daily-verse.ts
-import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z as z3 } from "npm:zod@^4.4.3";
 var get_daily_verse_default = defineTool3({
   name: "get_daily_verse",
@@ -150,6 +169,8 @@ var get_daily_verse_default = defineTool3({
   },
   annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
   handler: async ({ category }, ctx) => {
+    const auth = requireMcpUser(ctx);
+    if (auth.error) return auth.error;
     const limited = await enforceMcpRateLimit("get_daily_verse", ctx);
     if (limited.error) return limited.error;
     const supabase = publicClient();
@@ -184,5 +205,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.0/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.1/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
