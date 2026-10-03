@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
+import { withBuilderCode } from '@/config/baseBuilder';
 
 interface Capability {
   [method: string]: {
@@ -66,7 +67,7 @@ export const useEIP5792 = () => {
             from: address,
             calls: calls.map(call => ({
               to: call.to,
-              data: call.data,
+              data: withBuilderCode(call.data),
               value: call.value || '0x0',
             })),
           },

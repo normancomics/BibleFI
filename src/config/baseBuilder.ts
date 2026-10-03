@@ -23,7 +23,7 @@ export const BUILDER_CODE = 'bc_qv856cck' as const;
 const ERC_8021_SUFFIX = '80218021802180218021802180218021';
 
 function toDataSuffix(codes: readonly string[]): `0x${string}` {
-  const codesHex = Buffer.from(codes.join(','), 'ascii').toString('hex');
+  const codesHex = Array.from(new TextEncoder().encode(codes.join(","))).map((b) => b.toString(16).padStart(2, "0")).join("");
   const codesLength = codesHex.length / 2;
   return `0x${codesHex}${codesLength.toString(16).padStart(2, '0')}00${ERC_8021_SUFFIX}`;
 }

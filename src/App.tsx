@@ -58,6 +58,7 @@ const SuperBoringPage = lazy(() => import("./pages/SuperBoringPage"));
 const SwapPage = lazy(() => import("./pages/SwapPage"));
 const TechGraphsPage = lazy(() => import("./pages/TechGraphsPage"));
 const ScripturesPage = lazy(() => import("./pages/ScripturesPage"));
+const WisdomFrameworkPage = lazy(() => import("./pages/WisdomFrameworkPage"));
 const ChurchOnboardingPage = lazy(() => import("./pages/ChurchOnboardingPage"));
 const ChurchDashboardPage = lazy(() => import("./pages/ChurchDashboardPage"));
 const DefiOpportunitiesPage = lazy(() => import("./pages/DefiOpportunitiesPage"));
@@ -141,6 +142,7 @@ const App = () => (
             <Route path="/dca" element={<SuperBoringPage />} />
             <Route path="/tech-graphs" element={<TechGraphsPage />} />
             <Route path="/scriptures" element={<ScripturesPage />} />
+            <Route path="/bwsp-explained" element={<WisdomFrameworkPage />} />
             <Route path="/defi-opportunities" element={<DefiOpportunitiesPage />} />
             <Route path="/opportunities" element={<DefiOpportunitiesPage />} />
             <Route path="/builder-score" element={<BuilderScorePage />} />

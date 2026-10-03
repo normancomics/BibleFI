@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Contract, JsonRpcProvider, formatUnits, parseUnits } from "ethers";
 import { createBrowserProvider } from "@/lib/ethers-compat";
+import { withBuilderCode } from "@/config/baseBuilder";
 import {
   BWTYA_VAULT_READ_ABI,
   BWTYA_VAULT_WRITE_ABI,
@@ -211,11 +212,17 @@ export function useTitheVault(userAddress?: string | null): UseTitheVaultResult 
         const owner = await signer.getAddress();
         const allowance: bigint = await token.allowance(owner, vault.address);
         if (allowance < units) {
-          const approval = await token.approve(vault.address, units);
+          const approval = await signer.sendTransaction({
+            to: tokenAddress,
+            data: withBuilderCode(token.interface.encodeFunctionData("approve", [vault.address, units])),
+          });
           await approval.wait();
         }
         const writer = new Contract(vault.address, BWTYA_VAULT_WRITE_ABI, signer);
-        const tx = await writer.deposit(units, 0n);
+        const tx = await signer.sendTransaction({
+          to: vault.address,
+          data: withBuilderCode(writer.interface.encodeFunctionData("deposit", [units, 0n])),
+        });
         const receipt = await tx.wait();
         await load();
         return receipt?.hash ?? tx.hash;
@@ -232,7 +239,10 @@ export function useTitheVault(userAddress?: string | null): UseTitheVaultResult 
     try {
       const signer = await getSigner();
       const writer = new Contract(vault.address, BWTYA_VAULT_WRITE_ABI, signer);
-      const tx = await writer.claimYield();
+      const tx = await signer.sendTransaction({
+        to: vault.address,
+        data: withBuilderCode(writer.interface.encodeFunctionData("claimYield", [])),
+      });
       const receipt = await tx.wait();
       await load();
       return receipt?.hash ?? tx.hash;

@@ -45,7 +45,8 @@ export const spandexConfig = createConfig({
     kyberswap({ clientId: 'biblefi', attributes: { app: 'biblefi' } }),
     lifi({ attributes: { app: 'biblefi' } }),
   ],
-  clients: [baseClient] as PublicClient[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  clients: [baseClient] as any,
   options: {
     deadlineMs: 8000,
     numRetries: 2,
