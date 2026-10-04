@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, Plus, Church, CheckCircle, Star, Globe, MapPin } from "lucide-react";
+import { Search, Plus, Church, CheckCircle, Star, Globe, MapPin, Phone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -146,20 +146,48 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
   
   const renderChurchList = (churches: ChurchType[], isExternal = false) => {
     if (churches.length === 0) return null;
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const rankChurch = (church: ChurchType) => {
+      const name = church.name.toLowerCase();
+      if (!normalizedQuery) return 0;
+      if (name === normalizedQuery) return 3;
+      if (name.startsWith(normalizedQuery)) return 2;
+      if (name.includes(normalizedQuery)) return 1;
+      return 0;
+    };
+    const orderedChurches = [...churches].sort(
+      (a, b) => rankChurch(b) - rankChurch(a) || a.name.localeCompare(b.name),
+    );
+    const bestMatch = orderedChurches[0];
+    const hasNameMatch = rankChurch(bestMatch) > 0;
+    const safeWebsite = (value?: string) => {
+      if (!value) return null;
+      try {
+        const url = new URL(value);
+        return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+      } catch {
+        return null;
+      }
+    };
 
     return (
       <Card className="pixel-card mb-4">
         <CardContent className="pt-6 space-y-4">
-          {churches.map((church) => (
+          {orderedChurches.map((church, index) => {
+            const isBestMatch = hasNameMatch && index === 0;
+            return (
             <React.Fragment key={church.id}>
               <div 
-                className="flex justify-between items-center cursor-pointer hover:bg-muted/50 p-2 rounded"
+                className={`flex justify-between items-start cursor-pointer hover:bg-muted/50 p-3 rounded ${
+                  isBestMatch ? "ring-2 ring-primary bg-primary/5" : ""
+                }`}
                 onClick={() => handleChurchSelect(church)}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold">{church.name}</h3>
                     {isExternal && <Globe size={16} className="text-blue-500" />}
+                    {isBestMatch && <span className="rounded bg-primary/15 px-2 py-0.5 text-xs text-primary">Best match</span>}
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin size={12} />
@@ -168,17 +196,46 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
                   {church.denomination && (
                     <p className="text-xs text-muted-foreground">{church.denomination}</p>
                   )}
-                  {church.website && (
+                  {safeWebsite(church.website) && (
                     <a 
-                      href={church.website} 
+                      href={safeWebsite(church.website)!}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-xs text-blue-500 hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Visit Website
+                      {church.website}
                     </a>
                   )}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Address: {[church.address, church.city, church.state, church.postalCode, church.country]
+                      .filter(Boolean)
+                      .filter((value, index, values) => values.indexOf(value) === index)
+                      .join(", ") || "Not listed"}
+                  </p>
+                  {church.phone && (
+                    <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Phone size={12} /> {church.phone} (partially hidden)
+                    </p>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    <span className={church.acceptsCrypto ? "text-green-700" : "text-muted-foreground"}>
+                      Crypto offerings: {church.acceptsCrypto ? "Accepted" : "Not listed"}
+                    </span>
+                    {church.acceptsCrypto && church.cryptoNetworks?.length ? (
+                      <span className="text-muted-foreground">
+                        Networks: {church.cryptoNetworks.join(", ")}
+                      </span>
+                    ) : null}
+                    <span className={church.acceptsFiat ? "text-green-700" : "text-muted-foreground"}>
+                      Fiat offerings: {church.acceptsFiat ? "Accepted" : "Not listed"}
+                    </span>
+                    {church.acceptsFiat && church.fiatCurrencies?.length ? (
+                      <span className="text-muted-foreground">
+                        Currencies: {church.fiatCurrencies.join(", ")}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <div className="flex flex-wrap gap-1">
@@ -205,7 +262,8 @@ const ChurchSearch: React.FC<ChurchSearchProps> = ({ onAddChurch }) => {
               </div>
               <Separator />
             </React.Fragment>
-          ))}
+          );
+          })}
         </CardContent>
       </Card>
     );

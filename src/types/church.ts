@@ -5,10 +5,15 @@ export interface Church {
   denomination?: string;
   location: string; // Combined city, state, country for display
   address?: string;
+  postalCode?: string;
   city: string;
   state: string;
   country: string;
   website?: string;
+  phone?: string;
+  acceptsFiat?: boolean;
+  fiatCurrencies?: string[];
+  cryptoNetworks?: string[];
   acceptsCrypto: boolean;
   payment_methods?: string[];
   verified?: boolean;
