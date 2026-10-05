@@ -21,7 +21,21 @@ import { useWalletClient } from 'wagmi';
 import { getQuote, executeQuote } from '@spandex/core';
 import { spandexConfig } from '@/config/spandex';
 import type { SpandexSwapAdvisoryInput } from '@/services/spandex/types';
-import type { Address } from 'viem';
+import type { Address, Hex, WalletClient } from 'viem';
+import { withBuilderCode } from '@/config/baseBuilder';
+
+/** Appends BibleFi's Base builder code (ERC-8021) to every swap/approval the wallet sends. */
+function withBuilderAttribution<T extends WalletClient>(client: T): T {
+  return new Proxy(client, {
+    get(target, prop, receiver) {
+      if (prop === 'sendTransaction') {
+        return (args: { data?: Hex }) =>
+          target.sendTransaction({ ...args, data: withBuilderCode(args.data ?? '0x') } as unknown as Parameters<T['sendTransaction']>[0]);
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+}
 
 export interface UseSpandexExecuteReturn {
   isExecuting: boolean;
@@ -76,8 +90,7 @@ export function useSpandexExecute(): UseSpandexExecuteReturn {
         const { transactionHash } = await executeQuote({
           swap,
           quote,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          walletClient: walletClient as any,
+          walletClient: withBuilderAttribution(walletClient) as Parameters<typeof executeQuote>[0]['walletClient'],
           config: spandexConfig,
         });
 
