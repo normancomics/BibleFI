@@ -10,7 +10,7 @@ import { createPublicClient, http, type PublicClient } from 'viem';
 import { base } from 'viem/chains';
 
 // Public client for on-chain quote simulation
-const baseClient = createPublicClient({
+const baseClient: PublicClient = createPublicClient({
   chain: base,
   transport: http('https://base.rpc.subquery.network/public', {
     batch: true,
@@ -45,7 +45,6 @@ export const spandexConfig = createConfig({
     kyberswap({ clientId: 'biblefi', attributes: { app: 'biblefi' } }),
     lifi({ attributes: { app: 'biblefi' } }),
   ],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clients: [baseClient],
   options: {
     deadlineMs: 8000,
