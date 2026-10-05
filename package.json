@@ -115,6 +115,7 @@
     "vite": "^8.1.5"
   },
   "overrides": {
+    "viem": "$viem",
     "flatted": "3.4.2",
     "picomatch": "2.3.2",
     "lodash": "4.18.1",
