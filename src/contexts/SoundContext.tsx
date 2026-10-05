@@ -169,6 +169,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       if (!enabledRef.current) return;
       const ctx = getContext();
       if (!ctx) return;
+      if (!shouldPlay(soundName)) return;
 
       void (async () => {
         try {
@@ -176,13 +177,26 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
           if (ctx.state === 'suspended') {
             await ctx.resume();
           }
+          // Preferred path: the real retro pixel samples in /public/sounds.
+          const buffer = await loadBuffer(soundName);
+          if (buffer) {
+            const source = ctx.createBufferSource();
+            const gain = ctx.createGain();
+            source.buffer = buffer;
+            gain.gain.value = 0.35;
+            source.connect(gain);
+            gain.connect(ctx.destination);
+            source.start(0);
+            return;
+          }
+          // Fallback: synthesized retro blip if the sample is unavailable.
           playTone(ctx, soundName);
         } catch {
           /* audio blocked by the browser — stay silent rather than throw */
         }
       })();
     },
-    [getContext, playTone],
+    [getContext, loadBuffer, playTone, shouldPlay],
   );
 
   // Unlock audio on the first gesture (required on iPad/iPhone/Safari).
