@@ -10,7 +10,7 @@ import { createPublicClient, http, type PublicClient } from 'viem';
 import { base } from 'viem/chains';
 
 // Public client for on-chain quote simulation
-const baseClient: PublicClient = createPublicClient({
+const baseClient = createPublicClient({
   chain: base,
   transport: http('https://base.rpc.subquery.network/public', {
     batch: true,
@@ -45,7 +45,8 @@ export const spandexConfig = createConfig({
     kyberswap({ clientId: 'biblefi', attributes: { app: 'biblefi' } }),
     lifi({ attributes: { app: 'biblefi' } }),
   ],
-  clients: [baseClient],
+  // Base client carries OP-stack deposit tx types; spanDEX expects a generic-chain PublicClient.
+  clients: [baseClient as unknown as PublicClient],
   options: {
     deadlineMs: 8000,
     numRetries: 2,
