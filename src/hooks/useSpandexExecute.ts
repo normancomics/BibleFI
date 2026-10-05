@@ -30,7 +30,7 @@ function withBuilderAttribution<T extends WalletClient>(client: T): T {
     get(target, prop, receiver) {
       if (prop === 'sendTransaction') {
         return (args: { data?: Hex }) =>
-          target.sendTransaction({ ...args, data: withBuilderCode(args.data ?? '0x') } as Parameters<T['sendTransaction']>[0]);
+          target.sendTransaction({ ...args, data: withBuilderCode(args.data ?? '0x') } as unknown as Parameters<T['sendTransaction']>[0]);
       }
       return Reflect.get(target, prop, receiver);
     },
