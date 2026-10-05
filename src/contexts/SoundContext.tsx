@@ -33,16 +33,6 @@ const SOUND_FILES: Record<string, string> = {
   error: '/sounds/error.wav',
 };
 
-/** Fallback tones when a sample is unavailable. */
-const FREQUENCIES: Record<string, number> = {
-  click: 700,
-  select: 800,
-  coin: 1200,
-  scroll: 600,
-  powerup: 1500,
-  success: 1000,
-  error: 400,
-};
 
 interface SoundProviderProps {
   children: React.ReactNode;
