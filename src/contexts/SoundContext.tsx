@@ -93,19 +93,23 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     [getContext],
   );
 
-  // Retro 8-bit arcade blips: square waves with stepped pitch, like an NES.
-  // Every sound stays under ~0.3s, and a per-sound minimum interval stops
-  // rapid taps from piling sounds up.
   const lastPlayRef = useRef<Map<string, number>>(new Map());
   const MIN_INTERVAL_MS = 90;
 
+  // Guard shared by both sample playback and the synthesized fallback so
+  // rapid taps/hovers can never stack sounds on top of each other.
+  const shouldPlay = useCallback((soundName: string): boolean => {
+    const now = performance.now();
+    const last = lastPlayRef.current.get(soundName) ?? 0;
+    if (now - last < MIN_INTERVAL_MS) return false;
+    lastPlayRef.current.set(soundName, now);
+    return true;
+  }, []);
+
+  // Synthesized fallback: retro 8-bit arcade blips (square waves, stepped
+  // pitch), used only when a sample file cannot be loaded/decoded.
   const playTone = useCallback(
     (ctx: AudioContext, soundName: string) => {
-      const now = performance.now();
-      const last = lastPlayRef.current.get(soundName) ?? 0;
-      if (now - last < MIN_INTERVAL_MS) return;
-      lastPlayRef.current.set(soundName, now);
-
       const t0 = ctx.currentTime;
 
       // Each sound is a list of [frequency, duration, volume] steps.
