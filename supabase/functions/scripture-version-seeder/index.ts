@@ -186,6 +186,45 @@ async function fetchVerse(
   return null;
 }
 
+/**
+ * Free Use Bible API (bible.helloao.org) — open-source, no key, no rate-limit
+ * wall. Serves the Berean Standard Bible (public domain since 2023).
+ */
+const HELLOAO_VERSIONS: Record<string, string> = { BSB: 'BSB' };
+const helloaoCache = new Map<string, Array<{ number: number; text: string }>>();
+
+async function fetchHelloAoVerse(
+  ref: { book: string; chapter: number; verse: number },
+  translation: string,
+): Promise<string | null> {
+  const code = USFM[ref.book];
+  if (!code) return null;
+  const key = `${translation}/${code}/${ref.chapter}`;
+  let verses = helloaoCache.get(key);
+  if (!verses) {
+    try {
+      const res = await fetch(`https://bible.helloao.org/api/${key}.json`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      verses = (data?.chapter?.content ?? [])
+        .filter((c: { type: string }) => c.type === 'verse')
+        .map((v: { number: number; content: unknown[] }) => ({
+          number: v.number,
+          text: v.content
+            .map((p) => (typeof p === 'string' ? p : (p as { text?: string })?.text ?? ''))
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .trim(),
+        }));
+      helloaoCache.set(key, verses!);
+    } catch (err) {
+      console.error('[scripture-version-seeder] helloao failed', key, err);
+      return null;
+    }
+  }
+  return verses!.find((v) => v.number === ref.verse)?.text || null;
+}
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 
@@ -245,6 +284,20 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Open-source translations via the Free Use Bible API (no key needed).
+    for (const [label, translation] of Object.entries(HELLOAO_VERSIONS)) {
+      const text = await fetchHelloAoVerse(ref, translation);
+      if (!text) {
+        failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
+        continue;
+      }
+      rows.push({
+        book_name: ref.book, chapter: ref.chapter, verse: ref.verse, text, version: label,
+        testament: ref.testament, financial_relevance: ref.relevance,
+        wisdom_category: ref.categories, defi_keywords: DEFI_KEYWORDS,
+      });
+    }
+
     // Licensed translations (e.g. NIV) via API.Bible Pro — only when the key exists.
     if (apiBibleKey) {
       for (const [label, bibleId] of Object.entries(licensedIds)) {
@@ -290,7 +343,7 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       success: true,
-      versions_seeded: [...Object.keys(FREE_VERSIONS), ...Object.keys(licensedIds)],
+      versions_seeded: [...Object.keys(FREE_VERSIONS), ...Object.keys(HELLOAO_VERSIONS), ...Object.keys(licensedIds)],
       licensed_versions: Object.keys(licensedIds),
       references: REFERENCES.length,
       rows_upserted: upserted,
