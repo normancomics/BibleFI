@@ -244,7 +244,10 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const apiBibleKey = Deno.env.get('API_BIBLE_KEY');
+  const body = await req.json().catch(() => ({}));
+  // mode "open": only the keyless Free Use Bible API — fast, fits worker limits.
+  const openOnly = body?.mode === 'open';
+  const apiBibleKey = openOnly ? undefined : Deno.env.get('API_BIBLE_KEY');
   const skipped: string[] = [];
 
   let licensedIds: Record<string, string> = {};
@@ -265,7 +268,7 @@ Deno.serve(async (req) => {
   for (const ref of REFERENCES) {
     for (const [label, apiVersion] of Object.entries(FREE_VERSIONS)) {
       // API.Bible already covers this label reliably — don't hit the rate-limited mirror.
-      if (licensedIds[label]) continue;
+      if (openOnly || licensedIds[label]) continue;
       const text = await fetchVerse(ref, apiVersion);
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
