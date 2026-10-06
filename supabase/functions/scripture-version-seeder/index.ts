@@ -190,7 +190,12 @@ async function fetchVerse(
  * Free Use Bible API (bible.helloao.org) — open-source, no key, no rate-limit
  * wall. Serves the Berean Standard Bible (public domain since 2023).
  */
-const HELLOAO_VERSIONS: Record<string, string> = { BSB: 'BSB' };
+const HELLOAO_VERSIONS: Record<string, string> = {
+  BSB: 'BSB',
+  KJVA: 'eng_kja', // KJV with Apocrypha
+  HEB: 'HBOMAS', // Hebrew Masoretic OT
+  GRK: 'grc_gtr', // Greek Textus Receptus NT
+};
 const helloaoCache = new Map<string, Array<{ number: number; text: string }>>();
 
 async function fetchHelloAoVerse(
@@ -289,6 +294,7 @@ Deno.serve(async (req) => {
 
     // Open-source translations via the Free Use Bible API (no key needed).
     for (const [label, translation] of Object.entries(HELLOAO_VERSIONS)) {
+      if ((label === 'HEB' && ref.testament !== 'Old') || (label === 'GRK' && ref.testament !== 'New')) continue;
       const text = await fetchHelloAoVerse(ref, translation);
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
