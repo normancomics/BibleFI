@@ -24,3 +24,5 @@
 - [ ] Wisdom explainer page (BWSP, BWTYA, harmonic math) + publish
 - [ ] Add free/open-source Bible API source to scripture seeder
 - [ ] Research Bible APIs: KJV, Apocrypha, concordances, ESV, NLT, NIV, Hebrew/Greek/Aramaic
+- [ ] Check .env exposure, list secrets to rotate, add guard
+- [ ] More open-source Bible sources before publish (no publish until done)

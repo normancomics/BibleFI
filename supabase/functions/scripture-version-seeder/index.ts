@@ -195,6 +195,10 @@ const HELLOAO_VERSIONS: Record<string, string> = {
   KJVA: 'eng_kja', // KJV with Apocrypha
   HEB: 'HBOMAS', // Hebrew Masoretic OT
   GRK: 'grc_gtr', // Greek Textus Receptus NT
+  GNV: 'eng_gnv', // Geneva Bible 1599
+  DRA: 'eng_dra', // Douay-Rheims 1899
+  LXX: 'grc_bre', // Brenton Greek Septuagint (OT)
+  NET: 'eng_net', // NET Bible
 };
 const helloaoCache = new Map<string, Array<{ number: number; text: string }>>();
 
@@ -294,7 +298,7 @@ Deno.serve(async (req) => {
 
     // Open-source translations via the Free Use Bible API (no key needed).
     for (const [label, translation] of Object.entries(HELLOAO_VERSIONS)) {
-      if ((label === 'HEB' && ref.testament !== 'Old') || (label === 'GRK' && ref.testament !== 'New')) continue;
+      if (((label === 'HEB' || label === 'LXX') && ref.testament !== 'Old') || (label === 'GRK' && ref.testament !== 'New')) continue;
       const text = await fetchHelloAoVerse(ref, translation);
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);

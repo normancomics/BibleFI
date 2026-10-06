@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+[allowlist]
+description = "Public identifiers that are safe by design"
+paths = ['''funding\.json''', '''opRetro\.json''']
+regexes = ['''VITE_SUPABASE_(PUBLISHABLE_KEY|URL|PROJECT_ID)''']
