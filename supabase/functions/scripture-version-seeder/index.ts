@@ -186,6 +186,45 @@ async function fetchVerse(
   return null;
 }
 
+/**
+ * Free Use Bible API (bible.helloao.org) — open-source, no key, no rate-limit
+ * wall. Serves the Berean Standard Bible (public domain since 2023).
+ */
+const HELLOAO_VERSIONS: Record<string, string> = { BSB: 'BSB' };
+const helloaoCache = new Map<string, Array<{ number: number; text: string }>>();
+
+async function fetchHelloAoVerse(
+  ref: { book: string; chapter: number; verse: number },
+  translation: string,
+): Promise<string | null> {
+  const code = USFM[ref.book];
+  if (!code) return null;
+  const key = `${translation}/${code}/${ref.chapter}`;
+  let verses = helloaoCache.get(key);
+  if (!verses) {
+    try {
+      const res = await fetch(`https://bible.helloao.org/api/${key}.json`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      verses = (data?.chapter?.content ?? [])
+        .filter((c: { type: string }) => c.type === 'verse')
+        .map((v: { number: number; content: unknown[] }) => ({
+          number: v.number,
+          text: v.content
+            .map((p) => (typeof p === 'string' ? p : (p as { text?: string })?.text ?? ''))
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .trim(),
+        }));
+      helloaoCache.set(key, verses!);
+    } catch (err) {
+      console.error('[scripture-version-seeder] helloao failed', key, err);
+      return null;
+    }
+  }
+  return verses!.find((v) => v.number === ref.verse)?.text || null;
+}
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 
@@ -205,7 +244,10 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const apiBibleKey = Deno.env.get('API_BIBLE_KEY');
+  const body = await req.json().catch(() => ({}));
+  // mode "open": only the keyless Free Use Bible API — fast, fits worker limits.
+  const openOnly = body?.mode === 'open';
+  const apiBibleKey = openOnly ? undefined : Deno.env.get('API_BIBLE_KEY');
   const skipped: string[] = [];
 
   let licensedIds: Record<string, string> = {};
@@ -226,7 +268,7 @@ Deno.serve(async (req) => {
   for (const ref of REFERENCES) {
     for (const [label, apiVersion] of Object.entries(FREE_VERSIONS)) {
       // API.Bible already covers this label reliably — don't hit the rate-limited mirror.
-      if (licensedIds[label]) continue;
+      if (openOnly || licensedIds[label]) continue;
       const text = await fetchVerse(ref, apiVersion);
       if (!text) {
         failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
@@ -242,6 +284,20 @@ Deno.serve(async (req) => {
         financial_relevance: ref.relevance,
         wisdom_category: ref.categories,
         defi_keywords: DEFI_KEYWORDS,
+      });
+    }
+
+    // Open-source translations via the Free Use Bible API (no key needed).
+    for (const [label, translation] of Object.entries(HELLOAO_VERSIONS)) {
+      const text = await fetchHelloAoVerse(ref, translation);
+      if (!text) {
+        failures.push(`${ref.book} ${ref.chapter}:${ref.verse} (${label})`);
+        continue;
+      }
+      rows.push({
+        book_name: ref.book, chapter: ref.chapter, verse: ref.verse, text, version: label,
+        testament: ref.testament, financial_relevance: ref.relevance,
+        wisdom_category: ref.categories, defi_keywords: DEFI_KEYWORDS,
       });
     }
 
@@ -290,7 +346,7 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       success: true,
-      versions_seeded: [...Object.keys(FREE_VERSIONS), ...Object.keys(licensedIds)],
+      versions_seeded: [...Object.keys(FREE_VERSIONS), ...Object.keys(HELLOAO_VERSIONS), ...Object.keys(licensedIds)],
       licensed_versions: Object.keys(licensedIds),
       references: REFERENCES.length,
       rows_upserted: upserted,
