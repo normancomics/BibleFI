@@ -23,3 +23,4 @@
 - [ ] Add 'Seek Jesus, the Holy Spirit and the Bible first' note to Ask Wisdom
 - [ ] Wisdom explainer page (BWSP, BWTYA, harmonic math) + publish
 - [ ] Add free/open-source Bible API source to scripture seeder
+- [ ] Research Bible APIs: KJV, Apocrypha, concordances, ESV, NLT, NIV, Hebrew/Greek/Aramaic
