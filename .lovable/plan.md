@@ -1,23 +1,44 @@
-# Fix the Wisdom-Guided Swaps box: real balance and live swap preview
+# Make every DeFi screen show real balances and real previews
 
-## What's wrong
-- **Balance is always 0.0.** The swap box never reads your wallet. Every token's balance is typed into the page as "0.0".
-- **The dollar value is fake.** ETH is priced at a fixed $2,450 instead of the live price.
-- **No preview while you type.** Nothing shows in the "To" box until you press Get Quote.
-- **Mainnet only.** Quotes and token addresses are for real Base, so your test funds on Base Sepolia (0.052 ETH and 48.5 USDC) can't show up or be swapped here.
-- **Get Quote fails** ("Could not fetch live pricing"). The cause isn't confirmed yet. The first step is to call the quote service directly and read its real error, then fix it. If live pricing still can't be reached, show an estimate from market prices instead of an error.
+Covers swaps, vaults, staking and farming. Rule for every screen: show a real number from your wallet or the network, or clearly say why there isn't one. Never show a made-up number.
 
-## What I'll change
-1. **Real balances.** Read your connected wallet's ETH and token balances on whatever network your wallet is on, refresh them after each swap, and add a tap-to-use MAX.
-2. **Live prices.** Use the app's existing live market price for the dollar value.
-3. **Automatic preview.** About half a second after you stop typing, fill in the "To" amount, the rate, and the price impact. Get Quote stays as the confirm step.
-4. **Test network.** When your wallet is on Base Sepolia, show the test token list (ETH and test USDC) with a "Test network" label. Swap prices there come from the live mainnet rate, marked as an estimate, because test networks have no real trading pools. Swapping stays turned off on the test network, and the box points you to the test vault deposit instead.
-5. **Clear messages.** If the wallet isn't connected, show "Connect wallet to see your balance". If you type more than you hold, show "Not enough ETH — Proverbs 21:5".
+## What's wrong today (confirmed)
+- **Swap boxes always show a 0.0 balance.** The balances are typed into the page in BiblicalDeFiSwap, DefiSwap and MultiDexAggregator.
+- **Dollar values are fake.** ETH is fixed at $2,450.
+- **No preview while typing.** The "To" box stays empty until you press Get Quote.
+- **Get Quote fails** ("Could not fetch live pricing"). The cause isn't confirmed yet.
+- **Mainnet only.** Your Base Sepolia test funds (0.052 ETH and 48.5 USDC) never appear.
+- **Made-up starting numbers in wisdom token balances.** For example, 250 WISDOM and 75 xWISDOM are shown regardless of your wallet.
+
+## Step 1 — Audit (first, before changing anything)
+Go through each swap, vault, staking and farming screen. Tag every number as real, estimate or fake, and confirm which token and pool contracts actually exist on Base and Base Sepolia. Then find the real error behind "Quote failed".
+
+## Step 2 — Shared wallet reader
+One shared piece that reads your ETH and token balances, live prices, and your network (Base or Base Sepolia). Every screen uses it, so all balances agree.
+
+## Step 3 — Swaps (all swap boxes and the /swap page)
+- Real balance and MAX, with live dollar values.
+- Automatic preview about half a second after you stop typing: amount you'd receive, rate, price impact, fee, and the route.
+- Fix Get Quote. If live pricing is down, show a clearly labelled estimate instead of an error.
+- On Base Sepolia, show test ETH and USDC with an "estimate only" preview. Swapping stays off there because test networks have no trading pools.
+
+## Step 4 — Vaults
+- Read live from the vault: your principal, accrued yield, 10% tithe, net share, and wallet USDC.
+- Deposit preview as you type: projected yield over 1 month and 1 year, tithe amount, and the after-tithe result.
+- Withdraw and claim previews.
+
+## Step 5 — Staking and farming
+- Wherever a real contract exists, show live staked balance, rewards, and lock time left, plus a preview of the rewards you'd get from the amount you type.
+- Where a pool or token isn't live on-chain yet, replace the fake numbers with "Coming soon — not yet live on Base" plus a clearly marked example calculator. No fake balances.
+
+## Step 6 — Check it end to end
+Test with your wallet address on Base Sepolia: balances match the block explorer, previews fill in after typing, and the vault deposit preview matches the vault's own math.
 
 ## Technical details
-- Edit `src/components/defi/BiblicalDeFiSwap.tsx`: replace hardcoded `balance` and `price` with wagmi `useBalance` (native) and `useReadContracts` `balanceOf` (ERC-20) for `useChainId()`.
-- Token maps per chain: 8453 (current) and 84532 (ETH, USDC 0x036CbD53842c5426634e7929541eC2318f3dCF7e).
-- Debounced auto-quote (500ms) calls the existing `getSwapQuote` in preview mode, with the toast messages silenced.
-- On 84532, quote with mainnet addresses for estimate only and turn off execution.
-- Price comes from the existing live market data hook, falling back to the `uniswap-quote` implied rate.
-- Verify with Playwright: connected-state rendering on both chains, and the preview filling in after typing.
+- New `useWalletAssets(chainId)` hook: wagmi `useBalance` and multicall `balanceOf`, with per-chain token maps for 8453 and 84532 (Sepolia USDC 0x036CbD53842c5426634e7929541eC2318f3dCF7e).
+- Prices from the existing live market data service.
+- Debounced preview through the existing `getSwapQuote` with toast messages silenced.
+- Debug `uniswap-quote` with a direct curl call and read its response body.
+- Vault reads use the existing `useTitheVault` and bwtyaVault config. Previews use the vault's tithe and APY values.
+- Remove the hardcoded balance and price constants and the `useState(250)`-style seeds.
+- Verify with Playwright, a connected-wallet check on Sepolia, and the block explorer.
