@@ -32,9 +32,11 @@ export default defineConfig(({ mode }) => ({
     // Superfluid/OpenZeppelin Foundry deps) and aborts pre-bundling on their
     // unrelated imports.
     entries: ['index.html', 'src/**/*.{ts,tsx}'],
-    esbuildOptions: {
-      define: {
-        global: 'globalThis'
+    rolldownOptions: {
+      transform: {
+        define: {
+          global: 'globalThis'
+        }
       },
     },
   },
