@@ -12,6 +12,65 @@ import {
 } from './mathEngine';
 import type { ScoredOpportunity, StewardshipGrade, YieldOpportunity } from './types';
 
+function normalizeOpportunity(input: YieldOpportunity): { opportunity: YieldOpportunity; flags: string[] } {
+  const flags: string[] = [];
+  const source =
+    input && typeof input === 'object'
+      ? (input as YieldOpportunity)
+      : ({} as YieldOpportunity);
+
+  const text = (value: unknown, fallback: string, maxLength: number, field: string): string => {
+    if (typeof value !== 'string') {
+      flags.push(`⚠️ Invalid ${field} – using a safe default`);
+      return fallback;
+    }
+    if (value.length > maxLength) {
+      flags.push(`⚠️ ${field} exceeded its length limit and was truncated`);
+      return value.slice(0, maxLength);
+    }
+    return value.trim();
+  };
+
+  const nonNegative = (value: unknown, fallback: number, field: string): number => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+      flags.push(`⚠️ Invalid ${field} – treated conservatively`);
+      return fallback;
+    }
+    return value;
+  };
+
+  const riskScore = nonNegative(source.riskScore, 100, 'risk score');
+  const boundedRiskScore = clamp(riskScore, 0, 100);
+  if (boundedRiskScore !== riskScore) flags.push('⚠️ Risk score was outside the 0–100 range');
+
+  const booleanFlag = (value: unknown, field: string): boolean => {
+    if (value === undefined) return false;
+    if (typeof value !== 'boolean') {
+      flags.push(`⚠️ Invalid ${field} claim ignored`);
+      return false;
+    }
+    return value;
+  };
+
+  return {
+    opportunity: {
+      protocol: text(source.protocol, 'Unknown protocol', 120, 'protocol'),
+      poolName: text(source.poolName, 'Unknown pool', 120, 'pool name'),
+      tokenSymbol: text(source.tokenSymbol, '', 32, 'token symbol'),
+      chain: text(source.chain, 'Unknown chain', 64, 'chain'),
+      apy: nonNegative(source.apy, 0, 'APY'),
+      tvlUsd: nonNegative(source.tvlUsd, 0, 'TVL'),
+      riskScore: boundedRiskScore,
+      category: text(source.category, '', 80, 'category'),
+      biblicalAlignment: text(source.biblicalAlignment, '', 500, 'alignment description'),
+      isVerified: booleanFlag(source.isVerified, 'verification'),
+      audited: booleanFlag(source.audited, 'audit'),
+      transparent: booleanFlag(source.transparent, 'transparency'),
+    },
+    flags,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Dimension scorers
 // ---------------------------------------------------------------------------
@@ -48,6 +107,7 @@ function scoreFaithfulStewardship(o: YieldOpportunity): { score: number; flags: 
 
   // Verified project (0–3 pts)
   if (o.isVerified) score += 3;
+  else flags.push('⚠️ Project verification is not confirmed');
 
   return { score: clamp(score, 0, 25), flags };
 }
@@ -133,22 +193,24 @@ function buildRationale(o: YieldOpportunity, score: number, grade: StewardshipGr
 
 export class BWTYAScorer {
   score(opportunity: YieldOpportunity): ScoredOpportunity {
-    const d1 = scoreFruitBearing(opportunity);
-    const d2 = scoreFaithfulStewardship(opportunity);
-    const d3 = scoreBiblicalAlignment(opportunity);
-    const d4 = scoreTransparency(opportunity);
+    const normalized = normalizeOpportunity(opportunity);
+    const safeOpportunity = normalized.opportunity;
+    const d1 = scoreFruitBearing(safeOpportunity);
+    const d2 = scoreFaithfulStewardship(safeOpportunity);
+    const d3 = scoreBiblicalAlignment(safeOpportunity);
+    const d4 = scoreTransparency(safeOpportunity);
 
     const bwtyaScore = d1.score + d2.score + d3.score + d4.score;
     const grade = toGrade(bwtyaScore);
-    const allFlags = [...d1.flags, ...d2.flags, ...d3.flags, ...d4.flags];
+    const allFlags = [...normalized.flags, ...d1.flags, ...d2.flags, ...d3.flags, ...d4.flags];
 
     // Advanced metrics
     const conviction = convictionScore(d1.score, d2.score, d3.score, d4.score);
-    const rar = riskAdjustedReturn(opportunity.apy, opportunity.riskScore);
-    const kelly = kellyFraction(bwtyaScore, opportunity.apy);
+    const rar = riskAdjustedReturn(safeOpportunity.apy, safeOpportunity.riskScore);
+    const kelly = kellyFraction(bwtyaScore, safeOpportunity.apy);
 
     return {
-      opportunity,
+      opportunity: safeOpportunity,
       fruitBearingScore: d1.score,
       faithfulnessScore: d2.score,
       biblicalAlignmentScore: d3.score,
@@ -160,7 +222,7 @@ export class BWTYAScorer {
       paretoKept: true, // set by BWTYARanker after cross-opportunity analysis
       stewardshipGrade: grade,
       warningFlags: allFlags,
-      biblicalRationale: buildRationale(opportunity, bwtyaScore, grade, conviction),
+      biblicalRationale: buildRationale(safeOpportunity, bwtyaScore, grade, conviction),
     };
   }
 

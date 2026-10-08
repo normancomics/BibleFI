@@ -27,6 +27,7 @@ function ln(x: number): number {
 
 /** Clamp a value between lo and hi */
 export function clamp(v: number, lo: number, hi: number): number {
+  if (Number.isNaN(v)) return lo;
   return v < lo ? lo : v > hi ? hi : v;
 }
 
@@ -53,7 +54,7 @@ export function fruitSustainabilityCurve(
   apy: number,
   flags: string[],
 ): number {
-  if (apy <= 0) {
+  if (!Number.isFinite(apy) || apy <= 0) {
     flags.push('⚠️ Zero or negative APY – no fruit produced');
     return 0;
   }
@@ -86,6 +87,10 @@ export function fruitSustainabilityCurve(
 const TVL_TARGET = 100_000_000; // $100 M
 
 export function tvlDepthScore(tvlUsd: number, flags: string[]): number {
+  if (!Number.isFinite(tvlUsd) || tvlUsd < 0) {
+    flags.push('⚠️ Invalid TVL – treated as zero');
+    return 0;
+  }
   if (tvlUsd < 100_000) {
     flags.push('⚠️ Very low TVL – limited market depth');
   }
@@ -129,6 +134,7 @@ const TRUST_TAU = 180;   // days for ramp-up
 const TRUST_FLOOR = 0.3; // brand-new protocol minimum factor
 
 export function protocolTrustDecay(protocolAgeDays: number): number {
+  if (!Number.isFinite(protocolAgeDays)) return TRUST_FLOOR;
   if (protocolAgeDays <= 0) return TRUST_FLOOR;
   const ramp = 1 - Math.exp(-protocolAgeDays / TRUST_TAU);
   return TRUST_FLOOR + (1 - TRUST_FLOOR) * ramp;
@@ -162,27 +168,35 @@ export function kellyFraction(
   apy: number,
   riskFreeRate = RISK_FREE_RATE,
 ): number {
+  if (
+    !Number.isFinite(bwtyaScore) ||
+    !Number.isFinite(apy) ||
+    !Number.isFinite(riskFreeRate) ||
+    bwtyaScore <= 0 ||
+    apy <= 0 ||
+    riskFreeRate <= 0
+  ) {
+    return 0;
+  }
   const p = clamp(bwtyaScore / 100, 0.01, 0.99);
   const q = 1 - p;
-  const b = apy > 0 ? apy / Math.max(riskFreeRate, 0.01) : 0.01;
+  const b = apy / riskFreeRate;
   const kelly = (p * b - q) / b;
   return clamp(kelly, 0, MAX_KELLY);
 }
 
 /**
- * Normalises a set of Kelly fractions so they sum to 1.0, then converts to
- * integer allocation percents (rounding remainder to the first position).
+ * Converts Kelly fractions into portfolio percentages without forcing unused
+ * capital into positions. Each position remains capped at MAX_KELLY; only a
+ * combined exposure above 100% is proportionally scaled down.
  */
 export function normaliseKellyAllocations(fractions: number[]): number[] {
-  const total = fractions.reduce((s, f) => s + f, 0);
-  if (total === 0) {
-    const even = Math.floor(100 / fractions.length);
-    return fractions.map((_, i) => (i === 0 ? 100 - even * (fractions.length - 1) : even));
-  }
-  const percents = fractions.map((f) => Math.floor((f / total) * 100));
-  const assigned = percents.reduce((s, p) => s + p, 0);
-  percents[0] += 100 - assigned; // remainder to top pick
-  return percents;
+  const safeFractions = fractions.map((fraction) =>
+    Number.isFinite(fraction) ? clamp(fraction, 0, MAX_KELLY) : 0,
+  );
+  const total = safeFractions.reduce((sum, fraction) => sum + fraction, 0);
+  const scale = total > 1 ? 1 / total : 1;
+  return safeFractions.map((fraction) => fraction * scale * 100);
 }
 
 // ---------------------------------------------------------------------------
@@ -255,7 +269,11 @@ export function convictionScore(d1: number, d2: number, d3: number, d4: number):
  */
 export function ecclesiastesDiversificationScore(allocations: number[]): number {
   if (allocations.length === 0) return 0;
-  const hhi = allocations.reduce((s, a) => s + Math.pow(a / 100, 2), 0);
+  const hhi = allocations.reduce(
+    (sum, allocation) =>
+      sum + Math.pow((Number.isFinite(allocation) ? clamp(allocation, 0, 100) : 0) / 100, 2),
+    0,
+  );
   return clamp(1 - hhi, 0, 1);
 }
 
@@ -282,7 +300,10 @@ export function maxDrawdownEstimate(
 ): number {
   if (allocations.length === 0) return 0;
   const weightedRisk = allocations.reduce(
-    (s, alloc, i) => s + (alloc / 100) * (riskScores[i] ?? 50),
+    (sum, alloc, i) =>
+      sum +
+      (Number.isFinite(alloc) ? clamp(alloc, 0, 100) / 100 : 0) *
+        (Number.isFinite(riskScores[i]) ? clamp(riskScores[i], 0, 100) : 50),
     0,
   );
   return clamp(weightedRisk * DRAWDOWN_FACTOR, 0, 100);

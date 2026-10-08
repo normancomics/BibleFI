@@ -46,11 +46,11 @@ export function toYieldOpportunity(pool: YieldPool): YieldOpportunity {
     biblicalAlignment: [
       deep ? 'deep and established liquidity' : 'smaller pool, needs caution',
       steady ? 'steady gain rather than haste' : 'high advertised return, prove it first',
-      'publicly verifiable on Base',
+      'market data supplied by DeFiLlama; audit status not verified',
     ].join(', '),
-    isVerified: deep,
-    audited: deep,
-    transparent: true,
+    isVerified: false,
+    audited: false,
+    transparent: false,
   };
 }
 
@@ -61,8 +61,16 @@ export function toYieldOpportunity(pool: YieldPool): YieldOpportunity {
 export async function fetchLiveBaseOpportunities(limit = 12): Promise<YieldOpportunity[]> {
   const pools = await defiLlamaClient.getYieldPools();
   return pools
-    .filter((pool) => (pool.chain ?? '').toLowerCase() === 'base')
-    .filter((pool) => (pool.tvlUsd ?? 0) >= 1_000_000 && (pool.apy ?? 0) > 0 && (pool.apy ?? 0) < 100)
+    .filter((pool) => pool && typeof pool === 'object' && pool.isFallback !== true)
+    .filter((pool) => typeof pool.chain === 'string' && pool.chain.toLowerCase() === 'base')
+    .filter(
+      (pool) =>
+        Number.isFinite(pool.tvlUsd) &&
+        Number.isFinite(pool.apy) &&
+        pool.tvlUsd >= 1_000_000 &&
+        pool.apy > 0 &&
+        pool.apy < 100,
+    )
     .sort((a, b) => (b.tvlUsd ?? 0) - (a.tvlUsd ?? 0))
     .slice(0, limit)
     .map(toYieldOpportunity);

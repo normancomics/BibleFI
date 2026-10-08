@@ -130,6 +130,11 @@ const BWTYAAgentsPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                  {bwtyaResult.recommendedStrategy.cashAllocationPercent > 0 && (
+                    <p className="text-xs text-white/50 mt-3">
+                      Held as cash: {bwtyaResult.recommendedStrategy.cashAllocationPercent.toFixed(1)}%
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 

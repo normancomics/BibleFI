@@ -247,7 +247,7 @@ export interface PortfolioSimulationResult {
  * Simulate a full portfolio of scored opportunities.
  *
  * @param opportunities  Scored opportunities (in the order they'll be allocated)
- * @param allocations    Allocation percents matching opportunities array (sum should be 100)
+ * @param allocations    Portfolio allocation percents matching opportunities; the remainder is cash
  */
 export function simulatePortfolio(
   opportunities: ScoredOpportunity[],
@@ -264,14 +264,18 @@ export function simulatePortfolio(
 
   const perOpportunity = opportunities.map((o) => simulateOpportunity(o));
 
-  // Compute weighted portfolio percentiles
-  // We use a simple linear weighting of per-opportunity percentile bands
-  // (not a full joint-distribution simulation — kept pure and fast).
-  const totalAlloc = allocations.reduce((s, a) => s + a, 0) || 100;
+  // Compute portfolio-level outcomes by weighting against total portfolio value.
+  // Unallocated capital is treated as cash with a zero return.
+  const safeAllocations = opportunities.map((_, i) => {
+    const allocation = allocations[i];
+    return Number.isFinite(allocation) ? clamp(allocation, 0, 100) : 0;
+  });
+  const totalAlloc = safeAllocations.reduce((sum, allocation) => sum + allocation, 0);
+  const scale = totalAlloc > 100 ? 100 / totalAlloc : 1;
 
   function weightedPercentile(field: keyof MonteCarloResult): number {
     return perOpportunity.reduce((s, r, i) => {
-      const weight = (allocations[i] ?? 0) / totalAlloc;
+      const weight = ((safeAllocations[i] ?? 0) * scale) / 100;
       return s + (r[field] as number) * weight;
     }, 0);
   }

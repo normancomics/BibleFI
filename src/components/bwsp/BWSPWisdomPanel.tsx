@@ -358,6 +358,11 @@ export function BWSPWisdomPanel({
                       </tbody>
                     </table>
                   </div>
+                  {bwtyaResult.recommendedStrategy.cashAllocationPercent > 0 && (
+                    <p className="text-[11px] text-stone-500 mt-2">
+                      Held as cash: {bwtyaResult.recommendedStrategy.cashAllocationPercent.toFixed(1)}%
+                    </p>
+                  )}
                 </div>
 
                 {/* Warning flags */}

@@ -48,6 +48,8 @@ export interface BWTYAStrategy {
   minWisdomScore: number;
   titheReservePercent: number;
   allocations: StrategyAllocation[];
+  /** Portfolio share retained as cash because Kelly sizing did not justify deployment. */
+  cashAllocationPercent: number;
   // Advanced risk metrics
   maxDrawdownEstimate: number;         // % estimated max drawdown
   ecclesiastesDiversificationScore: number; // 0–1 HHI-based diversification health

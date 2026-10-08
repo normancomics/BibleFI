@@ -14,7 +14,10 @@ import type { BWTYAStrategy, ScoredOpportunity, StrategyAllocation } from './typ
 // Strategy definitions
 // ---------------------------------------------------------------------------
 
-const STRATEGY_TEMPLATES: Omit<BWTYAStrategy, 'allocations' | 'maxDrawdownEstimate' | 'ecclesiastesDiversificationScore'>[] = [
+const STRATEGY_TEMPLATES: Omit<
+  BWTYAStrategy,
+  'allocations' | 'cashAllocationPercent' | 'maxDrawdownEstimate' | 'ecclesiastesDiversificationScore'
+>[] = [
   {
     id: 'josephs_storehouse',
     name: "Joseph's Storehouse",
@@ -58,11 +61,11 @@ const STRATEGY_TEMPLATES: Omit<BWTYAStrategy, 'allocations' | 'maxDrawdownEstima
 // ---------------------------------------------------------------------------
 
 /**
- * Builds allocations for a set of top-ranked opportunities using Kelly Criterion
- * weights, capped and normalised to sum to 100 %.
+ * Builds allocations using capped Kelly fractions. Undeployed capital remains
+ * cash instead of being redistributed into positions without sufficient edge.
  *
  * For conservative strategies, raw Kelly weights are halved (half-Kelly) to
- * further reduce concentration risk as recommended by biblical prudence:
+ * further reduce exposure as recommended by biblical prudence:
  * "The wise store up choice food and olive oil" (Proverbs 21:20).
  */
 function buildKellyAllocations(
@@ -118,17 +121,20 @@ function buildAdvancedAllocations(top: ScoredOpportunity[]): StrategyAllocation[
 function computeStrategyMetrics(
   allocations: StrategyAllocation[],
   scored: ScoredOpportunity[],
-): { maxDrawdown: number; ecc: number } {
-  const percents = allocations.map((a) => a.allocationPercent);
+): { maxDrawdown: number; ecc: number; cashPercent: number } {
+  const investedPercents = allocations.map((a) => a.allocationPercent);
   const risks = allocations.map((a) => {
     const match = scored.find(
       (s) => `${s.opportunity.protocol}::${s.opportunity.poolName}` === a.opportunityId,
     );
     return match?.opportunity.riskScore ?? 50;
   });
+  const cashPercent = Math.max(0, 100 - investedPercents.reduce((sum, value) => sum + value, 0));
+  const percents = [...investedPercents, cashPercent];
   return {
-    maxDrawdown: maxDrawdownEstimate(percents, risks),
+    maxDrawdown: maxDrawdownEstimate(percents, [...risks, 0]),
     ecc: ecclesiastesDiversificationScore(percents),
+    cashPercent,
   };
 }
 
@@ -148,6 +154,7 @@ export class BWTYAStrategyMapper {
       allocations: conservativeAllocs,
       maxDrawdownEstimate: conservativeMetrics.maxDrawdown,
       ecclesiastesDiversificationScore: conservativeMetrics.ecc,
+      cashAllocationPercent: conservativeMetrics.cashPercent,
     });
 
     // Talents Multiplied (wisdom ≥ 30)
@@ -159,6 +166,7 @@ export class BWTYAStrategyMapper {
         allocations: moderateAllocs,
         maxDrawdownEstimate: moderateMetrics.maxDrawdown,
         ecclesiastesDiversificationScore: moderateMetrics.ecc,
+        cashAllocationPercent: moderateMetrics.cashPercent,
       });
     }
 
@@ -171,6 +179,7 @@ export class BWTYAStrategyMapper {
         allocations: advancedAllocs,
         maxDrawdownEstimate: advancedMetrics.maxDrawdown,
         ecclesiastesDiversificationScore: advancedMetrics.ecc,
+        cashAllocationPercent: advancedMetrics.cashPercent,
       });
     }
 

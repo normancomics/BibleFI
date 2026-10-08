@@ -10,6 +10,8 @@ import { simulatePortfolio } from './simulator';
 import { bwtyaStrategyMapper } from './strategyMapper';
 import type { BWTYAInput, BWTYAResult } from './types';
 
+const MAX_OPPORTUNITIES_PER_RUN = 250;
+
 // ---------------------------------------------------------------------------
 // BWSP execution gate – BWTYA may only execute after BWSP approval
 // ---------------------------------------------------------------------------
@@ -24,10 +26,47 @@ function evaluateGate(approval: BWTYAInput['bwspApproval']): BWTYAResult['execut
       capitalScalar: 0,
     };
   }
+
+  const checkedAt = Date.parse(approval.checkedAt);
+  const approvalIsValid =
+    (approval.verdict === 'approved' || approval.verdict === 'flagged' || approval.verdict === 'quarantined') &&
+    Number.isFinite(approval.compositeScore) &&
+    approval.compositeScore >= 0 &&
+    approval.compositeScore <= 1 &&
+    /^0x[0-9a-f]{16}$/i.test(approval.verseHash) &&
+    Number.isFinite(checkedAt) &&
+    checkedAt <= Date.now() &&
+    Date.now() - checkedAt <= 15 * 60_000;
+
+  if (!approvalIsValid) {
+    return {
+      permitted: false,
+      reason: 'BWSP approval is invalid or expired. Execution blocked.',
+      verseHash: null,
+      capitalScalar: 0,
+    };
+  }
+
   if (approval.verdict === 'quarantined') {
     return {
       permitted: false,
       reason: `BWSP quarantined this wisdom (score ${approval.compositeScore.toFixed(2)}). Execution blocked.`,
+      verseHash: approval.verseHash,
+      capitalScalar: 0,
+    };
+  }
+  if (approval.verdict === 'approved' && approval.compositeScore < 0.7) {
+    return {
+      permitted: false,
+      reason: 'BWSP approval score is below the approval threshold. Execution blocked.',
+      verseHash: approval.verseHash,
+      capitalScalar: 0,
+    };
+  }
+  if (approval.verdict === 'flagged' && approval.compositeScore < 0.45) {
+    return {
+      permitted: false,
+      reason: 'BWSP flagged this synthesis below the minimum execution threshold. Execution blocked.',
       verseHash: approval.verseHash,
       capitalScalar: 0,
     };
@@ -50,11 +89,24 @@ function evaluateGate(approval: BWTYAInput['bwspApproval']): BWTYAResult['execut
 
 export class BWTYAAlgorithm {
   run(input: BWTYAInput): BWTYAResult {
-    const { opportunities, wisdomScore = 0, currentAllocs, bwspApproval } = input;
+    const safeInput = input && typeof input === 'object' ? input : { opportunities: [] };
+    const opportunities = Array.isArray(safeInput.opportunities) ? safeInput.opportunities : [];
+    const currentAllocs = safeInput.currentAllocs;
+    const bwspApproval = safeInput.bwspApproval;
+    if (opportunities.length > MAX_OPPORTUNITIES_PER_RUN) {
+      throw new RangeError(`BWTYA accepts at most ${MAX_OPPORTUNITIES_PER_RUN} opportunities per run.`);
+    }
+    const wisdomScore =
+      Number.isFinite(safeInput.wisdomScore)
+        ? Math.max(0, Math.min(100, safeInput.wisdomScore!))
+        : 0;
 
     // 0. BWSP gate — scales deployable capital before any projection is made
     const executionGate = evaluateGate(bwspApproval);
-    const capitalUsd = (input.capitalUsd ?? 0) * (executionGate.capitalScalar || 1);
+    const capitalUsd =
+      Number.isFinite(safeInput.capitalUsd) && safeInput.capitalUsd! > 0
+        ? safeInput.capitalUsd! * executionGate.capitalScalar
+        : 0;
 
     // Auditability mandate: every gate decision emits verse hash + timestamp
     wisdomAuditTrail.emit({
@@ -121,10 +173,26 @@ export class BWTYAAlgorithm {
 
     // 7. Rebalancing signal (only if currentAllocs provided)
     let rebalanceSignal = null;
-    if (currentAllocs && recommendedStrategy && currentAllocs.length > 0) {
+    if (
+      Array.isArray(currentAllocs) &&
+      currentAllocs.length === scored.length &&
+      recommendedStrategy &&
+      currentAllocs.length > 0
+    ) {
+      const currentByOpportunity = new Map(
+        scored.map((item, index) => [
+          `${item.opportunity.protocol}::${item.opportunity.poolName}`,
+          currentAllocs[index],
+        ]),
+      );
       rebalanceSignal = bwtyaRebalancer.computeSignal(
         topRanked,
-        currentAllocs,
+        topRanked.map((item) => {
+          const allocation = currentByOpportunity.get(
+            `${item.opportunity.protocol}::${item.opportunity.poolName}`,
+          );
+          return Number.isFinite(allocation) ? Math.max(0, Math.min(100, allocation!)) : 0;
+        }),
         recommendedStrategy,
       );
     }

@@ -43,6 +43,8 @@ export interface YieldPool {
     predictedProbability: number;
     binnedConfidence: number;
   };
+  /** True when populated from local demo values after a failed API request. */
+  isFallback?: boolean;
 }
 
 const DEFILLAMA_BASE_URL = 'https://api.llama.fi';
@@ -79,10 +81,10 @@ export class DefiLlamaClient {
       }
       
       const data = await response.json();
-      return data.data || [];
+      return Array.isArray(data?.data) ? data.data : [];
     } catch (error) {
       console.error('DefiLlama yields error:', error);
-      return this.getMockYieldPools();
+      return this.getMockYieldPools().map((pool) => ({ ...pool, isFallback: true }));
     }
   }
 
