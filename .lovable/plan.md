@@ -5,6 +5,7 @@
 - **The dollar value is fake.** ETH is priced at a fixed $2,450 instead of the live price.
 - **No preview while you type.** Nothing shows in the "To" box until you press Get Quote.
 - **Mainnet only.** Quotes and token addresses are for real Base, so your test funds on Base Sepolia (0.052 ETH and 48.5 USDC) can't show up or be swapped here.
+- **Get Quote fails** ("Could not fetch live pricing"). The cause isn't confirmed yet. The first step is to call the quote service directly and read its real error, then fix it. If live pricing still can't be reached, show an estimate from market prices instead of an error.
 
 ## What I'll change
 1. **Real balances.** Read your connected wallet's ETH and token balances on whatever network your wallet is on, refresh them after each swap, and add a tap-to-use MAX.
