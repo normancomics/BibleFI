@@ -9,3 +9,7 @@ This project provides resources and information about the Bible. Please explore 
 - User-friendly interface 
 
 For any further information or contribution, please reach out!.
+
+## Contact
+
+Project email: BibleFi@tutamail.com
