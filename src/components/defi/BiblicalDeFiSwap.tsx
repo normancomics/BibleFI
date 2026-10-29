@@ -20,6 +20,7 @@ import SpandexBWTYAAdvisor from '@/components/defi/SpandexBWTYAAdvisor';
 import SwapRiskControlsPanel from '@/components/defi/SwapRiskControlsPanel';
 import { useSwapRiskControls } from '@/hooks/useSwapRiskControls';
 import { useAccount } from 'wagmi';
+import { useWalletAssets, BASE_SEPOLIA_CHAIN_ID } from '@/hooks/useWalletAssets';
 import type { Address } from 'viem';
 import { parseUnits } from 'viem';
 import {
@@ -34,8 +35,6 @@ interface Token {
   address: string;
   decimals: number;
   logoURI: string;
-  price?: number;
-  balance?: string;
 }
 
 interface SwapQuote {
@@ -53,7 +52,10 @@ interface SwapQuote {
 const BiblicalDeFiSwap: React.FC = () => {
   const { playSound } = useSound();
   const { validateTransaction, checkContentSecurity } = useSecurityContext();
-  const { address: walletAddress } = useAccount();
+  const { address: walletAddress, chainId: accountChainId } = useAccount();
+  const chainId = accountChainId === BASE_SEPOLIA_CHAIN_ID ? BASE_SEPOLIA_CHAIN_ID : 8453;
+  const isTestnet = chainId === BASE_SEPOLIA_CHAIN_ID;
+  const wallet = useWalletAssets(chainId);
   const [fromSymbol, setFromSymbol] = useState('ETH');
   const [toSymbol, setToSymbol] = useState('USDC');
   const [fromAmount, setFromAmount] = useState('');
@@ -89,45 +91,77 @@ const BiblicalDeFiSwap: React.FC = () => {
     ETH: {
       symbol: 'ETH', name: 'Ethereum',
       address: '0x4200000000000000000000000000000000000006', decimals: 18,
-      logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-      price: 2450.00, balance: '0.0'
+      logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
     },
     USDC: {
       symbol: 'USDC', name: 'USD Coin',
       address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', decimals: 6,
-      logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png',
-      price: 1.00, balance: '0.0'
+      logoURI: 'https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png'
     },
     USDT: {
       symbol: 'USDT', name: 'Tether USD',
       address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2', decimals: 6,
-      logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
-      price: 1.00, balance: '0.0'
+      logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png'
     },
     DAI: {
       symbol: 'DAI', name: 'Dai Stablecoin',
       address: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb', decimals: 18,
-      logoURI: 'https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png',
-      price: 1.00, balance: '0.0'
+      logoURI: 'https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png'
     },
     WETH: {
       symbol: 'WETH', name: 'Wrapped Ethereum',
       address: '0x4200000000000000000000000000000000000006', decimals: 18,
-      logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
-      price: 2450.00, balance: '0.0'
+      logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png'
     },
   };
 
   const fromToken = baseTokens[fromSymbol] || null;
   const toToken = baseTokens[toSymbol] || null;
 
-  const getSwapQuote = useCallback(async (overrideAmount?: string) => {
+  const fromBalance = fromToken ? wallet.getBalance(fromToken.symbol) : null;
+  const fromPriceUsd = fromToken ? wallet.getPriceUsd(fromToken.symbol) : null;
+  const toPriceUsd = toToken ? wallet.getPriceUsd(toToken.symbol) : null;
+  const toBalance = toToken ? wallet.getBalance(toToken.symbol) : null;
+
+  const formatBalance = (b: { formatted: string } | null) =>
+    !wallet.isConnected ? 'connect wallet' : b ? parseFloat(b.formatted).toFixed(6) : 'unavailable';
+
+  // Clearly-labelled estimate from live market prices (never a hardcoded number).
+  const buildEstimate = useCallback((amount: string): SwapQuote | null => {
+    if (!fromToken || !toToken) return null;
+    const a = wallet.getMarketPriceUsd(fromToken.symbol);
+    const b = wallet.getMarketPriceUsd(toToken.symbol);
+    const n = parseFloat(amount);
+    if (!a || !b || !(n > 0)) return null;
+    const fee = n * 0.003;
+    return {
+      fromAmount: amount,
+      toAmount: (((n - fee) * a) / b).toFixed(toToken.decimals > 8 ? 8 : toToken.decimals),
+      priceImpact: '0.00',
+      fee: fee.toFixed(6),
+      route: [fromToken.symbol, toToken.symbol],
+      dex: 'Estimate (market price)',
+      gasEstimate: '0.000500',
+      slippage,
+      source: 'estimate',
+    };
+  }, [fromToken, toToken, wallet, slippage]);
+
+  const getSwapQuote = useCallback(async (overrideAmount?: string, silent = false) => {
     const amount = overrideAmount ?? fromAmount;
     if (!fromToken || !toToken || !amount || parseFloat(amount) <= 0) return;
 
+    // Test networks have no trading pools: estimate only, never call routers.
+    if (isTestnet) {
+      const est = buildEstimate(amount);
+      setQuote(est);
+      if (!est && !silent) toast({ title: 'Estimate unavailable', description: 'Live market prices are not available right now.', variant: 'destructive' });
+      return;
+    }
+
     // Risk control: enforce max slippage
     if (parseFloat(slippage) > risk.maxSlippage) {
-      toast({
+      if (!silent) toast({
         title: "Slippage Above Cap",
         description: `Slippage ${slippage}% exceeds your max of ${risk.maxSlippage}%. Lower it or raise the cap in Risk Controls.`,
         variant: "destructive",
@@ -140,22 +174,24 @@ const BiblicalDeFiSwap: React.FC = () => {
     });
 
     if (!validation.success) {
-      toast({ title: "Invalid Input", description: validation.error, variant: "destructive" });
+      if (!silent) toast({ title: "Invalid Input", description: validation.error, variant: "destructive" });
       return;
     }
 
-    if (!apiRateLimiter.canMakeCall('swap-quote', 5, 30000)) {
+    if (!silent && !apiRateLimiter.canMakeCall('swap-quote', 5, 30000)) {
       toast({ title: "Rate Limited", description: "Please wait before requesting another quote", variant: "destructive" });
       return;
     }
 
     setIsLoading(true);
-    playSound('click');
-    resetAdvisory();
+    if (!silent) {
+      playSound('click');
+      resetAdvisory();
+    }
 
     // Fire spanDEX meta-aggregated quotes in parallel with Uniswap edge function
     const inputAmountRaw = BigInt(Math.floor(parseFloat(amount) * 10 ** fromToken.decimals));
-    const spandexPromise = useSpandex
+    const spandexPromise = useSpandex && !silent
       ? fetchSpandexQuote({
           inputToken: fromToken.address as Address,
           outputToken: toToken.address as Address,
@@ -184,7 +220,14 @@ const BiblicalDeFiSwap: React.FC = () => {
       ]);
 
       const { data, error } = uniswapResult;
-      if (error) throw error;
+      if (error || !data) {
+        let detail = error?.message || 'No response from quote service';
+        try {
+          const body = await (error as { context?: Response } | null)?.context?.json?.();
+          if (body?.error) detail = String(body.error);
+        } catch { /* body unreadable */ }
+        throw new Error(detail);
+      }
 
       const uniQuote: SwapQuote = {
         fromAmount: amount,
@@ -210,7 +253,7 @@ const BiblicalDeFiSwap: React.FC = () => {
         uniQuote.toAmount = spandexResult.outputAmount;
         uniQuote.dex = `spanDEX (${spandexResult.provider})`;
         uniQuote.source = 'uniswap'; // Mark as live since spanDEX uses on-chain data
-        toast({
+        if (!silent) toast({
           title: "🚀 Better Price Found!",
           description: `spanDEX found a better rate via ${spandexResult.provider}`,
         });
@@ -219,7 +262,7 @@ const BiblicalDeFiSwap: React.FC = () => {
       setQuote(uniQuote);
 
       // Launch BWTYA advisory (async, non-blocking – shown once it resolves)
-      if (useSpandex) {
+      if (useSpandex && !silent) {
         runAdvisory({
           fromToken: fromToken.symbol,
           toToken: toToken.symbol,
@@ -236,7 +279,7 @@ const BiblicalDeFiSwap: React.FC = () => {
         }).catch((e) => console.warn('[BWTYA Advisory]', e));
       }
 
-      if (data.source === 'estimate' && !spandexResult) {
+      if (!silent && data.source === 'estimate' && !spandexResult) {
         toast({
           title: "Estimated Quote",
           description: data.warning || "Using estimated pricing. Live quotes temporarily unavailable.",
@@ -244,7 +287,14 @@ const BiblicalDeFiSwap: React.FC = () => {
       }
     } catch (err) {
       console.error('Quote error:', err);
-      toast({ title: "Quote Failed", description: "Could not fetch live pricing. Please try again.", variant: "destructive" });
+      const est = buildEstimate(amount);
+      if (est) {
+        setQuote(est);
+        if (!silent) toast({ title: "Showing Estimate", description: `Live routing is unavailable (${err instanceof Error ? err.message : 'unknown error'}). Showing a market-price estimate.` });
+      } else {
+        setQuote(null);
+        if (!silent) toast({ title: "Quote Failed", description: err instanceof Error ? err.message : "Could not fetch pricing.", variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -261,10 +311,22 @@ const BiblicalDeFiSwap: React.FC = () => {
     walletAddress,
     autonomousSabbathMode,
     runAdvisory,
+    isTestnet,
+    buildEstimate,
   ]);
 
+  // Auto-preview ~500ms after the user stops typing
+  useEffect(() => {
+    if (autonomousSabbathMode) return;
+    const n = parseFloat(fromAmount);
+    if (!fromToken || !toToken || !(n > 0)) { setQuote(null); return; }
+    const t = window.setTimeout(() => { getSwapQuote(undefined, true); }, 500);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromAmount, fromSymbol, toSymbol, slippage, chainId, autonomousSabbathMode]);
+
   const executeSwap = async () => {
-    if (!quote || !fromToken || !toToken) return;
+    if (!quote || !fromToken || !toToken || isTestnet || quote.source === 'estimate') return;
 
     if (risk.pauseSwaps) {
       toast({
@@ -400,8 +462,31 @@ const BiblicalDeFiSwap: React.FC = () => {
               />
             </div>
             {fromToken && (
-              <div className="text-xs text-muted-foreground">
-                Balance: {fromToken.balance} {fromToken.symbol} • ${((fromToken.price || 0) * parseFloat(fromAmount || '0')).toFixed(2)}
+              <div className="text-xs text-muted-foreground flex items-center gap-2">
+                <span>
+                  Balance: {formatBalance(fromBalance)} {fromToken.symbol}
+                  {fromPriceUsd !== null
+                    ? ` • $${(fromPriceUsd * parseFloat(fromAmount || '0')).toFixed(2)}`
+                    : isTestnet ? ' • test token (no USD value)' : ' • USD price unavailable'}
+                </span>
+                {fromBalance && parseFloat(fromBalance.formatted) > 0 && (
+                  <button
+                    type="button"
+                    className="text-eboy-green underline"
+                    onClick={() => {
+                      const raw = parseFloat(fromBalance.formatted);
+                      // keep gas headroom when spending native ETH
+                      setFromAmount(String(fromToken.symbol === 'ETH' ? Math.max(raw - 0.001, 0) : raw));
+                    }}
+                  >
+                    MAX
+                  </button>
+                )}
+              </div>
+            )}
+            {isTestnet && (
+              <div className="text-xs text-yellow-500">
+                Base Sepolia: estimate only. Swapping is disabled because test networks have no trading pools.
               </div>
             )}
           </div>
@@ -426,11 +511,16 @@ const BiblicalDeFiSwap: React.FC = () => {
                 <Input type="text" placeholder="0.0" value={quote?.toAmount || ''} readOnly className="bg-muted/50" />
                 {quote && (
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-eboy-green">
-                    ≈ ${((toToken?.price || 0) * parseFloat(quote.toAmount)).toFixed(2)}
+                    {toPriceUsd !== null ? `≈ $${(toPriceUsd * parseFloat(quote.toAmount)).toFixed(2)}` : ''}
                   </div>
                 )}
               </div>
             </div>
+            {toToken && (
+              <div className="text-xs text-muted-foreground">
+                Balance: {formatBalance(toBalance)} {toToken.symbol}
+              </div>
+            )}
           </div>
 
           {/* Slippage Settings */}
@@ -498,7 +588,7 @@ const BiblicalDeFiSwap: React.FC = () => {
                           ) : quote.source === 'coingecko' ? (
                             <p><strong className="text-ancient-gold">CoinGecko Live:</strong> Market price from CoinGecko (refreshed every 60s). Accurate but doesn't reflect exact on-chain liquidity.</p>
                           ) : (
-                            <p><strong className="text-destructive">Estimated:</strong> Hardcoded fallback prices. Both Uniswap & CoinGecko are unavailable. Use with caution.</p>
+                            <p><strong className="text-destructive">Estimated:</strong> Computed from live market prices because live routing is unavailable. Not executable; actual output may differ.</p>
                           )}
                         </TooltipContent>
                       </Tooltip>
@@ -543,7 +633,7 @@ const BiblicalDeFiSwap: React.FC = () => {
 
                 <Button
                   onClick={executeSwap}
-                  disabled={isSwapping}
+                  disabled={isSwapping || isTestnet || quote.source === 'estimate'}
                   className="w-full bg-gradient-to-r from-ancient-gold to-yellow-600 hover:from-yellow-600 hover:to-ancient-gold text-black font-semibold"
                 >
                   <AnimatePresence mode="wait">

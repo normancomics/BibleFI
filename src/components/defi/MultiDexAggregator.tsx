@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
+import { useWalletAssets, BASE_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "@/hooks/useWalletAssets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,13 +23,12 @@ interface DexQuote {
 interface AggregatedQuote {
   bestQuote: DexQuote;
   allQuotes: DexQuote[];
-  savings: number;
-  confidence: number;
 }
 
 const MultiDexAggregator: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
+  const { chainId: accountChainId } = useAccount();
   
   const [fromToken, setFromToken] = useState<string>("ETH");
   const [toToken, setToToken] = useState<string>("USDC");
@@ -37,51 +38,23 @@ const MultiDexAggregator: React.FC = () => {
   const [aggregatedQuote, setAggregatedQuote] = useState<AggregatedQuote | null>(null);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  // Mock DEX data - in production, these would be real API calls
-  const getDexQuotes = async (from: string, to: string, amount: string): Promise<DexQuote[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const basePrice = 1800; // ETH price
-    const mockQuotes: DexQuote[] = [
-      {
-        dex: "Uniswap V3",
-        price: basePrice * 0.999, // Slightly better rate
-        gasEstimate: "0.0045 ETH",
-        priceImpact: 0.1,
-        route: [from, "WETH", to]
-      },
-      {
-        dex: "Odos",
-        price: basePrice * 1.002, // Best rate
-        gasEstimate: "0.0038 ETH",
-        priceImpact: 0.05,
-        route: [from, to]
-      },
-      {
-        dex: "KyberSwap",
-        price: basePrice * 0.997,
-        gasEstimate: "0.0052 ETH",
-        priceImpact: 0.15,
-        route: [from, "USDT", to]
-      },
-      {
-        dex: "Relay.link",
-        price: basePrice * 0.995,
-        gasEstimate: "0.0041 ETH",
-        priceImpact: 0.12,
-        route: [from, to]
-      },
-      {
-        dex: "Superfluid",
-        price: basePrice * 0.998,
-        gasEstimate: "0.0039 ETH",
-        priceImpact: 0.08,
-        route: [from, "DAI", to]
-      }
-    ];
+  const wallet = useWalletAssets(accountChainId === BASE_SEPOLIA_CHAIN_ID ? BASE_SEPOLIA_CHAIN_ID : BASE_CHAIN_ID);
 
-    return mockQuotes.sort((a, b) => b.price - a.price);
+  // Single market-price estimate from live prices. Per-DEX quotes are not fabricated;
+  // real routing happens on the /swap page.
+  const getDexQuotes = async (from: string, to: string, _amount: string): Promise<DexQuote[]> => {
+    const fromPrice = wallet.getMarketPriceUsd(from);
+    const toPrice = wallet.getMarketPriceUsd(to);
+    if (!fromPrice || !toPrice) throw new Error("Live market prices unavailable");
+    return [
+      {
+        dex: "Market estimate",
+        price: fromPrice / toPrice,
+        gasEstimate: "n/a",
+        priceImpact: 0,
+        route: [from, to],
+      },
+    ];
   };
 
   const aggregateQuotes = async () => {
@@ -95,20 +68,15 @@ const MultiDexAggregator: React.FC = () => {
     try {
       const quotes = await getDexQuotes(fromToken, toToken, fromAmount);
       const bestQuote = quotes[0];
-      const worstQuote = quotes[quotes.length - 1];
-      
       const outputAmount = parseFloat(fromAmount) * bestQuote.price;
-      const savings = ((bestQuote.price - worstQuote.price) / worstQuote.price) * 100;
       
       const aggregated: AggregatedQuote = {
         bestQuote,
         allQuotes: quotes,
-        savings,
-        confidence: 95 + Math.random() * 4 // 95-99% confidence
       };
       
       setAggregatedQuote(aggregated);
-      setToAmount((outputAmount / 1800).toFixed(6)); // Convert back to token amount
+      setToAmount(outputAmount.toFixed(6));
       
       playSound("success");
     } catch (error) {
@@ -141,7 +109,7 @@ const MultiDexAggregator: React.FC = () => {
     playSound("powerup");
     toast({
       title: "Best Route Found",
-      description: `Executing swap via ${aggregatedQuote.bestQuote.dex} - saving ${aggregatedQuote.savings.toFixed(2)}%`,
+      description: `Executing swap via ${aggregatedQuote.bestQuote.dex}`,
     });
 
     setTimeout(() => {
@@ -283,9 +251,7 @@ const MultiDexAggregator: React.FC = () => {
                   <TrendingUp className="w-4 h-4 text-green-400" />
                   <span className="font-medium text-green-400">Best Rate: {aggregatedQuote.bestQuote.dex}</span>
                 </div>
-                <Badge variant="secondary" className="bg-green-500/20 text-green-400">
-                  +{aggregatedQuote.savings.toFixed(2)}% savings
-                </Badge>
+                <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">Estimate only</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -318,12 +284,6 @@ const MultiDexAggregator: React.FC = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Confidence */}
-            <div className="flex items-center justify-center text-xs text-white/60">
-              <Shield className="w-3 h-3 mr-1" />
-              <span>{aggregatedQuote.confidence.toFixed(1)}% confidence</span>
             </div>
           </div>
         ) : null}

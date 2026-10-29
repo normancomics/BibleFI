@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
+import { useWalletAssets, BASE_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "@/hooks/useWalletAssets";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,13 @@ const DefiSwap: React.FC = () => {
   const { playSound } = useSound();
   const { prices, getPriceBySymbol, refreshData } = useRealTimeData();
   const { prices: realtimePrices, isConnected } = usePriceUpdates();
+  const { chainId: accountChainId } = useAccount();
+  const wallet = useWalletAssets(accountChainId === BASE_SEPOLIA_CHAIN_ID ? BASE_SEPOLIA_CHAIN_ID : BASE_CHAIN_ID);
+  const fmtBal = (sym: string) => {
+    if (!wallet.isConnected) return "connect wallet";
+    const b = wallet.getBalance(sym);
+    return b ? parseFloat(b.formatted).toFixed(6) : "unavailable";
+  };
   
   // State management
   const [fromToken, setFromToken] = useState<string>("ETH");
@@ -43,24 +52,26 @@ const DefiSwap: React.FC = () => {
         setIsLoading(true);
         
         // Get real-time prices
-        const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || 
-                              realtimePrices[fromToken]?.price || 
-                              getDefaultPrice(fromToken);
+        const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || realtimePrices[fromToken]?.price || wallet.getMarketPriceUsd(fromToken) || 0;
         
-        const toTokenPrice = getPriceBySymbol(toToken)?.current_price || 
-                            realtimePrices[toToken]?.price || 
-                            getDefaultPrice(toToken);
+        const toTokenPrice = getPriceBySymbol(toToken)?.current_price || realtimePrices[toToken]?.price || wallet.getMarketPriceUsd(toToken) || 0;
+
+        if (!fromTokenPrice || !toTokenPrice) {
+          setToAmount("");
+          setExchangeRate("Live price unavailable");
+          setIsLoading(false);
+          return;
+        }
 
         // Calculate exchange rate
         const rate = fromTokenPrice / toTokenPrice;
         const outputAmount = parseFloat(fromAmount) * rate;
         
-        // Add slippage simulation (0.1-0.5%)
-        const slippage = Math.random() * 0.004 + 0.001;
-        const finalAmount = outputAmount * (1 - slippage);
+        // Deduct the 0.3% pool fee (estimate)
+        const finalAmount = outputAmount * 0.997;
         
         setToAmount(finalAmount.toFixed(6));
-        setExchangeRate(`1 ${fromToken} ≈ ${rate.toFixed(6)} ${toToken} (Live)`);
+        setExchangeRate(`1 ${fromToken} ≈ ${rate.toFixed(6)} ${toToken} (estimate, live prices)`);
         
         setTimeout(() => setIsLoading(false), 500);
       } catch (error) {
@@ -78,17 +89,6 @@ const DefiSwap: React.FC = () => {
       setExchangeRate(`1 ${fromToken} = 1 ${toToken}`);
     }
   }, [fromToken, toToken, fromAmount, prices, realtimePrices]);
-
-  const getDefaultPrice = (symbol: string): number => {
-    const defaults: Record<string, number> = {
-      'ETH': 1800,
-      'USDC': 1.00,
-      'DAI': 0.999,
-      'USDT': 1.00,
-      'WETH': 1800
-    };
-    return defaults[symbol] || 1;
-  };
 
   // Handle token swap
   const handleSwapTokens = () => {
@@ -116,7 +116,7 @@ const DefiSwap: React.FC = () => {
   const handleSwapSubmit = () => {
     playSound("powerup");
     
-    const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || getDefaultPrice(fromToken);
+    const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || wallet.getMarketPriceUsd(fromToken) || 0;
     const usdValue = parseFloat(fromAmount) * fromTokenPrice;
     
     toast({
@@ -193,13 +193,13 @@ const DefiSwap: React.FC = () => {
                 <div>
                   <span className="text-white/60">ETH: </span>
                   <span className="text-green-400">
-                    ${getPriceBySymbol('ethereum')?.current_price?.toFixed(2) || '1800.00'}
+                    ${getPriceBySymbol('ethereum')?.current_price?.toFixed(2) ?? '—'}
                   </span>
                 </div>
                 <div>
                   <span className="text-white/60">USDC: </span>
                   <span className="text-green-400">
-                    ${getPriceBySymbol('usd-coin')?.current_price?.toFixed(3) || '1.000'}
+                    ${getPriceBySymbol('usd-coin')?.current_price?.toFixed(3) ?? '—'}
                   </span>
                 </div>
               </div>
@@ -209,7 +209,7 @@ const DefiSwap: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm text-white/70">From</label>
-                <span className="text-xs text-white/60">Balance: 1.0 {fromToken}</span>
+                <span className="text-xs text-white/60">Balance: {fmtBal(fromToken)} {fromToken}</span>
               </div>
               <div className="flex items-center space-x-2 bg-black/30 p-3 rounded-md border border-scripture/20">
                 <div className="flex-1">
@@ -273,7 +273,7 @@ const DefiSwap: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm text-white/70">To (Estimated)</label>
-                <span className="text-xs text-white/60">Balance: 100.0 {toToken}</span>
+                <span className="text-xs text-white/60">Balance: {fmtBal(toToken)} {toToken}</span>
               </div>
               <div className="flex items-center space-x-2 bg-black/30 p-3 rounded-md border border-scripture/20">
                 <div className="flex-1">
@@ -322,7 +322,7 @@ const DefiSwap: React.FC = () => {
             <PixelButton
               onClick={() => {
                 playSound("powerup");
-                const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || getDefaultPrice(fromToken);
+                const fromTokenPrice = getPriceBySymbol(fromToken)?.current_price || wallet.getMarketPriceUsd(fromToken) || 0;
                 const usdValue = parseFloat(fromAmount) * fromTokenPrice;
                 
                 toast({

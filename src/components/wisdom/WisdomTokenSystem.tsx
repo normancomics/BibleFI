@@ -33,10 +33,10 @@ interface WisdomAction {
 const WisdomTokenSystem: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [wisdomBalance, setWisdomBalance] = useState(250);
-  const [xWisdomBalance, setXWisdomBalance] = useState(75);
-  const [dailyStreak, setDailyStreak] = useState(7);
-  const [totalEarned, setTotalEarned] = useState(1520);
+  // $WISDOM / $xWISDOM are not deployed on Base yet, so there is no real balance,
+  // streak or earnings to show. Never seed these with made-up numbers.
+  const COMING_SOON = 'Coming soon — not yet live on Base';
+  const [exampleAmount, setExampleAmount] = useState('100');
   
   const wisdomActions: WisdomAction[] = [
     {
@@ -116,27 +116,17 @@ const WisdomTokenSystem: React.FC = () => {
   ];
 
   const completeAction = (action: WisdomAction) => {
-    playSound('coin');
-    setWisdomBalance(prev => prev + action.reward);
-    setTotalEarned(prev => prev + action.reward);
-    
     toast({
-      title: `+${action.reward} $WISDOM Earned! 🌟`,
-      description: action.name,
+      title: 'Rewards not live yet',
+      description: `${action.name}: ${COMING_SOON}. No $WISDOM was credited.`,
     });
   };
 
-  const stakeWisdom = (amount: number) => {
-    if (amount <= wisdomBalance) {
-      setWisdomBalance(prev => prev - amount);
-      setXWisdomBalance(prev => prev + amount);
-      playSound('success');
-      
-      toast({
-        title: `${amount} $WISDOM Staked! 📈`,
-        description: `Now earning ${amount} $xWISDOM`,
-      });
-    }
+  const exampleYield = (apyText: string) => {
+    const apy = parseFloat(apyText);
+    const amt = parseFloat(exampleAmount);
+    if (!isFinite(apy) || !isFinite(amt) || amt <= 0) return null;
+    return (amt * apy) / 100;
   };
 
   return (
@@ -146,23 +136,23 @@ const WisdomTokenSystem: React.FC = () => {
         <Card className="border-ancient-gold/30 bg-black/40">
           <CardContent className="p-4 text-center">
             <Coins className="w-8 h-8 mx-auto text-ancient-gold mb-2" />
-            <div className="text-2xl font-bold text-ancient-gold">{wisdomBalance.toLocaleString()}</div>
-            <div className="text-sm text-white/60">$WISDOM</div>
+            <div className="text-2xl font-bold text-ancient-gold">—</div>
+            <div className="text-sm text-white/60">$WISDOM · {COMING_SOON}</div>
           </CardContent>
         </Card>
         
         <Card className="border-scripture/30 bg-black/40">
           <CardContent className="p-4 text-center">
             <Zap className="w-8 h-8 mx-auto text-scripture mb-2" />
-            <div className="text-2xl font-bold text-scripture">{xWisdomBalance}</div>
-            <div className="text-sm text-white/60">$xWISDOM Staked</div>
+            <div className="text-2xl font-bold text-scripture">—</div>
+            <div className="text-sm text-white/60">$xWISDOM · {COMING_SOON}</div>
           </CardContent>
         </Card>
         
         <Card className="border-green-500/30 bg-black/40">
           <CardContent className="p-4 text-center">
             <Award className="w-8 h-8 mx-auto text-green-400 mb-2" />
-            <div className="text-2xl font-bold text-green-400">{dailyStreak}</div>
+            <div className="text-2xl font-bold text-green-400">—</div>
             <div className="text-sm text-white/60">Day Streak</div>
           </CardContent>
         </Card>
@@ -170,7 +160,7 @@ const WisdomTokenSystem: React.FC = () => {
         <Card className="border-blue-500/30 bg-black/40">
           <CardContent className="p-4 text-center">
             <Star className="w-8 h-8 mx-auto text-blue-400 mb-2" />
-            <div className="text-2xl font-bold text-blue-400">{totalEarned.toLocaleString()}</div>
+            <div className="text-2xl font-bold text-blue-400">—</div>
             <div className="text-sm text-white/60">Total Earned</div>
           </CardContent>
         </Card>
@@ -256,12 +246,23 @@ const WisdomTokenSystem: React.FC = () => {
                     </div>
                   </div>
                   
-                  <Button 
-                    onClick={() => stakeWisdom(100)}
-                    className="w-full bg-scripture hover:bg-scripture/80"
-                    disabled={wisdomBalance < 100}
-                  >
-                    Stake 100 $WISDOM
+                  <div className="mb-4 p-3 rounded border border-yellow-500/30 bg-yellow-500/5 text-sm">
+                    <div className="text-yellow-400 font-medium mb-2">{COMING_SOON}</div>
+                    <div className="text-white/60 mb-2">Example calculator (illustrative only — not a live rate or balance)</div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={exampleAmount}
+                      onChange={(e) => setExampleAmount(e.target.value)}
+                      className="w-full bg-black/40 border border-white/20 rounded px-2 py-1 text-white mb-2"
+                      aria-label="Example amount"
+                    />
+                    <div className="text-white/80">
+                      Example yearly reward at {pool.apy}: {exampleYield(pool.apy)?.toFixed(2) ?? '—'} tokens
+                    </div>
+                  </div>
+                  <Button disabled className="w-full bg-scripture">
+                    Coming soon
                   </Button>
                 </CardContent>
               </Card>
@@ -287,17 +288,17 @@ const WisdomTokenSystem: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-white/60">Stream Rate</div>
-                      <div className="text-white">10 $WISDOM/month</div>
+                      <div className="text-white">{COMING_SOON}</div>
                     </div>
                     <div>
                       <div className="text-white/60">Returns</div>
-                      <div className="text-green-400">12 $xWISDOM/month</div>
+                      <div className="text-green-400">—</div>
                     </div>
                   </div>
                 </div>
                 
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                  Start Streaming $WISDOM
+                <Button disabled className="w-full bg-blue-600 hover:bg-blue-700">
+                  Streaming coming soon
                 </Button>
                 
                 <div className="bg-black/50 p-4 rounded-lg border border-ancient-gold/30">
