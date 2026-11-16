@@ -4,22 +4,32 @@ import { useSound } from "@/contexts/SoundContext";
 import { useToast } from "@/hooks/use-toast";
 import PixelButton from "@/components/PixelButton";
 import { Wallet } from "lucide-react";
+import { useWalletAssets, fmtBalance } from "@/hooks/useWalletAssets";
+import { projectStakingRewards } from "@/lib/defiPreview";
 
 interface StakingFormProps {
   supportedTokens?: string[];
   onStakeSubmit?: (amount: string, token: string) => void;
   isFormVisible?: boolean;
+  apy?: number;
+  lockDays?: number;
 }
 
 const StakingForm: React.FC<StakingFormProps> = ({ 
   supportedTokens = ["USDC", "DAI", "ETH"], 
   onStakeSubmit = () => {},
-  isFormVisible = false
+  isFormVisible = false,
+  apy = 0,
+  lockDays = 30,
 }) => {
+  const wallet = useWalletAssets();
   const [stakeAmount, setStakeAmount] = React.useState("");
   const [selectedToken, setSelectedToken] = React.useState(supportedTokens[0] || "USDC");
   const { playSound } = useSound();
   const { toast } = useToast();
+
+  const live = wallet.get(selectedToken);
+  const preview = projectStakingRewards(Number(stakeAmount) || 0, apy, lockDays);
 
   const handleSubmit = () => {
     if (!stakeAmount || isNaN(Number(stakeAmount)) || Number(stakeAmount) <= 0) {
@@ -32,6 +42,11 @@ const StakingForm: React.FC<StakingFormProps> = ({
       return;
     }
     
+    if (live && live.balance !== null && Number(stakeAmount) > parseFloat(live.balance)) {
+      toast({ title: "Not enough " + selectedToken, description: "Count the cost first — Luke 14:28", variant: "destructive" });
+      playSound("error");
+      return;
+    }
     playSound("coin");
     onStakeSubmit(stakeAmount, selectedToken);
   };
@@ -68,6 +83,26 @@ const StakingForm: React.FC<StakingFormProps> = ({
             ))}
           </select>
         </div>
+      </div>
+      <div className="text-xs text-muted-foreground mb-3 space-y-1">
+        <div className="flex justify-between">
+          <span>
+            {wallet.isConnected
+              ? <>Wallet: {fmtBalance(live?.balance ?? null)} {selectedToken}{wallet.isTestnet && " (test)"}</>
+              : "Connect wallet to see your balance"}
+          </span>
+          {wallet.isConnected && live?.balance && parseFloat(live.balance) > 0 && (
+            <button type="button" className="font-semibold text-primary hover:underline" onClick={() => setStakeAmount(live.balance as string)}>MAX</button>
+          )}
+        </div>
+        {preview && (
+          <div className="rounded border border-border p-2 space-y-0.5">
+            <div className="flex justify-between"><span>Est. rewards over {lockDays} days ({apy}% APY)</span><span>{preview.grossReward.toFixed(4)} {selectedToken}</span></div>
+            <div className="flex justify-between"><span>10% tithe on rewards</span><span>{preview.tithe.toFixed(4)} {selectedToken}</span></div>
+            <div className="flex justify-between font-semibold"><span>You keep after lock</span><span>{preview.endBalance.toFixed(4)} {selectedToken}</span></div>
+            <div className="opacity-70">Estimate only — rates can change.</div>
+          </div>
+        )}
       </div>
       <PixelButton 
         className="w-full flex items-center justify-center" 

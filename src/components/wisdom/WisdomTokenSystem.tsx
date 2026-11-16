@@ -33,10 +33,10 @@ interface WisdomAction {
 const WisdomTokenSystem: React.FC = () => {
   const { toast } = useToast();
   const { playSound } = useSound();
-  const [wisdomBalance, setWisdomBalance] = useState(250);
-  const [xWisdomBalance, setXWisdomBalance] = useState(75);
+  const [wisdomBalance, setWisdomBalance] = useState(0);
+  const [xWisdomBalance, setXWisdomBalance] = useState(0);
   const [dailyStreak, setDailyStreak] = useState(7);
-  const [totalEarned, setTotalEarned] = useState(1520);
+  const [totalEarned, setTotalEarned] = useState(0);
   
   const wisdomActions: WisdomAction[] = [
     {
@@ -148,6 +148,7 @@ const WisdomTokenSystem: React.FC = () => {
             <Coins className="w-8 h-8 mx-auto text-ancient-gold mb-2" />
             <div className="text-2xl font-bold text-ancient-gold">{wisdomBalance.toLocaleString()}</div>
             <div className="text-sm text-white/60">$WISDOM</div>
+            <div className="text-xs text-white/40 mt-1">Token not yet live on Base</div>
           </CardContent>
         </Card>
         

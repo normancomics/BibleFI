@@ -12,6 +12,7 @@ import { useAccount } from 'wagmi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { projectStakingRewards } from '@/lib/defiPreview';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ExternalLink, Loader2, RefreshCw, Vault } from 'lucide-react';
@@ -191,7 +192,27 @@ const BwspVaultExecution: React.FC<BwspVaultExecutionProps> = ({
           </div>
           <p className="text-xs text-muted-foreground">
             Wallet balance: {vault.walletBalance.toFixed(2)} {vault.tokenSymbol}
+            {vault.walletBalance > 0 && (
+              <button type="button" className="ml-2 font-semibold text-primary hover:underline" onClick={() => setAmount(vault.walletBalance.toFixed(6))}>MAX</button>
+            )}
           </p>
+          {(() => {
+            const n = parseFloat(amount) || 0;
+            const apy = (position?.effectiveApy || 0) > 0 ? position!.effectiveApy : 8;
+            const m = projectStakingRewards(n, apy, 30);
+            const y = projectStakingRewards(n, apy, 365);
+            if (!m || !y) return null;
+            return (
+              <div className="rounded border border-border p-2 text-xs text-muted-foreground space-y-0.5">
+                {n > vault.walletBalance && <p className="text-destructive">More than your wallet holds — Luke 14:28</p>}
+                <div className="flex justify-between"><span>Est. yield, 1 month ({apy}% APY)</span><span>{m.grossReward.toFixed(4)}</span></div>
+                <div className="flex justify-between"><span>Est. yield, 1 year</span><span>{y.grossReward.toFixed(4)}</span></div>
+                <div className="flex justify-between"><span>10% tithe (1 year)</span><span>{y.tithe.toFixed(4)}</span></div>
+                <div className="flex justify-between font-semibold"><span>You'd have after 1 year</span><span>{y.endBalance.toFixed(4)} {vault.tokenSymbol}</span></div>
+                <p className="opacity-70">Estimate only — the vault calculates the real amounts.</p>
+              </div>
+            );
+          })()}
         </div>
 
         <Button
