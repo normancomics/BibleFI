@@ -100,21 +100,14 @@ const StakingPool: React.FC<StakingPoolProps> = ({
       description: `Connected with ${address.substring(0, 6)}...${address.substring(address.length - 4)}`,
     });
     
-    // Simulate successful staking after wallet connection
-    setTimeout(() => {
-      toast({
-        title: "Staking Successful",
-        description: `Your staking transaction is now growing with biblical wisdom`,
-        variant: "default",
-      });
-      
-      // Reset form
-      setShowStakingForm(false);
-      setIsWalletOpen(false);
-      playSound("success");
-    }, 1500);
+    // Pool contracts aren't live on Base yet — never report a fake stake.
+    toast({
+      title: "Staking pool not live yet",
+      description: "This pool isn't on Base yet, so nothing was staked. The preview shows what it would earn.",
+    });
+    setIsWalletOpen(false);
   };
-  
+
   const handleLearn = () => {
     playSound("scroll");
     setShowDetails(!showDetails);
@@ -175,6 +168,8 @@ const StakingPool: React.FC<StakingPoolProps> = ({
         supportedTokens={actualSupportedTokens} 
         onStakeSubmit={handleStakeSubmit}
         isFormVisible={showStakingForm}
+        apy={apy}
+        lockDays={parseInt(actualLockPeriod, 10) || 30}
       />
       
       <div className="px-4 mb-4">
