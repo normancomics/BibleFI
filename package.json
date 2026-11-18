@@ -96,7 +96,7 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@lovable.dev/vite-plugin-dev-server-bridge": "^1.0.2",
-    "@lovable.dev/vite-plugin-hmr-gate": "^1.8.0",
+    "@lovable.dev/vite-plugin-hmr-gate": "^1.8.3",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
@@ -112,7 +112,8 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "vitest": "^3.2.4"
   },
   "overrides": {
     "viem": "$viem",

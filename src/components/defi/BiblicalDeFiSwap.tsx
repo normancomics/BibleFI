@@ -182,6 +182,11 @@ const BiblicalDeFiSwap: React.FC = () => {
           return null;
         })
       : Promise.resolve(null);
+    // Never let a slow aggregator block the preview.
+    const spandexBounded = Promise.race([
+      spandexPromise,
+      new Promise<null>((r) => setTimeout(() => r(null), 6000)),
+    ]);
 
     try {
       const [uniswapResult, spandexResult] = await Promise.all([
@@ -193,7 +198,7 @@ const BiblicalDeFiSwap: React.FC = () => {
             slippage: parseFloat(slippage),
           },
         }),
-        spandexPromise,
+        spandexBounded,
       ]);
 
       const { data, error } = uniswapResult;
