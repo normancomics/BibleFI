@@ -482,15 +482,16 @@ const BiblicalDeFiSwap: React.FC = () => {
                 onValueChange={(s) => { setToSymbol(s); setQuote(null); }}
                 excludeToken={fromSymbol}
               />
-              <div className="flex-1 relative">
+              <div className="flex-1 min-w-0">
                 <Input type="text" placeholder="0.0" value={quote?.toAmount || ''} readOnly className="bg-muted/50" />
-                {quote && (
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-eboy-green">
-                    ≈ ${((toToken?.price || 0) * parseFloat(quote.toAmount)).toFixed(2)}
-                  </div>
-                )}
               </div>
             </div>
+            {quote && (
+              <div className="text-xs text-eboy-green">
+                ≈ ${((toToken?.price || 0) * parseFloat(quote.toAmount)).toFixed(2)}
+                {quote.source === 'estimate' && <span className="text-muted-foreground"> • estimate</span>}
+              </div>
+            )}
           </div>
 
           {/* Slippage Settings */}

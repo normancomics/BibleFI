@@ -80,7 +80,7 @@ const StakingPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="dashboard">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto gap-1">
                   <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                   <TabsTrigger value="pools">Staking Pools</TabsTrigger>
                   <TabsTrigger value="optimizer">Optimizer</TabsTrigger>
