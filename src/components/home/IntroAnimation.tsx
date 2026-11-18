@@ -42,7 +42,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
           setTimeout(() => {
             setPhase('scene');
             playSound("powerup");
-            setTimeout(() => handleSkip(), 4000);
+            setTimeout(() => handleSkip(), 9000);
           }, 700);
         }
       }
@@ -50,7 +50,7 @@ const IntroAnimation: React.FC<IntroAnimationProps> = ({ onComplete }) => {
     return () => clearInterval(typingInterval);
   }, [phase, playSound, handleSkip]);
 
-  const scene = biblicalScenes[Math.floor(Math.random() * biblicalScenes.length)];
+  const [scene] = useState(() => biblicalScenes[Math.floor(Math.random() * biblicalScenes.length)]);
 
   return (
     <div
