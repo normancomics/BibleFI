@@ -1,151 +1,89 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { baseRPCClient } from '@/integrations/base/rpc';
+import { useRealTokenPrices } from '@/hooks/useRealTokenPrices';
 
 export interface RealTimeStats {
-  totalValueLocked: string;
-  activeUsers: number;
-  averageAPY: string;
-  securityScore: string;
-  totalDonated: string;
-  baseTVL: string;
-  gasPrice: string;
-  blockNumber: number;
+  /** Base network TVL from DeFiLlama, or null if unavailable. */
+  baseTVL: string | null;
+  /** Base gas price in gwei, or null if the RPC call failed. */
+  gasPrice: string | null;
+  blockNumber: number | null;
 }
 
-// Mock price data to avoid API errors
-const mockPrices = [
-  { id: 'ethereum', symbol: 'eth', current_price: 1800, price_change_percentage_24h: 2.5 },
-  { id: 'usd-coin', symbol: 'usdc', current_price: 1.00, price_change_percentage_24h: 0.1 },
-  { id: 'dai', symbol: 'dai', current_price: 0.999, price_change_percentage_24h: -0.1 },
-  { id: 'tether', symbol: 'usdt', current_price: 1.001, price_change_percentage_24h: 0.0 }
-];
+export interface PriceEntry {
+  id: string;
+  symbol: string;
+  current_price: number;
+  price_change_percentage_24h: number;
+}
 
+const formatUsdCompact = (n: number) =>
+  n >= 1e9 ? `$${(n / 1e9).toFixed(2)}B` : `$${(n / 1e6).toFixed(1)}M`;
+
+async function fetchBaseTvl(): Promise<string | null> {
+  const res = await fetch('https://api.llama.fi/v2/chains');
+  if (!res.ok) return null;
+  const chains: Array<{ name: string; tvl: number }> = await res.json();
+  const base = chains.find((c) => c.name === 'Base');
+  return base ? formatUsdCompact(base.tvl) : null;
+}
+
+/** Live Base network stats and token prices. No fabricated or randomized values. */
 export function useRealTimeData() {
-  const [stats, setStats] = useState<RealTimeStats>({
-    totalValueLocked: "$2.4M",
-    activeUsers: 1247,
-    averageAPY: "8.4%",
-    securityScore: "99.8%",
-    totalDonated: "$487K",
-    baseTVL: "$2.4B",
-    gasPrice: "0.001",
-    blockNumber: 0
-  });
-
-  const [prices, setPrices] = useState(mockPrices);
-  const [yieldPools, setYieldPools] = useState([]);
+  const { prices: livePrices } = useRealTokenPrices();
+  const [stats, setStats] = useState<RealTimeStats>({ baseTVL: null, gasPrice: null, blockNumber: null });
   const [loading, setLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const fetchAllData = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      // Mock pool data
-      const mockPoolData = [
-        { project: 'Aave', apy: 8.5, tvlUsd: 2400000 },
-        { project: 'Compound', apy: 7.2, tvlUsd: 1800000 },
-        { project: 'Uniswap', apy: 12.3, tvlUsd: 3200000 }
-      ];
-
-      // Try to get real Base chain data
-      let gasPrice = "0.001";
-      let blockNumber = 10000000;
-      
-      try {
-        const [gasPriceResult, blockResult] = await Promise.allSettled([
-          baseRPCClient.getGasPrice(),
-          baseRPCClient.getLatestBlock()
-        ]);
-        
-        if (gasPriceResult.status === 'fulfilled' && gasPriceResult.value) {
-          gasPrice = gasPriceResult.value;
-        }
-        if (blockResult.status === 'fulfilled' && blockResult.value) {
-          blockNumber = blockResult.value;
-        }
-      } catch (error) {
-        console.log("Using mock Base chain data:", error);
-      }
-
-      // Calculate dynamic stats with variation
-      const now = Date.now();
-      const variation = Math.sin(now / 100000) * 0.1 + 1;
-      
-      const avgAPY = mockPoolData.length > 0 
-        ? (mockPoolData.reduce((sum, pool) => sum + pool.apy, 0) / mockPoolData.length * variation).toFixed(1)
-        : "8.4";
-
-      const platformTVL = mockPoolData.reduce((sum, pool) => sum + pool.tvlUsd, 0) * variation;
-
-      setStats({
-        totalValueLocked: `$${(platformTVL / 1000000).toFixed(1)}M`,
-        activeUsers: Math.floor(1200 * variation), 
-        averageAPY: `${avgAPY}%`,
-        securityScore: "99.8%",
-        totalDonated: `$${Math.floor(487 * variation)}K`,
-        baseTVL: `$${(2400000000 * variation / 1000000000).toFixed(1)}B`,
-        gasPrice,
-        blockNumber
-      });
-
-      // Update prices with small variations
-      setPrices(prev => prev.map(price => ({
-        ...price,
-        current_price: price.current_price * (0.98 + Math.random() * 0.04),
-        price_change_percentage_24h: (Math.random() - 0.5) * 10
-      })));
-
-      setYieldPools(mockPoolData);
-      setLastUpdate(new Date());
-    } catch (error) {
-      console.log('Using fallback data:', error);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    const [gas, block, tvl] = await Promise.allSettled([
+      baseRPCClient.getGasPrice(),
+      baseRPCClient.getLatestBlock(),
+      fetchBaseTvl(),
+    ]);
+    const blockNumber = block.status === 'fulfilled' && block.value > 0 ? block.value : null;
+    setStats({
+      // The RPC client swallows errors and returns defaults, so only trust gas when the block call also worked.
+      gasPrice: gas.status === 'fulfilled' && blockNumber !== null ? gas.value : null,
+      blockNumber,
+      baseTVL: tvl.status === 'fulfilled' ? tvl.value : null,
+    });
+    setIsConnected(blockNumber !== null);
+    setLastUpdate(new Date());
+    setLoading(false);
   }, []);
 
-  // Initial data fetch
   useEffect(() => {
     fetchAllData();
-  }, [fetchAllData]);
-
-  // Set up periodic updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAllData();
-    }, 30000);
-
+    const interval = setInterval(fetchAllData, 30000);
     return () => clearInterval(interval);
   }, [fetchAllData]);
 
-  const refreshData = useCallback(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+  const prices: PriceEntry[] = Object.entries(livePrices).map(([symbol, p]) => ({
+    id: symbol,
+    symbol: symbol.toLowerCase(),
+    current_price: p.price,
+    price_change_percentage_24h: p.change24h,
+  }));
 
-  const getPriceBySymbol = useCallback((symbol: string) => {
-    return prices.find(price => 
-      price.symbol.toLowerCase() === symbol.toLowerCase()
-    );
-  }, [prices]);
-
-  const getYieldPoolByProject = useCallback((project: string) => {
-    return yieldPools.find((pool: any) => 
-      pool.project.toLowerCase().includes(project.toLowerCase())
-    );
-  }, [yieldPools]);
+  const getPriceBySymbol = useCallback(
+    (symbol: string) => prices.find((p) => p.symbol === symbol.toLowerCase()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [livePrices],
+  );
 
   return {
     stats,
     prices,
-    yieldPools,
+    yieldPools: [] as Array<{ project: string; apy: number; tvlUsd: number }>,
     loading,
     lastUpdate,
-    refreshData,
+    refreshData: fetchAllData,
     getPriceBySymbol,
-    getYieldPoolByProject,
-    isConnected: true
+    getYieldPoolByProject: (_project: string): { project: string; apy: number; tvlUsd: number } | undefined => undefined,
+    isConnected,
   };
 }
 

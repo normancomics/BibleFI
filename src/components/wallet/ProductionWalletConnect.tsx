@@ -183,13 +183,13 @@ const ProductionWalletConnect: React.FC = () => {
               <div>
                 <span className="text-white/70 text-xs">Gas Price:</span>
                 <p className="text-ancient-gold font-medium">
-                  {stats.gasPrice} ETH
+                  {stats.gasPrice ?? '—'} gwei
                 </p>
               </div>
               <div>
-                <span className="text-white/70 text-xs">TVL:</span>
+                <span className="text-white/70 text-xs">Base TVL:</span>
                 <p className="text-ancient-gold font-medium">
-                  {stats.totalValueLocked}
+                  {stats.baseTVL ?? '—'}
                 </p>
               </div>
             </div>
