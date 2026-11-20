@@ -52,10 +52,9 @@ const BiblicalFarmingStrategy: React.FC<BiblicalFarmingStrategyProps> = ({
   const handleStartFarming = () => {
     playSound('coin');
     toast({
-      title: "Strategy Activated! 🌾",
-      description: `Preparing ${name} via ${platform} protocol — executing in-app.`,
+      title: "Preview only",
+      description: `${name} on ${platform} can't be executed in-app yet, so nothing was deposited. Figures shown are estimates.`,
     });
-    // In-app execution — no external redirect
   };
 
   const toggleExpand = () => {

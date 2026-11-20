@@ -53,7 +53,7 @@ const BiblicalStrategiesDashboard: React.FC = () => {
     playSound('click');
 
     try {
-      // Mock user answers for demo
+      // Fixed sample answers: the assessment is illustrative, not personalized
       const userAnswers = {
         diversificationComfort: 7,
         stewardshipCommitment: 8,
@@ -86,26 +86,15 @@ const BiblicalStrategiesDashboard: React.FC = () => {
   };
 
   const executeStrategy = async (strategy: DefiStrategy) => {
-    playSound('powerup');
     setIsLoading(true);
 
+    // No on-chain execution is wired for these strategies — never report a fake activation.
     try {
-      // Simulate strategy execution
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
       toast({
-        title: "Strategy Activated! 🎯",
-        description: `${strategy.name} is now active with biblical wisdom guidance`,
+        title: "Preview only",
+        description: `${strategy.name} can't be executed in-app yet, so nothing was deposited.`,
       });
-
-      playSound('success');
-    } catch (error) {
-      console.error('Strategy execution failed:', error);
-      toast({
-        title: "Execution Failed",
-        description: "Strategy could not be activated",
-        variant: "destructive"
-      });
+      playSound('click');
     } finally {
       setIsLoading(false);
     }

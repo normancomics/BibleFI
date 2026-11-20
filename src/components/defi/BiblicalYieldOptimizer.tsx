@@ -50,7 +50,7 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
   const builderTier = talentData?.builder_tier ?? 'Novice';
 
   useEffect(() => {
-    // Mock yield strategies based on biblical themes
+    // Illustrative strategy parameters (not live protocol data)
     setStrategies([
       {
         id: "proverbs",
@@ -147,8 +147,8 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
     
     setStrategies(allocations);
     toast({
-      title: "Portfolio Optimized!",
-      description: `Allocation updated for ${optimizeMode} strategy with biblical wisdom`,
+      title: "Preview allocation updated",
+      description: `Projected allocation set for the ${optimizeMode} mode. No funds were moved.`,
     });
   };
 
@@ -161,8 +161,8 @@ const BiblicalYieldOptimizer: React.FC<BiblicalYieldOptimizerProps> = ({
     const strategy = strategies.find(s => s.id === strategyId);
     if (strategy) {
       toast({
-        title: strategy.isActive ? "Strategy Deactivated" : "Strategy Activated",
-        description: `${strategy.name} ${strategy.isActive ? "removed from" : "added to"} your portfolio`,
+        title: strategy.isActive ? "Removed from preview" : "Added to preview",
+        description: `${strategy.name} ${strategy.isActive ? "removed from" : "added to"} the projected blend. No funds were moved.`,
       });
     }
   };
