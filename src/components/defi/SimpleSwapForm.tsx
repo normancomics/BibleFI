@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,18 +9,17 @@ import { useToast } from '@/hooks/use-toast';
 import { useSound } from '@/contexts/SoundContext';
 import { baseTokens } from '@/data/baseTokens';
 import { useSpandexQuote } from '@/hooks/useSpandexQuote';
+import { useSpandexExecute } from '@/hooks/useSpandexExecute';
 import { useAccount } from 'wagmi';
-import type { Address } from 'viem';
+import { parseUnits, type Address } from 'viem';
 
 const SimpleSwapForm: React.FC = () => {
   const [fromToken, setFromToken] = useState('ETH');
   const [toToken, setToToken] = useState('USDC');
   const [fromAmount, setFromAmount] = useState('');
-  const [toAmount, setToAmount] = useState('');
-  const [isSwapping, setIsSwapping] = useState(false);
   const { toast } = useToast();
   const { playSound } = useSound();
-  const { address: walletAddress } = useAccount();
+  const { address: walletAddress, isConnected } = useAccount();
 
   const toTokenInfo = baseTokens[toToken];
   const fromTokenInfo = baseTokens[fromToken];
@@ -29,80 +28,86 @@ const SimpleSwapForm: React.FC = () => {
     bestQuote: spandexBest,
     allQuotes: spandexQuotes,
     isLoading: spandexLoading,
+    error: quoteError,
     fetchQuote: fetchSpandexQuote,
   } = useSpandexQuote(toTokenInfo?.decimals ?? 6);
+  const { isExecuting, txHash, error: execError, execute, reset } = useSpandexExecute();
 
-  const handleSwapTokens = () => {
-    playSound('select');
-    const tempToken = fromToken;
-    setFromToken(toToken);
-    setToToken(tempToken);
-    setFromAmount('');
-    setToAmount('');
-  };
+  const parsedInput = useMemo(() => {
+    if (!fromAmount || !fromTokenInfo) return null;
+    try {
+      const raw = parseUnits(fromAmount, fromTokenInfo.decimals);
+      return raw > 0n ? raw : null;
+    } catch {
+      return null;
+    }
+  }, [fromAmount, fromTokenInfo]);
 
-  const calculateSwap = (amount: string) => {
-    if (!amount) return '';
-    const rates: Record<string, number> = {
-      'ETH': 2400,
-      'USDC': 1,
-      'DAI': 1.01,
-      'USDT': 0.999,
-      'WETH': 2395
-    };
-    
-    const fromRate = rates[fromToken] || 1;
-    const toRate = rates[toToken] || 1;
-    const result = (parseFloat(amount) * fromRate / toRate).toFixed(6);
-    return result;
-  };
+  const sameToken = fromToken === toToken;
+  const toAmount = !sameToken && parsedInput && spandexBest ? spandexBest.outputAmount : '';
 
-  const handleFromAmountChange = (value: string) => {
-    setFromAmount(value);
-    setToAmount(calculateSwap(value));
-    
-    // Fire spanDEX quote in background for better pricing
-    if (value && parseFloat(value) > 0 && fromTokenInfo && toTokenInfo) {
+  // Debounced to avoid a quote request per keystroke.
+  useEffect(() => {
+    if (!parsedInput || sameToken || !fromTokenInfo || !toTokenInfo) return;
+    const t = setTimeout(() => {
       fetchSpandexQuote({
         inputToken: fromTokenInfo.address as Address,
         outputToken: toTokenInfo.address as Address,
-        inputAmount: BigInt(Math.floor(parseFloat(value) * 10 ** fromTokenInfo.decimals)),
+        inputAmount: parsedInput,
         slippageBps: 100,
         swapperAccount: (walletAddress || '0x0000000000000000000000000000000000000001') as Address,
         chainId: 8453,
         outputDecimals: toTokenInfo.decimals,
-      }).then((result) => {
-        if (result && parseFloat(result.outputAmount) > parseFloat(calculateSwap(value))) {
-          setToAmount(result.outputAmount);
-        }
-      }).catch(() => { /* fallback to local calc */ });
-    }
+      });
+    }, 500);
+    return () => clearTimeout(t);
+  }, [parsedInput, sameToken, fromTokenInfo, toTokenInfo, walletAddress, fetchSpandexQuote]);
+
+  const handleSwapTokens = () => {
+    playSound('select');
+    setFromToken(toToken);
+    setToToken(fromToken);
+    setFromAmount('');
+    reset();
+  };
+
+  const handleFromAmountChange = (value: string) => {
+    setFromAmount(value);
+    reset();
   };
 
   const handleSwap = async () => {
-    if (!fromAmount || parseFloat(fromAmount) <= 0) {
+    if (!parsedInput || !fromTokenInfo || !toTokenInfo || sameToken) {
       toast({
         title: "Invalid Amount",
-        description: "Please enter a valid amount to swap",
+        description: "Please enter a valid amount and two different tokens",
         variant: "destructive"
       });
       return;
     }
+    if (!isConnected || !walletAddress) {
+      toast({ title: "Connect your wallet", description: "A wallet is needed to sign the swap.", variant: "destructive" });
+      return;
+    }
 
-    setIsSwapping(true);
     playSound('coin');
-    
-    // Simulate swap process
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    toast({
-      title: "Swap Successful! 🎉",
-      description: `Swapped ${fromAmount} ${fromToken} for ${toAmount} ${toToken}`,
+    const hash = await execute({
+      fromToken,
+      toToken,
+      fromTokenAddress: fromTokenInfo.address,
+      toTokenAddress: toTokenInfo.address,
+      inputAmountHuman: fromAmount,
+      inputAmountRaw: parsedInput,
+      chainId: 8453,
+      slippageBps: 100,
+      swapperAccount: walletAddress,
     });
-    
-    setIsSwapping(false);
-    setFromAmount('');
-    setToAmount('');
+    if (hash) {
+      toast({ title: "Swap confirmed", description: `Swapped ${fromAmount} ${fromToken} for ${toToken}.` });
+      setFromAmount('');
+    } else {
+      toast({ title: "Swap not completed", description: "No funds were moved unless your wallet shows a confirmed transaction.", variant: "destructive" });
+    }
   };
 
   return (
@@ -214,13 +219,13 @@ const SimpleSwapForm: React.FC = () => {
 
         <Button 
           onClick={handleSwap} 
-          disabled={isSwapping || !fromAmount}
+          disabled={isExecuting || !parsedInput || sameToken || !spandexBest}
           className="w-full bg-scripture hover:bg-scripture/80"
         >
-          {isSwapping ? (
+          {isExecuting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Swapping...
+              Confirm in wallet...
             </>
           ) : (
             'Swap Tokens'
@@ -228,8 +233,21 @@ const SimpleSwapForm: React.FC = () => {
         </Button>
 
         <div className="text-xs text-muted-foreground text-center">
-          Rate: 1 {fromToken} = {calculateSwap('1')} {toToken}
+          {spandexBest && parsedInput
+            ? `Estimated output via ${spandexBest.provider} · 1% max slippage`
+            : 'Enter an amount to see live quotes'}
         </div>
+        {sameToken && <div className="text-xs text-destructive text-center">Choose two different tokens.</div>}
+        {(quoteError && parsedInput && !spandexLoading && !spandexBest) && (
+          <div className="text-xs text-destructive text-center">No live route found: {quoteError}</div>
+        )}
+        {execError && <div className="text-xs text-destructive text-center">{execError}</div>}
+        {txHash && (
+          <a href={`https://basescan.org/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
+            className="block text-xs text-eboy-green text-center underline">
+            View confirmed transaction
+          </a>
+        )}
 
         {/* spanDEX Provider Quotes */}
         {spandexQuotes.length > 0 && (

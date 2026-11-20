@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Coins, Crown, Star, TrendingUp, Shield, Clock, Users } from "lucide-react";
-import SoundEffect from "@/components/SoundEffect";
-import { useToast } from "@/hooks/use-toast";
+import { BookOpen, Coins, Crown, Star, TrendingUp, Shield, Users } from "lucide-react";
 
 interface StakingPosition {
   id: string;
@@ -29,85 +25,10 @@ const BiblicalStakingDashboard: React.FC<BiblicalStakingDashboardProps> = ({
   userAddress, 
   wisdomScore = 0 
 }) => {
-  const [activePositions, setActivePositions] = useState<StakingPosition[]>([]);
-  const [totalValue, setTotalValue] = useState(0);
-  const [totalRewards, setTotalRewards] = useState(0);
-  const [selectedPool, setSelectedPool] = useState<string>("");
-  const { toast } = useToast();
-
-  // Mock data for demonstration
-  useEffect(() => {
-    if (userAddress) {
-      setActivePositions([
-        {
-          id: "1",
-          poolName: "Proverbs Pool",
-          amount: 1000,
-          token: "USDC",
-          apy: 3.5,
-          startDate: new Date("2024-01-15"),
-          lockPeriod: 30,
-          currentRewards: 12.35,
-          wisdomBonus: 0.5
-        },
-        {
-          id: "2", 
-          poolName: "Talents Pool",
-          amount: 2500,
-          token: "USDC",
-          apy: 5.2,
-          startDate: new Date("2024-02-01"),
-          lockPeriod: 90,
-          currentRewards: 45.67,
-          wisdomBonus: 0.8
-        }
-      ]);
-      setTotalValue(3500);
-      setTotalRewards(58.02);
-    }
-  }, [userAddress]);
-
-  const handleClaimRewards = (positionId: string) => {
-    const position = activePositions.find(p => p.id === positionId);
-    if (position) {
-      toast({
-        title: "Rewards Claimed!",
-        description: `Successfully claimed ${position.currentRewards} ${position.token} from ${position.poolName}`,
-      });
-      
-      // Update the position
-      setActivePositions(prev => prev.map(p => 
-        p.id === positionId 
-          ? { ...p, currentRewards: 0 }
-          : p
-      ));
-      
-      setTotalRewards(prev => prev - position.currentRewards);
-    }
-  };
-
-  const handleCompoundRewards = (positionId: string) => {
-    const position = activePositions.find(p => p.id === positionId);
-    if (position) {
-      toast({
-        title: "Rewards Compounded!",
-        description: `Added ${position.currentRewards} ${position.token} to your stake in ${position.poolName}`,
-      });
-      
-      // Update the position
-      setActivePositions(prev => prev.map(p => 
-        p.id === positionId 
-          ? { 
-              ...p, 
-              amount: p.amount + p.currentRewards,
-              currentRewards: 0 
-            }
-          : p
-      ));
-      
-      setTotalRewards(prev => prev - position.currentRewards);
-    }
-  };
+  // Staking pool contracts are not live on Base yet, so there are no real positions to show.
+  const activePositions: StakingPosition[] = [];
+  const totalValue = 0;
+  const totalRewards = 0;
 
   const getDaysRemaining = (startDate: Date, lockPeriod: number): number => {
     const endDate = new Date(startDate);
@@ -216,7 +137,7 @@ const BiblicalStakingDashboard: React.FC<BiblicalStakingDashboardProps> = ({
           {activePositions.length === 0 ? (
             <div className="text-center py-8">
               <BookOpen className="w-16 h-16 text-ancient-gold/50 mx-auto mb-4" />
-              <p className="text-white/70">No active staking positions. Start with the Proverbs Pool!</p>
+              <p className="text-white/70">No staking positions yet. Pools are previews until their contracts go live on Base — nothing is staked on your behalf.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -262,35 +183,6 @@ const BiblicalStakingDashboard: React.FC<BiblicalStakingDashboardProps> = ({
                         )}
                       </div>
 
-                      <div className="flex gap-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleClaimRewards(position.id)}
-                          disabled={position.currentRewards === 0}
-                          className="border-scripture text-scripture hover:bg-scripture/20"
-                        >
-                          Claim Rewards
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCompoundRewards(position.id)}
-                          disabled={position.currentRewards === 0}
-                          className="border-ancient-gold text-ancient-gold hover:bg-ancient-gold/20"
-                        >
-                          Compound
-                        </Button>
-                        {daysRemaining === 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-red-500 text-red-500 hover:bg-red-500/20"
-                          >
-                            Unstake
-                          </Button>
-                        )}
-                      </div>
                     </CardContent>
                   </Card>
                 );
