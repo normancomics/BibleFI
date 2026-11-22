@@ -119,24 +119,12 @@ const RealTimePortfolio: React.FC = () => {
     if (!prices) return;
 
     const updatedAssets = assets.map(asset => {
-      let priceData;
-      
-      switch (asset.symbol) {
-        case 'ETH':
-          priceData = prices.ethereum;
-          break;
-        case 'BTC':
-          priceData = prices.bitcoin;
-          break;
-        case 'USDC':
-          priceData = prices['usd-coin'];
-          break;
-        default:
-          priceData = { usd: 1, usd_24h_change: 0 };
-      }
+      // BTC exposure is priced via cbBTC; unknown symbols stay unpriced rather than assuming $1.
+      const priceData = prices[asset.symbol === 'BTC' ? 'cbBTC' : asset.symbol];
+      if (!priceData) return { ...asset, value: 0 };
 
-      const price = priceData?.usd || 1;
-      const change24h = priceData?.usd_24h_change || 0;
+      const price = priceData.price;
+      const change24h = priceData.change24h;
       const value = asset.balance * price;
 
       return {
