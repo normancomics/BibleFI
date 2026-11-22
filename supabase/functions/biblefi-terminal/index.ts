@@ -6,7 +6,7 @@
 // user's own wallet against BibleFi's existing rails:
 //   swap          → Spandex meta-aggregator (useSpandexExecute)
 //   tithe_stream  → Superfluid (useSuperfluid)
-//   private_give  → Veil.cash (veilCashClient)
+//   private_give  → Privacy Cash (external link-out)
 //   bwtya_invest  → x402-gated BWTYA (useX402StrategyExecute)
 //   advice/balance→ read-only
 //
@@ -63,7 +63,7 @@ Convert the user's message into ONE structured action by calling the dispatch_ac
 Action types:
 - swap: exchange one token for another (fields: from_token, to_token, amount). Tokens: ${KNOWN_TOKENS.join(', ')}.
 - tithe_stream: start a real-time streaming tithe/offering (fields: amount, period one of day|week|month, asset default USDC, recipient optional church name or 0x address).
-- private_give: anonymous/private give via ZK privacy pool (fields: amount, asset ETH|USDC, recipient optional).
+- private_give: anonymous/private give via Privacy Cash (fields: amount, asset ETH|USDC, recipient optional).
 - bwtya_invest: invest into a biblically-scored yield strategy (fields: amount, asset default USDC, risk one of conservative|moderate|aggressive).
 - advice: the user is asking a question / wants biblical financial wisdom (field: question).
 - balance: the user wants to see their portfolio/balances (no fields).

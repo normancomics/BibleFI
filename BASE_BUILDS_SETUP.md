@@ -39,7 +39,7 @@ Tagline: Biblical Wisdom for Your Financial Journey
 Description: |
   The world's first Christian faith-based DeFi platform on Base Chain.
   Features Superfluid-powered tithing streams, wisdom-guided yield strategies,
-  and anonymous giving via Veil.cash. Built for 2.3 billion Christians worldwide.
+  and anonymous giving via Privacy Cash. Built for 2.3 billion Christians worldwide.
 
 Category: DeFi / Social Impact / Public Goods
 
@@ -50,7 +50,7 @@ Smart Contracts:
 
 Integrations:
   - Superfluid (real-time tithing streams)
-  - Veil.cash (anonymous giving)
+  - Privacy Cash (anonymous giving)
   - Coinbase Wallet
   - RainbowKit
   - Farcaster Frames

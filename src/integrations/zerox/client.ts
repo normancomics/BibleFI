@@ -148,14 +148,6 @@ export const BASE_TOKENS: Record<string, Token> = {
     logoURI: "https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png",
     chainId: BASE_CHAIN_ID
   },
-  VEIL: {
-    symbol: "VEIL",
-    name: "Veil Cash",
-    address: "0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8",
-    decimals: 18,
-    logoURI: "https://assets.coingecko.com/coins/images/18723/small/veil-logo.png",
-    chainId: BASE_CHAIN_ID
-  },
   AERO: {
     symbol: "AERO",
     name: "Aerodrome Finance",

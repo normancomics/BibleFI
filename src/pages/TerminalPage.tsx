@@ -194,7 +194,7 @@ const TerminalPage: React.FC = () => {
                   {action.type === 'private_give' && (
                     <div className="text-sm">
                       Give <strong>{action.amount} {action.asset ?? 'ETH'}</strong> anonymously
-                      {action.recipient ? <> to <strong>{action.recipient}</strong></> : ''} via the Veil ZK privacy pool.
+                      {action.recipient ? <> to <strong>{action.recipient}</strong></> : ''} via Privacy Cash.
                     </div>
                   )}
                   {action.type === 'bwtya_invest' && (

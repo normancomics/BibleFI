@@ -42,7 +42,7 @@
     ],
     "protocols": [
       "superfluid",
-      "veil-cash"
+      "privacy-cash"
     ],
     "treasury": {
       "base": "0x7bEda57074AA917FF0993fb329E16C2c188baF08",

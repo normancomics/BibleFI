@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import superfluidLogo from '@/assets/superfluid-logo.png';
 import usdcLogo from '@/assets/usdc-logo.png';
-import veilLogo from '@/assets/veil-logo.png';
 import { useToast } from '@/hooks/use-toast';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits } from 'viem';
@@ -27,7 +26,7 @@ import { useTitheRewards } from '@/hooks/useTitheRewards';
 import { GooglePlacesChurchSearch } from './GooglePlacesChurchSearch';
 import { GooglePlacesChurch } from '@/services/googlePlacesChurchService';
 import FiatPaymentForm from './FiatPaymentForm';
-import { veilCashClient, VeilDenomination } from '@/integrations/veil/client';
+import { PRIVACY_CASH_DOCS_URL } from '@/config/privacycash';
 import { Church as ChurchType } from '@/types/church';
 // USDC contract on Base
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const;
@@ -116,12 +115,10 @@ const ComprehensiveTithingHub: React.FC = () => {
   const [selectedChurch, setSelectedChurch] = useState<Church | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [titheAmount, setTitheAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'superfluid' | 'fiat' | 'veil'>('crypto');
+  const [paymentMethod, setPaymentMethod] = useState<'crypto' | 'superfluid' | 'fiat' | 'privacycash'>('crypto');
   const [gaslessMode, setGaslessMode] = useState(true); // Default gasless on Base
   const [streamFrequency, setStreamFrequency] = useState('monthly');
   const [showFiatModal, setShowFiatModal] = useState(false);
-  const [veilDenomination, setVeilDenomination] = useState<VeilDenomination>('USDC_100');
-  const [isVeilProcessing, setIsVeilProcessing] = useState(false);
   
   // Add church form
   const [showAddChurch, setShowAddChurch] = useState(false);
@@ -347,68 +344,12 @@ const ComprehensiveTithingHub: React.FC = () => {
     }
   };
 
-  const handleVeilTithe = async () => {
-    if (!selectedChurch?.crypto_address) {
-      toast({ title: "Church does not have a crypto address", variant: "destructive" });
-      return;
-    }
-
-    try {
-      setIsVeilProcessing(true);
-      
-      // Initialize Veil client
-      const { BrowserProvider } = await import('ethers');
-      const provider = new BrowserProvider((window as any).ethereum);
-      const signer = await provider.getSigner();
-      await veilCashClient.initialize(signer);
-      
-      // Deposit to privacy pool
-      const depositResult = await veilCashClient.deposit(veilDenomination);
-
-      // Preview mode: nothing moved on-chain. Never imply a tithe was sent.
-      if (depositResult.preview) {
-        toast({
-          title: "Preview mode — no funds moved",
-          description: "Anonymous Veil giving is not yet live on this deployment. No on-chain transfer was made.",
-        });
-        return;
-      }
-
-      if (!depositResult.success || !depositResult.txHash) {
-        throw new Error(depositResult.error || 'Deposit did not confirm on-chain');
-      }
-
-      toast({
-        title: "Anonymous Deposit Confirmed",
-        description: "Save your note securely! You'll need it to send the anonymous tithe.",
-      });
-
-      if (depositResult.note) {
-        const withdrawResult = await veilCashClient.withdraw(
-          depositResult.note,
-          selectedChurch.crypto_address
-        );
-
-        if (withdrawResult.success && withdrawResult.txHash) {
-          toast({
-            title: "Anonymous Tithe Sent",
-            description: `${withdrawResult.amount} sent privately to ${selectedChurch.name}`,
-          });
-        } else if (withdrawResult.preview) {
-          toast({
-            title: "Preview mode — no tithe sent",
-            description: "Live Veil transfers are not enabled. No funds moved.",
-          });
-        } else {
-          toast({ title: "Withdrawal failed", description: withdrawResult.error, variant: "destructive" });
-        }
-      }
-    } catch (error) {
-      console.error('Veil tithe error:', error);
-      toast({ title: "Anonymous tithe failed", variant: "destructive" });
-    } finally {
-      setIsVeilProcessing(false);
-    }
+  const handlePrivacyCashTithe = () => {
+    window.open(PRIVACY_CASH_DOCS_URL, '_blank', 'noopener,noreferrer');
+    toast({
+      title: "Opening Privacy Cash",
+      description: "Complete your private gift there. BibleFi does not send or custody funds for anonymous gifts.",
+    });
   };
 
   const handleAddChurch = async () => {
@@ -705,17 +646,17 @@ const ComprehensiveTithingHub: React.FC = () => {
                       </CardContent>
                     </Card>
 
-                    {/* ZK Anonymous - Veil.cash */}
+                    {/* Anonymous giving - Privacy Cash */}
                     <Card 
                       className={`cursor-pointer transition-all ${
-                        paymentMethod === 'veil' ? 'border-purple-500 bg-purple-500/10' : ''
+                        paymentMethod === 'privacycash' ? 'border-purple-500 bg-purple-500/10' : ''
                       } ${!selectedChurch.accepts_crypto ? 'opacity-50' : ''}`}
-                      onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('veil')}
+                      onClick={() => selectedChurch.accepts_crypto && setPaymentMethod('privacycash')}
                     >
                       <CardContent className="p-4 text-center">
-                        <img src={veilLogo} alt="Veil.cash" className="w-8 h-8 mx-auto mb-2 rounded-full" />
-                        <p className="font-medium">Anonymous (ZK)</p>
-                        <p className="text-xs text-muted-foreground">Veil.cash privacy</p>
+                        <Lock className="w-8 h-8 mx-auto mb-2 text-purple-400" />
+                        <p className="font-medium">Anonymous</p>
+                        <p className="text-xs text-muted-foreground">Privacy Cash</p>
                       </CardContent>
                     </Card>
 
@@ -816,32 +757,19 @@ const ComprehensiveTithingHub: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Veil.cash ZK options */}
-                    {paymentMethod === 'veil' && (
+                    {/* Privacy Cash options */}
+                    {paymentMethod === 'privacycash' && (
                       <div className="p-4 bg-purple-950/20 rounded-lg border border-purple-500/30 space-y-3">
                         <div className="flex items-center gap-2 text-purple-400">
                           <Lock className="w-4 h-4" />
-                          <span className="font-medium">Anonymous ZK Tithe (Veil.cash)</span>
+                          <span className="font-medium">Anonymous Tithe (Privacy Cash)</span>
                         </div>
                         <p className="text-sm text-muted-foreground">
                           "But when you give to the needy, do not let your left hand know what your right hand is doing" — Matthew 6:3
                         </p>
-                        <div>
-                          <Label>Select Amount Pool</Label>
-                          <Select value={veilDenomination} onValueChange={(v) => setVeilDenomination(v as VeilDenomination)}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {veilCashClient.denominations.map(d => (
-                                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            ZK-SNARKs ensure complete privacy • Your identity remains hidden
-                          </p>
-                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          You complete the private gift on Privacy Cash. BibleFi does not send or custody funds for anonymous gifts.
+                        </p>
                       </div>
                     )}
 
@@ -875,24 +803,23 @@ const ComprehensiveTithingHub: React.FC = () => {
                         onClick={
                           paymentMethod === 'crypto' ? handleDirectCryptoTithe : 
                           paymentMethod === 'superfluid' ? handleSuperfluidTithe :
-                          handleVeilTithe
+                          handlePrivacyCashTithe
                         }
                         disabled={
-                          !isConnected || isPending || isConfirming || isVeilProcessing ||
-                          (paymentMethod !== 'veil' && !titheAmount)
+                          (paymentMethod !== 'privacycash' && (!isConnected || isPending || isConfirming || !titheAmount))
                         }
                         className="w-full"
                       >
-                        {!isConnected ? (
+                        {paymentMethod !== 'privacycash' && !isConnected ? (
                           <>Connect Wallet First</>
-                        ) : isPending || isConfirming || isVeilProcessing ? (
+                        ) : isPending || isConfirming ? (
                           <>Processing...</>
                         ) : (
                           <>
                             <Heart className="w-4 h-4 mr-2" />
                             {paymentMethod === 'crypto' ? 'Send USDC Tithe' : 
                              paymentMethod === 'superfluid' ? 'Start Streaming Tithe' :
-                             'Send Anonymous Tithe'}
+                             'Give via Privacy Cash'}
                           </>
                         )}
                       </Button>

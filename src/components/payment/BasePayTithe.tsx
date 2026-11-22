@@ -46,7 +46,6 @@ const SUPPORTED_TOKENS: SupportedToken[] = [
   { symbol: 'BIBLEFI', name: 'BibleFi Token', icon: '📖', available: false, category: 'governance' },
   { symbol: 'WISDOM', name: 'Wisdom Token', icon: '🧠', available: false, category: 'governance' },
   { symbol: 'SUP', name: 'Superfluid Token', icon: '💧', available: false, category: 'governance' },
-  { symbol: 'VEIL', name: 'Veil Privacy', icon: '🔒', available: false, category: 'governance' },
 ];
 
 interface BasePayTitheProps {

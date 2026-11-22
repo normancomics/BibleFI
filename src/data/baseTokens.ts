@@ -133,14 +133,6 @@ export const baseTokens: Record<string, TokenInfo> = {
     logoURI: "https://assets.coingecko.com/coins/images/9956/standard/Badge_Dai.png?1696509996",
     category: 'superfluid'
   },
-  VEIL: {
-    name: "Veil Cash",
-    symbol: "VEIL",
-    decimals: 18,
-    address: "0x27D2DECb4bFC9C76F0309b8E88dec3a601Fe25a8",
-    logoURI: "https://assets.coingecko.com/coins/images/53282/standard/avatar_x_fc.png?1735980729",
-    category: 'privacy'
-  },
   AERO: {
     name: "Aerodrome Finance",
     symbol: "AERO",

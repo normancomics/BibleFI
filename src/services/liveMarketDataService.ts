@@ -54,7 +54,7 @@ export interface MarketSentiment {
 // CoinGecko free API for prices
 export const fetchTokenPrices = async (): Promise<TokenPrice[]> => {
   try {
-    const ids = 'ethereum,usd-coin,dai,bitcoin,tether,veil-base';
+    const ids = 'ethereum,usd-coin,dai,bitcoin,tether';
     const res = await fetch(
       `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true`
     );
@@ -72,7 +72,6 @@ export const fetchTokenPrices = async (): Promise<TokenPrice[]> => {
       mapCoinGeckoPrice(data, 'dai', 'DAI', 'Dai'),
       mapCoinGeckoPrice(data, 'bitcoin', 'cbBTC', 'Coinbase Wrapped BTC'),
       mapCoinGeckoPrice(data, 'tether', 'USDT', 'Tether'),
-      mapCoinGeckoPrice(data, 'veil-base', 'VEIL', 'Veil.cash'),
     ].filter(Boolean) as TokenPrice[];
   } catch (error) {
     console.error('Error fetching prices:', error);

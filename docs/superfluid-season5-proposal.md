@@ -17,7 +17,7 @@
 
 ## Executive Summary
 
-[**BibleFi**](https://gravatar.com/bibledotfi) is the world's first Christian faith-based DeFi platform built on [**Base**](https://base.org) Chain, leveraging [**Superfluid's**](https://superfluid.org) streaming technology, [**Veil.cash's**](https://veil.cash) zk-SNARK anonymous payment pools, and BibleFi's proprietary **Biblical Wisdom Synthesis Protocol (BWSP)** and **Biblical Wisdom-To-Yield Algorithm (BWTYA)** to revolutionize how 2.3 billion Christians engage with decentralized finance through timeless Biblical principles of tithing, integrity, transparency, stewardship, wisdom, and generosity.
+[**BibleFi**](https://gravatar.com/bibledotfi) is the world's first Christian faith-based DeFi platform built on [**Base**](https://base.org) Chain, leveraging [**Superfluid's**](https://superfluid.org) streaming technology, [**Privacy Cash's**](https://privacycash.mintlify.app/) zk-SNARK anonymous payment pools, and BibleFi's proprietary **Biblical Wisdom Synthesis Protocol (BWSP)** and **Biblical Wisdom-To-Yield Algorithm (BWTYA)** to revolutionize how 2.3 billion Christians engage with decentralized finance through timeless Biblical principles of tithing, integrity, transparency, stewardship, wisdom, and generosity.
 
 ---
 
@@ -30,7 +30,7 @@
 - Per-second donation flows to churches, missions, and charities
 - Set-and-forget Biblical stewardship *(Malachi 3:10)*
 
-#### 🔒 Anonymous Giving (via [Veil.cash](https://veil.cash))
+#### 🔒 Anonymous Giving (via [Privacy Cash](https://privacycash.mintlify.app/))
 - Privacy-preserving donations aligned with *Matthew 6:3-4*
 - Zero-knowledge proofs protect donor identity while maintaining tax compliance
 - *"Let not your left hand know what your right hand does"*
@@ -105,7 +105,7 @@
 - Real-time Scripture references for financial decisions
 - Emergency withdrawal validation *(Genesis 41 - Joseph's wisdom)*
 
-#### 3. [Veil.cash](https://veil.cash) = Matthew 6:3-4 Compliance
+#### 3. [Privacy Cash](https://privacycash.mintlify.app/) = Matthew 6:3-4 Compliance
 - Anonymous donations without compromising tax benefits
 - Privacy-first design respects donor preferences
 - NEVER guilt-based manipulation, ONLY Biblical alignment
@@ -155,7 +155,7 @@
 | **Only Comprehensive Christian DeFi Platform** | Not just donations - full ecosystem (tithe, learn, invest, earn, give, govern, grow) |
 | **[Superfluid](https://superfluid.org) Integration = Unmatched UX** | Continuous live tithing streams impossible with traditional transfers |
 | **Proprietary BWSP Oracle & BWTYA** | 2,000+ Scripture references indexed, custom smart contract logic |
-| **[Veil.cash](https://veil.cash) Privacy** | Only platform offering true anonymous Christian Faith-based giving |
+| **[Privacy Cash](https://privacycash.mintlify.app/) Privacy** | Only platform offering true anonymous Christian Faith-based giving |
 | **Physical-Digital Bridge** | In-Church Tap-To-Tithe Terminals via [Burner.pro](https://burner.pro/terminal) |
 | **[Base](https://base.org) Chain = Lowest Costs** | <$0.01 per transaction (vs. Ethereum mainnet $5-50) |
 | **Passes the "Grandma Test"** | Simple enough for 65+ non-technical members, advanced enough for DeFi degens |
@@ -207,7 +207,7 @@
 |----------|--------|---|---------|
 | **Development & Infrastructure** | 800,000 $SUP | 40% | Smart contracts, audits, BWSP AI, Superfluid optimization |
 | **Liquidity & Market Making** | 600,000 $SUP | 30% | $BIBLEFI/$SUP and $WISDOM/$SUP pools on Aerodrome |
-| **Partnership & Ecosystem Growth** | 300,000 $SUP | 15% | Church onboarding, Veil.cash, Burner.pro integration |
+| **Partnership & Ecosystem Growth** | 300,000 $SUP | 15% | Church onboarding, Privacy Cash, Burner.pro integration |
 | **Marketing & Education** | 200,000 $SUP | 10% | Content, conferences, campaigns |
 | **Operations & Legal** | 100,000 $SUP | 5% | Compliance, entity formation, infrastructure |
 
@@ -235,7 +235,7 @@
 │  ↑                                                       │
 │  Layer 2: Integration Layer                             │
 │    - Superfluid Protocol (Streaming)                    │
-│    - Veil.cash (Anonymous giving)                       │
+│    - Privacy Cash (Anonymous giving)                       │
 │    - Burner.pro (POT terminals)                         │
 │  ↑                                                       │
 │  Layer 1: Infrastructure                                │
@@ -306,7 +306,7 @@ const SUPERFLUID_ADDRESSES = {
 - Farcaster mini-app public beta
 
 ### Phase 3: Scale (Q3-Q4 2026) 📈
-- Veil.cash anonymous giving integration
+- Privacy Cash anonymous giving integration
 - All Parable-based yield pools live
 - 500+ churches onboarded
 - 25,000 active users

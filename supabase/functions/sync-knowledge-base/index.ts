@@ -110,7 +110,7 @@ function generateApplication(category: string): string {
     'tax_compliance': 'Use the Render Unto Caesar tax module for compliant crypto reporting',
     'justice_ethics': 'Only use verified, audited DeFi protocols; avoid exploitative opportunities',
     'wisdom_planning': 'Consult the Biblical Advisor AI before making significant financial moves',
-    'poverty_charity': 'Allocate a portion of DeFi yields to charitable giving via Veil.cash for privacy',
+    'poverty_charity': 'Allocate a portion of DeFi yields to charitable giving via Privacy Cash for privacy',
     'divine_ownership': 'Remember all gains come from God; tithe from profits as acknowledgment',
   };
   return m[category] || 'Apply this principle through BibleFi\'s guided financial tools';
@@ -128,7 +128,7 @@ function generateDefiRelevance(category: string): string {
     'tax_compliance': 'On-chain transparency simplifies tax documentation and IRS compliance',
     'justice_ethics': 'Smart contract audits and transparent governance prevent financial manipulation',
     'wisdom_planning': 'BWSP Oracle evaluates investments against biblical principles before execution',
-    'poverty_charity': 'ZK-private donations via Veil.cash honor Matthew 6:3 anonymous giving',
+    'poverty_charity': 'Private donations via Privacy Cash honor Matthew 6:3 anonymous giving',
     'divine_ownership': 'Blockchain immutability reflects God\'s unchanging financial principles',
   };
   return m[category] || 'Connects biblical financial wisdom to modern DeFi infrastructure';

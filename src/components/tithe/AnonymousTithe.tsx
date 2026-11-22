@@ -8,11 +8,10 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2, Zap, ExternalLink, Search, Copy, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, Loader2, CheckCircle2, Zap, ExternalLink, Search, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { zkProofService } from '@/services/zkProofService';
-import { veilCashClient, VeilDenomination } from '@/integrations/veil/client';
-import { isVeilLive } from '@/config/veil';
+import { PRIVACY_CASH_DOCS_URL } from '@/config/privacycash';
 import { useAccount } from 'wagmi';
 import { ethers } from 'ethers';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,7 +25,7 @@ interface Church {
   acceptsCrypto?: boolean;
 }
 
-type ZKProvider = 'veil' | 'noir';
+type ZKProvider = 'privacycash' | 'noir';
 
 export const AnonymousTithe: React.FC = () => {
   const { address, isConnected } = useAccount();
@@ -36,12 +35,7 @@ export const AnonymousTithe: React.FC = () => {
   const [proofProgress, setProofProgress] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [proofGenerated, setProofGenerated] = useState(false);
-  const [zkProvider, setZKProvider] = useState<ZKProvider>('veil');
-  const [veilDenomination, setVeilDenomination] = useState<VeilDenomination>('USDC_100');
-  const [anonymitySetSize, setAnonymitySetSize] = useState<number | null>(null);
-  const veilLive = isVeilLive();
-  const [savedNote, setSavedNote] = useState<string | null>(null);
-  const [noteCopied, setNoteCopied] = useState(false);
+  const [zkProvider, setZKProvider] = useState<ZKProvider>('privacycash');
   
   // Church search state
   const [churchSearch, setChurchSearch] = useState('');
@@ -49,13 +43,6 @@ export const AnonymousTithe: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Church[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showChurchSearch, setShowChurchSearch] = useState(false);
-
-  // Fetch anonymity set size when denomination changes
-  useEffect(() => {
-    if (zkProvider === 'veil') {
-      veilCashClient.getAnonymitySetSize(veilDenomination).then(setAnonymitySetSize);
-    }
-  }, [veilDenomination, zkProvider]);
 
   // Search churches globally
   const handleSearchChurches = async () => {
@@ -119,33 +106,14 @@ export const AnonymousTithe: React.FC = () => {
         setProofProgress(prev => Math.min(prev + 10, 90));
       }, 500);
 
-      if (zkProvider === 'veil') {
-        // Veil.cash ZK-SNARK approach
-        const { BrowserProvider } = await import('ethers');
-        const provider = new BrowserProvider((window as any).ethereum);
-        const signer = await provider.getSigner();
-        await veilCashClient.initialize(signer);
-
-        const result = await veilCashClient.deposit(veilDenomination);
+      if (zkProvider === 'privacycash') {
         clearInterval(progressInterval);
         setProofProgress(0);
-
-        if (result.success && result.note) {
-          setSavedNote(result.note);
-          setProofProgress(100);
-          setProofGenerated(true);
-          toast.success('Anonymous deposit confirmed on-chain', {
-            description: 'IMPORTANT: Save your note securely before continuing.',
-          });
-        } else if (result.preview) {
-          // Preview mode: nothing moved on-chain. Be explicit — no fake success.
-          toast.warning('Preview mode — no funds moved', {
-            description: 'Anonymous Veil deposits are not yet live on this deployment. Nothing was sent on-chain.',
-            duration: 8000,
-          });
-        } else {
-          throw new Error(result.error || 'Deposit failed');
-        }
+        window.open(PRIVACY_CASH_DOCS_URL, '_blank', 'noopener,noreferrer');
+        toast.info('Opening Privacy Cash', {
+          description: 'Complete your private gift there. BibleFi does not send or custody anything for you.',
+          duration: 8000,
+        });
       } else {
         // Noir ZK approach
         if (!amount) {
@@ -177,35 +145,12 @@ export const AnonymousTithe: React.FC = () => {
     }
   };
 
-  const handleCopyNote = () => {
-    if (savedNote) {
-      navigator.clipboard.writeText(savedNote);
-      setNoteCopied(true);
-      toast.success('Note copied to clipboard!');
-      setTimeout(() => setNoteCopied(false), 3000);
-    }
-  };
-
   const handleSubmitTithe = async () => {
     if (!selectedChurch) return;
 
-    if (zkProvider === 'veil') {
-      if (!savedNote) return;
-      const result = await veilCashClient.withdraw(savedNote, selectedChurch.address);
-      if (result.success && result.txHash) {
-        toast.success('Anonymous tithe sent', {
-          description: `${result.amount} sent privately to ${selectedChurch.name}`,
-        });
-      } else if (result.preview) {
-        toast.warning('Preview mode — no tithe was sent', {
-          description: 'Live Veil transfers are not enabled on this deployment. No funds moved.',
-          duration: 8000,
-        });
-        return;
-      } else {
-        toast.error('Withdrawal failed: ' + (result.error || 'unknown error'));
-        return;
-      }
+    if (zkProvider === 'privacycash') {
+      window.open(PRIVACY_CASH_DOCS_URL, '_blank', 'noopener,noreferrer');
+      return;
     } else {
       // Noir path is proof-only until an on-chain verifier + settlement contract
       // is deployed — do NOT claim a tithe was sent.
@@ -215,17 +160,6 @@ export const AnonymousTithe: React.FC = () => {
       return;
     }
 
-    // Reset state (only reached on a real confirmed Veil transfer)
-    setAmount('');
-    setSelectedChurch(null);
-    setProofGenerated(false);
-    setProofProgress(0);
-    setSavedNote(null);
-  };
-
-  const getDenominationAmount = (denom: VeilDenomination): string => {
-    const info = veilCashClient.denominations.find(d => d.value === denom);
-    return info?.label || denom;
   };
 
   return (
@@ -253,25 +187,22 @@ export const AnonymousTithe: React.FC = () => {
           </AlertDescription>
         </Alert>
 
-        {!veilLive && (
-          <Alert className="bg-yellow-950/20 border-yellow-500/40 mt-3">
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-            <AlertDescription className="text-sm">
-              <strong className="text-yellow-500">Preview:</strong> Anonymous on-chain giving is not
-              yet live on this deployment. You can explore the flow, but{' '}
-              <strong>no transaction is sent and no funds move</strong> until live mode is enabled.
-            </AlertDescription>
-          </Alert>
-        )}
+        <Alert className="bg-yellow-950/20 border-yellow-500/40 mt-3">
+          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+          <AlertDescription className="text-sm">
+            <strong className="text-yellow-500">External provider:</strong> Private giving is completed on{' '}
+            Privacy Cash. <strong>BibleFi does not send transactions or move funds</strong> for anonymous gifts.
+          </AlertDescription>
+        </Alert>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {/* ZK Provider Selection */}
         <Tabs value={zkProvider} onValueChange={(v) => setZKProvider(v as ZKProvider)}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="veil" className="flex items-center gap-2">
+            <TabsTrigger value="privacycash" className="flex items-center gap-2">
               <Zap className="w-4 h-4" />
-              Veil.cash (Recommended)
+              Privacy Cash (Recommended)
             </TabsTrigger>
             <TabsTrigger value="noir" className="flex items-center gap-2">
               <Shield className="w-4 h-4" />
@@ -279,51 +210,16 @@ export const AnonymousTithe: React.FC = () => {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="veil" className="space-y-4 mt-4">
+          <TabsContent value="privacycash" className="space-y-4 mt-4">
             <Alert className="bg-primary/10 border-primary/30">
               <Zap className="h-4 w-4 text-primary" />
               <AlertDescription className="text-sm">
-                <strong>Veil.cash:</strong> ZK-SNARK privacy pools on Base L2. 
-                Your tithe joins a pool of trusted deposits for maximum anonymity.
+                <strong>Privacy Cash:</strong> a privacy protocol for private transfers.
+                Choose your church below, then complete the private gift on Privacy Cash.
               </AlertDescription>
             </Alert>
-            
-            {/* Denomination Selection */}
-            <div className="space-y-2">
-              <Label>Select Amount (Fixed Denominations for Privacy)</Label>
-              <Select value={veilDenomination} onValueChange={(v) => setVeilDenomination(v as VeilDenomination)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose amount" />
-                </SelectTrigger>
-                <SelectContent>
-                  {veilCashClient.denominations.map((denom) => (
-                    <SelectItem key={denom.value} value={denom.value}>
-                      {denom.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Fixed amounts ensure all deposits look identical, maximizing privacy.
-              </p>
-            </div>
-
-            {/* Anonymity Set Display — real on-chain pool.nextIndex() */}
-            <div className="p-3 bg-secondary/30 rounded-lg border border-border">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Anonymity Set Size:</span>
-                <Badge variant="secondary" className="text-lg">
-                  {anonymitySetSize === null ? '—' : `${anonymitySetSize.toLocaleString()} deposits`}
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {anonymitySetSize === null
-                  ? 'Live pool size unavailable right now.'
-                  : `Live Veil pool on Base — your tithe would hide among ${anonymitySetSize.toLocaleString()} real deposits.`}
-              </p>
-            </div>
           </TabsContent>
-          
+
           <TabsContent value="noir" className="space-y-4 mt-4">
             <Alert className="bg-secondary/50 border-border">
               <Shield className="h-4 w-4" />
@@ -487,20 +383,17 @@ export const AnonymousTithe: React.FC = () => {
 
         {showDetails && (
           <div className="p-4 bg-secondary/30 rounded-lg border border-border space-y-2 text-sm">
-            {zkProvider === 'veil' ? (
+            {zkProvider === 'privacycash' ? (
               <>
-                <p><span className="text-ancient-gold">Protocol:</span> Veil.cash Privacy Pool</p>
-                <p><span className="text-ancient-gold">ZK System:</span> Groth16 ZK-SNARKs</p>
-                <p><span className="text-ancient-gold">Network:</span> Base L2</p>
-                <p><span className="text-ancient-gold">Anonymity Set:</span> {anonymitySetSize.toLocaleString()} deposits</p>
-                <p><span className="text-ancient-gold">Est. Gas:</span> ~0.002 ETH</p>
-                <a 
-                  href="https://docs.veil.cash/"
+                <p><span className="text-ancient-gold">Provider:</span> Privacy Cash (external)</p>
+                <p><span className="text-ancient-gold">BibleFi role:</span> Church selection and guidance only; no funds are moved by this app</p>
+                <a
+                  href={PRIVACY_CASH_DOCS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-primary hover:underline"
                 >
-                  Veil.cash Documentation <ExternalLink className="w-3 h-3" />
+                  Privacy Cash Documentation <ExternalLink className="w-3 h-3" />
                 </a>
               </>
             ) : (
@@ -515,34 +408,12 @@ export const AnonymousTithe: React.FC = () => {
           </div>
         )}
 
-        {/* Saved Note Warning (Veil.cash) */}
-        {savedNote && zkProvider === 'veil' && (
-          <Alert className="bg-yellow-950/20 border-yellow-500/30">
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-            <AlertDescription className="text-sm">
-              <strong className="text-yellow-500">CRITICAL:</strong> Save this note! It's the only way to withdraw.
-              <div className="mt-2 p-2 bg-black/40 rounded font-mono text-xs break-all">
-                {savedNote}
-              </div>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="mt-2"
-                onClick={handleCopyNote}
-              >
-                <Copy className="w-4 h-4 mr-2" />
-                {noteCopied ? 'Copied!' : 'Copy Note'}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
         {/* Proof Generation Progress */}
         {isGeneratingProof && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                {zkProvider === 'veil' ? 'Creating anonymous deposit...' : 'Generating zero-knowledge proof...'}
+                Generating zero-knowledge proof...
               </span>
               <span className="text-ancient-gold">{proofProgress}%</span>
             </div>
@@ -555,9 +426,7 @@ export const AnonymousTithe: React.FC = () => {
           <Alert className="bg-green-950/20 border-green-500/30">
             <CheckCircle2 className="h-4 w-4 text-green-500" />
             <AlertDescription>
-              {zkProvider === 'veil' 
-                ? `Deposit ready! ${getDenominationAmount(veilDenomination)} will be sent anonymously.`
-                : 'Proof generated! Your tithe is ready to submit anonymously.'}
+              Proof generated! Your tithe is ready to submit anonymously.
             </AlertDescription>
           </Alert>
         )}
@@ -567,27 +436,24 @@ export const AnonymousTithe: React.FC = () => {
           {!proofGenerated ? (
             <Button
               onClick={handleGenerateProof}
-              disabled={isGeneratingProof || !selectedChurch || (!amount && zkProvider === 'noir')}
+              disabled={!selectedChurch || isGeneratingProof || (!amount && zkProvider === 'noir')}
               className="flex-1 bg-ancient-gold hover:bg-ancient-gold/90 text-black font-semibold"
             >
               {isGeneratingProof ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {zkProvider === 'veil' ? 'Depositing...' : 'Generating...'}
+                  Generating...
                 </>
               ) : (
                 <>
                   <Shield className="w-4 h-4 mr-2" />
-                  {zkProvider === 'veil' 
-                    ? `Deposit ${getDenominationAmount(veilDenomination)} Anonymously`
-                    : 'Generate Anonymous Proof'}
+                  {zkProvider === 'privacycash' ? 'Give Privately via Privacy Cash' : 'Generate Anonymous Proof'}
                 </>
               )}
             </Button>
           ) : (
             <Button
               onClick={handleSubmitTithe}
-              disabled={zkProvider === 'veil' && !savedNote}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
             >
               <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -599,11 +465,11 @@ export const AnonymousTithe: React.FC = () => {
         {/* Privacy Guarantee */}
         <div className="text-center pt-4 border-t border-border">
           <Badge variant="outline" className="border-ancient-gold/50 text-ancient-gold">
-            {veilLive ? '🔐 Cryptographically Private on Base L2' : '🔎 Preview — not yet private on-chain'}
+            {zkProvider === 'privacycash' ? '🔗 Completed on Privacy Cash' : '🔎 Preview — not yet private on-chain'}
           </Badge>
           <p className="text-xs text-muted-foreground mt-2">
-            {zkProvider === 'veil'
-              ? 'Veil.cash ZK-SNARK privacy pools (Groth16 + Poseidon) on Base'
+            {zkProvider === 'privacycash'
+              ? 'Privacy Cash handles the private transfer; BibleFi never custodies funds'
               : 'Noir zero-knowledge proofs — on-chain settlement pending verifier deployment'}
           </p>
         </div>

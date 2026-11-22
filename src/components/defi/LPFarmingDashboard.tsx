@@ -93,18 +93,6 @@ const LP_POOLS: LPPool[] = [
     scriptureRef: 'Matthew 25:21',
     minStake: 200, wisdomRequired: 600,
   },
-  {
-    id: 'veil-sup',
-    name: 'Anonymous Giving',
-    pair: '$VEIL / $SUP',
-    token0: 'VEIL', token1: 'SUP',
-    tvl: 800000, apr: 28.0, dailyReward: 400,
-    rewardToken: '$BIBLEFI',
-    riskLevel: 'medium',
-    scripture: '"But when thou doest alms, let not thy left hand know what thy right hand doeth."',
-    scriptureRef: 'Matthew 6:3',
-    minStake: 25, wisdomRequired: 250,
-  },
 ];
 
 const STAKING_POOLS: StakingPool[] = [

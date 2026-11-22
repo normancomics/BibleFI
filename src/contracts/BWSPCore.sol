@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
  * Features:
  * - Multi-tier tithing (10%, 15%, 20%) with APY bonuses (1.5x, 1.7x, 2.0x)
  * - Church registry with verification system
- * - ZK-proof anonymous tithing via Veil.cash integration
+ * - ZK-proof anonymous tithing (Privacy Cash / Noir)
  * - Wisdom score integration for bonus calculations
  * - Emergency pause functionality
  */
@@ -403,7 +403,7 @@ contract BWSPCore is Ownable, ReentrancyGuard, Pausable {
     
     /**
      * @notice Verify and record anonymous tithe with ZK proof
-     * @param proof ZK proof data from Veil.cash or Noir
+     * @param proof ZK proof data from Noir or another verifier
      * @param publicInputs Public inputs [churchId, minAmount, commitment]
      * @param nullifier Unique nullifier to prevent double-spending
      */
