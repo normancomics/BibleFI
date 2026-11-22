@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "audit:security": "npm audit --audit-level=critical --legacy-peer-deps",
     "preview": "vite preview",
     "verify:agents": "node scripts/verify-agents.mjs",
     "test:health": "node scripts/test-church-directory-health.mjs"
