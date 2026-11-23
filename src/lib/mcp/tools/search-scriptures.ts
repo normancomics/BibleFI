@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { enforceMcpRateLimit, publicClient, sanitizeFilterText } from "../guard";
+import { enforceMcpRateLimit, publicClient, requireMcpUser, sanitizeFilterText } from "../guard";
 
 export default defineTool({
   name: "search_scriptures",
@@ -16,6 +16,8 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query }, ctx) => {
+    const auth = requireMcpUser(ctx);
+    if (auth.error) return auth.error;
     const limited = await enforceMcpRateLimit("search_scriptures", ctx);
     if (limited.error) return limited.error;
 
@@ -30,7 +32,15 @@ export default defineTool({
     const supabase = publicClient();
     const { data, error } = await supabase
       .from("biblical_knowledge_base")
-      .select("reference,verse_text,category,principle,application,defi_relevance")
+      .select(
+        "reference,verse_text,category,principle,application,defi_relevance,source_translation,source_name,source_url,source_version,reviewed_at",
+      )
+      .eq("provenance_status", "verified")
+      .eq("review_status", "approved")
+      .in("source_translation", ["KJV", "WEB"])
+      .not("reviewed_at", "is", null)
+      .not("source_name", "is", null)
+      .not("source_url", "is", null)
       .or(
         `verse_text.ilike.%${safe}%,reference.ilike.%${safe}%,principle.ilike.%${safe}%,category.ilike.%${safe}%`,
       )

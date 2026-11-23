@@ -1,6 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { enforceMcpRateLimit, publicClient, sanitizeFilterText } from "../guard";
+import { enforceMcpRateLimit, publicClient, requireMcpUser, sanitizeFilterText } from "../guard";
 
 export default defineTool({
   name: "find_churches",
@@ -17,6 +17,8 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ query, limit }, ctx) => {
+    const auth = requireMcpUser(ctx);
+    if (auth.error) return auth.error;
     const limited = await enforceMcpRateLimit("find_churches", ctx);
     if (limited.error) return limited.error;
 

@@ -33,6 +33,7 @@ export interface DirectoryRow {
   verified: boolean;
   accepts_crypto: boolean;
   accepts_fiat: boolean;
+  fiat_currencies?: string[] | null;
   accepts_cards: boolean;
   accepts_checks?: boolean | null;
   rating: number;

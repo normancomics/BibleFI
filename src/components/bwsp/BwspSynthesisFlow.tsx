@@ -27,6 +27,7 @@ import {
 import { useBWSP } from '@/hooks/useBWSP';
 import { wisdomAuditTrail, type WisdomAuditRecord } from '@/services/audit/wisdomAuditTrail';
 import type { TripleCheckVerdict } from '@/services/bwsp/tripleCheck';
+import { BwspSourceNotes } from './BwspSourceNotes';
 
 const EXAMPLES = [
   'Should I borrow to invest in a high yield pool?',
@@ -43,13 +44,13 @@ const VERDICT_STYLE: Record<
     label: 'Confirmed',
     icon: ShieldCheck,
     className: 'border-eboy-green/50 text-eboy-green',
-    meaning: 'The passages checked out in full, so this guidance may be acted on.',
+    meaning: 'The passages passed these checks; this educational result is not a recommendation.',
   },
   flagged: {
     label: 'Needs care',
     icon: ShieldAlert,
     className: 'border-yellow-500/50 text-yellow-500',
-    meaning: 'Something did not sit right in the checks. Read it, but do not act on it alone.',
+    meaning: 'Something did not sit right in the checks. Treat this result with caution.',
   },
   quarantined: {
     label: 'Held back',
@@ -110,7 +111,7 @@ const BwspSynthesisFlow: React.FC = () => {
           <p className="text-sm text-muted-foreground">
             Your question is answered from Scripture first. Every answer is then checked three ways —
             that the passages are genuine, that they are read in context, and that nothing was picked
-            out to suit the answer — before it may guide any money decision.
+            out to suit the answer — before it is shown as educational information.
           </p>
           <Textarea
             rows={3}
@@ -209,7 +210,7 @@ const BwspSynthesisFlow: React.FC = () => {
               <CardTitle className="text-base">What Scripture says</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {bwspResponse.primaryScripture && (
+              {bwspResponse.primaryScripture?.reference && (
                 <blockquote className="border-l-2 border-ancient-gold pl-4">
                   <p className="italic">"{bwspResponse.primaryScripture.text}"</p>
                   <footer className="mt-1 text-sm text-ancient-gold">
@@ -217,18 +218,29 @@ const BwspSynthesisFlow: React.FC = () => {
                   </footer>
                 </blockquote>
               )}
-              <div>
+              {bwspResponse.wisdomGuidance && <div>
                 <h3 className="mb-1 text-sm font-semibold">Guidance</h3>
                 <p className="text-sm text-muted-foreground">{bwspResponse.wisdomGuidance}</p>
-              </div>
-              <div>
+              </div>}
+              {bwspResponse.financialPrinciple && <div>
                 <h3 className="mb-1 text-sm font-semibold">The principle</h3>
                 <p className="text-sm text-muted-foreground">{bwspResponse.financialPrinciple}</p>
-              </div>
-              <div>
+              </div>}
+              {bwspResponse.actionableInsight && <div>
                 <h3 className="mb-1 text-sm font-semibold">What to do</h3>
                 <p className="text-sm text-muted-foreground">{bwspResponse.actionableInsight}</p>
-              </div>
+              </div>}
+              {bwspResponse.synthesis.defiSuggestions && (
+                <div>
+                  <h3 className="mb-1 text-sm font-semibold">DeFi suggestions</h3>
+                  <p className="text-sm text-muted-foreground">{bwspResponse.synthesis.defiSuggestions}</p>
+                </div>
+              )}
+              <BwspSourceNotes
+                citations={bwspResponse.synthesis.sourceCitations}
+                disclaimer={bwspResponse.synthesis.disclaimer}
+                riskNotice={bwspResponse.synthesis.riskNotice}
+              />
               {bwspResponse.supportingScriptures?.length > 0 && (
                 <div>
                   <h3 className="mb-2 text-sm font-semibold">Also consider</h3>

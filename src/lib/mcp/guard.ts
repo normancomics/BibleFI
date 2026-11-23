@@ -7,6 +7,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import type { ToolContext } from "@lovable.dev/mcp-js";
+import { mcpAuthenticationError } from "./auth.mjs";
 
 export const MCP_RATE_LIMIT = 30;
 export const MCP_RATE_WINDOW_SECONDS = 60;
@@ -38,6 +39,12 @@ export interface GuardResult {
     content: Array<{ type: "text"; text: string }>;
     isError: true;
   };
+}
+
+/** Refuse anonymous calls before performing any MCP tool operation. */
+export function requireMcpUser(ctx?: ToolContext): GuardResult {
+  const error = mcpAuthenticationError(ctx?.getUserId?.());
+  return error ? { error } : {};
 }
 
 /** Enforce the per-caller MCP budget. Returns `{ error }` when over budget. */

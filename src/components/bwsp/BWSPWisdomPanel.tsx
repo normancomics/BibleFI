@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useBWSP } from '@/hooks/useBWSP';
 import type { YieldOpportunity } from '@/services/bwtya/types';
 import type { StewardshipGrade } from '@/services/bwtya/types';
+import { BwspSourceNotes } from './BwspSourceNotes';
 
 // ---------------------------------------------------------------------------
 // Helper components
@@ -200,42 +201,57 @@ export function BWSPWisdomPanel({
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Primary scripture */}
-              <div className="bg-amber-950 border border-amber-800 rounded p-3">
+              {bwspResponse.primaryScripture.reference && <div className="bg-amber-950 border border-amber-800 rounded p-3">
                 <p className="text-amber-300 text-xs font-semibold mb-1">
                   📖 {bwspResponse.primaryScripture.reference}
                 </p>
                 <p className="text-amber-100 text-sm italic leading-relaxed">
                   "{bwspResponse.primaryScripture.text}"
                 </p>
-              </div>
+              </div>}
 
               {/* Guidance */}
-              <div>
+              {bwspResponse.wisdomGuidance && <div>
                 <p className="text-amber-500 text-xs font-semibold mb-1 uppercase tracking-wider">
                   Wisdom Guidance
                 </p>
                 <p className="text-stone-300 text-sm leading-relaxed">
                   {bwspResponse.wisdomGuidance}
                 </p>
-              </div>
+              </div>}
 
               {/* Financial principle */}
-              <div>
+              {bwspResponse.financialPrinciple && <div>
                 <p className="text-green-500 text-xs font-semibold mb-1 uppercase tracking-wider">
                   Financial Principle
                 </p>
                 <p className="text-stone-300 text-sm leading-relaxed">
                   {bwspResponse.financialPrinciple}
                 </p>
-              </div>
+              </div>}
 
               {/* Actionable insight */}
-              <div className="bg-green-950 border border-green-800 rounded p-3">
+              {bwspResponse.actionableInsight && <div className="bg-green-950 border border-green-800 rounded p-3">
                 <p className="text-green-400 text-xs font-semibold mb-1">⚡ Actionable Insight</p>
                 <p className="text-stone-200 text-sm leading-relaxed">
                   {bwspResponse.actionableInsight}
                 </p>
-              </div>
+              </div>}
+              {bwspResponse.synthesis.defiSuggestions && (
+                <div>
+                  <p className="text-amber-500 text-xs font-semibold mb-1 uppercase tracking-wider">
+                    DeFi suggestions
+                  </p>
+                  <p className="text-stone-300 text-sm leading-relaxed">
+                    {bwspResponse.synthesis.defiSuggestions}
+                  </p>
+                </div>
+              )}
+              <BwspSourceNotes
+                citations={bwspResponse.synthesis.sourceCitations}
+                disclaimer={bwspResponse.synthesis.disclaimer}
+                riskNotice={bwspResponse.synthesis.riskNotice}
+              />
 
               {/* Supporting scriptures */}
               {bwspResponse.supportingScriptures.length > 0 && (
