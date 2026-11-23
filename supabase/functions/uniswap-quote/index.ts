@@ -24,18 +24,20 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Require authenticated user (prevents anonymous API key exhaustion)
-    let userId: string;
+    // Quotes are read-only price lookups. Wallet-only visitors (not signed in)
+    // must still see a swap preview, so auth is optional; anonymous callers get
+    // a stricter per-IP limit to protect the upstream API key (Proverbs 21:5).
+    let userId = 'anon';
     try {
       const { user } = await requireAuth(req);
       userId = user.id;
     } catch {
-      return errorResponse('Authentication required', 401, corsHeaders);
+      userId = 'anon';
     }
 
-    // Rate limit per user (in-memory; supplements per-user JWT requirement)
     const clientIP = getClientIP(req);
-    const rateCheck = checkRateLimit(`uniswap-quote:${userId}:${clientIP}`, 20, 60000);
+    const limit = userId === 'anon' ? 10 : 20;
+    const rateCheck = checkRateLimit(`uniswap-quote:${userId}:${clientIP}`, limit, 60000);
     if (!rateCheck.allowed) {
       return rateLimitResponse(rateCheck.resetAt, corsHeaders);
     }

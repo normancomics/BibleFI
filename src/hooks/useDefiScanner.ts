@@ -71,8 +71,10 @@ export function useDefiScanner(autoRefreshMs = 60000) {
   const fetchScan = useCallback(async () => {
     try {
       setError(null);
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      // Fall back to the same hardcoded public values the main client uses,
+      // so a missing .env can never produce an "undefined.supabase.co" URL.
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? 'ojiipppypzigjnjblbzn';
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qaWlwcHB5cHppZ2puamJsYnpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyMzIzNzksImV4cCI6MjA2MTgwODM3OX0.bqpCOIo3ADXkkU4QDu9bd2W-prCLs3BhYEmSB1FBHtU';
       
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/defi-opportunity-scanner`,

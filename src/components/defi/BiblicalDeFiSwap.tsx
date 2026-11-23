@@ -20,6 +20,7 @@ import SpandexBWTYAAdvisor from '@/components/defi/SpandexBWTYAAdvisor';
 import SwapRiskControlsPanel from '@/components/defi/SwapRiskControlsPanel';
 import { useSwapRiskControls } from '@/hooks/useSwapRiskControls';
 import { useAccount } from 'wagmi';
+import { useWalletAssets, estimateSwapOutput, fmtBalance } from '@/hooks/useWalletAssets';
 import type { Address } from 'viem';
 import { parseUnits } from 'viem';
 import {
@@ -66,6 +67,8 @@ const BiblicalDeFiSwap: React.FC = () => {
   const [showRisk, setShowRisk] = useState(false);
   const autonomousSabbathMode = isSabbathSunday();
   const { controls: risk, update: updateRisk, reset: resetRisk } = useSwapRiskControls();
+  const wallet = useWalletAssets();
+  const [isPreview, setIsPreview] = useState(false);
 
   // spanDEX meta-aggregator hook
   const {
@@ -118,16 +121,25 @@ const BiblicalDeFiSwap: React.FC = () => {
     },
   };
 
-  const fromToken = baseTokens[fromSymbol] || null;
-  const toToken = baseTokens[toSymbol] || null;
+  // Quotes always route against Base mainnet liquidity (test networks have no
+  // trading pools); balances + prices come from the connected wallet's network.
+  const withLive = (t: Token | undefined): Token | null => {
+    if (!t) return null;
+    const live = wallet.get(t.symbol);
+    return { ...t, balance: live?.balance ?? undefined, price: live?.priceUsd ?? undefined };
+  };
+  const fromToken = withLive(baseTokens[fromSymbol]);
+  const toToken = withLive(baseTokens[toSymbol]);
+  const fromBalanceNum = fromToken?.balance !== undefined ? parseFloat(fromToken.balance) : null;
+  const insufficient = fromBalanceNum !== null && parseFloat(fromAmount || '0') > fromBalanceNum;
 
-  const getSwapQuote = useCallback(async (overrideAmount?: string) => {
+  const getSwapQuote = useCallback(async (overrideAmount?: string, silent = false) => {
     const amount = overrideAmount ?? fromAmount;
     if (!fromToken || !toToken || !amount || parseFloat(amount) <= 0) return;
 
     // Risk control: enforce max slippage
     if (parseFloat(slippage) > risk.maxSlippage) {
-      toast({
+      (silent ? (() => {}) : toast)({
         title: "Slippage Above Cap",
         description: `Slippage ${slippage}% exceeds your max of ${risk.maxSlippage}%. Lower it or raise the cap in Risk Controls.`,
         variant: "destructive",
@@ -140,17 +152,18 @@ const BiblicalDeFiSwap: React.FC = () => {
     });
 
     if (!validation.success) {
-      toast({ title: "Invalid Input", description: validation.error, variant: "destructive" });
+      (silent ? (() => {}) : toast)({ title: "Invalid Input", description: validation.error, variant: "destructive" });
       return;
     }
 
     if (!apiRateLimiter.canMakeCall('swap-quote', 5, 30000)) {
-      toast({ title: "Rate Limited", description: "Please wait before requesting another quote", variant: "destructive" });
+      (silent ? (() => {}) : toast)({ title: "Rate Limited", description: "Please wait before requesting another quote", variant: "destructive" });
       return;
     }
 
     setIsLoading(true);
-    playSound('click');
+    setIsPreview(silent);
+    if (!silent) playSound('click');
     resetAdvisory();
 
     // Fire spanDEX meta-aggregated quotes in parallel with Uniswap edge function
@@ -169,6 +182,11 @@ const BiblicalDeFiSwap: React.FC = () => {
           return null;
         })
       : Promise.resolve(null);
+    // Never let a slow aggregator block the preview.
+    const spandexBounded = Promise.race([
+      spandexPromise,
+      new Promise<null>((r) => setTimeout(() => r(null), 6000)),
+    ]);
 
     try {
       const [uniswapResult, spandexResult] = await Promise.all([
@@ -180,7 +198,7 @@ const BiblicalDeFiSwap: React.FC = () => {
             slippage: parseFloat(slippage),
           },
         }),
-        spandexPromise,
+        spandexBounded,
       ]);
 
       const { data, error } = uniswapResult;
@@ -210,7 +228,7 @@ const BiblicalDeFiSwap: React.FC = () => {
         uniQuote.toAmount = spandexResult.outputAmount;
         uniQuote.dex = `spanDEX (${spandexResult.provider})`;
         uniQuote.source = 'uniswap'; // Mark as live since spanDEX uses on-chain data
-        toast({
+        (silent ? (() => {}) : toast)({
           title: "🚀 Better Price Found!",
           description: `spanDEX found a better rate via ${spandexResult.provider}`,
         });
@@ -237,14 +255,29 @@ const BiblicalDeFiSwap: React.FC = () => {
       }
 
       if (data.source === 'estimate' && !spandexResult) {
-        toast({
+        (silent ? (() => {}) : toast)({
           title: "Estimated Quote",
           description: data.warning || "Using estimated pricing. Live quotes temporarily unavailable.",
         });
       }
     } catch (err) {
-      console.error('Quote error:', err);
-      toast({ title: "Quote Failed", description: "Could not fetch live pricing. Please try again.", variant: "destructive" });
+      console.warn('Quote error, using price estimate:', err);
+      const est = estimateSwapOutput(parseFloat(amount), fromToken.price ?? null, toToken.price ?? null);
+      if (est !== null) {
+        setQuote({
+          fromAmount: amount,
+          toAmount: est.toFixed(toToken.decimals <= 6 ? 6 : 8),
+          priceImpact: '—',
+          fee: (parseFloat(amount) * 0.003).toFixed(6),
+          route: [fromToken.symbol, toToken.symbol],
+          dex: 'Market-price estimate',
+          gasEstimate: '0.000050',
+          slippage,
+          source: 'estimate',
+        });
+      } else {
+        (silent ? (() => {}) : toast)({ title: "Quote unavailable", description: "Live prices couldn't be reached. Please try again shortly — Proverbs 21:5.", variant: "destructive" });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -305,19 +338,13 @@ const BiblicalDeFiSwap: React.FC = () => {
       return;
     }
 
-    setIsSwapping(true);
-    playSound('powerup');
-
-    setTimeout(() => {
-      setIsSwapping(false);
-      toast({
-        title: "Swap Completed! ✨",
-        description: `Successfully swapped ${quote.fromAmount} ${fromToken?.symbol} for ${quote.toAmount} ${toToken?.symbol}`,
-      });
-      setFromAmount('');
-      setQuote(null);
-      playSound('success');
-    }, 3000);
+    // No in-app swap signing is wired yet — never report a fake success.
+    toast({
+      title: wallet.isTestnet ? "Test network — preview only" : "Preview only for now",
+      description: wallet.isTestnet
+        ? "Test networks have no trading pools. Use the test vault deposit to try BibleFi with test USDC."
+        : "In-app swap signing isn't live yet, so no funds moved. This preview shows what you'd receive.",
+    });
   };
 
   const swapTokens = () => {
@@ -357,6 +384,15 @@ const BiblicalDeFiSwap: React.FC = () => {
       window.clearInterval(cycleTimer);
     };
   }, [autonomousSabbathMode, getSwapQuote]);
+
+  // Live preview: quote ~500ms after typing stops.
+  useEffect(() => {
+    const n = parseFloat(fromAmount || '0');
+    if (!(n > 0)) { setQuote(null); return; }
+    const t = window.setTimeout(() => { getSwapQuote(fromAmount, true); }, 500);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromAmount, fromSymbol, toSymbol, slippage]);
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
@@ -400,9 +436,33 @@ const BiblicalDeFiSwap: React.FC = () => {
               />
             </div>
             {fromToken && (
-              <div className="text-xs text-muted-foreground">
-                Balance: {fromToken.balance} {fromToken.symbol} • ${((fromToken.price || 0) * parseFloat(fromAmount || '0')).toFixed(2)}
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {wallet.isConnected
+                    ? <>Balance: {fmtBalance(fromToken.balance ?? null)} {fromToken.symbol}{wallet.isTestnet && ' (test)'}</>
+                    : 'Connect wallet to see your balance'}
+                  {fromToken.price ? <> • ${(fromToken.price * parseFloat(fromAmount || '0')).toFixed(2)}</> : null}
+                </span>
+                {wallet.isConnected && fromBalanceNum !== null && fromBalanceNum > 0 && (
+                  <button
+                    type="button"
+                    className="text-eboy-green font-semibold hover:underline"
+                    onClick={() => {
+                      // leave a little ETH for network fees
+                      const max = fromToken.symbol === 'ETH' ? Math.max(fromBalanceNum - 0.0005, 0) : fromBalanceNum;
+                      setFromAmount(String(Number(max.toFixed(fromToken.decimals <= 6 ? 6 : 8))));
+                    }}
+                  >
+                    MAX
+                  </button>
+                )}
               </div>
+            )}
+            {insufficient && (
+              <p className="text-xs text-destructive">Not enough {fromToken?.symbol} — "Count the cost" (Luke 14:28)</p>
+            )}
+            {wallet.isTestnet && (
+              <p className="text-xs text-muted-foreground">Test network: preview uses live Base prices (estimate only).</p>
             )}
           </div>
 
@@ -422,15 +482,16 @@ const BiblicalDeFiSwap: React.FC = () => {
                 onValueChange={(s) => { setToSymbol(s); setQuote(null); }}
                 excludeToken={fromSymbol}
               />
-              <div className="flex-1 relative">
+              <div className="flex-1 min-w-0">
                 <Input type="text" placeholder="0.0" value={quote?.toAmount || ''} readOnly className="bg-muted/50" />
-                {quote && (
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-eboy-green">
-                    ≈ ${((toToken?.price || 0) * parseFloat(quote.toAmount)).toFixed(2)}
-                  </div>
-                )}
               </div>
             </div>
+            {quote && (
+              <div className="text-xs text-eboy-green">
+                ≈ ${((toToken?.price || 0) * parseFloat(quote.toAmount)).toFixed(2)}
+                {quote.source === 'estimate' && <span className="text-muted-foreground"> • estimate</span>}
+              </div>
+            )}
           </div>
 
           {/* Slippage Settings */}

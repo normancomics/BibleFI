@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useWalletAssets } from "@/hooks/useWalletAssets";
 import NavBar from "@/components/NavBar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import StakingPool from "@/components/StakingPool";
@@ -17,7 +18,8 @@ const StakingPage: React.FC = () => {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [connectedAddress, setConnectedAddress] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [userBalance] = useState(5000); // Mock balance
+  const walletAssets = useWalletAssets();
+  const userBalance = parseFloat(walletAssets.get('USDC')?.balance ?? '0') || 0; // real wallet USDC
   const [wisdomScore] = useState(65); // Mock wisdom score
   
   const handleWalletConnect = (provider: string, address: string) => {
@@ -78,7 +80,7 @@ const StakingPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="dashboard">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto gap-1">
                   <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                   <TabsTrigger value="pools">Staking Pools</TabsTrigger>
                   <TabsTrigger value="optimizer">Optimizer</TabsTrigger>

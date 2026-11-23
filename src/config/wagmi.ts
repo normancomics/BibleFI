@@ -1,6 +1,6 @@
 
 import { createConfig, http, type CreateConnectorFn } from 'wagmi'
-import { base, mainnet } from 'wagmi/chains'
+import { base, baseSepolia, mainnet } from 'wagmi/chains'
 import { coinbaseWallet, walletConnect, injected } from 'wagmi/connectors'
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 
@@ -8,7 +8,7 @@ import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 const projectId = '2589ec8e083adaa554ee06641ce2b93b' // BibleFi official project ID
 
 export const config = createConfig({
-  chains: [base, mainnet],
+  chains: [base, baseSepolia, mainnet],
   connectors: [
     // Farcaster mini app connector — the embedded wallet inside
     // Farcaster/Base App mini app hosts (connector id: 'farcaster')
@@ -73,6 +73,11 @@ export const config = createConfig({
   ],
   transports: {
     [base.id]: http('https://base.rpc.subquery.network/public', {
+      batch: true,
+      retryCount: 3,
+      retryDelay: 1000,
+    }),
+    [baseSepolia.id]: http('https://sepolia.base.org', {
       batch: true,
       retryCount: 3,
       retryDelay: 1000,

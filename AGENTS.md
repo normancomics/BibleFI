@@ -1,0 +1,1 @@
+- DeFi screens read balances and prices only through src/hooks/useWalletAssets.ts, and preview math lives in src/lib/defiPreview.ts — one source keeps numbers consistent and never invented.

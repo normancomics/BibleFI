@@ -33,16 +33,6 @@ const SOUND_FILES: Record<string, string> = {
   error: '/sounds/error.wav',
 };
 
-/** Fallback tones when a sample is unavailable. */
-const FREQUENCIES: Record<string, number> = {
-  click: 700,
-  select: 800,
-  coin: 1200,
-  scroll: 600,
-  powerup: 1500,
-  success: 1000,
-  error: 400,
-};
 
 interface SoundProviderProps {
   children: React.ReactNode;
@@ -103,35 +93,73 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
     [getContext],
   );
 
-  // Short, crisp blip: ~120ms, fast attack, quick decay — never drags on.
-  // A per-sound minimum interval stops rapid taps from piling sounds up.
   const lastPlayRef = useRef<Map<string, number>>(new Map());
   const MIN_INTERVAL_MS = 90;
 
+  // Guard shared by both sample playback and the synthesized fallback so
+  // rapid taps/hovers can never stack sounds on top of each other.
+  const shouldPlay = useCallback((soundName: string): boolean => {
+    const now = performance.now();
+    const last = lastPlayRef.current.get(soundName) ?? 0;
+    if (now - last < MIN_INTERVAL_MS) return false;
+    lastPlayRef.current.set(soundName, now);
+    return true;
+  }, []);
+
+  // Synthesized fallback: retro 8-bit arcade blips (square waves, stepped
+  // pitch), used only when a sample file cannot be loaded/decoded.
   const playTone = useCallback(
     (ctx: AudioContext, soundName: string) => {
-      const now = performance.now();
-      const last = lastPlayRef.current.get(soundName) ?? 0;
-      if (now - last < MIN_INTERVAL_MS) return;
-      lastPlayRef.current.set(soundName, now);
+      const t0 = ctx.currentTime;
 
-      const base = FREQUENCIES[soundName] ?? 1200;
-      const t = ctx.currentTime;
-      const DURATION = 0.12; // seconds — short and snappy
+      // Each sound is a list of [frequency, duration, volume] steps.
+      // Classic NES-style square wave, stepped pitches, no echo.
+      const RECIPES: Record<string, Array<[number, number, number]>> = {
+        click: [[880, 0.05, 0.12]],
+        select: [
+          [660, 0.04, 0.12],
+          [990, 0.06, 0.12],
+        ],
+        coin: [
+          [988, 0.06, 0.14],
+          [1319, 0.16, 0.14],
+        ],
+        scroll: [[440, 0.04, 0.08]],
+        powerup: [
+          [523, 0.05, 0.12],
+          [659, 0.05, 0.12],
+          [784, 0.05, 0.12],
+          [1047, 0.1, 0.12],
+        ],
+        success: [
+          [523, 0.06, 0.13],
+          [659, 0.06, 0.13],
+          [784, 0.06, 0.13],
+          [1047, 0.12, 0.13],
+        ],
+        error: [
+          [330, 0.08, 0.14],
+          [220, 0.12, 0.14],
+        ],
+      };
+      const steps = RECIPES[soundName] ?? [[988, 0.05, 0.12]];
 
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(base, t);
-      // Tiny upward flick at the start gives it a clean "tick" character.
-      osc.frequency.exponentialRampToValueAtTime(base * 1.25, t + 0.02);
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + DURATION);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(t);
-      osc.stop(t + DURATION + 0.02);
+      let t = t0;
+      for (const [freq, dur, vol] of steps) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(vol, t);
+        gain.gain.setValueAtTime(vol, t + dur * 0.7);
+        // Tiny 10ms tail so steps don't click against each other.
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.01);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.02);
+        t += dur;
+      }
     },
     [],
   );
@@ -141,6 +169,7 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
       if (!enabledRef.current) return;
       const ctx = getContext();
       if (!ctx) return;
+      if (!shouldPlay(soundName)) return;
 
       void (async () => {
         try {
@@ -148,13 +177,26 @@ export const SoundProvider: React.FC<SoundProviderProps> = ({ children }) => {
           if (ctx.state === 'suspended') {
             await ctx.resume();
           }
+          // Preferred path: the real retro pixel samples in /public/sounds.
+          const buffer = await loadBuffer(soundName);
+          if (buffer) {
+            const source = ctx.createBufferSource();
+            const gain = ctx.createGain();
+            source.buffer = buffer;
+            gain.gain.value = 0.35;
+            source.connect(gain);
+            gain.connect(ctx.destination);
+            source.start(0);
+            return;
+          }
+          // Fallback: synthesized retro blip if the sample is unavailable.
           playTone(ctx, soundName);
         } catch {
           /* audio blocked by the browser — stay silent rather than throw */
         }
       })();
     },
-    [getContext, playTone],
+    [getContext, loadBuffer, playTone, shouldPlay],
   );
 
   // Unlock audio on the first gesture (required on iPad/iPhone/Safari).
