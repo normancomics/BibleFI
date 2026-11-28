@@ -1,28 +1,19 @@
 # BibleFi Roadmap
 
-## Done
-- [x] Remove Crossway ESV code path (commercial-use incompatible)
-- [x] Rewrite public integration paragraph with current/upcoming DeFi protocols
+## Current request
+- [ ] Review the GitHub-synchronized changes and audit every swap, vault, staking, and farming flow for real balances and outcome previews
+- [ ] Compile and test the fixed BWTYA vault; prepare wallet-signed deployment and wire a verified deployed address into Continuous Giving and dashboards
+- [ ] Verify a 1–5 USDC Base Sepolia vault deposit after normancomics.eth signs it; confirm the transaction on-chain
+- [ ] Replace placeholder /scriptures content with real API.Bible translations when a working API.Bible key is available
+- [ ] Verify retro sounds, Base builder code, vault wiring, and BWSP explainer; run security checks and publish BibleFi.app
 
-## Open
-- [ ] Add API.Bible Pro key support for licensed NIV alternatives
-- [ ] Continue BWSP/BWTYA enhancements
-- [ ] Seed Acts 5:1-11 (Ananias & Sapphira) into the scripture loader and verify on /scriptures
-- [ ] Fix vault fund-safety issues C-1, C-2, H-1 and run a fresh security scan before any mainnet deploy
+## Completed foundations
+- [x] Real wallet balances and swap/staking previews on DeFi screens
+- [x] Base Sepolia wallet support and honest not-live staking states
+- [x] Opening scripture timing reviewed; ready for a slower reading pace
+- [x] GitHub CodeQL and daily Dependabot updates synchronized into the project
 
-- [ ] Store OPENSEA_API_KEY securely and wire an NFT/collection read path for BibleFi
-
-- [x] Replace social/placeholder preview image with the transparent BibleFi purple/gold Bible icon (og, twitter, farcaster, manifest, favicon)
-
-- [ ] Hourly Bible loader pass that seeds any newly-found finance-related scripture
-- [ ] Compile + end-to-end test the rewritten tithe vault on Base Sepolia, then wire its address into Continuous Giving
-- [ ] Opening page sound effects -> soft chime
-- [ ] Fix BWSP advisor answering off-topic questions (e.g. accelerator/VC question) and loading no scriptures
-- [ ] Explore Palantir Foundry/AIP + Harmonic connection for BWSP/BWTYA (needs user credentials)
-- [ ] Farcaster identity attribution on each Continuous Giving gift
-- [ ] Add 'Seek Jesus, the Holy Spirit and the Bible first' note to Ask Wisdom
-- [ ] Wisdom explainer page (BWSP, BWTYA, harmonic math) + publish
-- [ ] Add free/open-source Bible API source to scripture seeder
-- [ ] Research Bible APIs: KJV, Apocrypha, concordances, ESV, NLT, NIV, Hebrew/Greek/Aramaic
-- [ ] Check .env exposure, list secrets to rotate, add guard
-- [ ] More open-source Bible sources before publish (no publish until done)
+## Blocked / later
+- [ ] Base mainnet vault deployment requires successful tests, the user's wallet signature, and resolution of the independent-audit safety gate
+- [ ] API.Bible licensed translations require a valid API_BIBLE_KEY
+- [ ] Palantir Foundry/AIP + Harmonic connection needs user credentials
